@@ -1,0 +1,19 @@
+services:
+  db:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: iiwii:latest
+    container_name: iiwii-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-iiwii}
+      POSTGRES_USER: ${POSTGRES_USER:-pg}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-k9Qz8Vm2XpLw5TnR4YhE7CsB1DaF3G6j}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - iiwii_pgdata:/var/lib/postgresql/data
+
+volumes:
+  iiwii_pgdata:
