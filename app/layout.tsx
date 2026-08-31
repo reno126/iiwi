@@ -1,26 +1,42 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import "./globals.css";
 import { ClientSessionProvider } from "@/providers/ClientSessionProvider";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/authOptions";
 import { TopMenu } from "@/components/navigation/TopMenu";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export const metadata: Metadata = {
-  title: "Is it worth it? :: Beta version",
-  description: "Albo nawet pre beta...",
+  title: "TrueReview :: Is it worth it?",
+  description: "Realne opinie. Lepsze wybory.",
 };
 
-export default async function RootLayout({ children }: LayoutProps<"/">) {
+interface RootLayoutProps {
+  children: React.ReactNode;
+}
+
+export default async function RootLayout({ children }: RootLayoutProps) {
   const session = await getServerSession(authOptions);
 
   return (
     <html lang="pl" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col bg-gray-50 text-gray-900">
         <ClientSessionProvider session={session}>
-          <TopMenu />
-          {children}
+          <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-xs">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+              <Link href="/" className="flex items-center">
+                <BrandLogo />
+              </Link>
+              <TopMenu />
+            </div>
+          </header>
+          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {children}
+          </main>
         </ClientSessionProvider>
       </body>
     </html>
   );
 }
+
