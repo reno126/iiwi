@@ -11,15 +11,17 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  password      String?
-  image         String?
-  accounts      Account[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id              String    @id @default(cuid())
+  name            String?
+  email           String    @unique
+  emailVerified   DateTime?
+  password        String?
+  image           String?
+  accounts        Account[]
+  createdProducts Product[] @relation("CreatedProducts")
+  reviews         Review[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }
 
 model Account {
@@ -38,6 +40,38 @@ model Account {
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+}
+
+model Product {
+  id         String   @id @default(cuid())
+  name       String   @db.VarChar(100)
+  productUrl String?  @map("product_url")
+  imageUrl   String?  @map("image_url")
+  code       String?  @db.VarChar(24)
+  creatorId  String   @map("creator_id")
+  creator    User     @relation("CreatedProducts", fields: [creatorId], references: [id], onDelete: Cascade)
+  reviews    Review[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([creatorId])
+  @@index([code])
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  description String   @db.Text
+  rate        Float
+  likes       Int      @default(0)
+  productId   String   @map("product_id")
+  userId      String   @map("user_id")
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([productId])
+  @@index([userId])
 }
 
 model Test {
