@@ -6,6 +6,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/authOptions";
 import { TopMenu } from "@/components/navigation/TopMenu";
 import { BrandLogo } from "@/components/BrandLogo";
+import { Inter } from "next/font/google";
+import { cn } from "@/lib/schadcn/utils";
+
+const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: "TrueReview :: Is it worth it?",
@@ -20,7 +24,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   const session = await getServerSession(authOptions);
 
   return (
-    <html lang="pl" className="h-full antialiased">
+    <html lang="pl" className={cn("h-full antialiased", "font-sans", inter.variable)}>
       <body className="min-h-full flex flex-col bg-gray-50 text-gray-900">
         <ClientSessionProvider session={session}>
           <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-xs">
