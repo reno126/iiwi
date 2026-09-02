@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react";
 const menuConfig = [
   { title: "Home", href: "/" },
   { title: "Dashboard", href: "/dashboard" },
-  { title: "Test CRUD", href: "/test-crud" },
+  { title: "New product", href: "/products/new" },
 ];
 
 interface MenuItemProps {
