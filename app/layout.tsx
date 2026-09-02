@@ -12,7 +12,7 @@ import { cn } from "@/lib/shadcn/utils";
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
-  title: "TrueReview :: Is it worth it?",
+  title: "TrueReview :: Czy warto?",
   description: "Realne opinie. Lepsze wybory.",
 };
 

@@ -39,7 +39,7 @@ export function SignIn() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="email" className="block text-sm font-medium">
-            Email
+            Adres e-mail
           </label>
           <input
             id="email"
@@ -54,7 +54,7 @@ export function SignIn() {
 
         <div>
           <label htmlFor="password" className="block text-sm font-medium">
-            Password
+            Hasło
           </label>
           <input
             id="password"
@@ -71,7 +71,7 @@ export function SignIn() {
           type="submit"
           className="w-full rounded-md bg-blue-600 py-2 text-white hover:bg-blue-700"
         >
-          Sign In
+          Zaloguj się
         </button>
       </form>
 
@@ -80,7 +80,7 @@ export function SignIn() {
           <div className="w-full border-t border-gray-300" />
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="bg-white px-2 text-gray-500">Or continue with</span>
+          <span className="bg-white px-2 text-gray-500">Lub kontynuuj przez</span>
         </div>
       </div>
 
@@ -89,7 +89,7 @@ export function SignIn() {
         className="flex w-full items-center justify-center gap-2 rounded-md border bg-white py-2 hover:bg-gray-50"
       >
         <FaGoogle className="text-red-500" />
-        Sign in with Google
+        Zaloguj się przez Google
       </button>
     </div>
   );

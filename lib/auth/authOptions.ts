@@ -24,10 +24,10 @@ export const authOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
     Credentials({
-      name: "Credentials",
+      name: "Logowanie hasłem",
       credentials: {
-        email: { label: "Email", type: "text" },
-        password: { label: "Password", type: "password" },
+        email: { label: "Adres e-mail", type: "text" },
+        password: { label: "Hasło", type: "password" },
       },
       async authorize(credentials) {
         const user = await prisma.user.findUnique({
@@ -41,7 +41,7 @@ export const authOptions = {
 
         const isValid = await bcrypt.compare(
           credentials?.password as string,
-          user.password
+          user.password,
         );
 
         if (!isValid) return null;

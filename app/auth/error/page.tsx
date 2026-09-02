@@ -5,8 +5,8 @@ import { signIn } from "next-auth/react";
 export default function AuthErrorPage() {
     return (
         <div>
-            <p>You are not authorized to access this page. </p>
-            <button onClick={() => signIn("google")}>Sign in with Google</button>
+            <p>Nie masz uprawnień dostępu do tej strony.</p>
+            <button onClick={() => signIn("google")}>Zaloguj się przez Google</button>
         </div>
     );
 }

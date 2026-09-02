@@ -5,9 +5,9 @@ import { SignOut } from "../auth/SignOut";
 import { useSession } from "next-auth/react";
 
 const menuConfig = [
-  { title: "Home", href: "/" },
-  { title: "Dashboard", href: "/dashboard" },
-  { title: "New product", href: "/products/new" },
+  { title: "Strona główna", href: "/" },
+  { title: "Panel", href: "/dashboard" },
+  { title: "Nowy produkt", href: "/products/new" },
 ];
 
 interface MenuItemProps {
@@ -31,7 +31,7 @@ export function TopMenu() {
   const user = session?.user?.email;
 
   return (
-    <nav aria-label="Main navigation">
+    <nav aria-label="Główna nawigacja">
       <ul className="flex items-center space-x-6">
         {menuConfig.map((item) => (
           <li key={item.href}>
@@ -40,7 +40,7 @@ export function TopMenu() {
         ))}
         {user && (
           <li className="text-xs text-gray-500">
-            logged in as:{" "}
+            zalogowano jako:{" "}
             <span className="font-semibold text-gray-700">{user}</span>
           </li>
         )}
@@ -55,7 +55,7 @@ export function TopMenu() {
               href="/login"
               className="rounded-md bg-blue-600 px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
             >
-              Sign In
+              Zaloguj się
             </Link>
           </li>
         )}

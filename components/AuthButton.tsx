@@ -7,10 +7,10 @@ export default function AuthButton() {
   if (session) {
     return (
       <div>
-        Signed in as {session.user?.email} <br />
-        <button onClick={() => signOut()}>Sign out</button>
+        Zalogowano jako {session.user?.email} <br />
+        <button onClick={() => signOut()}>Wyloguj się</button>
       </div>
     );
   }
-  return <button onClick={() => signIn("google")}>Sign in with Google</button>;
+  return <button onClick={() => signIn("google")}>Zaloguj się przez Google</button>;
 }

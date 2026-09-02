@@ -2,26 +2,26 @@ import { z } from "zod";
 
 export const productCreateSchema = z.object({
   name: z
-    .string({ message: "Product name is required" })
-    .min(3, { message: "Product name must be at least 3 characters long" })
-    .max(100, { message: "Product name cannot exceed 100 characters" }),
+    .string({ message: "Nazwa produktu jest wymagana" })
+    .min(3, { message: "Nazwa produktu musi mieć co najmniej 3 znaki" })
+    .max(100, { message: "Nazwa produktu nie może przekraczać 100 znaków" }),
   productUrl: z
-    .url({ message: "Please provide a valid product URL" })
+    .url({ message: "Podaj prawidłowy adres URL produktu" })
     .refine((val) => !/\s/.test(val), {
-      message: "URLs cannot contain spaces",
+      message: "Adres URL nie może zawierać spacji",
     })
     .optional()
     .or(z.literal("")),
   imageUrl: z
-    .url({ message: "Please provide a valid image URL" })
+    .url({ message: "Podaj prawidłowy adres URL obrazu" })
     .refine((val) => !/\s/.test(val), {
-      message: "URLs cannot contain spaces",
+      message: "Adres URL nie może zawierać spacji",
     })
     .optional()
     .or(z.literal("")),
   code: z
     .string()
-    .max(24, { message: "Product code cannot exceed 24 characters" })
+    .max(24, { message: "Kod produktu nie może przekraczać 24 znaków" })
     .optional()
     .or(z.literal("")),
 });

@@ -8,7 +8,7 @@ export async function POST(req: Request) {
   const validated = RegisterSchema.safeParse(body);
 
   if (!validated.success) {
-    return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+    return NextResponse.json({ error: "Nieprawidłowe dane" }, { status: 400 });
   }
 
   const { email, password, name } = validated.data;
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
 
   if (existingUser) {
     return NextResponse.json(
-      { error: "Email already exists" },
+      { error: "Ten adres e-mail jest już zajęty" },
       { status: 409 }
     );
   }
@@ -34,5 +34,5 @@ export async function POST(req: Request) {
     },
   });
 
-  return NextResponse.json({ success: "User created" }, { status: 201 });
+  return NextResponse.json({ success: "Użytkownik został utworzony" }, { status: 201 });
 }

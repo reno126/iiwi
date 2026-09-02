@@ -9,7 +9,7 @@ export default async function LoginPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center">
-      <h1 className="mb-8 text-3xl font-bold">Sign In</h1>
+      <h1 className="mb-8 text-3xl font-bold">Zaloguj się</h1>
       <SignIn />
     </div>
   );

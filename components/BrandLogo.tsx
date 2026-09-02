@@ -16,7 +16,7 @@ export function BrandLogo({
   return (
     <Image
       src="/TrueReview_logo.svg"
-      alt="TrueReview Logo"
+      alt="Logo TrueReview"
       width={width}
       height={height}
       priority={priority}

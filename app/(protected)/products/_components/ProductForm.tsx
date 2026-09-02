@@ -66,8 +66,8 @@ export function ProductForm({
       if (onSuccess) {
         onSuccess(data);
       } else {
-        router.push("/dashboard");
-        router.refresh();
+        // router.push("/dashboard");
+        // router.refresh();
       }
     },
     onError: ({ error: { validationErrors } }) => {
@@ -98,10 +98,10 @@ export function ProductForm({
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle>Product Details</CardTitle>
+        <CardTitle>Szczegóły produktu</CardTitle>
         <CardDescription>
-          Provide the required details to create a product. Fields marked with
-          an asterisk (*) are required.
+          Wprowadź wymagane informacje, aby utworzyć produkt. Pola oznaczone
+          gwiazdką (*) są wymagane.
         </CardDescription>
       </CardHeader>
 
@@ -120,8 +120,8 @@ export function ProductForm({
             <Alert className="border-green-200 bg-green-50 text-green-800 dark:border-green-900/50 dark:bg-green-950/30 dark:text-green-300">
               <CircleCheck className="size-4 text-green-600 dark:text-green-400" />
               <AlertDescription>
-                Product &quot;{result.data.name}&quot; created successfully!
-                Redirecting...
+                Produkt &quot;{result.data.name}&quot; został pomyślnie utworzony!
+                Trwa przekierowywanie...
               </AlertDescription>
             </Alert>
           )}
@@ -130,17 +130,17 @@ export function ProductForm({
             {/* Name */}
             <Field data-invalid={!!errors.name}>
               <FieldLabel htmlFor="product-name">
-                Product Name <span className="text-destructive">*</span>
+                Nazwa produktu <span className="text-destructive">*</span>
               </FieldLabel>
               <Input
                 id="product-name"
-                placeholder="e.g. Wireless Noise-Cancelling Headphones"
+                placeholder="np. Bezprzewodowe słuchawki z redukcją szumów"
                 aria-invalid={!!errors.name}
                 {...register("name")}
               />
               <div className="flex flex-col gap-0.5">
                 <FieldDescription>
-                  Between 3 and 100 characters.
+                  Od 3 do 100 znaków.
                 </FieldDescription>
                 <FieldError
                   role={errors.name ? "alert" : undefined}
@@ -157,17 +157,17 @@ export function ProductForm({
 
             {/* Product URL */}
             <Field data-invalid={!!errors.productUrl}>
-              <FieldLabel htmlFor="product-url">Product URL</FieldLabel>
+              <FieldLabel htmlFor="product-url">Adres URL produktu</FieldLabel>
               <Input
                 id="product-url"
                 type="url"
-                placeholder="https://example.com/product/item-123"
+                placeholder="https://example.com/produkt/item-123"
                 aria-invalid={!!errors.productUrl}
                 {...register("productUrl")}
               />
               <div className="flex flex-col gap-0.5">
                 <FieldDescription>
-                  Optional URL to the official product or merchant page.
+                  Opcjonalny link do oficjalnej strony produktu lub sklepu.
                 </FieldDescription>
                 <FieldError
                   role={errors.productUrl ? "alert" : undefined}
@@ -184,16 +184,16 @@ export function ProductForm({
 
             {/* Product Code */}
             <Field data-invalid={!!errors.code}>
-              <FieldLabel htmlFor="product-code">Product Code / SKU</FieldLabel>
+              <FieldLabel htmlFor="product-code">Kod produktu / SKU</FieldLabel>
               <Input
                 id="product-code"
-                placeholder="e.g. PRD-98124"
+                placeholder="np. PRD-98124"
                 aria-invalid={!!errors.code}
                 {...register("code")}
               />
               <div className="flex flex-col gap-0.5">
                 <FieldDescription>
-                  Optional SKU or identifier (maximum 24 characters).
+                  Opcjonalny kod SKU lub identyfikator (maksymalnie 24 znaki).
                 </FieldDescription>
                 <FieldError
                   role={errors.code ? "alert" : undefined}
@@ -217,11 +217,11 @@ export function ProductForm({
             onClick={() => router.back()}
             disabled={isLoading}
           >
-            Cancel
+            Anuluj
           </Button>
           <Button type="submit" disabled={isLoading}>
             {isLoading && <Spinner className="mr-2" />}
-            {isLoading ? "Creating Product..." : "Create Product"}
+            {isLoading ? "Tworzenie produktu..." : "Utwórz produkt"}
           </Button>
         </CardFooter>
       </form>

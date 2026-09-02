@@ -42,12 +42,12 @@ export default function RegisterForm() {
   if (isRegistered) {
     return (
       <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-6">Registration Successful</h1>
-        <p className="mb-4"> Your account has been created successfully.</p>
-        <p className="mb-4"> You can now log in with your credentials.</p>
+        <h1 className="text-2xl font-bold mb-6">Rejestracja zakończona sukcesem</h1>
+        <p className="mb-4"> Twoje konto zostało pomyślnie utworzone.</p>
+        <p className="mb-4"> Możesz się teraz zalogować za pomocą swoich danych.</p>
 
         <p className="mb-4 p-3 bg-red-100 text-red-700 rounded">
-          Redirecting to login page...
+          Trwa przekierowywanie do strony logowania...
         </p>
       </div>
     );
@@ -55,12 +55,12 @@ export default function RegisterForm() {
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold mb-6">Create Account</h1>
+      <h1 className="text-2xl font-bold mb-6">Utwórz konto</h1>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label htmlFor="name" className="block mb-1 font-medium">
-            Full Name
+            Imię i nazwisko
           </label>
           <input
             {...register("name")}
@@ -75,7 +75,7 @@ export default function RegisterForm() {
 
         <div>
           <label htmlFor="email" className="block mb-1 font-medium">
-            Email
+            Adres e-mail
           </label>
           <input
             {...register("email")}
@@ -90,7 +90,7 @@ export default function RegisterForm() {
 
         <div>
           <label htmlFor="password" className="block mb-1 font-medium">
-            Password
+            Hasło
           </label>
           <input
             {...register("password")}
@@ -112,15 +112,15 @@ export default function RegisterForm() {
             isSubmitting ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
           }`}
         >
-          {isSubmitting ? "Creating account..." : "Sign Up"}
+          {isSubmitting ? "Tworzenie konta..." : "Zarejestruj się"}
         </button>
       </form>
 
       <div className="mt-4 text-center">
         <p className="text-gray-600">
-          Already have an account?{" "}
+          Masz już konto?{" "}
           <a href="/login" className="text-blue-600 hover:underline">
-            Sign in
+            Zaloguj się
           </a>
         </p>
       </div>
