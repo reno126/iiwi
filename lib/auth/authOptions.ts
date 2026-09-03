@@ -3,7 +3,7 @@ import { NextAuthOptions } from "next-auth";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import Credentials from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-import { prisma } from "../db/prisma";
+import { prisma } from "@/lib/db/prisma";
 
 declare module "next-auth" {
   interface Session {
