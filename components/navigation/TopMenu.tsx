@@ -50,14 +50,24 @@ export function TopMenu() {
           </li>
         )}
         {!user && (
-          <li>
-            <Link
-              href="/login"
-              className="rounded-md bg-blue-600 px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-            >
-              Zaloguj się
-            </Link>
-          </li>
+          <>
+            <li>
+              <Link
+                href="/login"
+                className="text-sm font-medium text-gray-700 transition-colors hover:text-blue-600"
+              >
+                Zaloguj się
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/register"
+                className="rounded-md bg-blue-600 px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+              >
+                Zarejestruj się
+              </Link>
+            </li>
+          </>
         )}
       </ul>
     </nav>

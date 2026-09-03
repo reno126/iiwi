@@ -1,11 +1,32 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-
 import { useState } from "react";
-import { RegisterSchema } from "@/schemas/schema";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { CircleAlert, CircleCheck } from "lucide-react";
+
+import { RegisterSchema } from "@/schemas/schema";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { cn } from "@/lib/shadcn/utils";
 
 interface FormTypes {
   name: string;
@@ -13,9 +34,14 @@ interface FormTypes {
   password: string;
 }
 
-export default function RegisterForm() {
+interface RegisterPageProps {
+  className?: string;
+}
+
+export function RegisterForm({ className }: RegisterPageProps) {
   const router = useRouter();
   const [isRegistered, setRegistered] = useState(false);
+  const [apiError, setApiError] = useState("");
 
   const {
     register,
@@ -23,9 +49,11 @@ export default function RegisterForm() {
     formState: { errors, isSubmitting },
   } = useForm<FormTypes>({
     resolver: zodResolver(RegisterSchema),
+    mode: "onTouched",
   });
 
   const onSubmit = async (data: FormTypes) => {
+    setApiError("");
     const response = await fetch("/api/register", {
       method: "POST",
       body: JSON.stringify(data),
@@ -36,94 +64,159 @@ export default function RegisterForm() {
       setTimeout(() => {
         router.push("/login");
       }, 2000);
+    } else {
+      const resData = await response.json().catch(() => ({}));
+      setApiError(resData.error || "Wystąpił błąd podczas rejestracji");
     }
   };
 
   if (isRegistered) {
     return (
-      <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-6">Rejestracja zakończona sukcesem</h1>
-        <p className="mb-4"> Twoje konto zostało pomyślnie utworzone.</p>
-        <p className="mb-4"> Możesz się teraz zalogować za pomocą swoich danych.</p>
-
-        <p className="mb-4 p-3 bg-red-100 text-red-700 rounded">
-          Trwa przekierowywanie do strony logowania...
-        </p>
+      <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center px-4 py-8">
+        <Card className={cn("w-full max-w-md", className)}>
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Rejestracja zakończona sukcesem</CardTitle>
+            <CardDescription>
+              Twoje konto zostało pomyślnie utworzone.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert className="border-green-200 bg-green-50 text-green-800 dark:border-green-900/50 dark:bg-green-950/30 dark:text-green-300">
+              <CircleCheck className="size-4 text-green-600 dark:text-green-400" />
+              <AlertDescription>
+                Możesz się teraz zalogować za pomocą swoich danych. Trwa przekierowywanie do strony logowania...
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+          <CardFooter className="justify-center border-t border-border pt-4">
+            <Link
+              href="/login"
+              className={cn(buttonVariants({ variant: "outline" }), "w-full")}
+            >
+              Przejdź do logowania
+            </Link>
+          </CardFooter>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold mb-6">Utwórz konto</h1>
+    <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center px-4 py-8">
+      <Card className={cn("w-full max-w-md", className)}>
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl">Utwórz konto</CardTitle>
+          <CardDescription>
+            Wprowadź swoje dane, aby utworzyć nowe konto
+          </CardDescription>
+        </CardHeader>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label htmlFor="name" className="block mb-1 font-medium">
-            Imię i nazwisko
-          </label>
-          <input
-            {...register("name")}
-            type="text"
-            id="name"
-            className="w-full p-2 border rounded"
-          />
-          {errors.name && (
-            <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+        <CardContent className="space-y-4">
+          {apiError && (
+            <Alert variant="destructive">
+              <CircleAlert className="size-4" />
+              <AlertDescription>{apiError}</AlertDescription>
+            </Alert>
           )}
-        </div>
 
-        <div>
-          <label htmlFor="email" className="block mb-1 font-medium">
-            Adres e-mail
-          </label>
-          <input
-            {...register("email")}
-            type="email"
-            id="email"
-            className="w-full p-2 border rounded"
-          />
-          {errors.email && (
-            <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
-          )}
-        </div>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+            <FieldGroup>
+              <Field data-invalid={!!errors.name}>
+                <FieldLabel htmlFor="name">
+                  Imię i nazwisko <span className="text-destructive">*</span>
+                </FieldLabel>
+                <Input
+                  id="name"
+                  placeholder="Jan Kowalski"
+                  autoComplete="name"
+                  aria-invalid={!!errors.name}
+                  disabled={isSubmitting}
+                  {...register("name")}
+                />
+                <FieldError
+                  role={errors.name ? "alert" : undefined}
+                  aria-hidden={!errors.name}
+                  className={cn(
+                    "min-h-5 text-sm font-normal text-destructive leading-tight",
+                    !errors.name && "invisible",
+                  )}
+                >
+                  {errors.name?.message || "\u00A0"}
+                </FieldError>
+              </Field>
 
-        <div>
-          <label htmlFor="password" className="block mb-1 font-medium">
-            Hasło
-          </label>
-          <input
-            {...register("password")}
-            type="password"
-            id="password"
-            className="w-full p-2 border rounded"
-          />
-          {errors.password && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.password.message}
-            </p>
-          )}
-        </div>
+              <Field data-invalid={!!errors.email}>
+                <FieldLabel htmlFor="email">
+                  Adres e-mail <span className="text-destructive">*</span>
+                </FieldLabel>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="twoj@email.com"
+                  autoComplete="email"
+                  aria-invalid={!!errors.email}
+                  disabled={isSubmitting}
+                  {...register("email")}
+                />
+                <FieldError
+                  role={errors.email ? "alert" : undefined}
+                  aria-hidden={!errors.email}
+                  className={cn(
+                    "min-h-5 text-sm font-normal text-destructive leading-tight",
+                    !errors.email && "invisible",
+                  )}
+                >
+                  {errors.email?.message || "\u00A0"}
+                </FieldError>
+              </Field>
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className={`w-full py-2 px-4 rounded text-white ${
-            isSubmitting ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
-          }`}
-        >
-          {isSubmitting ? "Tworzenie konta..." : "Zarejestruj się"}
-        </button>
-      </form>
+              <Field data-invalid={!!errors.password}>
+                <FieldLabel htmlFor="password">
+                  Hasło <span className="text-destructive">*</span>
+                </FieldLabel>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  aria-invalid={!!errors.password}
+                  disabled={isSubmitting}
+                  {...register("password")}
+                />
+                <FieldError
+                  role={errors.password ? "alert" : undefined}
+                  aria-hidden={!errors.password}
+                  className={cn(
+                    "min-h-5 text-sm font-normal text-destructive leading-tight",
+                    !errors.password && "invisible",
+                  )}
+                >
+                  {errors.password?.message || "\u00A0"}
+                </FieldError>
+              </Field>
+            </FieldGroup>
 
-      <div className="mt-4 text-center">
-        <p className="text-gray-600">
-          Masz już konto?{" "}
-          <a href="/login" className="text-blue-600 hover:underline">
-            Zaloguj się
-          </a>
-        </p>
-      </div>
+            <Button type="submit" disabled={isSubmitting} className="w-full">
+              {isSubmitting && <Spinner className="mr-2" />}
+              {isSubmitting ? "Tworzenie konta..." : "Zarejestruj się"}
+            </Button>
+          </form>
+        </CardContent>
+
+        <CardFooter className="justify-center border-t border-border pt-4">
+          <p className="text-center text-sm text-muted-foreground">
+            Masz już konto?{" "}
+            <Link
+              href="/login"
+              className="font-medium text-foreground underline underline-offset-4 hover:text-primary"
+            >
+              Zaloguj się
+            </Link>
+          </p>
+        </CardFooter>
+      </Card>
     </div>
   );
 }
+
+export default RegisterForm;
