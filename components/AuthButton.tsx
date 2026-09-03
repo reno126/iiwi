@@ -1,16 +1,35 @@
 "use client";
-import { signIn, signOut, useSession } from "next-auth/react";
 
-export default function AuthButton() {
+import { signIn, signOut, useSession } from "next-auth/react";
+import { FaGoogle } from "react-icons/fa";
+import { Button } from "@/components/ui/button";
+
+export function AuthButton() {
   const { data: session } = useSession();
 
   if (session) {
     return (
-      <div>
-        Zalogowano jako {session.user?.email} <br />
-        <button onClick={() => signOut()}>Wyloguj się</button>
+      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+        <span>
+          Zalogowano jako: <strong className="text-foreground">{session.user?.email}</strong>
+        </span>
+        <Button variant="outline" size="sm" onClick={() => signOut()}>
+          Wyloguj się
+        </Button>
       </div>
     );
   }
-  return <button onClick={() => signIn("google")}>Zaloguj się przez Google</button>;
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+    >
+      <FaGoogle className="mr-2 text-red-500" />
+      Zaloguj się przez Google
+    </Button>
+  );
 }
+
+export default AuthButton;

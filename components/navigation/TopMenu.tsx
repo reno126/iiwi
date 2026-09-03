@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { SignOut } from "../auth/SignOut";
 import { useSession } from "next-auth/react";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/shadcn/utils";
 
 const menuConfig = [
   { title: "Strona główna", href: "/" },
@@ -54,7 +56,7 @@ export function TopMenu() {
             <li>
               <Link
                 href="/login"
-                className="text-sm font-medium text-gray-700 transition-colors hover:text-blue-600"
+                className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
               >
                 Zaloguj się
               </Link>
@@ -62,7 +64,7 @@ export function TopMenu() {
             <li>
               <Link
                 href="/register"
-                className="rounded-md bg-blue-600 px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                className={cn(buttonVariants({ size: "sm" }))}
               >
                 Zarejestruj się
               </Link>

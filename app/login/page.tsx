@@ -3,7 +3,7 @@ import { authOptions } from "@/lib/auth/authOptions";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SignIn } from "./_componnets/SignIn";
+import { SignIn } from "./_components/SignIn";
 
 
 export async function LoginPage() {
