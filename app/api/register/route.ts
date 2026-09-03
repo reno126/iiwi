@@ -1,11 +1,11 @@
-import { RegisterSchema } from "@/schemas/schema";
+import { registerSchema } from "@/schemas/register";
 import { prisma } from "@/lib/db/prisma";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
   const body = await req.json();
-  const validated = RegisterSchema.safeParse(body);
+  const validated = registerSchema.safeParse(body);
 
   if (!validated.success) {
     return NextResponse.json({ error: "Nieprawidłowe dane" }, { status: 400 });
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
 
   const hashedPassword = await bcrypt.hash(password, 12);
 
-  const user = await prisma.user.create({
+  await prisma.user.create({
     data: {
       email,
       name,

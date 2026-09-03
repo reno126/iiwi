@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CircleAlert, CircleCheck } from "lucide-react";
 
-import { RegisterSchema } from "@/schemas/schema";
+import { registerSchema, type RegisterInput } from "@/schemas/register";
 import {
   Card,
   CardContent,
@@ -28,12 +28,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/shadcn/utils";
 
-interface FormTypes {
-  name: string;
-  email: string;
-  password: string;
-}
-
 interface RegisterProps {
   className?: string;
 }
@@ -47,12 +41,12 @@ export function Register({ className }: RegisterProps) {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<FormTypes>({
-    resolver: zodResolver(RegisterSchema),
+  } = useForm<RegisterInput>({
+    resolver: zodResolver(registerSchema),
     mode: "onTouched",
   });
 
-  const onSubmit = async (data: FormTypes) => {
+  const onSubmit = async (data: RegisterInput) => {
     setApiError("");
     const response = await fetch("/api/register", {
       method: "POST",
@@ -120,7 +114,7 @@ export function Register({ className }: RegisterProps) {
           <FieldGroup>
             <Field data-invalid={!!errors.name}>
               <FieldLabel htmlFor="name">
-                Imię i nazwisko <span className="text-destructive">*</span>
+                Imię<span className="text-destructive">*</span>
               </FieldLabel>
               <Input
                 id="name"

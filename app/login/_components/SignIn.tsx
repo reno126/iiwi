@@ -1,12 +1,15 @@
 "use client";
 
+import { useTransition } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { FaGoogle } from "react-icons/fa";
 import { CircleAlert } from "lucide-react";
 
+import { loginSchema, type LoginInput } from "@/schemas/login";
 import {
   Card,
   CardContent,
@@ -17,6 +20,7 @@ import {
 } from "@/components/ui/card";
 import {
   Field,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
@@ -35,11 +39,22 @@ export function SignIn({ className }: SignInProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isGooglePending, startGoogleTransition] = useTransition();
+
+  const {
+    register,
+    handleSubmit,
+    setError,
+    clearErrors,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    mode: "onTouched",
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
   const getErrorMessage = (errorCode: string | null) => {
     switch (errorCode) {
@@ -61,39 +76,37 @@ export function SignIn({ className }: SignInProps) {
   };
 
   const urlError = getErrorMessage(searchParams.get("error"));
-  const displayedError = error || urlError;
+  const displayedError = errors.root?.message || urlError;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setIsLoading(true);
+  const onSubmit = async (data: LoginInput) => {
+    clearErrors("root");
 
-    try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
+    const result = await signIn("credentials", {
+      email: data.email,
+      password: data.password,
+      redirect: false,
+    });
 
-      if (result?.error) {
-        if (result.error === "OAuthAccountOnly") {
-          setError(
+    if (result?.error) {
+      if (result.error === "OAuthAccountOnly") {
+        setError("root", {
+          message:
             "To konto zostało utworzone przez Google. Zaloguj się za pomocą przycisku Google poniżej.",
-          );
-        } else {
-          setError("Nieprawidłowy adres e-mail lub hasło.");
-        }
+        });
       } else {
-        router.push(callbackUrl);
+        setError("root", {
+          message: "Nieprawidłowy adres e-mail lub hasło.",
+        });
       }
-    } finally {
-      setIsLoading(false);
+    } else {
+      router.push(callbackUrl);
     }
   };
 
   const handleGoogleSignIn = () => {
-    setIsGoogleLoading(true);
-    signIn("google", { callbackUrl });
+    startGoogleTransition(async () => {
+      await signIn("google", { callbackUrl });
+    });
   };
 
   return (
@@ -113,46 +126,62 @@ export function SignIn({ className }: SignInProps) {
           </Alert>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
           <FieldGroup>
-            <Field>
+            <Field data-invalid={!!errors.email}>
               <FieldLabel htmlFor="email">Adres e-mail</FieldLabel>
               <Input
                 id="email"
-                name="email"
                 type="email"
                 autoComplete="email"
-                required
                 placeholder="twoj@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading || isGoogleLoading}
+                aria-invalid={!!errors.email}
+                disabled={isSubmitting || isGooglePending}
+                {...register("email")}
               />
+              <FieldError
+                role={errors.email ? "alert" : undefined}
+                aria-hidden={!errors.email}
+                className={cn(
+                  "min-h-5 text-sm font-normal text-destructive leading-tight",
+                  !errors.email && "invisible",
+                )}
+              >
+                {errors.email?.message || "\u00A0"}
+              </FieldError>
             </Field>
 
-            <Field>
+            <Field data-invalid={!!errors.password}>
               <FieldLabel htmlFor="password">Hasło</FieldLabel>
               <Input
                 id="password"
-                name="password"
                 type="password"
                 autoComplete="current-password"
-                required
                 placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading || isGoogleLoading}
+                aria-invalid={!!errors.password}
+                disabled={isSubmitting || isGooglePending}
+                {...register("password")}
               />
+              <FieldError
+                role={errors.password ? "alert" : undefined}
+                aria-hidden={!errors.password}
+                className={cn(
+                  "min-h-5 text-sm font-normal text-destructive leading-tight",
+                  !errors.password && "invisible",
+                )}
+              >
+                {errors.password?.message || "\u00A0"}
+              </FieldError>
             </Field>
           </FieldGroup>
 
           <Button
             type="submit"
             className="w-full"
-            disabled={isLoading || isGoogleLoading}
+            disabled={isSubmitting || isGooglePending}
           >
-            {isLoading && <Spinner className="mr-2" />}
-            {isLoading ? "Logowanie..." : "Zaloguj się"}
+            {isSubmitting && <Spinner className="mr-2" />}
+            {isSubmitting ? "Logowanie..." : "Zaloguj się"}
           </Button>
         </form>
 
@@ -168,14 +197,14 @@ export function SignIn({ className }: SignInProps) {
           variant="outline"
           className="w-full"
           onClick={handleGoogleSignIn}
-          disabled={isLoading || isGoogleLoading}
+          disabled={isSubmitting || isGooglePending}
         >
-          {isGoogleLoading ? (
+          {isGooglePending ? (
             <Spinner className="mr-2" />
           ) : (
             <FaGoogle className="mr-2 text-red-500" />
           )}
-          {isGoogleLoading ? "Przekierowywanie..." : "Zaloguj się przez Google"}
+          {isGooglePending ? "Przekierowywanie..." : "Zaloguj się przez Google"}
         </Button>
       </CardContent>
 
@@ -193,3 +222,5 @@ export function SignIn({ className }: SignInProps) {
     </Card>
   );
 }
+
+export default SignIn;
