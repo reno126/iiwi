@@ -1,20 +1,19 @@
 import { Suspense } from "react";
-import { SignIn } from "@/components/auth/SignIn";
 import { authOptions } from "@/lib/auth/authOptions";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SignIn } from "./_componnets/SignIn";
 
-interface LoginPageProps {}
 
-export async function LoginPage({}: LoginPageProps) {
+export async function LoginPage() {
   const session = await getServerSession(authOptions);
   if (session) redirect("/dashboard");
 
   return (
     <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center px-4 py-8">
       <Suspense
-        fallback={<Skeleton className="h-[460px] w-full max-w-md rounded-xl" />}
+        fallback={<Skeleton className="h-115 w-full max-w-md rounded-xl" />}
       >
         <SignIn />
       </Suspense>
