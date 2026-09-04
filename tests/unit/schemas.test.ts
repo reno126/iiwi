@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { registerSchema } from "@/schemas/register";
 import { loginSchema } from "@/schemas/login";
 import { productCreateSchema } from "@/schemas/product";
+import { reviewCreateSchema } from "@/schemas/review";
 
 describe("schemas/register", () => {
   it("validates correct registration data", () => {
@@ -207,6 +208,93 @@ describe("schemas/product", () => {
     if (!result.success) {
       const codeError = result.error.format().code?._errors;
       expect(codeError).toContain("Kod produktu nie może przekraczać 24 znaków");
+    }
+  });
+});
+
+describe("schemas/review", () => {
+  it("validates complete and valid review payload", () => {
+    const validData = {
+      productId: "prod-12345",
+      rate: 4.5,
+      description: "Bardzo dobry produkt, spełnia wszystkie oczekiwania!",
+    };
+
+    const result = reviewCreateSchema.safeParse(validData);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toEqual(validData);
+    }
+  });
+
+  it("fails when productId is empty", () => {
+    const result = reviewCreateSchema.safeParse({
+      productId: "",
+      rate: 5,
+      description: "Bardzo dobry produkt",
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const productIdError = result.error.format().productId?._errors;
+      expect(productIdError).toContain("Identyfikator produktu jest wymagany");
+    }
+  });
+
+  it("fails when rate is lower than 1", () => {
+    const result = reviewCreateSchema.safeParse({
+      productId: "prod-123",
+      rate: 0,
+      description: "Słaba jakość",
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const rateError = result.error.format().rate?._errors;
+      expect(rateError).toContain("Ocena musi wynosić co najmniej 1");
+    }
+  });
+
+  it("fails when rate exceeds 5", () => {
+    const result = reviewCreateSchema.safeParse({
+      productId: "prod-123",
+      rate: 6,
+      description: "Niesamowity produkt",
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const rateError = result.error.format().rate?._errors;
+      expect(rateError).toContain("Ocena nie może przekraczać 5");
+    }
+  });
+
+  it("fails when description is shorter than 3 characters", () => {
+    const result = reviewCreateSchema.safeParse({
+      productId: "prod-123",
+      rate: 4,
+      description: "Ok",
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const descError = result.error.format().description?._errors;
+      expect(descError).toContain("Treść recenzji musi mieć co najmniej 3 znaki");
+    }
+  });
+
+  it("fails when description exceeds 5000 characters", () => {
+    const longDesc = "A".repeat(5001);
+    const result = reviewCreateSchema.safeParse({
+      productId: "prod-123",
+      rate: 4,
+      description: longDesc,
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const descError = result.error.format().description?._errors;
+      expect(descError).toContain("Treść recenzji nie może przekraczać 5000 znaków");
     }
   });
 });
