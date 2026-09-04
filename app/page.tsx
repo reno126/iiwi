@@ -33,10 +33,10 @@ export async function HomePage() {
         </CardContent>
         <CardFooter className="flex justify-center gap-4 border-t border-border pt-4">
           <Link
-            href="/products/new"
+            href="/opinie/dodaj"
             className={cn(buttonVariants({ variant: "default" }))}
           >
-            Dodaj produkt
+            Dodaj opinię
           </Link>
           <Link
             href="/dashboard"

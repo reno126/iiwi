@@ -127,8 +127,8 @@ describe("components/AsyncSearch (Generic Search Component)", () => {
       vi.advanceTimersByTime(150);
     });
 
-    // Loading card and spinner should be visible
-    expect(screen.getByText("Wyszukiwanie wyników...")).toBeInTheDocument();
+    // Loading spinner should be visible
+    expect(screen.getByLabelText("Ładowanie wyników")).toBeInTheDocument();
 
     // Resolve the promise
     await act(async () => {
@@ -136,7 +136,7 @@ describe("components/AsyncSearch (Generic Search Component)", () => {
     });
 
     // Loading indicator is replaced with results
-    expect(screen.queryByText("Wyszukiwanie wyników...")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Ładowanie wyników")).not.toBeInTheDocument();
     expect(screen.getByText("Słuchawki bezprzewodowe Sony")).toBeInTheDocument();
   });
 

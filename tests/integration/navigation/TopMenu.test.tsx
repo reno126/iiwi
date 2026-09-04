@@ -30,9 +30,9 @@ describe("components/navigation/TopMenu", () => {
       "href",
       "/dashboard",
     );
-    expect(screen.getByRole("link", { name: "Nowy produkt" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Dodaj opinię" })).toHaveAttribute(
       "href",
-      "/products/new",
+      "/opinie/dodaj",
     );
   });
 

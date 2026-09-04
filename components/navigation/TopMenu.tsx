@@ -9,7 +9,7 @@ import { cn } from "@/lib/shadcn/utils";
 const menuConfig = [
   { title: "Strona główna", href: "/" },
   { title: "Panel", href: "/dashboard" },
-  { title: "Nowy produkt", href: "/products/new" },
+  { title: "Dodaj opinię", href: "/opinie/dodaj" },
 ];
 
 interface MenuItemProps {

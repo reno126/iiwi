@@ -16,7 +16,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Empty,
   EmptyHeader,
@@ -32,8 +31,13 @@ export interface AsyncSearchProps<T> {
    * Resolves to an array of items or an object containing a `data` array.
    */
   searchAction: (
-    query: string
+    query: string,
   ) => Promise<T[] | { data?: T[] | null } | null | undefined>;
+
+  /**
+   * Function to extract the text label of an item for default rendering and accessibility.
+   */
+  getItemLabel: (item: T) => string;
 
   /**
    * Callback invoked when a user clicks or selects a result item.
@@ -43,18 +47,17 @@ export interface AsyncSearchProps<T> {
   /**
    * Custom item renderer. Receives the item, whether it is highlighted, and its index.
    */
-  renderItem?: (item: T, isHighlighted: boolean, index: number) => React.ReactNode;
+  renderItem?: (
+    item: T,
+    isHighlighted: boolean,
+    index: number,
+  ) => React.ReactNode;
 
   /**
    * Function to extract a unique key for each item in the results list.
    * Defaults to `item.id ?? item.key ?? index`.
    */
   getKey?: (item: T, index: number) => string | number;
-
-  /**
-   * Function to extract the text label of an item for default rendering and accessibility.
-   */
-  getItemLabel?: (item: T) => string;
 
   /**
    * Minimum number of characters required to trigger the search.
@@ -152,25 +155,6 @@ export interface AsyncSearchProps<T> {
   onQueryChange?: (query: string) => void;
 }
 
-function defaultItemLabel<T>(item: T): string {
-  if (item === null || item === undefined) return "";
-  if (
-    typeof item === "string" ||
-    typeof item === "number" ||
-    typeof item === "boolean"
-  ) {
-    return String(item);
-  }
-  if (typeof item === "object") {
-    const record = item as Record<string, unknown>;
-    if (typeof record.name === "string") return record.name;
-    if (typeof record.title === "string") return record.title;
-    if (typeof record.label === "string") return record.label;
-    if (typeof record.description === "string") return record.description;
-  }
-  return JSON.stringify(item);
-}
-
 export function AsyncSearch<T>({
   searchAction,
   onResultSelect,
@@ -209,6 +193,7 @@ export function AsyncSearch<T>({
 
   const [rawResults, setRawResults] = useState<T[]>([]);
   const [rawHasSearched, setRawHasSearched] = useState(false);
+  const [lastSearchedQuery, setLastSearchedQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
@@ -250,6 +235,7 @@ export function AsyncSearch<T>({
 
           setRawResults(items);
           setRawHasSearched(true);
+          setLastSearchedQuery(trimmedDeferred);
           setError(null);
           setHighlightedIndex(-1);
         } catch (err) {
@@ -259,10 +245,11 @@ export function AsyncSearch<T>({
           setError(
             err instanceof Error
               ? err.message
-              : "Wystąpił błąd podczas wyszukiwania."
+              : "Wystąpił błąd podczas wyszukiwania.",
           );
           setRawResults([]);
           setRawHasSearched(true);
+          setLastSearchedQuery(trimmedDeferred);
           setHighlightedIndex(-1);
         }
       });
@@ -288,6 +275,7 @@ export function AsyncSearch<T>({
     onQueryChange?.("");
     setRawResults([]);
     setRawHasSearched(false);
+    setLastSearchedQuery("");
     setError(null);
     setHighlightedIndex(-1);
     inputRef.current?.focus();
@@ -312,14 +300,10 @@ export function AsyncSearch<T>({
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setHighlightedIndex((prev) =>
-        prev < results.length - 1 ? prev + 1 : 0
-      );
+      setHighlightedIndex((prev) => (prev < results.length - 1 ? prev + 1 : 0));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setHighlightedIndex((prev) =>
-        prev > 0 ? prev - 1 : results.length - 1
-      );
+      setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : results.length - 1));
     } else if (e.key === "Enter") {
       if (highlightedIndex >= 0 && highlightedIndex < results.length) {
         e.preventDefault();
@@ -333,9 +317,11 @@ export function AsyncSearch<T>({
 
   const showDropdown = resultsPlacement === "dropdown";
   const hasResultsToShow =
-    (isLoading && results.length === 0 && hasMinChars) ||
-    (error && !isLoading) ||
-    (!isLoading && hasSearched && results.length === 0 && hasMinChars) ||
+    Boolean(
+      loadingComponent && isLoading && results.length === 0 && hasMinChars,
+    ) ||
+    Boolean(error && !isLoading) ||
+    Boolean(hasSearched && results.length === 0 && hasMinChars) ||
     results.length > 0;
 
   return (
@@ -363,7 +349,7 @@ export function AsyncSearch<T>({
           className={cn(
             "pl-9",
             isLoading || query.length > 0 ? "pr-16" : "pr-3",
-            inputClassName
+            inputClassName,
           )}
         />
 
@@ -392,43 +378,34 @@ export function AsyncSearch<T>({
         </div>
       </div>
 
-      {/* Min Characters Hint */}
-      {showMinCharsHint &&
-        query.trim().length > 0 &&
-        query.trim().length < minChars && (
-          <p className="text-xs text-muted-foreground px-2" role="status">
-            Wpisz jeszcze co najmniej {minChars - query.trim().length}{" "}
-            {minChars - query.trim().length === 1 ? "znak" : "znaki"}, aby
-            wyszukać.
-          </p>
-        )}
+      {/* Min Characters Hint - space reserved to prevent screen flickering */}
+      {showMinCharsHint && (
+        <div className="h-5 px-2 flex items-center" aria-live="polite">
+          {query.trim().length > 0 && query.trim().length < minChars && (
+            <p className="text-xs text-muted-foreground" role="status">
+              Wpisz jeszcze co najmniej {minChars - query.trim().length}{" "}
+              {minChars - query.trim().length === 1 ? "znak" : "znaki"}, aby
+              wyszukać.
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Results Section */}
       {hasResultsToShow && (
         <div
           className={cn(
             "w-full",
-            showDropdown && "absolute top-full left-0 right-0 z-50 mt-1 shadow-lg"
+            showDropdown &&
+              "absolute top-full left-0 right-0 z-50 mt-1 shadow-lg",
           )}
         >
-          {/* 1. Loading State */}
-          {isLoading && results.length === 0 && hasMinChars && (
-            loadingComponent ?? (
-              <Card className="border shadow-xs" data-slot="search-loading">
-                <CardContent className="p-4 space-y-3">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Spinner className="size-4" />
-                    <span>Wyszukiwanie wyników...</span>
-                  </div>
-                  <div className="space-y-2 pt-1">
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                    <Skeleton className="h-4 w-2/3" />
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          )}
+          {/* 1. Optional custom loading state */}
+          {loadingComponent &&
+            isLoading &&
+            results.length === 0 &&
+            hasMinChars &&
+            loadingComponent}
 
           {/* 2. Error State */}
           {error && !isLoading && (
@@ -441,31 +418,33 @@ export function AsyncSearch<T>({
           )}
 
           {/* 3. Zero Results State */}
-          {!isLoading && hasSearched && results.length === 0 && hasMinChars && (
-            emptyState ?? (
-              <Card
-                className="border border-dashed shadow-xs"
-                data-slot="search-empty"
-              >
-                <CardContent className="p-6">
-                  <Empty>
-                    <EmptyMedia variant="icon">
-                      <SearchX
-                        className="size-5 text-muted-foreground"
-                        aria-hidden="true"
-                      />
-                    </EmptyMedia>
-                    <EmptyHeader>
-                      <EmptyTitle>{emptyTitle}</EmptyTitle>
-                      <EmptyDescription>
-                        {emptyDescription ??
-                          `Nie znaleziono żadnych wyników dla frazy „${trimmedDeferred}”.`}
-                      </EmptyDescription>
-                    </EmptyHeader>
-                  </Empty>
-                </CardContent>
-              </Card>
-            )
+          {hasSearched && results.length === 0 && hasMinChars && (
+            <div className={cn(isLoading && "opacity-60 transition-opacity")}>
+              {emptyState ?? (
+                <Card
+                  className="border border-dashed shadow-xs"
+                  data-slot="search-empty"
+                >
+                  <CardContent className="p-6">
+                    <Empty>
+                      <EmptyMedia variant="icon">
+                        <SearchX
+                          className="size-5 text-muted-foreground"
+                          aria-hidden="true"
+                        />
+                      </EmptyMedia>
+                      <EmptyHeader>
+                        <EmptyTitle>{emptyTitle}</EmptyTitle>
+                        <EmptyDescription>
+                          {emptyDescription ??
+                            `Nie znaleziono żadnych wyników dla frazy „${lastSearchedQuery || trimmedDeferred}”.`}
+                        </EmptyDescription>
+                      </EmptyHeader>
+                    </Empty>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           )}
 
           {/* 4. Results List */}
@@ -473,7 +452,7 @@ export function AsyncSearch<T>({
             <Card
               className={cn(
                 "border shadow-xs overflow-hidden",
-                isLoading && "opacity-75 transition-opacity"
+                isLoading && "opacity-75 transition-opacity",
               )}
               data-slot="search-results"
             >
@@ -489,8 +468,8 @@ export function AsyncSearch<T>({
                     const key = getKey
                       ? getKey(item, index)
                       : ((item as Record<string, unknown>)?.id ??
-                         (item as Record<string, unknown>)?.key ??
-                         index);
+                        (item as Record<string, unknown>)?.key ??
+                        index);
 
                     return (
                       <div
@@ -505,17 +484,13 @@ export function AsyncSearch<T>({
                           "flex items-center w-full px-3 py-2 text-sm rounded-md cursor-pointer select-none transition-colors outline-none",
                           isHighlighted
                             ? "bg-accent text-accent-foreground font-medium"
-                            : "hover:bg-muted/60 text-foreground"
+                            : "hover:bg-muted/60 text-foreground",
                         )}
                       >
                         {renderItem ? (
                           renderItem(item, isHighlighted, index)
                         ) : (
-                          <span className="truncate">
-                            {getItemLabel
-                              ? getItemLabel(item)
-                              : defaultItemLabel(item)}
-                          </span>
+                          <span className="truncate">{getItemLabel(item)}</span>
                         )}
                       </div>
                     );
