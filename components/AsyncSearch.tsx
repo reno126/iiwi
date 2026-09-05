@@ -37,7 +37,7 @@ export interface AsyncSearchProps<T> {
   /**
    * Function to extract the text label of an item for default rendering and accessibility.
    */
-  getItemLabel: (item: T) => string;
+  getItemLabel?: (item: T) => string;
 
   /**
    * Callback invoked when a user clicks or selects a result item.
@@ -153,6 +153,25 @@ export interface AsyncSearchProps<T> {
    * Callback invoked whenever the input text changes.
    */
   onQueryChange?: (query: string) => void;
+}
+
+function defaultItemLabel<T>(item: T): string {
+  if (item === null || item === undefined) return "";
+  if (
+    typeof item === "string" ||
+    typeof item === "number" ||
+    typeof item === "boolean"
+  ) {
+    return String(item);
+  }
+  if (typeof item === "object") {
+    const record = item as Record<string, unknown>;
+    if (typeof record.name === "string") return record.name;
+    if (typeof record.title === "string") return record.title;
+    if (typeof record.label === "string") return record.label;
+    if (typeof record.description === "string") return record.description;
+  }
+  return String(item);
 }
 
 export function AsyncSearch<T>({
@@ -370,7 +389,7 @@ export function AsyncSearch<T>({
               onClick={handleClear}
               disabled={disabled}
               aria-label="Wyczyść wyszukiwanie"
-              className="text-muted-foreground hover:text-foreground h-6 w-6 p-0 rounded-full"
+              className="text-muted-foreground hover:text-foreground size-6 p-0 rounded-full"
             >
               <X className="size-3.5" aria-hidden="true" />
             </Button>
@@ -490,7 +509,11 @@ export function AsyncSearch<T>({
                         {renderItem ? (
                           renderItem(item, isHighlighted, index)
                         ) : (
-                          <span className="truncate">{getItemLabel(item)}</span>
+                          <span className="truncate">
+                            {getItemLabel
+                              ? getItemLabel(item)
+                              : defaultItemLabel(item)}
+                          </span>
                         )}
                       </div>
                     );
