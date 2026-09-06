@@ -9,8 +9,8 @@ export type ProductWithReviews = {
   imageUrl: string | null;
   code: string | null;
   creatorId: string;
-  rate_avg: number | null;
-  rate_count: number | null;
+  rate_avg: number;
+  rate_count: number;
   createdAt: Date;
   updatedAt: Date;
   creator: {
@@ -83,18 +83,8 @@ export async function productGetById(
     return null;
   }
 
-  const totalReviews = product.reviews.length;
-  const averageRate =
-    product.rate_avg ??
-    (totalReviews > 0
-      ? Number(
-          (
-            product.reviews.reduce((acc, r) => acc + r.rate, 0) / totalReviews
-          ).toFixed(1),
-        )
-      : null);
-
-  const reviewCount = product.rate_count ?? product._count.reviews;
+  const averageRate = product.rate_count > 0 ? product.rate_avg : null;
+  const reviewCount = product.rate_count;
 
   return {
     ...product,

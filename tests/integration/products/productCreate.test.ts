@@ -69,8 +69,8 @@ describe("serverActions/productCreate", () => {
       imageUrl: "https://example.com/img.png",
       code: "SKU-1234",
       creatorId: mockUser.id,
-      rate_avg: null,
-      rate_count: null,
+      rate_avg: 0,
+      rate_count: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -97,6 +97,8 @@ describe("serverActions/productCreate", () => {
         imageUrl: inputData.imageUrl,
         code: inputData.code,
         creatorId: mockUser.id,
+        rate_avg: 0,
+        rate_count: 0,
       },
     });
   });
@@ -119,8 +121,8 @@ describe("serverActions/productCreate", () => {
       imageUrl: null,
       code: null,
       creatorId: mockUser.id,
-      rate_avg: null,
-      rate_count: null,
+      rate_avg: 0,
+      rate_count: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -140,6 +142,8 @@ describe("serverActions/productCreate", () => {
         imageUrl: null,
         code: null,
         creatorId: mockUser.id,
+        rate_avg: 0,
+        rate_count: 0,
       },
     });
   });

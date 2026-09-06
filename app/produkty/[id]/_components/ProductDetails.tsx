@@ -115,8 +115,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
                 {/* Rating Overview */}
                 <div className="flex flex-wrap items-center gap-3">
-                  {product.averageRate !== null ? (
-                    <StarRating rate={product.averageRate} size="md" />
+                  {product.rate_count > 0 ? (
+                    <StarRating rate={product.rate_avg} size="md" />
                   ) : (
                     <span className="text-sm text-muted-foreground">
                       Brak ocen
@@ -125,7 +125,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   <span className="text-muted-foreground">•</span>
                   <span className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
                     <MessageSquare className="size-4 text-muted-foreground" />
-                    {formatReviewCount(product._count.reviews)}
+                    {formatReviewCount(product.rate_count)}
                   </span>
                 </div>
               </div>

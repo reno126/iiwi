@@ -85,11 +85,7 @@ Examples:
       );
       for (const prod of result.products) {
         console.log(
-          ` - [${prod.id}] "${prod.name}": rate_avg = ${
-            prod.rate_avg !== null ? prod.rate_avg : "null"
-          }, rate_count = ${
-            prod.rate_count !== null ? prod.rate_count : "null"
-          } (${prod.reviewCount} review${prod.reviewCount === 1 ? "" : "s"})`,
+          ` - [${prod.id}] "${prod.name}": rate_avg = ${prod.rate_avg}, rate_count = ${prod.rate_count} (${prod.reviewCount} review${prod.reviewCount === 1 ? "" : "s"})`,
         );
       }
       console.log("\nReconstruction finished successfully.");

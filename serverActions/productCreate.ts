@@ -17,6 +17,8 @@ export const productCreate = safeActionUserCtx
         imageUrl: imageUrl ? imageUrl : null,
         code: code ? code : null,
         creatorId: userId,
+        rate_avg: 0,
+        rate_count: 0,
       },
     });
 

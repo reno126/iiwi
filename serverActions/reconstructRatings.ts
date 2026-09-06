@@ -9,8 +9,8 @@ import {
 export interface ReconstructedProductRating {
   id: string;
   name: string;
-  rate_avg: number | null;
-  rate_count: number | null;
+  rate_avg: number;
+  rate_count: number;
   reviewCount: number;
 }
 
@@ -80,8 +80,8 @@ export async function reconstructRatings(
               product.reviews.reduce((acc, r) => acc + r.rate, 0) / reviewCount
             ).toFixed(2),
           )
-        : null;
-    const rate_count = reviewCount > 0 ? reviewCount : null;
+        : 0;
+    const rate_count = reviewCount;
 
     updates.push({
       id: product.id,

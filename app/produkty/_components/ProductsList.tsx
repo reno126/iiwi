@@ -75,14 +75,14 @@ export function ProductsList({ products }: ProductsListProps) {
                     {/* Number of reviews */}
                     <span className="flex items-center gap-1.5 font-medium text-foreground">
                       <MessageSquare className="size-3.5 text-muted-foreground" />
-                      {formatReviewCount(product._count.reviews)}
+                      {formatReviewCount(product.rate_count)}
                     </span>
 
                     {/* Average Rating if available */}
-                    {product.averageRate !== null && (
+                    {product.rate_count > 0 && (
                       <span className="flex items-center gap-1 font-medium text-amber-600 dark:text-amber-400">
                         <Star className="size-3.5 fill-amber-400 text-amber-500" />
-                        {product.averageRate.toFixed(1)} / 5
+                        {product.rate_avg.toFixed(1)} / 5
                       </span>
                     )}
 
