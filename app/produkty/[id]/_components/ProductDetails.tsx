@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Package,
@@ -14,9 +18,10 @@ import {
 import type { ProductWithReviews } from "@/serverActions/productGetById";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ReadMore } from "@/components/ReadMore";
+import { ReviewForm } from "@/components/reviews/ReviewForm";
 import { formatPolishDate, formatReviewCount } from "@/lib/formatters";
 import { cn } from "@/lib/shadcn/utils";
 
@@ -57,6 +62,18 @@ export interface ProductDetailsProps {
 }
 
 export function ProductDetails({ product }: ProductDetailsProps) {
+  const router = useRouter();
+  const [isReviewFormOpen, setIsReviewFormOpen] = useState(false);
+
+  const handleReviewSuccess = () => {
+    setIsReviewFormOpen(false);
+    router.refresh();
+  };
+
+  const handleCancelReview = () => {
+    setIsReviewFormOpen(false);
+  };
+
   const creatorDisplayName =
     product.creator.name ||
     product.creator.email.split("@")[0] ||
@@ -197,110 +214,140 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
               {/* Action: Add Review */}
               <div className="pt-2">
-                <Link
-                  href="/opinie/dodaj"
-                  className={cn(buttonVariants(), "gap-1.5")}
+                <Button
+                  type="button"
+                  onClick={() => setIsReviewFormOpen(true)}
+                  disabled={isReviewFormOpen}
+                  className="gap-1.5"
                 >
                   <PlusCircle className="size-4" />
                   Napisz opinię dla tego produktu
-                </Link>
+                </Button>
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Reviews Section */}
-      <section aria-labelledby="reviews-heading" className="space-y-4">
-        <div className="flex items-center justify-between gap-4 border-b border-border pb-3">
-          <h2
-            id="reviews-heading"
-            className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2"
-          >
-            Opinie użytkowników
-            <Badge variant="outline" className="text-xs">
-              {product.reviews.length}
-            </Badge>
-          </h2>
-
-          <Link
-            href="/opinie/dodaj"
-            className={cn(
-              buttonVariants({ variant: "outline", size: "sm" }),
-              "gap-1.5",
-            )}
-          >
-            <PlusCircle className="size-3.5" />
-            Dodaj opinię
-          </Link>
-        </div>
-
-        {/* Empty state when there are no reviews */}
-        {product.reviews.length === 0 ? (
-          <Card className="border-dashed p-8 text-center">
-            <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground mb-3">
-              <MessageSquare className="size-6" />
-            </div>
-            <h3 className="text-base font-semibold text-foreground">
-              Brak opinii dla tego produktu
-            </h3>
-            <p className="mt-1 text-sm text-muted-foreground max-w-sm mx-auto">
-              Ten produkt nie ma jeszcze żadnych recenzji. Podziel się swoim
-              doświadczeniem i pomóż innym w wyborze!
-            </p>
-            <div className="mt-5">
-              <Link
-                href="/opinie/dodaj"
-                className={buttonVariants({ size: "sm" })}
-              >
-                Bądź pierwszą osobą, która doda recenzję
-              </Link>
-            </div>
-          </Card>
-        ) : (
-          /* List of Reviews */
-          <div className="flex flex-col gap-4">
-            {product.reviews.map((review) => {
-              const reviewerName =
-                review.user.name ||
-                review.user.email.split("@")[0] ||
-                "Anonimowy użytkownik";
-
-              return (
-                <Card key={review.id} className="border shadow-2xs">
-                  <CardHeader className="p-4 pb-2">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      {/* Reviewer identity & Date */}
-                      <div className="flex items-center gap-2.5">
-                        <div className="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold uppercase shrink-0">
-                          {reviewerName.charAt(0)}
-                        </div>
-                        <div>
-                          <CardTitle className="text-sm font-semibold text-foreground">
-                            {reviewerName}
-                          </CardTitle>
-                          <p className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Calendar className="size-3" />
-                            {formatPolishDate(review.createdAt)}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Review Rating Stars */}
-                      <StarRating rate={review.rate} />
-                    </div>
-                  </CardHeader>
-
-                  <CardContent className="p-4 pt-2">
-                    {/* Review Description cut off above 5 lines using generic ReadMore component */}
-                    <ReadMore text={review.description} maxLines={5} />
-                  </CardContent>
-                </Card>
-              );
-            })}
+      {/* Reviews or Review Form Section */}
+      {isReviewFormOpen ? (
+        <section aria-labelledby="review-form-heading" className="space-y-4">
+          <div className="border-b border-border pb-3">
+            <h2
+              id="review-form-heading"
+              className="text-xl font-bold tracking-tight text-foreground"
+            >
+              Napisz swoją opinię
+            </h2>
           </div>
-        )}
-      </section>
+          <Card className="border p-6 shadow-sm">
+            <CardContent className="p-0">
+              <ReviewForm
+                productId={product.id}
+                onSuccess={handleReviewSuccess}
+                onCancel={handleCancelReview}
+                autoFocus
+              />
+            </CardContent>
+          </Card>
+        </section>
+      ) : (
+        <section aria-labelledby="reviews-heading" className="space-y-4">
+          <div className="border-b border-border pb-3">
+            <h2
+              id="reviews-heading"
+              className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2"
+            >
+              Opinie użytkowników
+              <Badge variant="outline" className="text-xs">
+                {product.reviews.length}
+              </Badge>
+            </h2>
+          </div>
+
+          {/* Empty state when there are no reviews */}
+          {product.reviews.length === 0 ? (
+            <Card className="border-dashed p-8 text-center">
+              <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground mb-3">
+                <MessageSquare className="size-6" />
+              </div>
+              <h3 className="text-base font-semibold text-foreground">
+                Brak opinii dla tego produktu
+              </h3>
+              <p className="mt-1 text-sm text-muted-foreground max-w-sm mx-auto">
+                Ten produkt nie ma jeszcze żadnych recenzji. Podziel się swoim
+                doświadczeniem i pomóż innym w wyborze!
+              </p>
+              <div className="mt-5">
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => setIsReviewFormOpen(true)}
+                >
+                  Bądź pierwszą osobą, która doda recenzję
+                </Button>
+              </div>
+            </Card>
+          ) : (
+            <div className="space-y-6">
+              {/* List of Reviews */}
+              <div className="flex flex-col gap-4">
+                {product.reviews.map((review) => {
+                  const reviewerName =
+                    review.user.name ||
+                    review.user.email.split("@")[0] ||
+                    "Anonimowy użytkownik";
+
+                  return (
+                    <Card key={review.id} className="border shadow-2xs">
+                      <CardHeader className="p-4 pb-2">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          {/* Reviewer identity & Date */}
+                          <div className="flex items-center gap-2.5">
+                            <div className="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold uppercase shrink-0">
+                              {reviewerName.charAt(0)}
+                            </div>
+                            <div>
+                              <CardTitle className="text-sm font-semibold text-foreground">
+                                {reviewerName}
+                              </CardTitle>
+                              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Calendar className="size-3" />
+                                {formatPolishDate(review.createdAt)}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Review Rating Stars */}
+                          <StarRating rate={review.rate} />
+                        </div>
+                      </CardHeader>
+
+                      <CardContent className="p-4 pt-2">
+                        {/* Review Description cut off above 5 lines using generic ReadMore component */}
+                        <ReadMore text={review.description} maxLines={5} />
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+
+              {/* Action: Add Review at bottom of review list */}
+              <div className="pt-2">
+                <Button
+                  type="button"
+                  onClick={() => setIsReviewFormOpen(true)}
+                  disabled={isReviewFormOpen}
+                  className="gap-1.5"
+                >
+                  <PlusCircle className="size-4" />
+                  Napisz opinię dla tego produktu
+                </Button>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { reviewCreateSchema, type ReviewCreateInput } from "@/schemas/review";
@@ -15,6 +16,7 @@ interface ReviewFormProps {
   onSuccess?: (productId: string) => void;
   onCancel?: () => void;
   className?: string;
+  autoFocus?: boolean;
 }
 
 export function ReviewForm({
@@ -22,10 +24,11 @@ export function ReviewForm({
   onSuccess,
   onCancel,
   className,
+  autoFocus = false,
 }: ReviewFormProps) {
   const methods = useForm<ReviewCreateInput>({
     resolver: zodResolver(reviewCreateSchema),
-    mode: "onTouched",
+    mode: "onChange",
     defaultValues: {
       productId,
       description: "",
@@ -36,8 +39,15 @@ export function ReviewForm({
     handleSubmit,
     setError,
     clearErrors,
+    setFocus,
     formState: { errors, isSubmitting },
   } = methods;
+
+  useEffect(() => {
+    if (autoFocus) {
+      setFocus("description");
+    }
+  }, [autoFocus, setFocus]);
 
   const onSubmit = async (data: ReviewCreateInput) => {
     clearErrors("root");
@@ -80,7 +90,7 @@ export function ReviewForm({
           </Alert>
         )}
 
-        <ReviewFields />
+        <ReviewFields autoFocusDescription={autoFocus} />
 
         <div className="flex items-center justify-end gap-3 mt-6">
           {onCancel && (

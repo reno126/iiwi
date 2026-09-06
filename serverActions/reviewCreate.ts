@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { safeActionUserCtx } from "@/lib/actions/safeActionUserCtx";
 import { prisma } from "@/lib/db/prisma";
 import { reviewCreateSchema } from "@/schemas/review";
@@ -10,7 +11,7 @@ export const reviewCreate = safeActionUserCtx
     const { productId, rate, description } = parsedInput;
     const { userId } = ctx;
 
-    return await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx) => {
       const review = await tx.review.create({
         data: {
           productId,
@@ -42,4 +43,13 @@ export const reviewCreate = safeActionUserCtx
 
       return review;
     });
+
+    try {
+      revalidatePath(`/produkty/${productId}`);
+      revalidatePath("/produkty");
+    } catch {
+      // Ignore when invoked outside Next.js request context (e.g. unit tests)
+    }
+
+    return result;
   });

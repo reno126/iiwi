@@ -12,15 +12,18 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { RatingInput } from "./RatingInput";
 import type { ReviewCreateInput } from "@/schemas/review";
+import { cn } from "@/lib/shadcn/utils";
 
 interface ReviewFieldsProps {
   className?: string;
   legend?: string;
+  autoFocusDescription?: boolean;
 }
 
 export function ReviewFields({
   className,
   legend = "Twoja opinia",
+  autoFocusDescription = false,
 }: ReviewFieldsProps) {
   const {
     register,
@@ -45,9 +48,16 @@ export function ReviewFields({
               />
             )}
           />
-          {errors.rate?.message && (
-            <FieldError>{errors.rate.message}</FieldError>
-          )}
+          <FieldError
+            role={errors.rate ? "alert" : undefined}
+            aria-hidden={!errors.rate}
+            className={cn(
+              "min-h-5 text-sm font-normal text-destructive leading-tight",
+              !errors.rate && "invisible",
+            )}
+          >
+            {errors.rate?.message || "\u00A0"}
+          </FieldError>
         </Field>
 
         <Field data-invalid={!!errors.description}>
@@ -57,11 +67,20 @@ export function ReviewFields({
             rows={4}
             placeholder="Napisz, jak oceniasz ten produkt..."
             disabled={isSubmitting}
+            autoFocus={autoFocusDescription}
+            aria-invalid={!!errors.description}
             {...register("description")}
           />
-          {errors.description?.message && (
-            <FieldError>{errors.description.message}</FieldError>
-          )}
+          <FieldError
+            role={errors.description ? "alert" : undefined}
+            aria-hidden={!errors.description}
+            className={cn(
+              "min-h-5 text-sm font-normal text-destructive leading-tight",
+              !errors.description && "invisible",
+            )}
+          >
+            {errors.description?.message || "\u00A0"}
+          </FieldError>
         </Field>
       </FieldGroup>
     </FieldSet>
