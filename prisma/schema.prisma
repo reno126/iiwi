@@ -51,8 +51,8 @@ model Product {
   creatorId  String   @map("creator_id")
   creator    User     @relation("CreatedProducts", fields: [creatorId], references: [id], onDelete: Cascade)
   reviews    Review[]
-  rate_avg   Float?
-  rate_count Int?
+  rate_avg   Float
+  rate_count Int
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 

@@ -70,6 +70,7 @@ describe("serverActions/productCreate", () => {
       code: "SKU-1234",
       creatorId: mockUser.id,
       rate_avg: null,
+      rate_count: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -119,6 +120,7 @@ describe("serverActions/productCreate", () => {
       code: null,
       creatorId: mockUser.id,
       rate_avg: null,
+      rate_count: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });

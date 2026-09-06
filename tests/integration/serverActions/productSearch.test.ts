@@ -39,6 +39,7 @@ describe("serverActions/productSearch", () => {
         productUrl: null,
         imageUrl: null,
         rate_avg: null,
+        rate_count: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       },

@@ -9,6 +9,8 @@ export type ProductWithReviews = {
   imageUrl: string | null;
   code: string | null;
   creatorId: string;
+  rate_avg: number | null;
+  rate_count: number | null;
   createdAt: Date;
   updatedAt: Date;
   creator: {
@@ -92,8 +94,13 @@ export async function productGetById(
         )
       : null);
 
+  const reviewCount = product.rate_count ?? product._count.reviews;
+
   return {
     ...product,
     averageRate,
+    _count: {
+      reviews: reviewCount,
+    },
   };
 }

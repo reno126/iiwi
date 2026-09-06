@@ -87,6 +87,8 @@ Examples:
         console.log(
           ` - [${prod.id}] "${prod.name}": rate_avg = ${
             prod.rate_avg !== null ? prod.rate_avg : "null"
+          }, rate_count = ${
+            prod.rate_count !== null ? prod.rate_count : "null"
           } (${prod.reviewCount} review${prod.reviewCount === 1 ? "" : "s"})`,
         );
       }

@@ -10,6 +10,7 @@ export interface ReconstructedProductRating {
   id: string;
   name: string;
   rate_avg: number | null;
+  rate_count: number | null;
   reviewCount: number;
 }
 
@@ -21,9 +22,9 @@ export interface ReconstructRatingsResult {
 }
 
 /**
- * Reconstructs the `rate_avg` for products based on the `rate` field of their associated reviews.
+ * Reconstructs `rate_avg` and `rate_count` for products based on the `rate` field of their associated reviews.
  * If a `productId` is provided, the calculation runs only for that product.
- * If not provided (or undefined), it recalculates `rate_avg` for all products in the database.
+ * If not provided (or undefined), it recalculates for all products in the database.
  */
 export async function reconstructRatings(
   input?: string | ReconstructRatingsInput,
@@ -80,11 +81,13 @@ export async function reconstructRatings(
             ).toFixed(2),
           )
         : null;
+    const rate_count = reviewCount > 0 ? reviewCount : null;
 
     updates.push({
       id: product.id,
       name: product.name,
       rate_avg,
+      rate_count,
       reviewCount,
     });
   }
@@ -95,7 +98,10 @@ export async function reconstructRatings(
       updates.map((item) =>
         prisma.product.update({
           where: { id: item.id },
-          data: { rate_avg: item.rate_avg },
+          data: {
+            rate_avg: item.rate_avg,
+            rate_count: item.rate_count,
+          },
         }),
       ),
     );
