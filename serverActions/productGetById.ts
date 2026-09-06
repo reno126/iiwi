@@ -38,7 +38,9 @@ export type ProductWithReviews = {
   averageRate: number | null;
 };
 
-export async function productGetById(id: string): Promise<ProductWithReviews | null> {
+export async function productGetById(
+  id: string,
+): Promise<ProductWithReviews | null> {
   const trimmedId = id?.trim();
   if (!trimmedId) {
     return null;
@@ -81,13 +83,14 @@ export async function productGetById(id: string): Promise<ProductWithReviews | n
 
   const totalReviews = product.reviews.length;
   const averageRate =
-    totalReviews > 0
+    product.rate_avg ??
+    (totalReviews > 0
       ? Number(
           (
             product.reviews.reduce((acc, r) => acc + r.rate, 0) / totalReviews
           ).toFixed(1),
         )
-      : null;
+      : null);
 
   return {
     ...product,

@@ -21,7 +21,8 @@
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",
     "test:e2e": "playwright test",
-    "test:cleanup": "npx tsx tests/e2e/helpers/cleanup.ts"
+    "test:cleanup": "npx tsx tests/e2e/helpers/cleanup.ts",
+    "ratings:reconstruct": "npx tsx scripts/reconstructRatings.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

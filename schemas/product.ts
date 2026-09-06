@@ -33,3 +33,11 @@ export const productIdSchema = z.object({
 });
 
 export type ProductIdInput = z.infer<typeof productIdSchema>;
+
+export const reconstructRatingsSchema = z.object({
+  productId: z.string().optional(),
+});
+
+export type ReconstructRatingsInput = z.infer<
+  typeof reconstructRatingsSchema
+>;

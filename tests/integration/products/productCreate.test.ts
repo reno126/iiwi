@@ -52,7 +52,11 @@ describe("serverActions/productCreate", () => {
   });
 
   it("creates product in database when user is authenticated and input is valid", async () => {
-    const mockUser = { id: "user-abc-123", name: "Jan", email: "jan@example.com" };
+    const mockUser = {
+      id: "user-abc-123",
+      name: "Jan",
+      email: "jan@example.com",
+    };
     vi.mocked(auth).mockResolvedValueOnce({
       user: mockUser,
       expires: "9999-12-31",
@@ -65,6 +69,7 @@ describe("serverActions/productCreate", () => {
       imageUrl: "https://example.com/img.png",
       code: "SKU-1234",
       creatorId: mockUser.id,
+      rate_avg: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -96,7 +101,11 @@ describe("serverActions/productCreate", () => {
   });
 
   it("handles optional fields by converting empty values to null", async () => {
-    const mockUser = { id: "user-456", name: "Anna", email: "anna@example.com" };
+    const mockUser = {
+      id: "user-456",
+      name: "Anna",
+      email: "anna@example.com",
+    };
     vi.mocked(auth).mockResolvedValueOnce({
       user: mockUser,
       expires: "9999-12-31",
@@ -109,6 +118,7 @@ describe("serverActions/productCreate", () => {
       imageUrl: null,
       code: null,
       creatorId: mockUser.id,
+      rate_avg: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });

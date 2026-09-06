@@ -9,7 +9,7 @@ import {
 export interface ReconstructedProductRating {
   id: string;
   name: string;
-  mid_rate: number | null;
+  rate_avg: number | null;
   reviewCount: number;
 }
 
@@ -21,15 +21,14 @@ export interface ReconstructRatingsResult {
 }
 
 /**
- * Reconstructs the `mid_rate` for products based on the `rate` field of their associated reviews.
+ * Reconstructs the `rate_avg` for products based on the `rate` field of their associated reviews.
  * If a `productId` is provided, the calculation runs only for that product.
- * If not provided (or undefined), it recalculates `mid_rate` for all products in the database.
+ * If not provided (or undefined), it recalculates `rate_avg` for all products in the database.
  */
 export async function reconstructRatings(
   input?: string | ReconstructRatingsInput,
 ): Promise<ReconstructRatingsResult> {
-  const rawId =
-    typeof input === "string" ? input : input?.productId;
+  const rawId = typeof input === "string" ? input : input?.productId;
 
   const parsed = reconstructRatingsSchema.safeParse({
     productId: rawId?.trim() ? rawId.trim() : undefined,
@@ -73,7 +72,7 @@ export async function reconstructRatings(
 
   for (const product of products) {
     const reviewCount = product.reviews.length;
-    const mid_rate =
+    const rate_avg =
       reviewCount > 0
         ? Number(
             (
@@ -85,7 +84,7 @@ export async function reconstructRatings(
     updates.push({
       id: product.id,
       name: product.name,
-      mid_rate,
+      rate_avg,
       reviewCount,
     });
   }
@@ -96,7 +95,7 @@ export async function reconstructRatings(
       updates.map((item) =>
         prisma.product.update({
           where: { id: item.id },
-          data: { mid_rate: item.mid_rate },
+          data: { rate_avg: item.rate_avg },
         }),
       ),
     );

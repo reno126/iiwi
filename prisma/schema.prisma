@@ -51,11 +51,15 @@ model Product {
   creatorId  String   @map("creator_id")
   creator    User     @relation("CreatedProducts", fields: [creatorId], references: [id], onDelete: Cascade)
   reviews    Review[]
+  rate_avg   Float?
+  rate_count Int?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
   @@index([creatorId])
   @@index([code])
+  @@index([rate_avg])
+  @@index([rate_count])
 }
 
 model Review {
@@ -72,13 +76,4 @@ model Review {
 
   @@index([productId])
   @@index([userId])
-}
-
-model Test {
-  id        String   @id @default(cuid())
-  text      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("test")
 }

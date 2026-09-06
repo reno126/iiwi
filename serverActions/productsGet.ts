@@ -7,6 +7,7 @@ export interface ProductListItem {
   name: string;
   code: string | null;
   imageUrl: string | null;
+  rate_avg: number | null;
   createdAt: Date;
   _count: {
     reviews: number;
@@ -22,6 +23,7 @@ export async function productsGet(): Promise<ProductListItem[]> {
       name: true,
       code: true,
       imageUrl: true,
+      rate_avg: true,
       createdAt: true,
       _count: {
         select: {
@@ -39,19 +41,21 @@ export async function productsGet(): Promise<ProductListItem[]> {
   return products.map((p) => {
     const totalReviews = p.reviews.length;
     const averageRate =
-      totalReviews > 0
+      p.rate_avg ??
+      (totalReviews > 0
         ? Number(
             (
               p.reviews.reduce((acc, r) => acc + r.rate, 0) / totalReviews
             ).toFixed(1),
           )
-        : null;
+        : null);
 
     return {
       id: p.id,
       name: p.name,
       code: p.code,
       imageUrl: p.imageUrl,
+      rate_avg: p.rate_avg,
       createdAt: p.createdAt,
       _count: {
         reviews: p._count.reviews,

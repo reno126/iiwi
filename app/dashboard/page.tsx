@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export async function DashboardPage() {
-  const t = await prisma.test.findFirst();
+  const productCount = await prisma.product.count();
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8">
@@ -25,9 +25,9 @@ export async function DashboardPage() {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Test połączenia z bazą:{" "}
+            Status połączenia z bazą:{" "}
             <span className="font-semibold text-foreground">
-              {t?.text ?? "Brak danych"}
+              Połączono (Liczba produktów: {productCount})
             </span>
           </p>
         </CardContent>
