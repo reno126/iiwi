@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "command(npm)",
+      "command(npm *)",
+      "command(git)",
+      "command(git *)"
+    ]
+  }
+}
