@@ -27,3 +27,9 @@ export const productCreateSchema = z.object({
 });
 
 export type ProductCreateInput = z.infer<typeof productCreateSchema>;
+
+export const productIdSchema = z.object({
+  id: z.string().min(1, { message: "ID produktu jest wymagane" }),
+});
+
+export type ProductIdInput = z.infer<typeof productIdSchema>;
