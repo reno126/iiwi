@@ -5,17 +5,29 @@ vi.mock("@/lib/auth/helper", () => ({
   auth: vi.fn(),
 }));
 
+const { mockTx } = vi.hoisted(() => {
+  return {
+    mockTx: {
+      review: {
+        create: vi.fn(),
+        aggregate: vi.fn(),
+      },
+      product: {
+        update: vi.fn(),
+      },
+    },
+  };
+});
+
 // Mock prisma db
 vi.mock("@/lib/db/prisma", () => ({
   prisma: {
-    review: {
-      create: vi.fn(),
-    },
+    ...mockTx,
+    $transaction: vi.fn(async (cb: (tx: typeof mockTx) => unknown) => cb(mockTx)),
   },
 }));
 
 import { auth } from "@/lib/auth/helper";
-import { prisma } from "@/lib/db/prisma";
 import { reviewCreate } from "@/serverActions/reviewCreate";
 
 describe("serverActions/reviewCreate", () => {
@@ -34,7 +46,8 @@ describe("serverActions/reviewCreate", () => {
 
     expect(result?.serverError).toBeDefined();
     expect(result?.data).toBeUndefined();
-    expect(prisma.review.create).not.toHaveBeenCalled();
+    expect(mockTx.review.create).not.toHaveBeenCalled();
+    expect(mockTx.product.update).not.toHaveBeenCalled();
   });
 
   it("returns validation errors when input data fails reviewCreateSchema", async () => {
@@ -54,10 +67,11 @@ describe("serverActions/reviewCreate", () => {
     expect(result?.validationErrors?.fieldErrors?.productId).toBeDefined();
     expect(result?.validationErrors?.fieldErrors?.rate).toBeDefined();
     expect(result?.validationErrors?.fieldErrors?.description).toBeDefined();
-    expect(prisma.review.create).not.toHaveBeenCalled();
+    expect(mockTx.review.create).not.toHaveBeenCalled();
+    expect(mockTx.product.update).not.toHaveBeenCalled();
   });
 
-  it("creates review in database when user is authenticated and input is valid", async () => {
+  it("creates review and recalculates rate_avg and rate_count on the fly", async () => {
     const mockUser = { id: "user-abc-123", name: "Jan", email: "jan@example.com" };
     vi.mocked(auth).mockResolvedValueOnce({
       user: mockUser,
@@ -75,7 +89,16 @@ describe("serverActions/reviewCreate", () => {
       updatedAt: new Date(),
     };
 
-    vi.mocked(prisma.review.create).mockResolvedValueOnce(createdReview);
+    mockTx.review.create.mockResolvedValueOnce(createdReview);
+    mockTx.review.aggregate.mockResolvedValueOnce({
+      _avg: { rate: 4.5 },
+      _count: { rate: 3 },
+    });
+    mockTx.product.update.mockResolvedValueOnce({
+      id: "prod-123",
+      rate_avg: 4.5,
+      rate_count: 3,
+    });
 
     const inputData = {
       productId: "prod-123",
@@ -89,12 +112,26 @@ describe("serverActions/reviewCreate", () => {
     expect(result?.validationErrors).toBeUndefined();
     expect(result?.data).toEqual(createdReview);
 
-    expect(prisma.review.create).toHaveBeenCalledWith({
+    expect(mockTx.review.create).toHaveBeenCalledWith({
       data: {
         productId: inputData.productId,
         rate: inputData.rate,
         description: inputData.description,
         userId: mockUser.id,
+      },
+    });
+
+    expect(mockTx.review.aggregate).toHaveBeenCalledWith({
+      where: { productId: inputData.productId },
+      _avg: { rate: true },
+      _count: { rate: true },
+    });
+
+    expect(mockTx.product.update).toHaveBeenCalledWith({
+      where: { id: inputData.productId },
+      data: {
+        rate_avg: 4.5,
+        rate_count: 3,
       },
     });
   });

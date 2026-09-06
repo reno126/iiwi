@@ -18,6 +18,8 @@ export const productWithReviewCreate = safeActionUserCtx
           imageUrl: imageUrl || null,
           code: code || null,
           creatorId: userId,
+          rate_avg: 0,
+          rate_count: 0,
         },
       });
 
@@ -30,6 +32,26 @@ export const productWithReviewCreate = safeActionUserCtx
         },
       });
 
-      return { product, review };
+      const aggregations = await tx.review.aggregate({
+        where: { productId: product.id },
+        _avg: { rate: true },
+        _count: { rate: true },
+      });
+
+      const rate_avg =
+        aggregations._avg.rate !== null
+          ? Number(aggregations._avg.rate.toFixed(2))
+          : 0;
+      const rate_count = aggregations._count.rate;
+
+      const updatedProduct = await tx.product.update({
+        where: { id: product.id },
+        data: {
+          rate_avg,
+          rate_count,
+        },
+      });
+
+      return { product: updatedProduct, review };
     });
   });

@@ -10,14 +10,36 @@ export const reviewCreate = safeActionUserCtx
     const { productId, rate, description } = parsedInput;
     const { userId } = ctx;
 
-    const review = await prisma.review.create({
-      data: {
-        productId,
-        rate,
-        description,
-        userId,
-      },
-    });
+    return await prisma.$transaction(async (tx) => {
+      const review = await tx.review.create({
+        data: {
+          productId,
+          rate,
+          description,
+          userId,
+        },
+      });
 
-    return review;
+      const aggregations = await tx.review.aggregate({
+        where: { productId },
+        _avg: { rate: true },
+        _count: { rate: true },
+      });
+
+      const rate_avg =
+        aggregations._avg.rate !== null
+          ? Number(aggregations._avg.rate.toFixed(2))
+          : 0;
+      const rate_count = aggregations._count.rate;
+
+      await tx.product.update({
+        where: { id: productId },
+        data: {
+          rate_avg,
+          rate_count,
+        },
+      });
+
+      return review;
+    });
   });
