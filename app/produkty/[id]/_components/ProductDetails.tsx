@@ -14,7 +14,7 @@ import {
 import type { ProductWithReviews } from "@/serverActions/productGetById";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ReadMore } from "@/components/ReadMore";
 import { formatPolishDate, formatReviewCount } from "@/lib/formatters";
@@ -69,15 +69,16 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     <div className="mx-auto max-w-4xl space-y-8 py-4">
       {/* Back Navigation */}
       <div>
-        <Button
-          variant="ghost"
-          size="sm"
-          render={<Link href="/produkty" />}
-          className="-ml-2 gap-1.5 text-muted-foreground hover:text-foreground"
+        <Link
+          href="/produkty"
+          className={cn(
+            buttonVariants({ variant: "ghost", size: "sm" }),
+            "-ml-2 gap-1.5 text-muted-foreground hover:text-foreground",
+          )}
         >
           <ChevronLeft className="size-4" />
           Wróć do listy produktów
-        </Button>
+        </Link>
       </div>
 
       {/* Main Product Card: Displays all product fields */}
@@ -196,10 +197,13 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
               {/* Action: Add Review */}
               <div className="pt-2">
-                <Button render={<Link href="/opinie/dodaj" />} className="gap-1.5">
+                <Link
+                  href="/opinie/dodaj"
+                  className={cn(buttonVariants(), "gap-1.5")}
+                >
                   <PlusCircle className="size-4" />
                   Napisz opinię dla tego produktu
-                </Button>
+                </Link>
               </div>
             </div>
           </div>
@@ -219,15 +223,16 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             </Badge>
           </h2>
 
-          <Button
-            variant="outline"
-            size="sm"
-            render={<Link href="/opinie/dodaj" />}
-            className="gap-1.5"
+          <Link
+            href="/opinie/dodaj"
+            className={cn(
+              buttonVariants({ variant: "outline", size: "sm" }),
+              "gap-1.5",
+            )}
           >
             <PlusCircle className="size-3.5" />
             Dodaj opinię
-          </Button>
+          </Link>
         </div>
 
         {/* Empty state when there are no reviews */}
@@ -244,9 +249,12 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               doświadczeniem i pomóż innym w wyborze!
             </p>
             <div className="mt-5">
-              <Button render={<Link href="/opinie/dodaj" />} size="sm">
+              <Link
+                href="/opinie/dodaj"
+                className={buttonVariants({ size: "sm" })}
+              >
                 Bądź pierwszą osobą, która doda recenzję
-              </Button>
+              </Link>
             </div>
           </Card>
         ) : (

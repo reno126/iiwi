@@ -4,7 +4,9 @@
       "command(npm)",
       "command(npm *)",
       "command(git)",
-      "command(git *)"
+      "command(git *)",
+      "command(npx)",
+      "command(npx *)"
     ]
   }
 }

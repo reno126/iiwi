@@ -3,7 +3,8 @@ import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 import { productsGet } from "@/serverActions/productsGet";
 import { ProductsList } from "./_components/ProductsList";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/shadcn/utils";
 
 export const metadata: Metadata = {
   title: "Produkty | TrueReview",
@@ -26,13 +27,16 @@ export default async function ProductsPage() {
           </p>
         </div>
 
-        <Button
-          render={<Link href="/opinie/dodaj" />}
-          className="shrink-0 gap-1.5 self-start sm:self-center"
+        <Link
+          href="/opinie/dodaj"
+          className={cn(
+            buttonVariants(),
+            "shrink-0 gap-1.5 self-start sm:self-center",
+          )}
         >
           <PlusCircle className="size-4" />
           Dodaj opinię
-        </Button>
+        </Link>
       </div>
 
       {/* Product List: Always renders 1 product per row on each resolution */}

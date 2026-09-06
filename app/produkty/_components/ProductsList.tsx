@@ -3,8 +3,9 @@ import { Package, MessageSquare, Calendar, Star, ArrowRight } from "lucide-react
 import type { ProductListItem } from "@/serverActions/productsGet";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { formatPolishDate, formatReviewCount } from "@/lib/formatters";
+import { cn } from "@/lib/shadcn/utils";
 
 export interface ProductsListProps {
   products: ProductListItem[];
@@ -23,9 +24,9 @@ export function ProductsList({ products }: ProductsListProps) {
           pierwszy produkt.
         </p>
         <div className="mt-6">
-          <Button render={<Link href="/opinie/dodaj" />}>
+          <Link href="/opinie/dodaj" className={buttonVariants()}>
             Dodaj produkt i opinię
-          </Button>
+          </Link>
         </div>
       </Card>
     );
@@ -97,15 +98,16 @@ export function ProductsList({ products }: ProductsListProps) {
 
               {/* Action Button */}
               <div className="flex items-center self-end sm:self-center shrink-0 pt-2 sm:pt-0">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  render={<Link href={`/produkty/${product.id}`} />}
-                  className="gap-1.5 group-hover:border-primary group-hover:text-primary transition-colors"
+                <Link
+                  href={`/produkty/${product.id}`}
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "sm" }),
+                    "gap-1.5 group-hover:border-primary group-hover:text-primary transition-colors",
+                  )}
                 >
                   Zobacz szczegóły
                   <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
-                </Button>
+                </Link>
               </div>
             </div>
           </CardContent>
