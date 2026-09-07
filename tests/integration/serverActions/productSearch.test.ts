@@ -38,6 +38,7 @@ describe("serverActions/productSearch", () => {
         creatorId: "user-1",
         productUrl: null,
         imageUrl: null,
+        shopId: null,
         rate_avg: 0,
         rate_count: 0,
         createdAt: new Date(),

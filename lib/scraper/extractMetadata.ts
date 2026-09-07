@@ -268,7 +268,7 @@ function parseSrcset(srcsetValue: string | undefined | null): string[] {
  * Zbiera wszystkie potencjalne adresy URL obrazka z elementu DOM i jego kontenerów
  * (uwzględniając zoom, lazy-loading, srcset i picture/source).
  */
-function extractElementImageCandidates($: cheerio.CheerioAPI, elem: cheerio.Element): string[] {
+function extractElementImageCandidates($: cheerio.CheerioAPI, elem: Parameters<cheerio.CheerioAPI>[0]): string[] {
   const $el = $(elem);
   const candidates: (string | undefined)[] = [];
 
