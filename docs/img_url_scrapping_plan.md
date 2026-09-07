@@ -11,7 +11,10 @@ Dokument opisuje plan wdrożenia funkcjonalności automatycznego pobierania adre
   1. Użytkownik wkleja link do sklepu (np. `https://www.action.com/pl-pl/p/3222380/ladowarka-scienna-usb-c-sologic/`).
   2. Klika przycisk pobierania - "Wyciągnij zdjęcie produktu"
   3. Pojawia się wskaźnik ładowania (spinner).
-  4. Scraper pobiera stronę, wyciąga URL głównego zdjęcia oraz opcjonalnie sugeruje nazwę produktu oraz kod produktu.
+  4. Scraper pobiera stronę, wyciąga: 
+      4a. URL głównego zdjęcia (minimum aby pokazać sukces) 
+      4b. nazwę produktu (super, jeśli się uda, nie to trudno, pokażemy pole do wpisania samodzielnego)
+      4c. kod produktu (super, jeśli się uda, nie to trudno, pokażemy pole do wpisania samodzielnego)
   5. URL zostaje automatycznie wpisany do pola `imageUrl`, a w formularzu wyświetla się podgląd miniatury z możliwością usunięcia lub zmiany.
   6. W przypadku konieczności uruchomienia Tier 2, zmienia komunikat dla użytkownika "Zajmie to chwilę dłużej, ale nadal pracuję nad tym..."
   7. W przypadku blokady strony lub błędu, formularz wyświetla czytelny, nieblokujący komunikat i pozwala na ręczne wklejenie linku.
@@ -49,7 +52,7 @@ sequenceDiagram
     alt Status 200 OK
         Ext-->>SA: Zwraca HTML
         SA->>S: Parsowanie HTML (OpenGraph / JSON-LD / DOM)
-        S-->>SA: Znaleziono imageUrl (+ opcjonalnie title)
+        S-->>SA: Znaleziono imageUrl (+ opcjonalnie name, code)
     else Status 403 / 503 / Cloudflare Challenge / Timeout
         Ext-->>SA: Błąd blokady lub brak danych
     end
@@ -62,13 +65,13 @@ sequenceDiagram
         ZR->>Ext: Pobranie przez rotowane residential proxy + headless browser
         ZR-->>SA: Zwraca wyrenderowany HTML
         SA->>S: Parsowanie HTML
-        S-->>SA: Znaleziono imageUrl (+ opcjonalnie title)
+        S-->>SA: Znaleziono imageUrl (+ opcjonalnie name, code)
     end
     end
 
-    alt Sukces
-        SA-->>F: { success: true, data: { imageUrl, title? } }
-        F->>F: setValue("imageUrl", data.imageUrl)<br/>Wyświetlenie podglądu miniatury
+    alt Sukces (znaleziono imageUrl - pkt 4a)
+        SA-->>F: { success: true, data: { imageUrl, name?, code? } }
+        F->>F: setValue("imageUrl", data.imageUrl)<br/>Opcjonalne uzupełnienie pustych pól name i code<br/>Wyświetlenie podglądu miniatury
     else Błąd całkowity (brak zdjęcia / błąd obu warstw)
         SA-->>F: { success: false, error: "Nie udało się pobrać zdjęcia..." }
         F->>U: Wyświetlenie delikatnego ostrzeżenia + zachowanie możliwości wpisania ręcznego
@@ -77,9 +80,14 @@ sequenceDiagram
 
 ---
 
-## 3. Hierarchia Ekstrakcji Danych (Heurystyka Pobierania Głównego Zdjęcia)
+## 3. Hierarchia Ekstrakcji Danych (Heurystyka Pobierania Danych Produktu)
 
-Gdy silnik otrzyma kod HTML (z Tier 1 lub Tier 2), następuje analiza dokumentu za pomocą lekkiej biblioteki `cheerio` według precyzyjnej hierarchii priorytetów:
+Gdy silnik otrzyma kod HTML (z Tier 1 lub Tier 2), następuje analiza dokumentu za pomocą lekkiej biblioteki `cheerio`. Zgodnie z punktami **4a, 4b i 4c**, ekstrakcja obejmuje trzy poziomy danych:
+
+---
+
+### 3.1. Pobieranie Głównego Zdjęcia Produktu (Warunek krytyczny / Sukces – pkt 4a)
+*Pobranie poprawnego URL zdjęcia jest warunkiem koniecznym uznania całej operacji za sukces.*
 
 1. **Priorytet 1: Meta tagi Open Graph oraz Twitter Card**
    - `meta[property="og:image"]` (oraz `og:image:secure_url`)
@@ -88,7 +96,7 @@ Gdy silnik otrzyma kod HTML (z Tier 1 lub Tier 2), następuje analiza dokumentu 
 
 2. **Priorytet 2: Dane strukturalne Schema.org (JSON-LD)**
    - Wyszukanie skryptów `<script type="application/ld+json">`.
-   - Weryfikacja węzłów o typie `@type: "Product"`.
+   - Weryfikacja węzłów o typie `@type: "Product"` (obsługa również struktury `@graph`).
    - Odczyt pola `image` (obsługa formatów: string, tablica stringów `images[0]`, obiekt `ImageObject` z polem `url` lub `contentUrl`).
    - *Uzasadnienie:* Standard Google Rich Snippets / Google Shopping — zazwyczaj wskazuje bezpośrednie zdjęcie produktu w pełnej rozdzielczości.
 
@@ -101,12 +109,74 @@ Gdy silnik otrzyma kod HTML (z Tier 1 lub Tier 2), następuje analiza dokumentu 
      - `[data-gallery] img`
      - `.product-image img`, `.product-gallery img`, `.product__media img`
      - `main picture img`
-   - Filtracja: odrzucanie małych ikonek, plików `.svg`, trackerów 1x1 px, grafik zawierających w nazwie `logo`, `banner`, `icon`, `spinner`.
+   - Filtracja: odrzucanie małych ikonek (< 100px), plików `.svg`, trackerów 1x1 px, grafik zawierających w nazwie `logo`, `banner`, `icon`, `spinner`.
 
 5. **Normalizacja i Walidacja Adresu URL:**
    - Rozwijanie linków względnych do bezwzględnych: `new URL(src, baseUrl).href`.
    - Obsługa adresów protocol-relative: zamiana `//cdn.sklep.pl/...` na `https://cdn.sklep.pl/...`.
    - Walidacja protokołu (`http://` lub `https://`).
+
+---
+
+### 3.2. Pobieranie Nazwy Produktu (Opcjonalne / Best-Effort – pkt 4b)
+*Pobierana pomocniczo. Jeśli się uda – uzupełnia pole; jeśli nie – użytkownik wpisuje nazwę ręcznie.*
+
+1. **Priorytet 1: Dane strukturalne Schema.org (JSON-LD)**
+   - Odczyt pola `name` z węzła `@type: "Product"`.
+   - *Zaleta:* Zazwyczaj zawiera czystą, oficjalną nazwę produktu bez marketingowych dopisków i nazwy sklepu.
+
+2. **Priorytet 2: Mikrodane HTML5**
+   - Wyszukanie elementu `[itemprop="name"]` (np. `<h1>` lub `<span>` w sekcji produktu).
+
+3. **Priorytet 3: Główny nagłówek strony `<h1>`**
+   - Pobranie tekstu z pierwszego elementu `<h1>` znajdującego się wewnątrz `<main>` lub kontenera produktu.
+
+4. **Priorytet 4: Meta tagi Open Graph / Twitter (`og:title`, `twitter:title`)**
+   - Zastosowanie funkcji czyszczącej odcinającej sufiksy sklepowe (np. ` - Sklep Online`, ` | Action PL`, ` w Media Expert`).
+
+5. **Priorytet 5: Tag `<title>` strony**
+   - Fallback z analogicznym oczyszczeniem z nazwy domeny/sklepu.
+
+*Zachowanie w UI:* Uzupełnia pole `name` tylko wtedy, gdy jest ono puste (aby nie nadpisać danych wpisanych wcześniej przez użytkownika). Maksymalnie 100 znaków (zgodnie ze schematem bazy).
+
+---
+
+### 3.3. Pobieranie Kodu Produktu / EAN / SKU (Opcjonalne / Best-Effort – pkt 4c)
+*Pobierany pomocniczo. Jeśli się uda – uzupełnia pole `code`; jeśli nie – pole pozostaje puste do ewentualnego ręcznego uzupełnienia.*
+
+1. **Priorytet 1: Dane strukturalne Schema.org (JSON-LD)**
+   - W węźle `@type: "Product"` przeszukiwane są kolejno pola:
+     - `gtin13`, `gtin`, `gtin8`, `gtin12`, `gtin14` (standardowe kody kreskowe EAN/UPC).
+     - `sku` (Stock Keeping Unit).
+     - `mpn` (Manufacturer Part Number).
+     - `productID`.
+
+2. **Priorytet 2: Mikrodane HTML5**
+   - Selektory: `[itemprop="gtin13"]`, `[itemprop="gtin"]`, `[itemprop="sku"]`, `[itemprop="mpn"]`.
+
+3. **Priorytet 3: Wzorce tabeli specyfikacji technicznej w DOM**
+   - Przeszukanie tabel i list parametrów (`<dl>`, `<table>`, `.specifications`, `.product-attributes`):
+     - Wyszukanie wierszy/etykiet zawierających słowa kluczowe: `EAN`, `Kod produktu`, `Symbol`, `Numer artykułu`, `SKU`, `Kod producenta`.
+     - Pobranie odpowiadającej im wartości tekstowej.
+
+4. **Priorytet 4: Ekstrakcja identyfikatora z adresu URL**
+   - Wiele sklepów koduje unikalny kod produktu bezpośrednio w strukturze URL:
+     - Przykład Action.com: `.../p/3222380/...` -> kod `3222380`.
+     - Wzorce typu `/p/([0-9A-Za-z_-]+)/` lub `/(?:id|kod)-([0-9A-Za-z_-]+)`.
+
+*Zachowanie w UI:* Uzupełnia pole `code` (maksymalnie 24 znaki zgodnie ze schematem bazy danych).
+
+---
+
+### 3.4. Kontrakt Zwracanych Danych (TypeScript Interface)
+
+```typescript
+export interface ScrapedProductMetadata {
+  imageUrl: string;      // Wymagane (warunek sukcesu 4a)
+  name?: string | null;  // Opcjonalne (4b - nazwa produktu)
+  code?: string | null;  // Opcjonalne (4c - kod produktu / EAN / SKU)
+}
+```
 
 ---
 
