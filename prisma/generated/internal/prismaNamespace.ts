@@ -400,6 +400,7 @@ export const ModelName = {
   User: 'User',
   Account: 'Account',
   Product: 'Product',
+  Shop: 'Shop',
   Review: 'Review'
 } as const
 
@@ -416,7 +417,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "account" | "product" | "review"
+    modelProps: "user" | "account" | "product" | "shop" | "review"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -642,6 +643,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Shop: {
+      payload: Prisma.$ShopPayload<ExtArgs>
+      fields: Prisma.ShopFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ShopFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ShopFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopPayload>
+        }
+        findFirst: {
+          args: Prisma.ShopFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ShopFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopPayload>
+        }
+        findMany: {
+          args: Prisma.ShopFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopPayload>[]
+        }
+        create: {
+          args: Prisma.ShopCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopPayload>
+        }
+        createMany: {
+          args: Prisma.ShopCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ShopCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopPayload>[]
+        }
+        delete: {
+          args: Prisma.ShopDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopPayload>
+        }
+        update: {
+          args: Prisma.ShopUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopPayload>
+        }
+        deleteMany: {
+          args: Prisma.ShopDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ShopUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ShopUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopPayload>[]
+        }
+        upsert: {
+          args: Prisma.ShopUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ShopPayload>
+        }
+        aggregate: {
+          args: Prisma.ShopAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateShop>
+        }
+        groupBy: {
+          args: Prisma.ShopGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ShopGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ShopCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ShopCountAggregateOutputType> | number
+        }
+      }
+    }
     Review: {
       payload: Prisma.$ReviewPayload<ExtArgs>
       fields: Prisma.ReviewFieldRefs
@@ -794,6 +869,7 @@ export const ProductScalarFieldEnum = {
   imageUrl: 'imageUrl',
   code: 'code',
   creatorId: 'creatorId',
+  shopId: 'shopId',
   rate_avg: 'rate_avg',
   rate_count: 'rate_count',
   createdAt: 'createdAt',
@@ -801,6 +877,17 @@ export const ProductScalarFieldEnum = {
 } as const
 
 export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
+
+
+export const ShopScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  logo: 'logo',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ShopScalarFieldEnum = (typeof ShopScalarFieldEnum)[keyof typeof ShopScalarFieldEnum]
 
 
 export const ReviewScalarFieldEnum = {
@@ -1056,6 +1143,7 @@ export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   account?: Prisma.AccountOmit
   product?: Prisma.ProductOmit
+  shop?: Prisma.ShopOmit
   review?: Prisma.ReviewOmit
 }
 

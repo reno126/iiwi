@@ -24,6 +24,10 @@ export const productCreateSchema = z.object({
     .max(24, { message: "Kod produktu nie może przekraczać 24 znaków" })
     .optional()
     .or(z.literal("")),
+  shopId: z
+    .string()
+    .optional()
+    .or(z.literal("")),
 });
 
 export type ProductCreateInput = z.infer<typeof productCreateSchema>;

@@ -50,6 +50,8 @@ model Product {
   code       String?  @db.VarChar(24)
   creatorId  String   @map("creator_id")
   creator    User     @relation("CreatedProducts", fields: [creatorId], references: [id], onDelete: Cascade)
+  shopId     String?  @map("shop_id")
+  shop       Shop?    @relation(fields: [shopId], references: [id], onDelete: SetNull)
   reviews    Review[]
   rate_avg   Float
   rate_count Int
@@ -57,9 +59,21 @@ model Product {
   updatedAt  DateTime @updatedAt
 
   @@index([creatorId])
+  @@index([shopId])
   @@index([code])
   @@index([rate_avg])
   @@index([rate_count])
+}
+
+model Shop {
+  id        String    @id @default(cuid())
+  name      String?   @unique @db.VarChar(24)
+  logo      String?   @unique
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("shop")
 }
 
 model Review {

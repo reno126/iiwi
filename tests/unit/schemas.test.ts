@@ -4,6 +4,7 @@ import { loginSchema } from "@/schemas/login";
 import { productCreateSchema } from "@/schemas/product";
 import { reviewCreateSchema } from "@/schemas/review";
 import { productScrapeSchema } from "@/schemas/productScrape";
+import { shopSchema, shopCreateSchema } from "@/schemas/shop";
 
 describe("schemas/register", () => {
   it("validates correct registration data", () => {
@@ -331,5 +332,79 @@ describe("schemas/productScrape", () => {
     };
     const result = productScrapeSchema.safeParse(invalid);
     expect(result.success).toBe(false);
+  });
+});
+
+describe("schemas/shop", () => {
+  it("validates correct shop data", () => {
+    const valid = {
+      id: "shop-123",
+      name: "Media Expert",
+      logo: "https://example.com/logo.png",
+    };
+    const result = shopSchema.safeParse(valid);
+    expect(result.success).toBe(true);
+  });
+
+  it("validates shop with nullable/optional fields", () => {
+    const valid = {
+      id: "shop-123",
+      name: null,
+      logo: null,
+    };
+    expect(shopSchema.safeParse(valid).success).toBe(true);
+    expect(shopSchema.safeParse({ id: "shop-123" }).success).toBe(true);
+  });
+
+  it("fails when shop name is shorter than 3 characters", () => {
+    const invalid = {
+      id: "shop-123",
+      name: "AB",
+    };
+    const result = shopSchema.safeParse(invalid);
+    expect(result.success).toBe(false);
+  });
+
+  it("fails when shop name exceeds 24 characters", () => {
+    const invalid = {
+      id: "shop-123",
+      name: "Bardzo Długa Nazwa Sklepu Przekraczająca 24",
+    };
+    const result = shopSchema.safeParse(invalid);
+    expect(result.success).toBe(false);
+  });
+
+  it("validates shopCreateSchema correctly", () => {
+    expect(
+      shopCreateSchema.safeParse({
+        name: "Action",
+        logo: "https://example.com/logo.svg",
+      }).success
+    ).toBe(true);
+
+    expect(
+      shopCreateSchema.safeParse({
+        name: null,
+        logo: null,
+      }).success
+    ).toBe(true);
+
+    expect(
+      shopCreateSchema.safeParse({
+        name: "A",
+      }).success
+    ).toBe(false);
+  });
+});
+
+describe("schemas/product - shopId field", () => {
+  it("allows optional shopId as string, empty string, or undefined", () => {
+    const base = {
+      name: "Testowy Produkt",
+    };
+
+    expect(productCreateSchema.safeParse({ ...base, shopId: "shop-1" }).success).toBe(true);
+    expect(productCreateSchema.safeParse({ ...base, shopId: "" }).success).toBe(true);
+    expect(productCreateSchema.safeParse({ ...base }).success).toBe(true);
   });
 });

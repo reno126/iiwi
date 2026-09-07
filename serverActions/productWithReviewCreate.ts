@@ -7,7 +7,8 @@ import { productWithReviewCreateSchema } from "@/schemas/productWithReview";
 export const productWithReviewCreate = safeActionUserCtx
   .inputSchema(productWithReviewCreateSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const { name, productUrl, imageUrl, code, rate, description } = parsedInput;
+    const { name, productUrl, imageUrl, code, shopId, rate, description } =
+      parsedInput;
     const { userId } = ctx;
 
     return await prisma.$transaction(async (tx) => {
@@ -17,6 +18,7 @@ export const productWithReviewCreate = safeActionUserCtx
           productUrl: productUrl || null,
           imageUrl: imageUrl || null,
           code: code || null,
+          shopId: shopId || null,
           creatorId: userId,
           rate_avg: 0,
           rate_count: 0,

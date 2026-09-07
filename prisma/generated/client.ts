@@ -57,6 +57,11 @@ export type Account = Prisma.AccountModel
  */
 export type Product = Prisma.ProductModel
 /**
+ * Model Shop
+ * 
+ */
+export type Shop = Prisma.ShopModel
+/**
  * Model Review
  * 
  */
