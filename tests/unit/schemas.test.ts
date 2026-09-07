@@ -3,6 +3,7 @@ import { registerSchema } from "@/schemas/register";
 import { loginSchema } from "@/schemas/login";
 import { productCreateSchema } from "@/schemas/product";
 import { reviewCreateSchema } from "@/schemas/review";
+import { productScrapeSchema } from "@/schemas/productScrape";
 
 describe("schemas/register", () => {
   it("validates correct registration data", () => {
@@ -296,5 +297,39 @@ describe("schemas/review", () => {
       const descError = result.error.format().description?._errors;
       expect(descError).toContain("Treść recenzji nie może przekraczać 5000 znaków");
     }
+  });
+});
+
+describe("schemas/productScrape", () => {
+  it("validates valid HTTP and HTTPS product URLs", () => {
+    const valid = {
+      productUrl: "https://www.action.com/pl-pl/p/3222380/ladowarka",
+    };
+    const result = productScrapeSchema.safeParse(valid);
+    expect(result.success).toBe(true);
+  });
+
+  it("fails when productUrl contains whitespace", () => {
+    const invalid = {
+      productUrl: "https://example.com/item space",
+    };
+    const result = productScrapeSchema.safeParse(invalid);
+    expect(result.success).toBe(false);
+  });
+
+  it("fails when productUrl is not a URL", () => {
+    const invalid = {
+      productUrl: "invalid-url",
+    };
+    const result = productScrapeSchema.safeParse(invalid);
+    expect(result.success).toBe(false);
+  });
+
+  it("fails when protocol is not http or https", () => {
+    const invalid = {
+      productUrl: "ftp://example.com/item",
+    };
+    const result = productScrapeSchema.safeParse(invalid);
+    expect(result.success).toBe(false);
   });
 });
