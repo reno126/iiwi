@@ -40,6 +40,9 @@ export const productScrapeMetadata = safeActionUserCtx
     let tier1Html: string | null = null;
     let shouldTryTier2 = false;
 
+    console.log(`[Scraper] Starting Tier 1 direct fetch for: ${productUrl}`);
+    const tier1Start = Date.now();
+
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
@@ -52,39 +55,72 @@ export const productScrapeMetadata = safeActionUserCtx
       });
 
       clearTimeout(timeoutId);
+      const tier1Duration = Date.now() - tier1Start;
+
+      console.log(
+        `[Scraper] Tier 1 responded with HTTP ${response.status} in ${tier1Duration}ms for: ${productUrl}`
+      );
 
       if (response.ok) {
         tier1Html = await response.text();
       } else if (response.status === 403 || response.status === 503 || response.status === 429) {
+        console.log(
+          `[Scraper] Tier 1 received blocking status (${response.status}). Flagging for Tier 2 fallback.`
+        );
         shouldTryTier2 = true;
       }
-    } catch {
+    } catch (err) {
+      const tier1Duration = Date.now() - tier1Start;
+      console.log(
+        `[Scraper] Tier 1 network error/timeout after ${tier1Duration}ms:`,
+        err instanceof Error ? err.message : err
+      );
       // Błąd sieci lub timeout w Tier 1 – kwalifikuje do próby Tier 2
       shouldTryTier2 = true;
     }
 
     // Próba ekstrakcji z HTML uzyskanego w Tier 1
     if (tier1Html) {
+      console.log(
+        `[Scraper] Tier 1 returned HTML (${tier1Html.length} chars). Attempting metadata extraction...`
+      );
       const metadata = extractProductMetadata(tier1Html, productUrl);
       if (metadata && metadata.imageUrl) {
+        console.log(`[Scraper] Tier 1 extraction success:`, metadata);
         return metadata;
       }
+      console.log(
+        `[Scraper] Tier 1 HTML did not yield a valid product image. Flagging for Tier 2 fallback.`
+      );
       // Jeśli Tier 1 zwrócił HTML, ale nie znaleziono zdjęcia (np. strona renderowana przez SPA/JS)
       shouldTryTier2 = true;
     }
 
     // 3. Tier 2: ZenRows Fallback (headless browser + residential proxy)
     if (shouldTryTier2 && process.env.ZENROWS_API_KEY) {
+      console.log(`[Scraper] Starting Tier 2 (ZenRows) fallback for: ${productUrl}`);
       const tier2Html = await fetchWithZenRows(productUrl, { timeoutMs: 25000 });
       if (tier2Html) {
+        console.log(
+          `[Scraper] ZenRows returned HTML (${tier2Html.length} chars). Attempting metadata extraction...`
+        );
         const metadata = extractProductMetadata(tier2Html, productUrl);
         if (metadata && metadata.imageUrl) {
+          console.log(`[Scraper] Tier 2 extraction success:`, metadata);
           return metadata;
         }
+        console.warn(
+          `[Scraper] Tier 2 extraction failed: ZenRows returned 200 OK HTML, but extractProductMetadata found no valid imageUrl for: ${productUrl}`
+        );
+      } else {
+        console.warn(`[Scraper] Tier 2 (ZenRows) returned null or empty response for: ${productUrl}`);
       }
+    } else if (shouldTryTier2 && !process.env.ZENROWS_API_KEY) {
+      console.warn(`[Scraper] Tier 2 needed, but ZENROWS_API_KEY is not configured.`);
     }
 
     // 4. Błąd całkowity – nie udało się pobrać zdjęcia z żadnego źródła
+    console.warn(`[Scraper] Scrape fully failed for: ${productUrl}`);
     returnServerError(
       "Nie udało się automatycznie pobrać zdjęcia z podanego linku. Możesz wkleić link do zdjęcia ręcznie."
     );

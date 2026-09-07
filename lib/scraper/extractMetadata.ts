@@ -241,6 +241,82 @@ function extractCodeFromUrl(url: string): string | null {
 }
 
 /**
+ * Parsuje atrybuty typu srcset i data-srcset, zwracając listę kandydatów URL.
+ * Jeśli zdefiniowano wiele rozdzielczości (np. 424w, 1000w), większe wersje są na początku.
+ */
+function parseSrcset(srcsetValue: string | undefined | null): string[] {
+  if (!srcsetValue || typeof srcsetValue !== "string") return [];
+
+  const candidates: string[] = [];
+  const entries = srcsetValue.split(",");
+
+  for (const entry of entries) {
+    const trimmed = entry.trim();
+    if (!trimmed) continue;
+    // Format srcset: "https://domena.pl/img.jpg 424w" lub "https://domena.pl/img.jpg"
+    const urlPart = trimmed.split(/\s+/)[0];
+    if (urlPart) {
+      candidates.push(urlPart);
+    }
+  }
+
+  // W srcset większe rozdzielczości są zazwyczaj na końcu – odwracamy, aby preferować wyższą jakość
+  return candidates.reverse();
+}
+
+/**
+ * Zbiera wszystkie potencjalne adresy URL obrazka z elementu DOM i jego kontenerów
+ * (uwzględniając zoom, lazy-loading, srcset i picture/source).
+ */
+function extractElementImageCandidates($: cheerio.CheerioAPI, elem: cheerio.Element): string[] {
+  const $el = $(elem);
+  const candidates: (string | undefined)[] = [];
+
+  // 1. Atrybuty wysokiej rozdzielczości i zoomu (np. na elemencie lub jego rodzicu w galeriach)
+  candidates.push($el.attr("data-zoom-bg"));
+  candidates.push($el.attr("data-zoom-image"));
+  candidates.push($el.attr("data-large"));
+  candidates.push($el.attr("data-high-res-src"));
+
+  const parentZoomBg = $el.closest("[data-zoom-bg]").attr("data-zoom-bg");
+  if (parentZoomBg) candidates.push(parentZoomBg);
+
+  const parentZoomImg = $el.closest("[data-zoom-image]").attr("data-zoom-image");
+  if (parentZoomImg) candidates.push(parentZoomImg);
+
+  // 2. Responsive srcset na elemencie (data-srcset oraz srcset)
+  const dataSrcsetCandidates = parseSrcset($el.attr("data-srcset"));
+  candidates.push(...dataSrcsetCandidates);
+
+  const srcsetCandidates = parseSrcset($el.attr("srcset"));
+  candidates.push(...srcsetCandidates);
+
+  // 3. Atrybuty lazy loading
+  candidates.push($el.attr("data-src"));
+  candidates.push($el.attr("data-original"));
+
+  // 4. Standardowy atrybut src
+  candidates.push($el.attr("src"));
+
+  // 5. Atrybuty content / href (dla meta lub link)
+  candidates.push($el.attr("content"));
+  candidates.push($el.attr("href"));
+
+  // 6. Jeśli element jest wewnątrz <picture>, zbadaj powiązane tagi <source>
+  const $parentPicture = $el.parent("picture");
+  if ($parentPicture.length > 0) {
+    $parentPicture.find("source").each((_, source) => {
+      const $source = $(source);
+      candidates.push(...parseSrcset($source.attr("data-srcset")));
+      candidates.push(...parseSrcset($source.attr("srcset")));
+      candidates.push($source.attr("src"));
+    });
+  }
+
+  return candidates.filter((c): c is string => Boolean(c && typeof c === "string" && c.trim().length > 0));
+}
+
+/**
  * Główna funkcja wyciągająca metadane produktu z kodu HTML.
  */
 export function extractProductMetadata(html: string, pageUrl: string): ScrapedProductMetadata | null {
@@ -273,38 +349,56 @@ export function extractProductMetadata(html: string, pageUrl: string): ScrapedPr
     imageUrl = jsonLdData.imageUrl;
   }
 
-  // Priorytet 3: Mikrodane HTML5 itemprop="image"
+  // Priorytet 3: Mikrodane HTML5 itemprop="image" (pełna analiza atrybutów, srcset i zoom)
   if (!imageUrl) {
-    const itempropElem = $('[itemprop="image"]').first();
-    const cand =
-      itempropElem.attr("src") ||
-      itempropElem.attr("content") ||
-      itempropElem.attr("href");
-    const normalized = normalizeUrl(cand, pageUrl);
-    if (normalized && isValidProductImage(normalized)) {
-      imageUrl = normalized;
+    const itempropElems = $('[itemprop="image"]').toArray();
+    for (const elem of itempropElems) {
+      const candidates = extractElementImageCandidates($, elem);
+      for (const cand of candidates) {
+        const normalized = normalizeUrl(cand, pageUrl);
+        if (normalized && isValidProductImage(normalized)) {
+          imageUrl = normalized;
+          break;
+        }
+      }
+      if (imageUrl) break;
     }
   }
 
   // Priorytet 4: Heurystyka DOM selektorów e-commerce
   if (!imageUrl) {
     const domSelectors = [
+      '[data-zoom-bg]',
+      '[data-zoom-image]',
       '[data-testid*="product-image"] img',
       '[data-gallery] img',
+      '.carousel-product img',
+      '.carousel-product [data-zoom-bg]',
       '.product-image img',
       '.product-gallery img',
       '.product__media img',
+      '.product-media img',
+      '.pdp-image img, .pdp-main-image img',
+      '.product-detail img, .product-details img',
+      '.swiper-slide.carousel-product__item img',
+      'picture img',
       'main picture img',
       'article img',
     ];
 
     for (const selector of domSelectors) {
-      const el = $(selector).first();
-      const cand = el.attr("src") || el.attr("data-src") || el.attr("srcset")?.split(" ")[0];
-      const normalized = normalizeUrl(cand, pageUrl);
-      if (normalized && isValidProductImage(normalized)) {
-        imageUrl = normalized;
-        break;
+      if (imageUrl) break;
+      const elements = $(selector).toArray();
+      for (const elem of elements) {
+        const candidates = extractElementImageCandidates($, elem);
+        for (const cand of candidates) {
+          const normalized = normalizeUrl(cand, pageUrl);
+          if (normalized && isValidProductImage(normalized)) {
+            imageUrl = normalized;
+            break;
+          }
+        }
+        if (imageUrl) break;
       }
     }
   }
@@ -322,16 +416,27 @@ export function extractProductMetadata(html: string, pageUrl: string): ScrapedPr
     name = jsonLdData.name;
   }
 
-  // Priorytet 2: Mikrodane itemprop="name"
+  // Priorytet 2: Główny nagłówek <h1> lub dedykowane klasy tytułu produktu
   if (!name) {
-    const itempropName = $('[itemprop="name"]').first().text();
-    name = cleanProductName(itempropName);
+    const h1Text = $(
+      "main h1, article h1, h1, .product-name, .product-title, .pdp-title"
+    ).first().text();
+    name = cleanProductName(h1Text);
   }
 
-  // Priorytet 3: Główny nagłówek <h1>
+  // Priorytet 3: Mikrodane HTML5 itemprop="name" (preferowany kontekst Product lub ostatni okruszek)
   if (!name) {
-    const h1Text = $("main h1, article h1, h1").first().text();
-    name = cleanProductName(h1Text);
+    const productScopeName = $('[itemscope][itemtype*="Product"] [itemprop="name"]').first().text();
+    if (productScopeName) {
+      name = cleanProductName(productScopeName);
+    } else {
+      const allItempropNames = $('[itemprop="name"]').toArray();
+      if (allItempropNames.length > 0) {
+        // W okruszkach chleba (BreadcrumbList) ostatni element to nazwa produktu, pierwszy to sklep
+        const lastItempropName = $(allItempropNames[allItempropNames.length - 1]).text();
+        name = cleanProductName(lastItempropName);
+      }
+    }
   }
 
   // Priorytet 4: Meta tagi og:title / twitter:title
@@ -359,7 +464,7 @@ export function extractProductMetadata(html: string, pageUrl: string): ScrapedPr
   // Priorytet 2: Mikrodane HTML5
   if (!code) {
     const itempropCode = $(
-      '[itemprop="gtin13"], [itemprop="gtin"], [itemprop="sku"], [itemprop="mpn"]'
+      '[itemprop="gtin13"], [itemprop="gtin"], [itemprop="sku"], [itemprop="mpn"], [itemprop="productID"]'
     ).first();
     const rawVal = itempropCode.attr("content") || itempropCode.text();
     code = cleanProductCode(rawVal);
