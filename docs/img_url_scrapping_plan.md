@@ -243,20 +243,23 @@ Ponieważ serwer wykonuje zapytanie HTTP pod adres podany przez użytkownika, ni
 5. **`serverActions/productScrapeMetadata.ts`**
    - Akcja serwerowa Next.js oparta o `safeActionUserCtx`.
    - Orkiestracja hybrydowa:
-     1. Walidacja SSRF.
-     2. Próba pobrania bezpośredniego przez `fetch()` z nagłówkami imitującymi przeglądarkę.
-     3. W razie błędu 403/503 lub braku zdjęcia: próba przez ZenRows.
-     4. Zwrot obiektu `{ imageUrl: string | null; title?: string | null }`.
+     1. Walidacja SSRF (zwracanie czytelnego komunikatu w razie niebezpiecznego URL).
+     2. Próba pobrania bezpośredniego przez `fetch()` z nagłówkami imitującymi przeglądarkę (Tier 1).
+     3. W razie błędu 403/503 lub braku zdjęcia: próba przez ZenRows (Tier 2).
+     4. Zwrot obiektu `{ imageUrl: string; name?: string | null; code?: string | null }`.
 
 ### 6.2. Pliki do Modyfikacji
 
 1. **`package.json`**
    - Dodanie zależności `cheerio` (lekki, szybki parser DOM dla środowisk serwerowych Node.js/Vercel).
 2. **`components/products/ProductFields.tsx`**
-   - Dodanie przycisku pobierania danych z URL (ikona `Sparkles` lub `Download` z lucide-react) obok pola `productUrl`.
+   - Dodanie przycisku pobierania danych z URL z etykietą **"Wyciągnij zdjęcie produktu"** (ikona `Sparkles` lub `Download` z lucide-react) obok pola `productUrl`.
    - Obsługa stanu ładowania z użyciem React 19 `useTransition` (zgodnie z regułami projektu dotyczącymi async triggers).
+   - Wyświetlenie komunikatu dla użytkownika: *"Zajmie to chwilę dłużej, ale nadal pracuję nad tym..."* w przypadku dłuższego oczekiwania na Tier 2.
    - Wyświetlenie eleganckiego komponentu podglądu miniatury pobranego zdjęcia pod polem `imageUrl` z możliwością usunięcia / wyczyszczenia.
-   - Opcjonalne automatyczne uzupełnienie pola `name` (nazwa produktu), jeżeli pole było dotychczas puste, a scraper wyciągnął tytuł strony.
+   - Automatyczne uzupełnienie `imageUrl` (warunek sukcesu 4a).
+   - Opcjonalne pomocnicze uzupełnienie pól `name` (4b) oraz `code` (4c), jeżeli były one dotychczas puste.
+   - Wyświetlenie precyzyjnego komunikatu błędu w przypadku wklejenia niebezpiecznego linku (ochrona SSRF).
 3. **`.env.example`**
    - Dodanie zmiennej `ZENROWS_API_KEY=""`.
 
@@ -270,13 +273,13 @@ Ponieważ serwer wykonuje zapytanie HTTP pod adres podany przez użytkownika, ni
 
 ### Krok 2: Warstwa Bezpieczeństwa i Walidacji
 - [ ] Utworzyć `schemas/productScrape.ts` z definicją `productScrapeSchema` (walidacja formatu URL, brak spacji, dozwolony protokół http/https).
-- [ ] Zaimplementować `lib/scraper/ssrfProtection.ts` (blokada localhost, IP prywatnych, metadanych chmurowych).
+- [ ] Zaimplementować `lib/scraper/ssrfProtection.ts` (blokada localhost, IP prywatnych, metadanych chmurowych z czytelnym komunikatem błędu).
 
 ### Krok 3: Silnik Ekstrakcji Danych (HTML Parser)
 - [ ] Zaimplementować `lib/scraper/extractMetadata.ts`:
-  - Ekstrakcja tagów Open Graph / Twitter Cards.
-  - Bezpieczny parser JSON-LD (`@type: Product`).
-  - Heurystyka selektorów DOM jako fallback.
+  - Ekstrakcja głównego zdjęcia (4a): Open Graph / Twitter Cards, JSON-LD `@type: Product`, Microdata, selektory DOM.
+  - Ekstrakcja nazwy produktu (4b): JSON-LD, Microdata, `<h1>`, `og:title`, `<title>`.
+  - Ekstrakcja kodu produktu (4c): JSON-LD (`gtin`, `sku`, `mpn`), Microdata, tabele parametrów, identyfikator z URL.
   - Normalizacja URLi do formatu bezwzględnego.
 
 ### Krok 4: Integracja Hybrydowego Pobierania (Server Action)
@@ -284,20 +287,22 @@ Ponieważ serwer wykonuje zapytanie HTTP pod adres podany przez użytkownika, ni
 - [ ] Utworzyć akcję serwerową `serverActions/productScrapeMetadata.ts`:
   - Tier 1: Szybki natywny `fetch` z nagłówkami przeglądarkowymi i timeoutem 5s.
   - Tier 2: Wywołanie ZenRows w razie błędu blokady (403/503) lub braku danych.
-  - Zwracanie spójnego obiektu wyniku lub kontrolowanego błędu.
+  - Zwracanie spójnego obiektu wyniku `{ imageUrl, name?, code? }` lub kontrolowanego błędu.
 
 ### Krok 5: Integracja z Formularzem UI (`ProductFields.tsx`)
-- [ ] Zintegrować przycisk pobierania przy polu `productUrl`.
+- [ ] Zintegrować przycisk "Wyciągnij zdjęcie produktu" przy polu `productUrl`.
 - [ ] Dodać obsługę `useTransition` dla asynchronicznego wywołania akcji pobierania.
+- [ ] Dodać obsługę powiadomienia o przedłużającym się pobieraniu w Tier 2 ("Zajmie to chwilę dłużej...").
 - [ ] Dodać komponent podglądu zdjęcia:
   - Miniatura obrazu z obsługą błędów ładowania (`onError`).
   - Przycisk usunięcia / zmiany grafiki.
-- [ ] Podpiąć `setValue("imageUrl", data.imageUrl, { shouldValidate: true })` z `react-hook-form`.
-- [ ] Opcjonalnie: uzupełnienie `name`, jeśli pole jest puste.
+- [ ] Podpiąć `setValue("imageUrl", data.imageUrl, { shouldValidate: true })`.
+- [ ] Zaimplementować pomocnicze uzupełnianie `name` i `code` (wyłącznie gdy pola są puste).
+- [ ] Zapewnić czytelne komunikaty błędów (w tym informację o przyczynie przy blokadzie SSRF).
 
 ### Krok 6: Weryfikacja i Testy
 - [ ] Test jednostkowy modułu SSRF (próby podania `http://localhost`, `127.0.0.1`, `169.254.169.254`).
-- [ ] Test jednostkowy modułu ekstrakcji HTML na przykładowych próbkach (OpenGraph, JSON-LD, czysty DOM).
+- [ ] Test jednostkowy modułu ekstrakcji HTML na przykładowych próbkach (ekstrakcja zdjęcia, nazwy oraz kodu EAN/SKU).
 - [ ] Test integracyjny akcji serwerowej na różnych sklepach (sklep z bezpośrednim dostępem vs sklep z Cloudflare jak Action.com).
 - [ ] Weryfikacja typów TypeScript (`npm run typecheck`) oraz lintera (`npm run lint`).
 
