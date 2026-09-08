@@ -25,6 +25,9 @@ global.ResizeObserver = class ResizeObserver {
   disconnect() {}
 };
 
+// Polyfill scrollIntoView for jsdom (required by cmdk)
+window.HTMLElement.prototype.scrollIntoView = vi.fn();
+
 // Start MSW server before tests
 beforeAll(() => {
   server.listen({ onUnhandledRequest: "warn" });
