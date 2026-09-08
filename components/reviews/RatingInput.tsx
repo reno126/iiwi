@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Star } from "lucide-react";
-import { cn } from "@/lib/shadcn/utils";
+import { cn } from "cn";
 
 interface RatingInputProps {
   value?: number;

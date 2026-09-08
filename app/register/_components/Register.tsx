@@ -26,7 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { cn } from "@/lib/shadcn/utils";
+import { cn } from "cn";
 
 interface RegisterProps {
   className?: string;

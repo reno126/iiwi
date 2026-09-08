@@ -7,7 +7,7 @@ import { authOptions } from "@/lib/auth/authOptions";
 import { TopMenu } from "@/components/navigation/TopMenu";
 import { BrandLogo } from "@/components/BrandLogo";
 import { Inter } from "next/font/google";
-import { cn } from "@/lib/shadcn/utils";
+import { cn } from "cn";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 

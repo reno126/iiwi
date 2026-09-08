@@ -23,7 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import { ReadMore } from "@/components/ReadMore";
 import { ReviewForm } from "@/components/reviews/ReviewForm";
 import { formatPolishDate, formatReviewCount } from "@/lib/formatters";
-import { cn } from "@/lib/shadcn/utils";
+import { cn } from "cn";
 
 interface StarRatingProps {
   rate: number;

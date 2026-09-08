@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/shadcn/utils";
+import { cn } from "cn";
 
 export function AuthErrorPage() {
   return (

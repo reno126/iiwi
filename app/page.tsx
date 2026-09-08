@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/shadcn/utils";
+import { cn } from "cn";
 
 export const metadata: Metadata = {
   title: "Strona główna | TrueReview",

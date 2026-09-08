@@ -16,7 +16,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Sparkles, Trash2, ImageOff, CircleAlert, CheckCircle2 } from "lucide-react";
 import { productScrapeMetadata } from "@/serverActions/productScrapeMetadata";
 import type { ProductCreateInput } from "@/schemas/product";
-import { cn } from "@/lib/shadcn/utils";
+import { cn } from "cn";
 
 interface ProductFieldsProps {
   className?: string;

@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { cn } from "@/lib/shadcn/utils";
+import { cn } from "cn";
 
 export interface ReadMoreProps {
   text?: string;

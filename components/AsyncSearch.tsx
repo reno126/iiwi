@@ -23,7 +23,7 @@ import {
   EmptyDescription,
   EmptyMedia,
 } from "@/components/ui/empty";
-import { cn } from "@/lib/shadcn/utils";
+import { cn } from "cn";
 
 export interface AsyncSearchProps<T> {
   /**

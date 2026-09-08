@@ -4,7 +4,7 @@ import { PlusCircle } from "lucide-react";
 import { productsGet } from "@/serverActions/productsGet";
 import { ProductsList } from "./_components/ProductsList";
 import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/shadcn/utils";
+import { cn } from "cn";
 
 export const metadata: Metadata = {
   title: "Produkty | TrueReview",

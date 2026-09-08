@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { formatPolishDate, formatReviewCount } from "@/lib/formatters";
-import { cn } from "@/lib/shadcn/utils";
+import { cn } from "cn";
 
 export interface ProductsListProps {
   products: ProductListItem[];

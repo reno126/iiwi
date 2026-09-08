@@ -29,7 +29,7 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/shadcn/utils";
+import { cn } from "cn";
 
 interface SignInProps {
   className?: string;

@@ -15,7 +15,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-import { cn } from "@/lib/shadcn/utils";
+import { cn } from "cn";
 
 const menuConfig = [
   { title: "Strona główna", href: "/" },

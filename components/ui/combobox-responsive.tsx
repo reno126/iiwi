@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { ChevronsUpDown, X } from "lucide-react";
-import { cn } from "@/lib/shadcn/utils";
+import { cn } from "cn";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { Button } from "@/components/ui/button";
 import {
