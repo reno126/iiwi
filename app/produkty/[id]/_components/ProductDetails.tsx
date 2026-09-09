@@ -324,8 +324,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                       </CardHeader>
 
                       <CardContent className="p-4 pt-2">
-                        {/* Review Description cut off above 5 lines using generic ReadMore component */}
-                        <ReadMore text={review.description} maxLines={5} />
+                        {/* Review Description cut off above 3 lines using generic ReadMore component */}
+                        <ReadMore text={review.description} maxLines={3} />
                       </CardContent>
                     </Card>
                   );
