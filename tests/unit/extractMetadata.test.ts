@@ -161,10 +161,12 @@ describe("lib/scraper/extractMetadata", () => {
     `;
 
     const result = extractProductMetadata(html, "https://store.com/item");
-    expect(result).toBeNull();
+    expect(result).not.toBeNull();
+    expect(result?.imageUrl).toBeNull();
+    expect(result?.name).toBe("Produkt Bez Zdjęcia");
   });
 
-  it("returns null when no valid image is found (critical condition 4a)", () => {
+  it("successfully extracts metadata even when no valid image is found (best-effort)", () => {
     const html = `
       <!DOCTYPE html>
       <html>
@@ -173,6 +175,23 @@ describe("lib/scraper/extractMetadata", () => {
         </head>
         <body>
           <h1>Produkt bez zdjęć</h1>
+        </body>
+      </html>
+    `;
+
+    const result = extractProductMetadata(html, "https://store.com/item");
+    expect(result).not.toBeNull();
+    expect(result?.imageUrl).toBeNull();
+    expect(result?.name).toBe("Produkt bez zdjęć");
+    expect(result?.code).toBeNull();
+  });
+
+  it("returns null when no metadata (image, name, or code) can be extracted", () => {
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <body>
+          <div>Nic tutaj nie ma</div>
         </body>
       </html>
     `;

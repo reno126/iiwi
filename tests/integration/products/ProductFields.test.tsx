@@ -17,9 +17,10 @@ vi.mock("@/serverActions/shopMatchByUrlAction", () => ({
 
 interface WrapperProps {
   defaultValues?: Partial<ProductCreateInput>;
+  hideProductUrl?: boolean;
 }
 
-function FormWrapper({ defaultValues }: WrapperProps) {
+function FormWrapper({ defaultValues, hideProductUrl }: WrapperProps) {
   const methods = useForm<ProductCreateInput>({
     defaultValues: {
       name: "",
@@ -33,7 +34,7 @@ function FormWrapper({ defaultValues }: WrapperProps) {
   return (
     <FormProvider {...methods}>
       <form>
-        <ProductFields />
+        <ProductFields hideProductUrl={hideProductUrl} />
       </form>
     </FormProvider>
   );
@@ -66,6 +67,7 @@ describe("components/products/ProductFields", () => {
         name: "Pobrana Nazwa Produktu",
         code: "EAN-123456",
         shop: null,
+        scrapedFields: ["name", "imageUrl", "code"],
       },
     });
 
@@ -87,18 +89,17 @@ describe("components/products/ProductFields", () => {
       });
     });
 
-    // Sprawdzamy czy pole imageUrl, name oraz code zostały uzupełnione
-    const imageUrlInput = screen.getByLabelText(/Adres URL zdjęcia/i) as HTMLInputElement;
+    // Sprawdzamy czy pole name oraz code zostały uzupełnione, a pole URL zdjęcia zastąpione podglądem
     const nameInput = screen.getByLabelText(/Nazwa produktu/i) as HTMLInputElement;
     const codeInput = screen.getByLabelText(/Kod produktu/i) as HTMLInputElement;
 
     await waitFor(() => {
-      expect(imageUrlInput.value).toBe("https://example.com/scraped-image.jpg");
       expect(nameInput.value).toBe("Pobrana Nazwa Produktu");
       expect(codeInput.value).toBe("EAN-123456");
     });
 
-    // Podgląd miniatury powinien być widoczny
+    // Pole input adresu URL zdjęcia powinno zostać usunięte na rzecz podglądu miniatury
+    expect(screen.queryByLabelText(/Adres URL zdjęcia/i)).not.toBeInTheDocument();
     expect(screen.getByText("Podgląd zdjęcia produktu")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Usuń/i })).toBeInTheDocument();
   });
@@ -111,6 +112,7 @@ describe("components/products/ProductFields", () => {
         name: "Nowa Nazwa",
         code: "NEW-CODE",
         shop: null,
+        scrapedFields: ["name", "imageUrl", "code"],
       },
     });
 
@@ -131,10 +133,9 @@ describe("components/products/ProductFields", () => {
 
     const nameInput = screen.getByLabelText(/Nazwa produktu/i) as HTMLInputElement;
     const codeInput = screen.getByLabelText(/Kod produktu/i) as HTMLInputElement;
-    const imageUrlInput = screen.getByLabelText(/Adres URL zdjęcia/i) as HTMLInputElement;
 
     await waitFor(() => {
-      expect(imageUrlInput.value).toBe("https://example.com/scraped-image.jpg");
+      expect(screen.getByText("Podgląd zdjęcia produktu")).toBeInTheDocument();
     });
 
     // Wartości nie powinny zostać nadpisane
@@ -153,10 +154,14 @@ describe("components/products/ProductFields", () => {
       />
     );
 
+    // Na starcie pole inputu jest ukryte, a widoczny jest wyłącznie podgląd
+    expect(screen.queryByLabelText(/Adres URL zdjęcia/i)).not.toBeInTheDocument();
     expect(screen.getByText("Podgląd zdjęcia produktu")).toBeInTheDocument();
+
     const deleteBtn = screen.getByRole("button", { name: /Usuń/i });
     await user.click(deleteBtn);
 
+    // Po usunięciu podgląd znika, a pojawia się pole input
     const imageUrlInput = screen.getByLabelText(/Adres URL zdjęcia/i) as HTMLInputElement;
     expect(imageUrlInput.value).toBe("");
     expect(screen.queryByText("Podgląd zdjęcia produktu")).not.toBeInTheDocument();
@@ -204,6 +209,7 @@ describe("components/products/ProductFields", () => {
           name: "Media Expert",
           logo: "https://example.com/me-logo.svg",
         },
+        scrapedFields: ["name", "imageUrl", "code", "shop"],
       },
     });
 
@@ -224,5 +230,12 @@ describe("components/products/ProductFields", () => {
       expect(screen.getByText("Media Expert")).toBeInTheDocument();
       expect(screen.getByText("Wybrany sklep")).toBeInTheDocument();
     });
+  });
+
+  it("hides productUrl field when hideProductUrl is true", () => {
+    render(<FormWrapper hideProductUrl={true} />);
+
+    expect(screen.getByLabelText(/Nazwa produktu/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Adres URL do produktu/i)).not.toBeInTheDocument();
   });
 });

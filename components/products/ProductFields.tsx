@@ -25,12 +25,14 @@ interface ProductFieldsProps {
   className?: string;
   legend?: string;
   initialShop?: MatchedShopResult | null;
+  hideProductUrl?: boolean;
 }
 
 export function ProductFields({
   className,
   legend = "Informacje o produkcie",
   initialShop = null,
+  hideProductUrl = false,
 }: ProductFieldsProps) {
   const {
     register,
@@ -41,6 +43,13 @@ export function ProductFields({
   } = useFormContext<ProductCreateInput>();
 
   const [selectedShop, setSelectedShop] = useState<MatchedShopResult | null>(initialShop);
+  const [prevInitialShop, setPrevInitialShop] = useState<MatchedShopResult | null>(initialShop);
+
+  if (prevInitialShop !== initialShop) {
+    setPrevInitialShop(initialShop);
+    setSelectedShop(initialShop);
+  }
+
   const [isPending, startTransition] = useTransition();
   const [isTier2NoticeVisible, setIsTier2NoticeVisible] = useState(false);
   const [scrapeNotice, setScrapeNotice] = useState<{
@@ -51,6 +60,16 @@ export function ProductFields({
 
   const productUrlValue = watch("productUrl");
   const imageUrlValue = watch("imageUrl");
+
+  const [showPreviewOnly, setShowPreviewOnly] = useState<boolean>(() => Boolean(imageUrlValue?.trim()));
+  const [prevImageUrlValue, setPrevImageUrlValue] = useState(imageUrlValue);
+
+  if (prevImageUrlValue !== imageUrlValue) {
+    setPrevImageUrlValue(imageUrlValue);
+    if (imageUrlValue && !prevImageUrlValue) {
+      setShowPreviewOnly(true);
+    }
+  }
 
   const handleUrlBlur = async () => {
     const currentShopId = getValues("shopId");
@@ -112,10 +131,7 @@ export function ProductFields({
           if (imageUrl) {
             setValue("imageUrl", imageUrl, { shouldValidate: true, shouldDirty: true });
             setImageLoadError(false);
-            setScrapeNotice({
-              type: "success",
-              message: "Zdjęcie produktu zostało pomyślnie pobrane.",
-            });
+            setShowPreviewOnly(true);
           }
 
           // 4b: Pomocnicze uzupełnienie nazwy tylko jeśli pole jest puste
@@ -135,6 +151,13 @@ export function ProductFields({
             setValue("shopId", shop.id, { shouldValidate: true, shouldDirty: true });
             setSelectedShop(shop);
           }
+
+          setScrapeNotice({
+            type: "success",
+            message: imageUrl
+              ? "Pomyślnie zaktualizowano dane i zdjęcie produktu z linku."
+              : "Pomyślnie pobrano dane produktu z linku (brak zdjęcia w ofercie).",
+          });
         }
       } catch (err: unknown) {
         setScrapeNotice({
@@ -154,6 +177,7 @@ export function ProductFields({
   const handleClearImage = () => {
     setValue("imageUrl", "", { shouldValidate: true, shouldDirty: true });
     setImageLoadError(false);
+    setShowPreviewOnly(false);
   };
 
   return (
@@ -172,64 +196,68 @@ export function ProductFields({
           )}
         </Field>
 
-        <Field>
-          <FieldLabel htmlFor="product-url">Adres URL do produktu</FieldLabel>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Input
-              id="product-url"
-              type="url"
-              placeholder="https://example.com/produkt"
-              {...register("productUrl", {
-                onBlur: handleUrlBlur,
-              })}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleScrape}
-              disabled={isPending || !productUrlValue?.trim()}
-              className="shrink-0"
-            >
-              {isPending ? (
-                <Spinner className="mr-2 size-4" />
-              ) : (
-                <Sparkles className="mr-2 size-4 text-primary" />
-              )}
-              Wyciągnij zdjęcie produktu
-            </Button>
-          </div>
-
-          {/* Komunikat o wydłużonym czasie Tier 2 */}
-          {isPending && isTier2NoticeVisible && (
-            <div className="mt-2 flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400">
-              <Spinner className="size-3.5" />
-              <span>Zajmie to chwilę dłużej, ale nadal pracuję nad tym...</span>
+        {!hideProductUrl ? (
+          <Field>
+            <FieldLabel htmlFor="product-url">Adres URL do produktu</FieldLabel>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Input
+                id="product-url"
+                type="url"
+                placeholder="https://example.com/produkt"
+                {...register("productUrl", {
+                  onBlur: handleUrlBlur,
+                })}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleScrape}
+                disabled={isPending || !productUrlValue?.trim()}
+                className="shrink-0"
+              >
+                {isPending ? (
+                  <Spinner className="mr-2 size-4" />
+                ) : (
+                  <Sparkles className="mr-2 size-4 text-primary" />
+                )}
+                Wyciągnij zdjęcie produktu
+              </Button>
             </div>
-          )}
 
-          {/* Nieblokujący komunikat o wyniku scrapowania */}
-          {scrapeNotice && (
-            <div
-              className={cn(
-                "mt-2 flex items-start gap-2 rounded-md border p-2.5 text-xs",
-                scrapeNotice.type === "error"
-                  ? "border-destructive/30 bg-destructive/10 text-destructive dark:bg-destructive/20"
-                  : "border-emerald-500/30 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300"
-              )}
-            >
-              {scrapeNotice.type === "error" ? (
-                <CircleAlert className="mt-0.5 size-4 shrink-0" />
-              ) : (
-                <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
-              )}
-              <span className="flex-1 leading-relaxed">{scrapeNotice.message}</span>
-            </div>
-          )}
+            {/* Komunikat o wydłużonym czasie Tier 2 */}
+            {isPending && isTier2NoticeVisible && (
+              <div className="mt-2 flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400">
+                <Spinner className="size-3.5" />
+                <span>Zajmie to chwilę dłużej, ale nadal pracuję nad tym...</span>
+              </div>
+            )}
 
-          {errors.productUrl?.message && (
-            <FieldError>{errors.productUrl.message}</FieldError>
-          )}
-        </Field>
+            {/* Nieblokujący komunikat o wyniku scrapowania */}
+            {scrapeNotice && (
+              <div
+                className={cn(
+                  "mt-2 flex items-start gap-2 rounded-md border p-2.5 text-xs",
+                  scrapeNotice.type === "error"
+                    ? "border-destructive/30 bg-destructive/10 text-destructive dark:bg-destructive/20"
+                    : "border-emerald-500/30 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300"
+                )}
+              >
+                {scrapeNotice.type === "error" ? (
+                  <CircleAlert className="mt-0.5 size-4 shrink-0" />
+                ) : (
+                  <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
+                )}
+                <span className="flex-1 leading-relaxed">{scrapeNotice.message}</span>
+              </div>
+            )}
+
+            {errors.productUrl?.message && (
+              <FieldError>{errors.productUrl.message}</FieldError>
+            )}
+          </Field>
+        ) : (
+          <input type="hidden" {...register("productUrl")} />
+        )}
 
         <ProductShopSelector
           selectedShop={selectedShop}
@@ -237,21 +265,12 @@ export function ProductFields({
           disabled={isPending}
         />
 
-        <Field>
-          <FieldLabel htmlFor="product-image">Adres URL zdjęcia</FieldLabel>
-          <Input
-            id="product-image"
-            type="url"
-            placeholder="https://example.com/zdjecie.jpg"
-            {...register("imageUrl")}
-          />
-          {errors.imageUrl?.message && (
-            <FieldError>{errors.imageUrl.message}</FieldError>
-          )}
-
-          {/* Podgląd miniatury zdjęcia z opcją usunięcia */}
-          {imageUrlValue && (
-            <div className="mt-2.5 flex items-center gap-3 rounded-lg border bg-muted/30 p-2.5">
+        {showPreviewOnly && imageUrlValue ? (
+          <Field>
+            <FieldLabel>Zdjęcie produktu</FieldLabel>
+            <input type="hidden" {...register("imageUrl")} />
+            {/* Podgląd miniatury zdjęcia z opcją usunięcia */}
+            <div className="flex items-center gap-3 rounded-lg border bg-muted/30 p-2.5">
               <div className="relative size-16 shrink-0 overflow-hidden rounded-md border bg-background flex items-center justify-center">
                 {imageLoadError ? (
                   <ImageOff className="size-6 text-muted-foreground" />
@@ -287,8 +306,24 @@ export function ProductFields({
                 Usuń
               </Button>
             </div>
-          )}
-        </Field>
+            {errors.imageUrl?.message && (
+              <FieldError>{errors.imageUrl.message}</FieldError>
+            )}
+          </Field>
+        ) : (
+          <Field>
+            <FieldLabel htmlFor="product-image">Adres URL zdjęcia</FieldLabel>
+            <Input
+              id="product-image"
+              type="url"
+              placeholder="https://example.com/zdjecie.jpg"
+              {...register("imageUrl")}
+            />
+            {errors.imageUrl?.message && (
+              <FieldError>{errors.imageUrl.message}</FieldError>
+            )}
+          </Field>
+        )}
 
         <Field>
           <FieldLabel htmlFor="product-code">Kod produktu / EAN</FieldLabel>

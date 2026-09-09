@@ -1,7 +1,7 @@
 import * as cheerio from "cheerio";
 
 export interface ScrapedProductMetadata {
-  imageUrl: string;
+  imageUrl?: string | null;
   name?: string | null;
   code?: string | null;
 }
@@ -403,11 +403,6 @@ export function extractProductMetadata(html: string, pageUrl: string): ScrapedPr
     }
   }
 
-  // Jeżeli nie znaleziono żadnego poprawnego zdjęcia – scraper nie osiągnął celu (pkt 4a)
-  if (!imageUrl) {
-    return null;
-  }
-
   // --- 2. EKSTRAKCJA NAZWY PRODUKTU (Best effort 4b) ---
   let name: string | null = null;
 
@@ -495,8 +490,13 @@ export function extractProductMetadata(html: string, pageUrl: string): ScrapedPr
     code = extractCodeFromUrl(pageUrl);
   }
 
+  const hasAnyData = Boolean(imageUrl || name || code);
+  if (!hasAnyData) {
+    return null;
+  }
+
   return {
-    imageUrl,
+    imageUrl: imageUrl || null,
     name: name || null,
     code: code || null,
   };

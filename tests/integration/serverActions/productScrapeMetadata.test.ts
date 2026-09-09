@@ -67,6 +67,7 @@ describe("serverActions/productScrapeMetadata", () => {
       name: "Słuchawki Bezprzewodowe Sony",
       code: "12345",
       shop: null,
+      scrapedFields: ["name", "imageUrl", "code"],
     });
 
     // Upewnijmy się, że Tier 2 (ZenRows) nie był wywołany
@@ -112,6 +113,7 @@ describe("serverActions/productScrapeMetadata", () => {
       name: "Ładowarka ścienna USB-C Sologic",
       code: "3222380",
       shop: null,
+      scrapedFields: ["name", "imageUrl", "code"],
     });
 
     // Powinny być dokładnie 2 zapytania: Tier 1 i fallback Tier 2
@@ -160,14 +162,58 @@ describe("serverActions/productScrapeMetadata", () => {
       name: "Hulajnoga elektryczna",
       code: null,
       shop: mockShop,
+      scrapedFields: ["name", "imageUrl", "shop"],
     });
   });
 
-  it("returns a graceful server error when both Tier 1 and Tier 2 fail to extract image", async () => {
+  it("succeeds with partial metadata when only name is present (no image)", async () => {
+    const mockHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Myszka bezprzewodowa</title>
+        </head>
+        <body>
+          <h1>Myszka bezprzewodowa</h1>
+        </body>
+      </html>
+    `;
+
+    vi.spyOn(globalThis, "fetch")
+      // Tier 1 direct fetch: zwraca HTML bez zdjęcia
+      .mockResolvedValueOnce(
+        new Response(mockHtml, {
+          status: 200,
+          headers: { "Content-Type": "text/html" },
+        })
+      )
+      // Tier 2 ZenRows: też brak zdjęcia
+      .mockResolvedValueOnce(
+        new Response(mockHtml, {
+          status: 200,
+          headers: { "Content-Type": "text/html" },
+        })
+      );
+
+    const result = await productScrapeMetadata({
+      productUrl: "https://sklep.pl/myszka",
+    });
+
+    expect(result?.serverError).toBeUndefined();
+    expect(result?.data).toEqual({
+      imageUrl: null,
+      name: "Myszka bezprzewodowa",
+      code: null,
+      shop: null,
+      scrapedFields: ["name"],
+    });
+  });
+
+  it("returns a graceful server error when both Tier 1 and Tier 2 fail to extract any metadata", async () => {
     vi.spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(new Response("Access Denied", { status: 403 }))
       .mockResolvedValueOnce(
-        new Response("<html><body>No image here</body></html>", { status: 200 })
+        new Response("<html><body><div>Pusto</div></body></html>", { status: 200 })
       );
 
     const result = await productScrapeMetadata({
@@ -176,6 +222,6 @@ describe("serverActions/productScrapeMetadata", () => {
 
     expect(result?.data).toBeUndefined();
     expect(result?.serverError).toBeDefined();
-    expect(result?.serverError).toContain("Nie udało się automatycznie pobrać zdjęcia");
+    expect(result?.serverError).toContain("Nie udało się automatycznie pobrać danych");
   });
 });

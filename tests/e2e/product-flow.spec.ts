@@ -34,12 +34,17 @@ test.describe("Product Creation Flow (End-to-End)", () => {
       page.getByText("Dodaj nowy produkt i opinię"),
     ).toBeVisible();
 
+    // Verify initial 3-element prompt is rendered
+    await expect(
+      page.getByText("Podaj nam link do oferty produktu"),
+    ).toBeVisible();
+
+    // Choose manual creation path
+    await page.getByRole("button", { name: "Dodaj produkt ręcznie" }).click();
+
     // 3. Fill in product details
     const productName = `${E2E_TEST_PREFIX} Produkt E2E ${timestamp}`;
     await page.getByLabel(/Nazwa produktu/i).fill(productName);
-    await page
-      .getByLabel(/Adres URL do produktu/i)
-      .fill("https://example.com/products/test-item");
     await page
       .getByLabel(/Kod produktu \/ EAN/i)
       .fill(`${E2E_TEST_PREFIX}SKU-${timestamp.toString().slice(-6)}`);
@@ -67,11 +72,14 @@ test.describe("Product Creation Flow (End-to-End)", () => {
     await page.goto("/opinie/dodaj");
     await page.getByRole("button", { name: "Dodaj produkt" }).click();
 
-    // 2. Enter name with only 2 chars
+    // 2. Select manual creation path
+    await page.getByRole("button", { name: "Dodaj produkt ręcznie" }).click();
+
+    // 3. Enter name with only 2 chars
     await page.getByLabel(/Nazwa produktu/i).fill("AB");
     await page.getByRole("button", { name: "Dodaj produkt i opinię" }).click();
 
-    // 3. Expect validation message
+    // 4. Expect validation message
     await expect(
       page.getByText("Nazwa produktu musi mieć co najmniej 3 znaki"),
     ).toBeVisible();

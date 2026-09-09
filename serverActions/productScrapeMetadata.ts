@@ -9,10 +9,11 @@ import { findShopByUrl, type MatchedShopResult } from "@/lib/shops/findShopByUrl
 import { returnServerError } from "next-safe-action";
 
 export interface ScrapedMetadataResult {
-  imageUrl: string;
+  imageUrl?: string | null;
   name?: string | null;
   code?: string | null;
   shop?: MatchedShopResult | null;
+  scrapedFields: Array<"name" | "imageUrl" | "code" | "shop">;
 }
 
 const BROWSER_HEADERS = {
@@ -46,6 +47,7 @@ export const productScrapeMetadata = safeActionUserCtx
 
     // 2. Tier 1: Szybki bezpośredni fetch z nagłówkami przeglądarki (timeout 5s)
     let tier1Html: string | null = null;
+    let tier1Metadata: ReturnType<typeof extractProductMetadata> = null;
     let shouldTryTier2 = false;
 
     console.log(`[Scraper] Starting Tier 1 direct fetch for: ${productUrl}`);
@@ -92,23 +94,36 @@ export const productScrapeMetadata = safeActionUserCtx
       console.log(
         `[Scraper] Tier 1 returned HTML (${tier1Html.length} chars). Attempting metadata extraction...`
       );
-      const metadata = extractProductMetadata(tier1Html, productUrl);
-      if (metadata && metadata.imageUrl) {
-        console.log(`[Scraper] Tier 1 extraction success:`, metadata);
+      tier1Metadata = extractProductMetadata(tier1Html, productUrl);
+
+      // Jeśli Tier 1 pozyskał zarówno zdjęcie, jak i nazwę – mamy pełny sukces
+      if (tier1Metadata && tier1Metadata.imageUrl && tier1Metadata.name) {
+        console.log(`[Scraper] Tier 1 full extraction success:`, tier1Metadata);
         const shop = await findShopByUrl(productUrl);
+        const scrapedFields: Array<"name" | "imageUrl" | "code" | "shop"> = [];
+        if (tier1Metadata.name) scrapedFields.push("name");
+        if (tier1Metadata.imageUrl) scrapedFields.push("imageUrl");
+        if (tier1Metadata.code) scrapedFields.push("code");
+        if (shop) scrapedFields.push("shop");
+
         return {
-          ...metadata,
+          ...tier1Metadata,
           shop,
+          scrapedFields,
         };
       }
-      console.log(
-        `[Scraper] Tier 1 HTML did not yield a valid product image. Flagging for Tier 2 fallback.`
-      );
-      // Jeśli Tier 1 zwrócił HTML, ale nie znaleziono zdjęcia (np. strona renderowana przez SPA/JS)
-      shouldTryTier2 = true;
+
+      // Jeżeli brak zdjęcia (często renderowanego przez JS), ale jest ZenRows – spróbujmy Tier 2
+      if (!tier1Metadata?.imageUrl) {
+        console.log(
+          `[Scraper] Tier 1 HTML is missing product image. Flagging for Tier 2 fallback.`
+        );
+        shouldTryTier2 = true;
+      }
     }
 
     // 3. Tier 2: ZenRows Fallback (headless browser + residential proxy)
+    let tier2Metadata: ReturnType<typeof extractProductMetadata> = null;
     if (shouldTryTier2 && process.env.ZENROWS_API_KEY) {
       console.log(`[Scraper] Starting Tier 2 (ZenRows) fallback for: ${productUrl}`);
       const tier2Html = await fetchWithZenRows(productUrl, { timeoutMs: 25000 });
@@ -116,18 +131,10 @@ export const productScrapeMetadata = safeActionUserCtx
         console.log(
           `[Scraper] ZenRows returned HTML (${tier2Html.length} chars). Attempting metadata extraction...`
         );
-        const metadata = extractProductMetadata(tier2Html, productUrl);
-        if (metadata && metadata.imageUrl) {
-          console.log(`[Scraper] Tier 2 extraction success:`, metadata);
-          const shop = await findShopByUrl(productUrl);
-          return {
-            ...metadata,
-            shop,
-          };
+        tier2Metadata = extractProductMetadata(tier2Html, productUrl);
+        if (tier2Metadata) {
+          console.log(`[Scraper] Tier 2 extraction returned:`, tier2Metadata);
         }
-        console.warn(
-          `[Scraper] Tier 2 extraction failed: ZenRows returned 200 OK HTML, but extractProductMetadata found no valid imageUrl for: ${productUrl}`
-        );
       } else {
         console.warn(`[Scraper] Tier 2 (ZenRows) returned null or empty response for: ${productUrl}`);
       }
@@ -135,9 +142,42 @@ export const productScrapeMetadata = safeActionUserCtx
       console.warn(`[Scraper] Tier 2 needed, but ZENROWS_API_KEY is not configured.`);
     }
 
-    // 4. Błąd całkowity – nie udało się pobrać zdjęcia z żadnego źródła
+    // Scalanie wyników z Tier 1 i Tier 2 (preferując wartości niepuste)
+    const mergedMetadata = {
+      imageUrl: tier2Metadata?.imageUrl || tier1Metadata?.imageUrl || null,
+      name: tier2Metadata?.name || tier1Metadata?.name || null,
+      code: tier2Metadata?.code || tier1Metadata?.code || null,
+    };
+
+    const shop = await findShopByUrl(productUrl);
+
+    const hasAnyData = Boolean(
+      mergedMetadata.imageUrl || mergedMetadata.name || mergedMetadata.code || shop
+    );
+
+    if (hasAnyData) {
+      const scrapedFields: Array<"name" | "imageUrl" | "code" | "shop"> = [];
+      if (mergedMetadata.name) scrapedFields.push("name");
+      if (mergedMetadata.imageUrl) scrapedFields.push("imageUrl");
+      if (mergedMetadata.code) scrapedFields.push("code");
+      if (shop) scrapedFields.push("shop");
+
+      console.log(`[Scraper] Scrape succeeded with partial or full metadata:`, {
+        ...mergedMetadata,
+        shop,
+        scrapedFields,
+      });
+
+      return {
+        ...mergedMetadata,
+        shop,
+        scrapedFields,
+      };
+    }
+
+    // 4. Błąd całkowity – nie udało się pobrać żadnych metadanych
     console.warn(`[Scraper] Scrape fully failed for: ${productUrl}`);
     returnServerError(
-      "Nie udało się automatycznie pobrać zdjęcia z podanego linku. Możesz wkleić link do zdjęcia ręcznie."
+      "Nie udało się automatycznie pobrać danych z podanego linku. Możesz uzupełnić dane ręcznie."
     );
   });

@@ -1,0 +1,119 @@
+"use client";
+
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import { Sparkles, ArrowLeft } from "lucide-react";
+
+interface UrlPromptStepProps {
+  onScrape: (url: string) => void;
+  onManualSelect: () => void;
+  onCancel?: () => void;
+  isPending: boolean;
+  isTier2NoticeVisible: boolean;
+  initialUrl?: string;
+}
+
+export function UrlPromptStep({
+  onScrape,
+  onManualSelect,
+  onCancel,
+  isPending,
+  isTier2NoticeVisible,
+  initialUrl = "",
+}: UrlPromptStepProps) {
+  const [url, setUrl] = useState(initialUrl);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = url.trim();
+    if (!trimmed) return;
+    onScrape(trimmed);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* 1. Element 1: Nagłówek i podtytuł mniejszymi literami */}
+      <div className="space-y-2 text-center">
+        <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          Podaj nam link do oferty produktu
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          my pobierzemy wszystko co potrzeba, a Ty jedynie ocenisz produkt
+        </p>
+      </div>
+
+      {/* 2. & 3. Element 2 (pole do url) + Element 3 (przycisk: Pobierz info) */}
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Input
+            type="url"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="https://sklep.pl/produkt..."
+            autoFocus
+            disabled={isPending}
+            className="h-11 flex-1 text-base sm:text-sm"
+          />
+          <Button
+            type="submit"
+            disabled={isPending || !url.trim()}
+            className="h-11 px-6 shrink-0 gap-2 font-medium"
+          >
+            {isPending ? (
+              <Spinner className="size-4" />
+            ) : (
+              <Sparkles className="size-4" />
+            )}
+            Pobierz info
+          </Button>
+        </div>
+
+        {/* Informacja o wydłużonym czasie Tier 2 */}
+        {isPending && isTier2NoticeVisible && (
+          <div className="flex items-center justify-center gap-2 pt-1 text-xs text-amber-600 dark:text-amber-400">
+            <Spinner className="size-3.5" />
+            <span>Zajmie to chwilę dłużej, ale nadal pracuję nad tym...</span>
+          </div>
+        )}
+      </form>
+
+      {/* Opcja alternatywna: brak linku / dodawanie ręczne */}
+      <div className="border-t pt-6 text-center space-y-2">
+        <span className="block text-sm font-medium text-foreground">
+          Nie masz linku do oferty?
+        </span>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onManualSelect}
+          disabled={isPending}
+          className="mx-auto"
+        >
+          Dodaj produkt ręcznie
+        </Button>
+        <span className="block text-xs text-muted-foreground">
+          wymagamy tylko nazwy
+        </span>
+      </div>
+
+      {/* Powrót do wyszukiwania w bazie */}
+      {onCancel && (
+        <div className="text-center pt-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={onCancel}
+            disabled={isPending}
+            className="text-xs text-muted-foreground hover:text-foreground gap-1.5"
+          >
+            <ArrowLeft className="size-3.5" />
+            Wróć do wyszukiwania
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
