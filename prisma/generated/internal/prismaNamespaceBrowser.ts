@@ -127,6 +127,7 @@ export const ShopScalarFieldEnum = {
   id: 'id',
   name: 'name',
   logo: 'logo',
+  matcherKeys: 'matcherKeys',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

@@ -5,7 +5,15 @@ import { productScrapeSchema } from "@/schemas/productScrape";
 import { validateUrlSafety } from "@/lib/scraper/ssrfProtection";
 import { extractProductMetadata } from "@/lib/scraper/extractMetadata";
 import { fetchWithZenRows } from "@/lib/scraper/zenrowsClient";
+import { findShopByUrl, type MatchedShopResult } from "@/lib/shops/findShopByUrl";
 import { returnServerError } from "next-safe-action";
+
+export interface ScrapedMetadataResult {
+  imageUrl: string;
+  name?: string | null;
+  code?: string | null;
+  shop?: MatchedShopResult | null;
+}
 
 const BROWSER_HEADERS = {
   "User-Agent":
@@ -87,7 +95,11 @@ export const productScrapeMetadata = safeActionUserCtx
       const metadata = extractProductMetadata(tier1Html, productUrl);
       if (metadata && metadata.imageUrl) {
         console.log(`[Scraper] Tier 1 extraction success:`, metadata);
-        return metadata;
+        const shop = await findShopByUrl(productUrl);
+        return {
+          ...metadata,
+          shop,
+        };
       }
       console.log(
         `[Scraper] Tier 1 HTML did not yield a valid product image. Flagging for Tier 2 fallback.`
@@ -107,7 +119,11 @@ export const productScrapeMetadata = safeActionUserCtx
         const metadata = extractProductMetadata(tier2Html, productUrl);
         if (metadata && metadata.imageUrl) {
           console.log(`[Scraper] Tier 2 extraction success:`, metadata);
-          return metadata;
+          const shop = await findShopByUrl(productUrl);
+          return {
+            ...metadata,
+            shop,
+          };
         }
         console.warn(
           `[Scraper] Tier 2 extraction failed: ZenRows returned 200 OK HTML, but extractProductMetadata found no valid imageUrl for: ${productUrl}`

@@ -9,10 +9,15 @@ export const shopSchema = z.object({
     .nullable()
     .optional(),
   logo: z
-    .url({ message: "Podaj prawidłowy adres URL logo" })
+    .string()
+    .refine(
+      (val) => !val || val.startsWith("/") || /^https?:\/\//i.test(val),
+      { message: "Podaj prawidłowy adres URL lub ścieżkę do logo" }
+    )
     .nullable()
     .optional()
     .or(z.literal("")),
+  matcherKeys: z.array(z.string().min(1)).default([]),
   createdAt: z.date().optional(),
   updatedAt: z.date().optional(),
 });
@@ -27,10 +32,21 @@ export const shopCreateSchema = z.object({
     .nullable()
     .optional(),
   logo: z
-    .url({ message: "Podaj prawidłowy adres URL logo" })
+    .string()
+    .refine(
+      (val) => !val || val.startsWith("/") || /^https?:\/\//i.test(val),
+      { message: "Podaj prawidłowy adres URL lub ścieżkę do logo" }
+    )
     .nullable()
     .optional()
     .or(z.literal("")),
+  matcherKeys: z.array(z.string().min(1)).default([]),
 });
 
 export type ShopCreateInput = z.infer<typeof shopCreateSchema>;
+
+export const shopMatchSchema = z.object({
+  url: z.string().min(1, { message: "Adres URL jest wymagany" }),
+});
+
+export type ShopMatchInput = z.infer<typeof shopMatchSchema>;

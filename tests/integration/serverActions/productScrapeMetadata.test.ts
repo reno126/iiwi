@@ -5,7 +5,12 @@ vi.mock("@/lib/auth/helper", () => ({
   auth: vi.fn(),
 }));
 
+vi.mock("@/lib/shops/findShopByUrl", () => ({
+  findShopByUrl: vi.fn().mockResolvedValue(null),
+}));
+
 import { auth } from "@/lib/auth/helper";
+import { findShopByUrl } from "@/lib/shops/findShopByUrl";
 import { productScrapeMetadata } from "@/serverActions/productScrapeMetadata";
 
 describe("serverActions/productScrapeMetadata", () => {
@@ -61,6 +66,7 @@ describe("serverActions/productScrapeMetadata", () => {
       imageUrl: "https://cdn.shop.pl/items/headphones.jpg",
       name: "Słuchawki Bezprzewodowe Sony",
       code: "12345",
+      shop: null,
     });
 
     // Upewnijmy się, że Tier 2 (ZenRows) nie był wywołany
@@ -105,6 +111,7 @@ describe("serverActions/productScrapeMetadata", () => {
       imageUrl: "https://action.scene7.com/is/image/Action/3222380_1",
       name: "Ładowarka ścienna USB-C Sologic",
       code: "3222380",
+      shop: null,
     });
 
     // Powinny być dokładnie 2 zapytania: Tier 1 i fallback Tier 2
@@ -113,6 +120,47 @@ describe("serverActions/productScrapeMetadata", () => {
     expect(zenrowsCallUrl).toContain("api.zenrows.com");
     expect(zenrowsCallUrl).toContain("js_render=true");
     expect(zenrowsCallUrl).toContain("premium_proxy=true");
+  });
+
+  it("enriches metadata with matched shop when findShopByUrl finds a shop", async () => {
+    const mockHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta property="og:image" content="https://mediaexpert.pl/img/item.jpg" />
+          <meta property="og:title" content="Hulajnoga elektryczna" />
+        </head>
+        <body>
+          <h1>Hulajnoga elektryczna</h1>
+        </body>
+      </html>
+    `;
+
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(mockHtml, {
+        status: 200,
+        headers: { "Content-Type": "text/html" },
+      })
+    );
+
+    const mockShop = {
+      id: "shop-me",
+      name: "Media Expert",
+      logo: "https://example.com/me.svg",
+    };
+    vi.mocked(findShopByUrl).mockResolvedValueOnce(mockShop);
+
+    const result = await productScrapeMetadata({
+      productUrl: "https://www.mediaexpert.pl/hulajnogi/item-123",
+    });
+
+    expect(result?.serverError).toBeUndefined();
+    expect(result?.data).toEqual({
+      imageUrl: "https://mediaexpert.pl/img/item.jpg",
+      name: "Hulajnoga elektryczna",
+      code: null,
+      shop: mockShop,
+    });
   });
 
   it("returns a graceful server error when both Tier 1 and Tier 2 fail to extract image", async () => {

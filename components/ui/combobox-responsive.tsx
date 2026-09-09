@@ -25,6 +25,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { Spinner } from "@/components/ui/spinner";
 
 export interface ComboboxResponsiveProps<T> {
   /** Array of items to select from. */
@@ -60,6 +61,15 @@ export interface ComboboxResponsiveProps<T> {
   /** Whether selecting the currently selected item clears it. Defaults to true. */
   clearable?: boolean;
 
+  /** Controlled open state. */
+  open?: boolean;
+  /** Callback fired when the open state changes. */
+  onOpenChange?: (open: boolean) => void;
+  /** Whether the items are loading. */
+  loading?: boolean;
+  /** Loading text. */
+  loadingText?: string;
+
   /** Additional classes. */
   className?: string;
   triggerClassName?: string;
@@ -77,6 +87,10 @@ export function ComboboxResponsive<T>({
   filterFn,
   renderItem,
   renderTrigger,
+  open: controlledOpen,
+  onOpenChange: setControlledOpen,
+  loading = false,
+  loadingText = "Ładowanie...",
   placeholder = "Wybierz opcję...",
   searchPlaceholder = "Szukaj...",
   emptyText = "Nie znaleziono wyników.",
@@ -89,7 +103,18 @@ export function ComboboxResponsive<T>({
   triggerId,
   ariaLabel,
 }: ComboboxResponsiveProps<T>) {
-  const [open, setOpen] = React.useState(false);
+  const [internalOpen, setInternalOpen] = React.useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = React.useCallback(
+    (nextOpen: boolean) => {
+      if (!isControlled) {
+        setInternalOpen(nextOpen);
+      }
+      setControlledOpen?.(nextOpen);
+    },
+    [isControlled, setControlledOpen]
+  );
   const [search, setSearch] = React.useState("");
   const isMobile = useIsMobile();
 
@@ -108,7 +133,7 @@ export function ComboboxResponsive<T>({
       setOpen(false);
       setSearch("");
     },
-    [clearable, value, onValueChange]
+    [clearable, value, onValueChange, setOpen]
   );
 
   const handleClear = React.useCallback(
@@ -150,25 +175,34 @@ export function ComboboxResponsive<T>({
         autoFocus
       />
       <CommandList className={cn("max-h-72 overflow-y-auto", isMobile && "max-h-none flex-1")}>
-        <CommandEmpty>{emptyText}</CommandEmpty>
-        <CommandGroup>
-          {displayedItems.map((item) => {
-            const itemValue = getItemValue(item);
-            const isSelected = itemValue === value;
-            const searchKey = getItemLabel ? getItemLabel(item) : itemValue;
+        {loading ? (
+          <div className="flex items-center justify-center gap-2 p-6 text-sm text-muted-foreground">
+            <Spinner className="size-4" />
+            <span>{loadingText}</span>
+          </div>
+        ) : (
+          <>
+            <CommandEmpty>{emptyText}</CommandEmpty>
+            <CommandGroup>
+              {displayedItems.map((item) => {
+                const itemValue = getItemValue(item);
+                const isSelected = itemValue === value;
+                const searchKey = getItemLabel ? getItemLabel(item) : itemValue;
 
-            return (
-              <CommandItem
-                key={itemValue}
-                value={searchKey}
-                onSelect={() => handleSelect(itemValue, item)}
-                className="cursor-pointer"
-              >
-                {renderItem(item, isSelected)}
-              </CommandItem>
-            );
-          })}
-        </CommandGroup>
+                return (
+                  <CommandItem
+                    key={itemValue}
+                    value={searchKey}
+                    onSelect={() => handleSelect(itemValue, item)}
+                    className="cursor-pointer"
+                  >
+                    {renderItem(item, isSelected)}
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          </>
+        )}
       </CommandList>
     </Command>
   );

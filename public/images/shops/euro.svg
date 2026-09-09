@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="100%" height="100%">
+  <rect width="320" height="80" fill="transparent" />
+  <g font-family="Arial Black, Impact, Montserrat, sans-serif" font-weight="900" font-size="44" letter-spacing="-1">
+    <text x="12" y="52" fill="#08205B">RTV</text>
+    <text x="110" y="52" fill="#D4151E">EURO</text>
+    <text x="240" y="52" fill="#08205B">AGD</text>
+  </g>
+  <rect x="12" y="62" width="296" height="5" rx="2.5" fill="#FFCB05" />
+</svg>

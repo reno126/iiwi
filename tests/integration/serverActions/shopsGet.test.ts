@@ -23,6 +23,7 @@ describe("serverActions/shopsGet", () => {
         id: "shop-1",
         name: "Action",
         logo: "https://example.com/action.png",
+        matcherKeys: ["action.com", "action"],
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -30,6 +31,7 @@ describe("serverActions/shopsGet", () => {
         id: "shop-2",
         name: "Media Expert",
         logo: "https://example.com/me.png",
+        matcherKeys: ["mediaexpert.pl", "mediaexpert"],
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -46,6 +48,7 @@ describe("serverActions/shopsGet", () => {
         id: true,
         name: true,
         logo: true,
+        matcherKeys: true,
       },
     });
   });

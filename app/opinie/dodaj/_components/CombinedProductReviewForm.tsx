@@ -39,6 +39,7 @@ export function CombinedProductReviewForm({
       productUrl: "",
       imageUrl: "",
       code: "",
+      shopId: "",
       description: "",
     },
   });

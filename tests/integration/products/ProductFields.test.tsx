@@ -11,6 +11,10 @@ vi.mock("@/serverActions/productScrapeMetadata", () => ({
   productScrapeMetadata: vi.fn(),
 }));
 
+vi.mock("@/serverActions/shopMatchByUrlAction", () => ({
+  shopMatchByUrlAction: vi.fn().mockResolvedValue(null),
+}));
+
 interface WrapperProps {
   defaultValues?: Partial<ProductCreateInput>;
 }
@@ -61,6 +65,7 @@ describe("components/products/ProductFields", () => {
         imageUrl: "https://example.com/scraped-image.jpg",
         name: "Pobrana Nazwa Produktu",
         code: "EAN-123456",
+        shop: null,
       },
     });
 
@@ -105,6 +110,7 @@ describe("components/products/ProductFields", () => {
         imageUrl: "https://example.com/scraped-image.jpg",
         name: "Nowa Nazwa",
         code: "NEW-CODE",
+        shop: null,
       },
     });
 
@@ -184,5 +190,39 @@ describe("components/products/ProductFields", () => {
     // Formularz nie rzuca błędu blokującego na pole productUrl
     const productUrlInput = screen.getByLabelText(/Adres URL do produktu/i);
     expect(productUrlInput).not.toHaveAttribute("aria-invalid", "true");
+  });
+
+  it("auto-fills shop when scraper returns matched shop", async () => {
+    const user = userEvent.setup();
+    vi.mocked(productScrapeMetadata).mockResolvedValueOnce({
+      data: {
+        imageUrl: "https://example.com/me-item.jpg",
+        name: "Hulajnoga Kamikaze K1",
+        code: "K1-PLUS",
+        shop: {
+          id: "shop-media-expert",
+          name: "Media Expert",
+          logo: "https://example.com/me-logo.svg",
+        },
+      },
+    });
+
+    render(
+      <FormWrapper
+        defaultValues={{
+          productUrl: "https://www.mediaexpert.pl/rowery/hulajnogi/kamikaze-k1",
+        }}
+      />
+    );
+
+    const scrapeBtn = screen.getByRole("button", {
+      name: /Wyciągnij zdjęcie produktu/i,
+    });
+    await user.click(scrapeBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText("Media Expert")).toBeInTheDocument();
+      expect(screen.getByText("Wybrany sklep")).toBeInTheDocument();
+    });
   });
 });

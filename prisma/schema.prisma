@@ -66,13 +66,15 @@ model Product {
 }
 
 model Shop {
-  id        String    @id @default(cuid())
-  name      String?   @unique @db.VarChar(24)
-  logo      String?   @unique
-  products  Product[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id          String    @id @default(cuid())
+  name        String?   @unique @db.VarChar(24)
+  logo        String?   @unique
+  matcherKeys String[]  @default([]) @map("matcher_keys")
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
+  @@index([matcherKeys], type: Gin)
   @@map("shop")
 }
 

@@ -6,6 +6,7 @@ export interface ShopItem {
   id: string;
   name: string | null;
   logo: string | null;
+  matcherKeys?: string[];
 }
 
 export async function shopsGet(): Promise<ShopItem[]> {
@@ -15,6 +16,7 @@ export async function shopsGet(): Promise<ShopItem[]> {
       id: true,
       name: true,
       logo: true,
+      matcherKeys: true,
     },
   });
 }

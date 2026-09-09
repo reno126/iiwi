@@ -15,17 +15,22 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Sparkles, Trash2, ImageOff, CircleAlert, CheckCircle2 } from "lucide-react";
 import { productScrapeMetadata } from "@/serverActions/productScrapeMetadata";
+import { shopMatchByUrlAction } from "@/serverActions/shopMatchByUrlAction";
+import { ProductShopSelector } from "@/components/products/ProductShopSelector";
+import type { MatchedShopResult } from "@/lib/shops/findShopByUrl";
 import type { ProductCreateInput } from "@/schemas/product";
 import { cn } from "cn";
 
 interface ProductFieldsProps {
   className?: string;
   legend?: string;
+  initialShop?: MatchedShopResult | null;
 }
 
 export function ProductFields({
   className,
   legend = "Informacje o produkcie",
+  initialShop = null,
 }: ProductFieldsProps) {
   const {
     register,
@@ -35,6 +40,7 @@ export function ProductFields({
     formState: { errors },
   } = useFormContext<ProductCreateInput>();
 
+  const [selectedShop, setSelectedShop] = useState<MatchedShopResult | null>(initialShop);
   const [isPending, startTransition] = useTransition();
   const [isTier2NoticeVisible, setIsTier2NoticeVisible] = useState(false);
   const [scrapeNotice, setScrapeNotice] = useState<{
@@ -45,6 +51,24 @@ export function ProductFields({
 
   const productUrlValue = watch("productUrl");
   const imageUrlValue = watch("imageUrl");
+
+  const handleUrlBlur = async () => {
+    const currentShopId = getValues("shopId");
+    if (currentShopId) return;
+
+    const rawUrl = (getValues("productUrl") || "").trim();
+    if (!rawUrl) return;
+
+    try {
+      const res = await shopMatchByUrlAction({ url: rawUrl });
+      if (res?.data) {
+        setValue("shopId", res.data.id, { shouldValidate: true, shouldDirty: true });
+        setSelectedShop(res.data);
+      }
+    } catch {
+      // Ignorujemy błędy cichego dopasowania w tle
+    }
+  };
 
   const handleScrape = () => {
     let url = (getValues("productUrl") || "").trim();
@@ -83,7 +107,7 @@ export function ProductFields({
         }
 
         if (res?.data) {
-          const { imageUrl, name, code } = res.data;
+          const { imageUrl, name, code, shop } = res.data;
 
           if (imageUrl) {
             setValue("imageUrl", imageUrl, { shouldValidate: true, shouldDirty: true });
@@ -104,6 +128,12 @@ export function ProductFields({
           const currentCode = (getValues("code") || "").trim();
           if (!currentCode && code) {
             setValue("code", code, { shouldValidate: true, shouldDirty: true });
+          }
+
+          // 4d: Pomocnicze uzupełnienie sklepu jeśli dopasowano i pole jest puste
+          if (shop) {
+            setValue("shopId", shop.id, { shouldValidate: true, shouldDirty: true });
+            setSelectedShop(shop);
           }
         }
       } catch (err: unknown) {
@@ -149,7 +179,9 @@ export function ProductFields({
               id="product-url"
               type="url"
               placeholder="https://example.com/produkt"
-              {...register("productUrl")}
+              {...register("productUrl", {
+                onBlur: handleUrlBlur,
+              })}
             />
             <Button
               type="button"
@@ -198,6 +230,12 @@ export function ProductFields({
             <FieldError>{errors.productUrl.message}</FieldError>
           )}
         </Field>
+
+        <ProductShopSelector
+          selectedShop={selectedShop}
+          onSelectShop={setSelectedShop}
+          disabled={isPending}
+        />
 
         <Field>
           <FieldLabel htmlFor="product-image">Adres URL zdjęcia</FieldLabel>

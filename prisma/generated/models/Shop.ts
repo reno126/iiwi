@@ -44,6 +44,7 @@ export type ShopCountAggregateOutputType = {
   id: number
   name: number
   logo: number
+  matcherKeys: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -70,6 +71,7 @@ export type ShopCountAggregateInputType = {
   id?: true
   name?: true
   logo?: true
+  matcherKeys?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -151,6 +153,7 @@ export type ShopGroupByOutputType = {
   id: string
   name: string | null
   logo: string | null
+  matcherKeys: string[]
   createdAt: Date
   updatedAt: Date
   _count: ShopCountAggregateOutputType | null
@@ -180,6 +183,7 @@ export type ShopWhereInput = {
   id?: Prisma.StringFilter<"Shop"> | string
   name?: Prisma.StringNullableFilter<"Shop"> | string | null
   logo?: Prisma.StringNullableFilter<"Shop"> | string | null
+  matcherKeys?: Prisma.StringNullableListFilter<"Shop">
   createdAt?: Prisma.DateTimeFilter<"Shop"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Shop"> | Date | string
   products?: Prisma.ProductListRelationFilter
@@ -189,6 +193,7 @@ export type ShopOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   logo?: Prisma.SortOrderInput | Prisma.SortOrder
+  matcherKeys?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   products?: Prisma.ProductOrderByRelationAggregateInput
@@ -201,6 +206,7 @@ export type ShopWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.ShopWhereInput | Prisma.ShopWhereInput[]
   OR?: Prisma.ShopWhereInput[]
   NOT?: Prisma.ShopWhereInput | Prisma.ShopWhereInput[]
+  matcherKeys?: Prisma.StringNullableListFilter<"Shop">
   createdAt?: Prisma.DateTimeFilter<"Shop"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Shop"> | Date | string
   products?: Prisma.ProductListRelationFilter
@@ -210,6 +216,7 @@ export type ShopOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   logo?: Prisma.SortOrderInput | Prisma.SortOrder
+  matcherKeys?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ShopCountOrderByAggregateInput
@@ -224,6 +231,7 @@ export type ShopScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Shop"> | string
   name?: Prisma.StringNullableWithAggregatesFilter<"Shop"> | string | null
   logo?: Prisma.StringNullableWithAggregatesFilter<"Shop"> | string | null
+  matcherKeys?: Prisma.StringNullableListFilter<"Shop">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Shop"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Shop"> | Date | string
 }
@@ -232,6 +240,7 @@ export type ShopCreateInput = {
   id?: string
   name?: string | null
   logo?: string | null
+  matcherKeys?: Prisma.ShopCreatematcherKeysInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
   products?: Prisma.ProductCreateNestedManyWithoutShopInput
@@ -241,6 +250,7 @@ export type ShopUncheckedCreateInput = {
   id?: string
   name?: string | null
   logo?: string | null
+  matcherKeys?: Prisma.ShopCreatematcherKeysInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutShopInput
@@ -250,6 +260,7 @@ export type ShopUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  matcherKeys?: Prisma.ShopUpdatematcherKeysInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   products?: Prisma.ProductUpdateManyWithoutShopNestedInput
@@ -259,6 +270,7 @@ export type ShopUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  matcherKeys?: Prisma.ShopUpdatematcherKeysInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   products?: Prisma.ProductUncheckedUpdateManyWithoutShopNestedInput
@@ -268,6 +280,7 @@ export type ShopCreateManyInput = {
   id?: string
   name?: string | null
   logo?: string | null
+  matcherKeys?: Prisma.ShopCreatematcherKeysInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -276,6 +289,7 @@ export type ShopUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  matcherKeys?: Prisma.ShopUpdatematcherKeysInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -284,6 +298,7 @@ export type ShopUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  matcherKeys?: Prisma.ShopUpdatematcherKeysInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -293,10 +308,19 @@ export type ShopNullableScalarRelationFilter = {
   isNot?: Prisma.ShopWhereInput | null
 }
 
+export type StringNullableListFilter<$PrismaModel = never> = {
+  equals?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel> | null
+  has?: string | Prisma.StringFieldRefInput<$PrismaModel> | null
+  hasEvery?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  hasSome?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  isEmpty?: boolean
+}
+
 export type ShopCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   logo?: Prisma.SortOrder
+  matcherKeys?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -333,10 +357,20 @@ export type ShopUpdateOneWithoutProductsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ShopUpdateToOneWithWhereWithoutProductsInput, Prisma.ShopUpdateWithoutProductsInput>, Prisma.ShopUncheckedUpdateWithoutProductsInput>
 }
 
+export type ShopCreatematcherKeysInput = {
+  set: string[]
+}
+
+export type ShopUpdatematcherKeysInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
 export type ShopCreateWithoutProductsInput = {
   id?: string
   name?: string | null
   logo?: string | null
+  matcherKeys?: Prisma.ShopCreatematcherKeysInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -345,6 +379,7 @@ export type ShopUncheckedCreateWithoutProductsInput = {
   id?: string
   name?: string | null
   logo?: string | null
+  matcherKeys?: Prisma.ShopCreatematcherKeysInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -369,6 +404,7 @@ export type ShopUpdateWithoutProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  matcherKeys?: Prisma.ShopUpdatematcherKeysInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -377,6 +413,7 @@ export type ShopUncheckedUpdateWithoutProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  matcherKeys?: Prisma.ShopUpdatematcherKeysInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -416,6 +453,7 @@ export type ShopSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   id?: boolean
   name?: boolean
   logo?: boolean
+  matcherKeys?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   products?: boolean | Prisma.Shop$productsArgs<ExtArgs>
@@ -426,6 +464,7 @@ export type ShopSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   id?: boolean
   name?: boolean
   logo?: boolean
+  matcherKeys?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["shop"]>
@@ -434,6 +473,7 @@ export type ShopSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   id?: boolean
   name?: boolean
   logo?: boolean
+  matcherKeys?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["shop"]>
@@ -442,11 +482,12 @@ export type ShopSelectScalar = {
   id?: boolean
   name?: boolean
   logo?: boolean
+  matcherKeys?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ShopOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "logo" | "createdAt" | "updatedAt", ExtArgs["result"]["shop"]>
+export type ShopOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "logo" | "matcherKeys" | "createdAt" | "updatedAt", ExtArgs["result"]["shop"]>
 export type ShopInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   products?: boolean | Prisma.Shop$productsArgs<ExtArgs>
   _count?: boolean | Prisma.ShopCountOutputTypeDefaultArgs<ExtArgs>
@@ -463,6 +504,7 @@ export type $ShopPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     id: string
     name: string | null
     logo: string | null
+    matcherKeys: string[]
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["shop"]>
@@ -892,6 +934,7 @@ export interface ShopFieldRefs {
   readonly id: Prisma.FieldRef<"Shop", 'String'>
   readonly name: Prisma.FieldRef<"Shop", 'String'>
   readonly logo: Prisma.FieldRef<"Shop", 'String'>
+  readonly matcherKeys: Prisma.FieldRef<"Shop", 'String[]'>
   readonly createdAt: Prisma.FieldRef<"Shop", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Shop", 'DateTime'>
 }
