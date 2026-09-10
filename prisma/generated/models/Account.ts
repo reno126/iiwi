@@ -800,7 +800,7 @@ export type $AccountPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
 export type AccountGetPayload<S extends boolean | null | undefined | AccountDefaultArgs> = runtime.Types.Result.GetResult<Prisma.$AccountPayload, S>
 
 export type AccountCountArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> =
-  Omit<AccountFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+  Omit<AccountFindManyArgs, 'select' | 'include' | 'distinct' | 'omit' | 'relationLoadStrategy'> & {
     select?: AccountCountAggregateInputType | true
   }
 
@@ -1253,6 +1253,7 @@ export type AccountFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Filter, which Account to fetch.
    */
   where: Prisma.AccountWhereUniqueInput
+  relationLoadStrategy?: Prisma.RelationLoadStrategy
 }
 
 /**
@@ -1275,6 +1276,7 @@ export type AccountFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extension
    * Filter, which Account to fetch.
    */
   where: Prisma.AccountWhereUniqueInput
+  relationLoadStrategy?: Prisma.RelationLoadStrategy
 }
 
 /**
@@ -1327,6 +1329,7 @@ export type AccountFindFirstArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Filter by unique combinations of Accounts.
    */
   distinct?: Prisma.AccountScalarFieldEnum | Prisma.AccountScalarFieldEnum[]
+  relationLoadStrategy?: Prisma.RelationLoadStrategy
 }
 
 /**
@@ -1379,6 +1382,7 @@ export type AccountFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extensions
    * Filter by unique combinations of Accounts.
    */
   distinct?: Prisma.AccountScalarFieldEnum | Prisma.AccountScalarFieldEnum[]
+  relationLoadStrategy?: Prisma.RelationLoadStrategy
 }
 
 /**
@@ -1431,6 +1435,7 @@ export type AccountFindManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Filter by unique combinations of Accounts.
    */
   distinct?: Prisma.AccountScalarFieldEnum | Prisma.AccountScalarFieldEnum[]
+  relationLoadStrategy?: Prisma.RelationLoadStrategy
 }
 
 /**
@@ -1453,6 +1458,7 @@ export type AccountCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    * The data needed to create a Account.
    */
   data: Prisma.XOR<Prisma.AccountCreateInput, Prisma.AccountUncheckedCreateInput>
+  relationLoadStrategy?: Prisma.RelationLoadStrategy
 }
 
 /**
@@ -1513,6 +1519,7 @@ export type AccountUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    * Choose, which Account to update.
    */
   where: Prisma.AccountWhereUniqueInput
+  relationLoadStrategy?: Prisma.RelationLoadStrategy
 }
 
 /**
@@ -1591,6 +1598,7 @@ export type AccountUpsertArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    * In case the Account was found with the provided `where` argument, update it with this data.
    */
   update: Prisma.XOR<Prisma.AccountUpdateInput, Prisma.AccountUncheckedUpdateInput>
+  relationLoadStrategy?: Prisma.RelationLoadStrategy
 }
 
 /**
@@ -1613,6 +1621,7 @@ export type AccountDeleteArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    * Filter which Account to delete.
    */
   where: Prisma.AccountWhereUniqueInput
+  relationLoadStrategy?: Prisma.RelationLoadStrategy
 }
 
 /**

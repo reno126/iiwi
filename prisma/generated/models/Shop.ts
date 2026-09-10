@@ -514,7 +514,7 @@ export type $ShopPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
 export type ShopGetPayload<S extends boolean | null | undefined | ShopDefaultArgs> = runtime.Types.Result.GetResult<Prisma.$ShopPayload, S>
 
 export type ShopCountArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> =
-  Omit<ShopFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+  Omit<ShopFindManyArgs, 'select' | 'include' | 'distinct' | 'omit' | 'relationLoadStrategy'> & {
     select?: ShopCountAggregateInputType | true
   }
 
@@ -961,6 +961,7 @@ export type ShopFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Filter, which Shop to fetch.
    */
   where: Prisma.ShopWhereUniqueInput
+  relationLoadStrategy?: Prisma.RelationLoadStrategy
 }
 
 /**
@@ -983,6 +984,7 @@ export type ShopFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extensions.I
    * Filter, which Shop to fetch.
    */
   where: Prisma.ShopWhereUniqueInput
+  relationLoadStrategy?: Prisma.RelationLoadStrategy
 }
 
 /**
@@ -1035,6 +1037,7 @@ export type ShopFindFirstArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    * Filter by unique combinations of Shops.
    */
   distinct?: Prisma.ShopScalarFieldEnum | Prisma.ShopScalarFieldEnum[]
+  relationLoadStrategy?: Prisma.RelationLoadStrategy
 }
 
 /**
@@ -1087,6 +1090,7 @@ export type ShopFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extensions.In
    * Filter by unique combinations of Shops.
    */
   distinct?: Prisma.ShopScalarFieldEnum | Prisma.ShopScalarFieldEnum[]
+  relationLoadStrategy?: Prisma.RelationLoadStrategy
 }
 
 /**
@@ -1139,6 +1143,7 @@ export type ShopFindManyArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
    * Filter by unique combinations of Shops.
    */
   distinct?: Prisma.ShopScalarFieldEnum | Prisma.ShopScalarFieldEnum[]
+  relationLoadStrategy?: Prisma.RelationLoadStrategy
 }
 
 /**
@@ -1161,6 +1166,7 @@ export type ShopCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
    * The data needed to create a Shop.
    */
   data: Prisma.XOR<Prisma.ShopCreateInput, Prisma.ShopUncheckedCreateInput>
+  relationLoadStrategy?: Prisma.RelationLoadStrategy
 }
 
 /**
@@ -1217,6 +1223,7 @@ export type ShopUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
    * Choose, which Shop to update.
    */
   where: Prisma.ShopWhereUniqueInput
+  relationLoadStrategy?: Prisma.RelationLoadStrategy
 }
 
 /**
@@ -1291,6 +1298,7 @@ export type ShopUpsertArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
    * In case the Shop was found with the provided `where` argument, update it with this data.
    */
   update: Prisma.XOR<Prisma.ShopUpdateInput, Prisma.ShopUncheckedUpdateInput>
+  relationLoadStrategy?: Prisma.RelationLoadStrategy
 }
 
 /**
@@ -1313,6 +1321,7 @@ export type ShopDeleteArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
    * Filter which Shop to delete.
    */
   where: Prisma.ShopWhereUniqueInput
+  relationLoadStrategy?: Prisma.RelationLoadStrategy
 }
 
 /**

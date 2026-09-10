@@ -63,7 +63,7 @@ export function ProductShopSelector({
 
   return (
     <Field>
-      <FieldLabel>Sklep (opcjonalnie)</FieldLabel>
+      <FieldLabel>Sklep</FieldLabel>
 
       {selectedShop ? (
         // Stan 1: Sklep jest wybrany (rozpoznany ze scrapera lub wybrany ręcznie)

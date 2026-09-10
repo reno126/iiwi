@@ -5,6 +5,7 @@ import {
   Calendar,
   Star,
   ArrowRight,
+  Store,
 } from "lucide-react";
 import type { ProductListItem } from "@/serverActions/productsGet";
 import { Card, CardContent } from "@/components/ui/card";
@@ -43,7 +44,11 @@ export function ProductsList({ products }: ProductsListProps) {
   return (
     <div className="flex flex-col gap-4 w-full" data-slot="products-list">
       {products.map((product) => (
-        <Link href={`/produkty/${product.id}`} key={product.id} className="group">
+        <Link
+          href={`/produkty/${product.id}`}
+          key={product.id}
+          className="group"
+        >
           <Card className="transition-all hover:border-primary/50 hover:shadow-sm py-1 md:py-5">
             <CardContent className="p-1 md:p-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -64,7 +69,7 @@ export function ProductsList({ products }: ProductsListProps) {
 
                   <div className="min-w-0 space-y-1.5">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-md md:text-lg font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-4">
+                      <span className="text-md md:text-lg font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-3">
                         {product.name}
                       </span>
 
@@ -90,6 +95,12 @@ export function ProductsList({ products }: ProductsListProps) {
                         </span>
                       )}
                     </div>
+                    {product?.shop?.name && (
+                      <span className="flex items-center gap-1.5 text-xs text-foreground">
+                        <Store className="size-4 text-muted-foreground" />{" "}
+                        {product.shop.name}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>

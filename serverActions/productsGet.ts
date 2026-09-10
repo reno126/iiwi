@@ -10,10 +10,14 @@ export interface ProductListItem {
   rate_avg: number;
   rate_count: number;
   createdAt: Date;
+  shop: {
+    name: string | null;
+  } | null;
 }
 
 export async function productsGet(): Promise<ProductListItem[]> {
   return await prisma.product.findMany({
+    relationLoadStrategy: "join",
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
@@ -23,6 +27,11 @@ export async function productsGet(): Promise<ProductListItem[]> {
       rate_avg: true,
       rate_count: true,
       createdAt: true,
+      shop: {
+        select: {
+          name: true,
+        },
+      },
     },
   });
 }
