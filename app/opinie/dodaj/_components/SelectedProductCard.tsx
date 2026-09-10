@@ -25,7 +25,7 @@ export function SelectedProductCard({
               <img
                 src={product.imageUrl}
                 alt={product.name}
-                className="size-8 object-contain rounded"
+                className="size-12 object-contain rounded"
               />
             ) : (
               <Package className="size-5 text-muted-foreground" />
