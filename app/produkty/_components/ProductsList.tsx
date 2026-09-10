@@ -44,14 +44,12 @@ export function ProductsList({ products }: ProductsListProps) {
     <div className="flex flex-col gap-4 w-full" data-slot="products-list">
       {products.map((product) => (
         <Link href={`/produkty/${product.id}`} key={product.id} className="group">
-          <Card className="transition-all hover:border-primary/50 hover:shadow-sm">
-            <CardContent className="p-5">
-              {/* One product per row across all resolutions */}
-
+          <Card className="transition-all hover:border-primary/50 hover:shadow-sm py-1 md:py-5">
+            <CardContent className="p-1 md:p-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 {/* Product Thumbnail & Main Details */}
                 <div className="flex items-start gap-4 min-w-0">
-                  <div className="size-16 rounded-lg bg-muted border flex items-center justify-center shrink-0 overflow-hidden">
+                  <div className="size-20 rounded-lg md:bg-muted md:border flex items-center justify-center shrink-0 overflow-hidden">
                     {product.imageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -66,7 +64,7 @@ export function ProductsList({ products }: ProductsListProps) {
 
                   <div className="min-w-0 space-y-1.5">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                      <span className="text-md md:text-lg font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-4">
                         {product.name}
                       </span>
 
