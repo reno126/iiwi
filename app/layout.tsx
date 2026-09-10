@@ -44,6 +44,11 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {children}
           </main>
+          <footer className="w-full bg-red-600 text-white py-4 px-4 sm:px-6 lg:px-8 mt-auto">
+            <div className="max-w-7xl mx-auto text-center text-xs sm:text-sm font-medium">
+              Darmowy serwis z rzetelnymi opiniami o produktach z dowolnych sklepów.
+            </div>
+          </footer>
         </ClientSessionProvider>
       </body>
     </html>
