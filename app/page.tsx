@@ -9,7 +9,8 @@ import { ShopsGrid } from "./_components/ShopsGrid";
 
 export const metadata: Metadata = {
   title: "Strona główna | TrueReview",
-  description: "Tylko tutaj znajdzie prawdziwe, całkowicie niezależne opinie o produktach.",
+  description:
+    "Tylko tutaj znajdzie prawdziwe, całkowicie niezależne opinie o produktach.",
 };
 
 export default async function HomePage() {
@@ -22,8 +23,16 @@ export default async function HomePage() {
     <div className="flex flex-col gap-10 sm:gap-14 md:gap-16 w-full max-w-5xl mx-auto py-4 sm:py-8">
       {/* 1. Big Text Hero */}
       <section className="text-center py-4 sm:py-8 md:py-10">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground max-w-4xl mx-auto leading-tight">
-          Tylko tutaj znajdzie prawdziwe, całkowicie niezależne opinie o produktach
+        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-muted-foreground max-w-4xl mx-auto leading-tight">
+          Tylko tutaj znajdzie
+          <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground">
+            {" "}prawdziwe
+          </span>
+          , całkowicie niezależne
+          <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground">
+            {" "}opinie
+          </span>{" "}
+          o produktach
         </h1>
       </section>
 
