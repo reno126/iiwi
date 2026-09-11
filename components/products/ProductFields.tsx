@@ -309,7 +309,7 @@ export function ProductFields({
                 variant="outline"
                 size="sm"
                 onClick={handleClearImage}
-                className="w-full sm:w-auto shrink-0 text-muted-foreground hover:text-destructive hover:border-destructive/40"
+                className="sm:w-auto shrink-0 text-muted-foreground hover:text-destructive hover:border-destructive/40"
               >
                 <Trash2 className="size-3.5 mr-1" />
                 Usuń

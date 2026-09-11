@@ -63,14 +63,16 @@ export function ProductShopSelector({
 
   return (
     <Field className="rounded-xl border border-border/80 bg-white p-3.5 sm:p-4 shadow-2xs transition-colors focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/10">
-      <FieldLabel className="text-sm font-medium text-foreground">Sklep</FieldLabel>
+      <FieldLabel className="text-sm font-medium text-foreground">
+        Sklep
+      </FieldLabel>
 
       {selectedShop ? (
         // Stan 1: Sklep jest wybrany (rozpoznany ze scrapera lub wybrany ręcznie)
-        <div className="flex items-center justify-between gap-3 p-3 rounded-lg border bg-muted/20 text-card-foreground">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-3 p-3 rounded-lg border bg-muted/20 text-card-foreground">
           <div className="flex items-center gap-3 min-w-0">
             {selectedShop.logo ? (
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-md border bg-white p-1">
+              <div className="flex size-16 shrink-0 items-center justify-center rounded-md border bg-white p-1">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={selectedShop.logo}
@@ -87,7 +89,6 @@ export function ProductShopSelector({
               <span className="font-medium text-sm truncate">
                 {selectedShop.name || "Nieznany sklep"}
               </span>
-              <span className="text-xs text-muted-foreground">Wybrany sklep</span>
             </div>
           </div>
 
@@ -131,34 +132,29 @@ export function ProductShopSelector({
                     )}
                     <span className="truncate">{item.name || "Sklep"}</span>
                   </div>
-                  {isSelected && <Check className="size-4 text-primary shrink-0" />}
+                  {isSelected && (
+                    <Check className="size-4 text-primary shrink-0" />
+                  )}
                 </div>
               )}
             />
 
             <Button
               type="button"
-              variant="ghost"
-              size="icon"
+              variant="outline"
+              size="sm"
               aria-label="Usuń sklep"
               disabled={disabled}
               onClick={handleClearShop}
-              className="text-muted-foreground hover:text-destructive size-8"
+                className="sm:w-auto text-muted-foreground hover:text-destructive hover:border-destructive/40"
             >
-              <Trash2 className="size-4" />
+              <Trash2 className="size-3.5 mr-1" /> Usuń
             </Button>
           </div>
         </div>
       ) : (
         // Stan 2: Brak wybranego sklepu (pusty / oczekujący na link)
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 rounded-lg border border-dashed text-sm text-muted-foreground bg-muted/20">
-          <div className="flex items-center gap-2 min-w-0">
-            <Store className="size-4 shrink-0 text-muted-foreground" />
-            <span className="text-xs sm:text-sm">
-              Sklep zostanie rozpoznany automatycznie po pobraniu danych z linku.
-            </span>
-          </div>
-
           <ComboboxResponsive<ShopItem>
             items={shopsList || []}
             value={shopId || ""}
@@ -195,7 +191,9 @@ export function ProductShopSelector({
                   )}
                   <span className="truncate">{item.name || "Sklep"}</span>
                 </div>
-                {isSelected && <Check className="size-4 text-primary shrink-0" />}
+                {isSelected && (
+                  <Check className="size-4 text-primary shrink-0" />
+                )}
               </div>
             )}
           />
