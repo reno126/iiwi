@@ -4,7 +4,13 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { Sparkles, ArrowLeft } from "lucide-react";
+import {
+  Sparkles,
+  ArrowLeft,
+  SmilePlus,
+  FaceGrinningIcon,
+  ScanFaceIcon,
+} from "lucide-react";
 
 interface UrlPromptStepProps {
   onScrape: (url: string) => void;
@@ -35,12 +41,9 @@ export function UrlPromptStep({
   return (
     <div className="space-y-6">
       {/* 1. Element 1: Nagłówek i podtytuł mniejszymi literami */}
-      <div className="space-y-2 text-center">
-        <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-          Podaj nam link do oferty produktu
-        </h2>
+      <div className="">
         <p className="text-sm text-muted-foreground">
-          my pobierzemy wszystko co potrzeba, a Ty jedynie ocenisz produkt
+          wklej go poniżej, to pójdzie szybko!
         </p>
       </div>
 
@@ -94,7 +97,7 @@ export function UrlPromptStep({
           Dodaj produkt ręcznie
         </Button>
         <span className="block text-xs text-muted-foreground">
-          wymagamy tylko nazwy
+          wymagamy tylko nazwy, no i opinii
         </span>
       </div>
 

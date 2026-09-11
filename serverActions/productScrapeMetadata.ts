@@ -5,7 +5,10 @@ import { productScrapeSchema } from "@/schemas/productScrape";
 import { validateUrlSafety } from "@/lib/scraper/ssrfProtection";
 import { extractProductMetadata } from "@/lib/scraper/extractMetadata";
 import { fetchWithZenRows } from "@/lib/scraper/zenrowsClient";
-import { findShopByUrl, type MatchedShopResult } from "@/lib/shops/findShopByUrl";
+import {
+  findShopByUrl,
+  type MatchedShopResult,
+} from "@/lib/shops/findShopByUrl";
 import { returnServerError } from "next-safe-action";
 
 export interface ScrapedMetadataResult {
@@ -22,7 +25,8 @@ const BROWSER_HEADERS = {
   Accept:
     "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
   "Accept-Language": "pl-PL,pl;q=0.9,en-US;q=0.8,en;q=0.7",
-  "Sec-Ch-Ua": '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+  "Sec-Ch-Ua":
+    '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
   "Sec-Ch-Ua-Mobile": "?0",
   "Sec-Ch-Ua-Platform": '"Windows"',
   "Sec-Fetch-Dest": "document",
@@ -41,7 +45,8 @@ export const productScrapeMetadata = safeActionUserCtx
     const safetyCheck = validateUrlSafety(productUrl);
     if (!safetyCheck.isValid) {
       returnServerError(
-        safetyCheck.error ?? "Podany adres URL jest niedozwolony ze względów bezpieczeństwa."
+        safetyCheck.error ??
+          "Podany adres URL jest niedozwolony ze względów bezpieczeństwa.",
       );
     }
 
@@ -68,14 +73,18 @@ export const productScrapeMetadata = safeActionUserCtx
       const tier1Duration = Date.now() - tier1Start;
 
       console.log(
-        `[Scraper] Tier 1 responded with HTTP ${response.status} in ${tier1Duration}ms for: ${productUrl}`
+        `[Scraper] Tier 1 responded with HTTP ${response.status} in ${tier1Duration}ms for: ${productUrl}`,
       );
 
       if (response.ok) {
         tier1Html = await response.text();
-      } else if (response.status === 403 || response.status === 503 || response.status === 429) {
+      } else if (
+        response.status === 403 ||
+        response.status === 503 ||
+        response.status === 429
+      ) {
         console.log(
-          `[Scraper] Tier 1 received blocking status (${response.status}). Flagging for Tier 2 fallback.`
+          `[Scraper] Tier 1 received blocking status (${response.status}). Flagging for Tier 2 fallback.`,
         );
         shouldTryTier2 = true;
       }
@@ -83,7 +92,7 @@ export const productScrapeMetadata = safeActionUserCtx
       const tier1Duration = Date.now() - tier1Start;
       console.log(
         `[Scraper] Tier 1 network error/timeout after ${tier1Duration}ms:`,
-        err instanceof Error ? err.message : err
+        err instanceof Error ? err.message : err,
       );
       // Błąd sieci lub timeout w Tier 1 – kwalifikuje do próby Tier 2
       shouldTryTier2 = true;
@@ -92,7 +101,7 @@ export const productScrapeMetadata = safeActionUserCtx
     // Próba ekstrakcji z HTML uzyskanego w Tier 1
     if (tier1Html) {
       console.log(
-        `[Scraper] Tier 1 returned HTML (${tier1Html.length} chars). Attempting metadata extraction...`
+        `[Scraper] Tier 1 returned HTML (${tier1Html.length} chars). Attempting metadata extraction...`,
       );
       tier1Metadata = extractProductMetadata(tier1Html, productUrl);
 
@@ -116,7 +125,7 @@ export const productScrapeMetadata = safeActionUserCtx
       // Jeżeli brak zdjęcia (często renderowanego przez JS), ale jest ZenRows – spróbujmy Tier 2
       if (!tier1Metadata?.imageUrl) {
         console.log(
-          `[Scraper] Tier 1 HTML is missing product image. Flagging for Tier 2 fallback.`
+          `[Scraper] Tier 1 HTML is missing product image. Flagging for Tier 2 fallback.`,
         );
         shouldTryTier2 = true;
       }
@@ -125,21 +134,29 @@ export const productScrapeMetadata = safeActionUserCtx
     // 3. Tier 2: ZenRows Fallback (headless browser + residential proxy)
     let tier2Metadata: ReturnType<typeof extractProductMetadata> = null;
     if (shouldTryTier2 && process.env.ZENROWS_API_KEY) {
-      console.log(`[Scraper] Starting Tier 2 (ZenRows) fallback for: ${productUrl}`);
-      const tier2Html = await fetchWithZenRows(productUrl, { timeoutMs: 25000 });
+      console.log(
+        `[Scraper] Starting Tier 2 (ZenRows) fallback for: ${productUrl}`,
+      );
+      const tier2Html = await fetchWithZenRows(productUrl, {
+        timeoutMs: 60000,
+      });
       if (tier2Html) {
         console.log(
-          `[Scraper] ZenRows returned HTML (${tier2Html.length} chars). Attempting metadata extraction...`
+          `[Scraper] ZenRows returned HTML (${tier2Html.length} chars). Attempting metadata extraction...`,
         );
         tier2Metadata = extractProductMetadata(tier2Html, productUrl);
         if (tier2Metadata) {
           console.log(`[Scraper] Tier 2 extraction returned:`, tier2Metadata);
         }
       } else {
-        console.warn(`[Scraper] Tier 2 (ZenRows) returned null or empty response for: ${productUrl}`);
+        console.warn(
+          `[Scraper] Tier 2 (ZenRows) returned null or empty response for: ${productUrl}`,
+        );
       }
     } else if (shouldTryTier2 && !process.env.ZENROWS_API_KEY) {
-      console.warn(`[Scraper] Tier 2 needed, but ZENROWS_API_KEY is not configured.`);
+      console.warn(
+        `[Scraper] Tier 2 needed, but ZENROWS_API_KEY is not configured.`,
+      );
     }
 
     // Scalanie wyników z Tier 1 i Tier 2 (preferując wartości niepuste)
@@ -152,7 +169,10 @@ export const productScrapeMetadata = safeActionUserCtx
     const shop = await findShopByUrl(productUrl);
 
     const hasAnyData = Boolean(
-      mergedMetadata.imageUrl || mergedMetadata.name || mergedMetadata.code || shop
+      mergedMetadata.imageUrl ||
+        mergedMetadata.name ||
+        mergedMetadata.code ||
+        shop,
     );
 
     if (hasAnyData) {
@@ -178,6 +198,6 @@ export const productScrapeMetadata = safeActionUserCtx
     // 4. Błąd całkowity – nie udało się pobrać żadnych metadanych
     console.warn(`[Scraper] Scrape fully failed for: ${productUrl}`);
     returnServerError(
-      "Nie udało się automatycznie pobrać danych z podanego linku. Możesz uzupełnić dane ręcznie."
+      "Nie udało się automatycznie pobrać danych z podanego linku. Możesz uzupełnić dane ręcznie.",
     );
   });

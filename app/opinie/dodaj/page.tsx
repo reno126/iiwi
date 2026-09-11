@@ -13,9 +13,6 @@ export function NewReviewPage() {
         <h1 className="text-3xl font-bold tracking-tight text-foreground">
           Dodaj opinię
         </h1>
-        <p className="text-sm text-muted-foreground">
-          Wybierz produkt z bazy lub dodaj nowy, aby podzielić się swoją opinią.
-        </p>
       </div>
 
       <AddReviewFlow />

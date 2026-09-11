@@ -270,8 +270,8 @@ export function ProductFields({
             <FieldLabel>Zdjęcie produktu</FieldLabel>
             <input type="hidden" {...register("imageUrl")} />
             {/* Podgląd miniatury zdjęcia z opcją usunięcia */}
-            <div className="flex items-center gap-3 rounded-lg border bg-muted/30 p-2.5">
-              <div className="relative size-16 shrink-0 overflow-hidden rounded-md border bg-background flex items-center justify-center">
+            <div className="flex flex-col md:flex-row items-center gap-3 rounded-lg border bg-muted/30 p-2.5">
+              <div className="relative size-24 shrink-0 overflow-hidden rounded-md border bg-background flex items-center justify-center">
                 {imageLoadError ? (
                   <ImageOff className="size-6 text-muted-foreground" />
                 ) : (
@@ -291,7 +291,7 @@ export function ProductFields({
                     ? "Błąd ładowania podglądu zdjęcia"
                     : "Podgląd zdjęcia produktu"}
                 </span>
-                <span className="text-xs text-muted-foreground truncate">
+                <span className="hidden md:inline text-xs text-muted-foreground truncate">
                   {imageUrlValue}
                 </span>
               </div>

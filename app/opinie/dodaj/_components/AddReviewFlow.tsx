@@ -29,17 +29,18 @@ export function AddReviewFlow() {
       {/* STAN 1: SEARCHING */}
       {mode.type === "SEARCHING" && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between gap-4">
-            <span className="text-sm font-medium text-foreground">
-              Wybierz produkt lub dodaj nowy
-            </span>
+          <div className="flex flex-col items-center justify-between gap-4">
+            <p className="text-sm text-muted-foreground">
+              Wybierz produkt z bazy lub dodaj nowy, aby podzielić się swoją
+              opinią.
+            </p>
             <Button
               type="button"
               onClick={() => setMode({ type: "NEW_PRODUCT_AND_REVIEW" })}
-              className="shrink-0 gap-1.5"
+              className="shrink-0 gap-1.5 w-full md:w-auto"
             >
               <PlusCircle className="size-4" />
-              Dodaj produkt
+              Dodaj nowy produkt
             </Button>
           </div>
 

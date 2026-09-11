@@ -24,7 +24,10 @@ import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CircleAlert, ArrowLeft } from "lucide-react";
 import { UrlPromptStep } from "./UrlPromptStep";
-import { ScrapeNoticeBanner, type ScrapedFieldType } from "./ScrapeNoticeBanner";
+import {
+  ScrapeNoticeBanner,
+  type ScrapedFieldType,
+} from "./ScrapeNoticeBanner";
 import type { MatchedShopResult } from "@/lib/shops/findShopByUrl";
 
 interface CombinedProductReviewFormProps {
@@ -48,7 +51,9 @@ export function CombinedProductReviewForm({
   const [phase, setPhase] = useState<FormPhase>({ type: "URL_PROMPT" });
   const [isScraping, startScrapingTransition] = useTransition();
   const [isTier2NoticeVisible, setIsTier2NoticeVisible] = useState(false);
-  const [detectedShop, setDetectedShop] = useState<MatchedShopResult | null>(null);
+  const [detectedShop, setDetectedShop] = useState<MatchedShopResult | null>(
+    null,
+  );
 
   const methods = useForm<ProductWithReviewCreateInput>({
     resolver: zodResolver(productWithReviewCreateSchema),
@@ -95,7 +100,10 @@ export function CombinedProductReviewForm({
           const { imageUrl, name, code, shop, scrapedFields } = res.data;
 
           if (imageUrl) {
-            setValue("imageUrl", imageUrl, { shouldValidate: true, shouldDirty: true });
+            setValue("imageUrl", imageUrl, {
+              shouldValidate: true,
+              shouldDirty: true,
+            });
           }
           if (name) {
             setValue("name", name, { shouldValidate: true, shouldDirty: true });
@@ -104,7 +112,10 @@ export function CombinedProductReviewForm({
             setValue("code", code, { shouldValidate: true, shouldDirty: true });
           }
           if (shop) {
-            setValue("shopId", shop.id, { shouldValidate: true, shouldDirty: true });
+            setValue("shopId", shop.id, {
+              shouldValidate: true,
+              shouldDirty: true,
+            });
             setDetectedShop(shop);
           }
 
@@ -185,16 +196,17 @@ export function CombinedProductReviewForm({
   };
 
   return (
-    <Card className="border shadow-xs">
-      <CardHeader>
-        <CardTitle className="text-xl">Dodaj nowy produkt i opinię</CardTitle>
-        <CardDescription>
+    <Card className="border-none shadow-none ring-0 md:border md:shadow-xs">
+      <CardHeader className="px-3 md:px-4">
+        <CardTitle className="text-xl">
+          {" "}
           {phase.type === "URL_PROMPT"
-            ? "Rozpocznij od podania linku do oferty lub dodaj produkt ręcznie."
+            ? "Masz link do oferty produktu?"
             : phase.mode === "manual"
-            ? "Wprowadź nazwę produktu i podziel się swoją recenzją."
-            : "Zweryfikuj pobrane dane produktu i podziel się swoją recenzją."}
-        </CardDescription>
+              ? "Tryb ręczny"
+              : "Zweryfikuj pobrane dane"}
+        </CardTitle>
+        <CardDescription></CardDescription>
       </CardHeader>
 
       <CardContent>
@@ -229,26 +241,24 @@ export function CombinedProductReviewForm({
 
               {/* Informacja w ścieżce ręcznej */}
               {phase.mode === "manual" && (
-                <div className="rounded-lg border bg-muted/40 p-3 text-xs text-muted-foreground flex items-center justify-between gap-2">
-                  <span>
-                    Tryb ręczny: <strong>wymagamy tylko nazwy produktu</strong> oraz Twojej oceny.
-                  </span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setPhase({ type: "URL_PROMPT" })}
-                    className="h-7 text-xs"
-                  >
-                    Chcę jednak podać link
-                  </Button>
-                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPhase({ type: "URL_PROMPT" })}
+                  className="h-7 text-xs"
+                >
+                  Chcę jednak podać link
+                </Button>
               )}
 
               {/* Sub-form 1: Produkt */}
               <ProductFields
-                hideProductUrl={phase.mode === "manual" || phase.mode === "scraped_success"}
+                hideProductUrl={
+                  phase.mode === "manual" || phase.mode === "scraped_success"
+                }
                 initialShop={detectedShop}
+                legend=""
               />
 
               <Separator />
