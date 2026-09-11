@@ -11,6 +11,7 @@ import {
   FieldError,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Sparkles, Trash2, ImageOff, CircleAlert, CheckCircle2 } from "lucide-react";
@@ -188,10 +189,11 @@ export function ProductFields({
           <FieldLabel htmlFor="product-name" className="text-sm font-medium text-foreground">
             Nazwa produktu *
           </FieldLabel>
-          <Input
+          <Textarea
             id="product-name"
+            rows={1}
             placeholder="np. Logitech MX Master 3S"
-            className="h-11 text-base sm:text-sm"
+            className="min-h-11 py-2.5 text-base sm:text-sm resize-none overflow-hidden"
             {...register("name")}
           />
           {errors.name?.message && (
