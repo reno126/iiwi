@@ -8,7 +8,7 @@ import { RecentReviewsBanner } from "./_components/RecentReviewsBanner";
 import { ShopsGrid } from "./_components/ShopsGrid";
 
 export const metadata: Metadata = {
-  title: "Strona główna | TrueReview",
+  title: "Prawdziwe, niezależne opinie o produktach",
   description:
     "Tylko tutaj znajdzie prawdziwe, całkowicie niezależne opinie o produktach.",
 };
@@ -24,7 +24,7 @@ export default async function HomePage() {
       {/* 1. Big Text Hero */}
       <section className="text-center py-4 sm:py-8 md:py-10">
         <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-muted-foreground max-w-4xl mx-auto leading-tight">
-          Tylko tutaj znajdzie{" "}
+          Tylko tutaj znajdziesz{" "}
           <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground">
             prawdziwe
           </span>
@@ -41,7 +41,7 @@ export default async function HomePage() {
         <Link
           href="/produkty"
           className={cn(
-            buttonVariants({ size: "lg" }),
+            buttonVariants({ size: "lg", variant: "outline" }),
             "w-full sm:w-auto font-semibold shadow-xs text-center",
           )}
         >
@@ -50,7 +50,7 @@ export default async function HomePage() {
         <Link
           href="/opinie/dodaj"
           className={cn(
-            buttonVariants({ variant: "outline", size: "lg" }),
+            buttonVariants({ size: "lg" }),
             "w-full sm:w-auto font-semibold shadow-xs text-center",
           )}
         >
