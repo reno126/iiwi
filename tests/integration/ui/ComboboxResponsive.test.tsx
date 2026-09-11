@@ -106,26 +106,6 @@ describe("components/ui/combobox-responsive", () => {
     expect(handleChange).toHaveBeenCalledWith("shop-2", testItems[1]);
   });
 
-  it("clears selection when clearable is true and clear button is clicked", () => {
-    const handleChange = vi.fn();
-    render(
-      <ComboboxResponsive<TestItem>
-        items={testItems}
-        value="shop-1"
-        getItemValue={(i) => i.id}
-        getItemLabel={(i) => i.name}
-        onValueChange={handleChange}
-        clearable={true}
-        renderItem={(i) => <span>{i.name}</span>}
-      />
-    );
-
-    const clearButton = screen.getByRole("button", { name: "Wyczyść wybór" });
-    fireEvent.click(clearButton);
-
-    expect(handleChange).toHaveBeenCalledWith("", undefined);
-  });
-
   it("opens full-screen Dialog with dialogTitle on mobile", async () => {
     vi.spyOn(useMobileHook, "useIsMobile").mockReturnValue(true);
 

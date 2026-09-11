@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { ChevronsUpDown, X } from "lucide-react";
 import { cn } from "cn";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { Button } from "@/components/ui/button";
@@ -136,14 +135,6 @@ export function ComboboxResponsive<T>({
     [clearable, value, onValueChange, setOpen]
   );
 
-  const handleClear = React.useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      onValueChange?.("", undefined);
-    },
-    [onValueChange]
-  );
-
   const displayedItems = React.useMemo(() => {
     if (!filterFn || !search.trim()) return items;
     return items.filter((item) => filterFn(item, search.trim()));
@@ -231,26 +222,6 @@ export function ComboboxResponsive<T>({
             <div className="flex flex-1 items-center gap-2 truncate">
               {triggerContent}
             </div>
-            <div className="flex items-center gap-1 shrink-0">
-              {clearable && value && !disabled && (
-                <span
-                  role="button"
-                  tabIndex={0}
-                  aria-label="Wyczyść wybór"
-                  onClick={handleClear}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      handleClear(e as unknown as React.MouseEvent);
-                    }
-                  }}
-                  className="rounded p-0.5 text-muted-foreground hover:text-foreground hover:bg-muted"
-                >
-                  <X className="size-3.5" />
-                </span>
-              )}
-              <ChevronsUpDown className="size-4 opacity-50" />
-            </div>
           </DialogTrigger>
 
           <DialogContent
@@ -296,26 +267,6 @@ export function ComboboxResponsive<T>({
         >
           <div className="flex flex-1 items-center gap-2 truncate">
             {triggerContent}
-          </div>
-          <div className="flex items-center gap-1 shrink-0">
-            {clearable && value && !disabled && (
-              <span
-                role="button"
-                tabIndex={0}
-                aria-label="Wyczyść wybór"
-                onClick={handleClear}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    handleClear(e as unknown as React.MouseEvent);
-                  }
-                }}
-                className="rounded p-0.5 text-muted-foreground hover:text-foreground hover:bg-muted"
-              >
-                <X className="size-3.5" />
-              </span>
-            )}
-            <ChevronsUpDown className="size-4 opacity-50" />
           </div>
         </PopoverTrigger>
 
