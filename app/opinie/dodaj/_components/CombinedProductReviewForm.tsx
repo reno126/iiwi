@@ -196,8 +196,8 @@ export function CombinedProductReviewForm({
   };
 
   return (
-    <Card className="border-none shadow-none ring-0 md:border md:shadow-xs">
-      <CardHeader className="px-3 md:px-4">
+    <Card className="border-none shadow-none ring-0 md:border md:shadow-xs bg-transparent md:bg-card">
+      <CardHeader className="px-0 md:px-6">
         <CardTitle className="text-xl">
           {" "}
           {phase.type === "URL_PROMPT"
@@ -209,7 +209,7 @@ export function CombinedProductReviewForm({
         <CardDescription></CardDescription>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="px-0 md:px-6">
         {phase.type === "URL_PROMPT" ? (
           /* STAN 1: Ekran początkowy (3 elementy + opcja manualna) */
           <UrlPromptStep
@@ -222,7 +222,7 @@ export function CombinedProductReviewForm({
         ) : (
           /* STAN 2: Aktywny formularz (ścieżka automatyczna lub manualna) */
           <FormProvider {...methods}>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
               {errors.root?.message && (
                 <Alert variant="destructive">
                   <CircleAlert className="size-4" />
@@ -261,36 +261,43 @@ export function CombinedProductReviewForm({
                 legend=""
               />
 
-              <Separator />
+              <Separator className="my-2" />
 
               {/* Sub-form 2: Recenzja */}
               <ReviewFields />
 
-              <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 pt-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => setPhase({ type: "URL_PROMPT" })}
-                  disabled={isSubmitting}
-                  className="gap-1.5 text-muted-foreground hover:text-foreground"
-                >
-                  <ArrowLeft className="size-4" />
-                  Zmień sposób wprowadzania
-                </Button>
-
-                <div className="flex items-center justify-end gap-3">
+              <div className="sticky bottom-0 -mx-4 -mb-6 sm:mx-0 sm:mb-0 bg-background/95 backdrop-blur-xs border-t sm:border-t-0 p-3 sm:p-0 z-20 transition-all mt-4">
+                <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 max-w-2xl mx-auto">
                   <Button
                     type="button"
-                    variant="outline"
-                    onClick={onCancel}
+                    variant="ghost"
+                    onClick={() => setPhase({ type: "URL_PROMPT" })}
                     disabled={isSubmitting}
+                    className="gap-1.5 text-muted-foreground hover:text-foreground w-full sm:w-auto"
                   >
-                    Anuluj
+                    <ArrowLeft className="size-4" />
+                    Zmień sposób wprowadzania
                   </Button>
-                  <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting && <Spinner className="mr-2 size-4" />}
-                    Dodaj produkt i opinię
-                  </Button>
+
+                  <div className="flex items-center justify-end gap-2 sm:gap-3 w-full sm:w-auto">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={onCancel}
+                      disabled={isSubmitting}
+                      className="w-1/3 sm:w-auto"
+                    >
+                      Anuluj
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-2/3 sm:w-auto h-11 sm:h-9 font-semibold"
+                    >
+                      {isSubmitting && <Spinner className="mr-2 size-4" />}
+                      Dodaj produkt i opinię
+                    </Button>
+                  </div>
                 </div>
               </div>
             </form>

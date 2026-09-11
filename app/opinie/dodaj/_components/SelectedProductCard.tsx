@@ -17,8 +17,8 @@ export function SelectedProductCard({
 }: SelectedProductCardProps) {
   return (
     <Card className="border-primary/40 bg-primary/5 shadow-xs transition-all">
-      <CardContent className="p-4 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 min-w-0">
+      <CardContent className="p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0 w-full sm:w-auto">
           <div className="size-10 rounded-md bg-background border flex items-center justify-center shrink-0">
             {product.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -31,8 +31,8 @@ export function SelectedProductCard({
               <Package className="size-5 text-muted-foreground" />
             )}
           </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="font-semibold text-foreground truncate">
                 {product.name}
               </span>
@@ -53,7 +53,7 @@ export function SelectedProductCard({
           variant="outline"
           size="sm"
           onClick={onReselect}
-          className="shrink-0 gap-1.5"
+          className="w-full sm:w-auto shrink-0 gap-1.5"
         >
           <RotateCcw className="size-3.5" />
           Zmień produkt

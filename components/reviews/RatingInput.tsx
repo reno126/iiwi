@@ -38,13 +38,13 @@ export function RatingInput({
               onClick={() => onChange?.(star)}
               onMouseEnter={() => setHovered(star)}
               onMouseLeave={() => setHovered(null)}
-              className="p-1 text-muted-foreground transition-colors hover:text-amber-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm disabled:pointer-events-none cursor-pointer disabled:cursor-not-allowed"
+              className="p-2 sm:p-1.5 text-muted-foreground transition-colors hover:text-amber-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md disabled:pointer-events-none cursor-pointer disabled:cursor-not-allowed touch-manipulation"
             >
               <Star
                 className={cn(
-                  "size-6 transition-all",
+                  "size-7 sm:size-6 transition-all",
                   isFilled
-                    ? "fill-amber-400 text-amber-500"
+                    ? "fill-amber-400 text-amber-500 scale-105"
                     : "text-muted-foreground/40"
                 )}
               />
@@ -54,7 +54,7 @@ export function RatingInput({
       </div>
 
       {typeof value === "number" && value >= 1 && (
-        <span className="text-sm font-semibold text-foreground">
+        <span className="text-sm sm:text-base font-semibold text-foreground">
           {value} / 5
         </span>
       )}

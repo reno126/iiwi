@@ -182,13 +182,16 @@ export function ProductFields({
 
   return (
     <FieldSet className={className}>
-      <FieldLegend>{legend}</FieldLegend>
-      <FieldGroup>
-        <Field>
-          <FieldLabel htmlFor="product-name">Nazwa produktu *</FieldLabel>
+      {legend && <FieldLegend>{legend}</FieldLegend>}
+      <FieldGroup className="gap-3 sm:gap-4">
+        <Field className="rounded-xl border border-border/80 bg-white p-3.5 sm:p-4 shadow-2xs transition-colors focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/10">
+          <FieldLabel htmlFor="product-name" className="text-sm font-medium text-foreground">
+            Nazwa produktu *
+          </FieldLabel>
           <Input
             id="product-name"
             placeholder="np. Logitech MX Master 3S"
+            className="h-11 text-base sm:text-sm"
             {...register("name")}
           />
           {errors.name?.message && (
@@ -197,13 +200,17 @@ export function ProductFields({
         </Field>
 
         {!hideProductUrl ? (
-          <Field>
-            <FieldLabel htmlFor="product-url">Adres URL do produktu</FieldLabel>
+          <Field className="rounded-xl border border-border/80 bg-white p-3.5 sm:p-4 shadow-2xs transition-colors focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/10">
+            <FieldLabel htmlFor="product-url" className="text-sm font-medium text-foreground">
+              Adres URL do produktu
+            </FieldLabel>
             <div className="flex flex-col sm:flex-row gap-2">
               <Input
                 id="product-url"
                 type="url"
+                inputMode="url"
                 placeholder="https://example.com/produkt"
+                className="h-11 text-base sm:text-sm flex-1"
                 {...register("productUrl", {
                   onBlur: handleUrlBlur,
                 })}
@@ -213,7 +220,7 @@ export function ProductFields({
                 variant="outline"
                 onClick={handleScrape}
                 disabled={isPending || !productUrlValue?.trim()}
-                className="shrink-0"
+                className="h-11 sm:h-11 shrink-0 font-medium"
               >
                 {isPending ? (
                   <Spinner className="mr-2 size-4" />
@@ -266,11 +273,11 @@ export function ProductFields({
         />
 
         {showPreviewOnly && imageUrlValue ? (
-          <Field>
-            <FieldLabel>Zdjęcie produktu</FieldLabel>
+          <Field className="rounded-xl border border-border/80 bg-white p-3.5 sm:p-4 shadow-2xs">
+            <FieldLabel className="text-sm font-medium text-foreground">Zdjęcie produktu</FieldLabel>
             <input type="hidden" {...register("imageUrl")} />
             {/* Podgląd miniatury zdjęcia z opcją usunięcia */}
-            <div className="flex flex-col md:flex-row items-center gap-3 rounded-lg border bg-muted/30 p-2.5">
+            <div className="flex flex-col sm:flex-row items-center gap-3 rounded-lg border bg-muted/30 p-2.5">
               <div className="relative size-24 shrink-0 overflow-hidden rounded-md border bg-background flex items-center justify-center">
                 {imageLoadError ? (
                   <ImageOff className="size-6 text-muted-foreground" />
@@ -285,13 +292,13 @@ export function ProductFields({
                   />
                 )}
               </div>
-              <div className="flex flex-1 flex-col gap-1 min-w-0">
+              <div className="flex flex-1 flex-col gap-1 min-w-0 text-center sm:text-left">
                 <span className="text-xs font-medium text-foreground truncate">
                   {imageLoadError
                     ? "Błąd ładowania podglądu zdjęcia"
                     : "Podgląd zdjęcia produktu"}
                 </span>
-                <span className="hidden md:inline text-xs text-muted-foreground truncate">
+                <span className="hidden sm:inline text-xs text-muted-foreground truncate">
                   {imageUrlValue}
                 </span>
               </div>
@@ -300,7 +307,7 @@ export function ProductFields({
                 variant="outline"
                 size="sm"
                 onClick={handleClearImage}
-                className="shrink-0 text-muted-foreground hover:text-destructive hover:border-destructive/40"
+                className="w-full sm:w-auto shrink-0 text-muted-foreground hover:text-destructive hover:border-destructive/40"
               >
                 <Trash2 className="size-3.5 mr-1" />
                 Usuń
@@ -311,11 +318,15 @@ export function ProductFields({
             )}
           </Field>
         ) : (
-          <Field>
-            <FieldLabel htmlFor="product-image">Adres URL zdjęcia</FieldLabel>
+          <Field className="rounded-xl border border-border/80 bg-white p-3.5 sm:p-4 shadow-2xs transition-colors focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/10">
+            <FieldLabel htmlFor="product-image" className="text-sm font-medium text-foreground">
+              Adres URL zdjęcia
+            </FieldLabel>
             <Input
               id="product-image"
               type="url"
+              inputMode="url"
+              className="h-11 text-base sm:text-sm"
               placeholder="https://example.com/zdjecie.jpg"
               {...register("imageUrl")}
             />
@@ -325,10 +336,14 @@ export function ProductFields({
           </Field>
         )}
 
-        <Field>
-          <FieldLabel htmlFor="product-code">Kod produktu / EAN</FieldLabel>
+        <Field className="rounded-xl border border-border/80 bg-white p-3.5 sm:p-4 shadow-2xs transition-colors focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/10">
+          <FieldLabel htmlFor="product-code" className="text-sm font-medium text-foreground">
+            Kod produktu / EAN
+          </FieldLabel>
           <Input
             id="product-code"
+            inputMode="numeric"
+            className="h-11 text-base sm:text-sm"
             placeholder="np. 5099206103734"
             {...register("code")}
           />

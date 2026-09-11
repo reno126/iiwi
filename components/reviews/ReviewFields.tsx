@@ -33,10 +33,13 @@ export function ReviewFields({
 
   return (
     <FieldSet className={className}>
-      <FieldLegend>{legend}</FieldLegend>
-      <FieldGroup>
-        <Field data-invalid={!!errors.rate}>
-          <FieldLabel>Ocena *</FieldLabel>
+      {legend && <FieldLegend>{legend}</FieldLegend>}
+      <FieldGroup className="gap-3 sm:gap-4">
+        <Field
+          data-invalid={!!errors.rate}
+          className="rounded-xl border border-border/80 bg-white p-3.5 sm:p-4 shadow-2xs transition-colors focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/10"
+        >
+          <FieldLabel className="text-sm font-medium text-foreground">Ocena *</FieldLabel>
           <Controller
             name="rate"
             control={control}
@@ -60,8 +63,13 @@ export function ReviewFields({
           </FieldError>
         </Field>
 
-        <Field data-invalid={!!errors.description}>
-          <FieldLabel htmlFor="review-description">Treść recenzji *</FieldLabel>
+        <Field
+          data-invalid={!!errors.description}
+          className="rounded-xl border border-border/80 bg-white p-3.5 sm:p-4 shadow-2xs transition-colors focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/10"
+        >
+          <FieldLabel htmlFor="review-description" className="text-sm font-medium text-foreground">
+            Treść recenzji *
+          </FieldLabel>
           <Textarea
             id="review-description"
             rows={4}
@@ -69,6 +77,7 @@ export function ReviewFields({
             disabled={isSubmitting}
             autoFocus={autoFocusDescription}
             aria-invalid={!!errors.description}
+            className="min-h-28 text-base sm:text-sm"
             {...register("description")}
           />
           <FieldError

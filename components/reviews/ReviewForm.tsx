@@ -92,18 +92,23 @@ export function ReviewForm({
 
         <ReviewFields autoFocusDescription={autoFocus} />
 
-        <div className="flex items-center justify-end gap-3 mt-6">
+        <div className="flex items-center justify-end gap-2 sm:gap-3 mt-6">
           {onCancel && (
             <Button
               type="button"
               variant="outline"
               onClick={onCancel}
               disabled={isSubmitting}
+              className="w-1/3 sm:w-auto h-11 sm:h-9"
             >
               Anuluj
             </Button>
           )}
-          <Button type="submit" disabled={isSubmitting}>
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex-1 sm:flex-initial h-11 sm:h-9 font-semibold"
+          >
             {isSubmitting && <Spinner className="mr-2 size-4" />}
             Opublikuj opinię
           </Button>

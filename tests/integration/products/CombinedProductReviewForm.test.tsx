@@ -38,12 +38,10 @@ describe("CombinedProductReviewForm - New Flow", () => {
 
     // 1. Nagłówek i podtytuł
     expect(
-      screen.getByText("Podaj nam link do oferty produktu")
+      screen.getByText("Masz link do oferty produktu?")
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "my pobierzemy wszystko co potrzeba, a Ty jedynie ocenisz produkt"
-      )
+      screen.getByText("wklej go poniżej, to pójdzie szybko!")
     ).toBeInTheDocument();
 
     // 2. Pole do URL
@@ -60,7 +58,9 @@ describe("CombinedProductReviewForm - New Flow", () => {
     expect(
       screen.getByRole("button", { name: /Dodaj produkt ręcznie/i })
     ).toBeInTheDocument();
-    expect(screen.getByText("wymagamy tylko nazwy")).toBeInTheDocument();
+    expect(
+      screen.getByText("wymagamy tylko nazwy, no i opinii")
+    ).toBeInTheDocument();
 
     // Pełne pola formularza (nazwa, ocena, recenzja) NIE powinny być jeszcze widoczne
     expect(screen.queryByLabelText(/Nazwa produktu/i)).not.toBeInTheDocument();
@@ -83,7 +83,7 @@ describe("CombinedProductReviewForm - New Flow", () => {
 
     // Formularz manualny jest widoczny
     expect(screen.getByLabelText(/Nazwa produktu \*/i)).toBeInTheDocument();
-    expect(screen.getByText(/Tryb ręczny: /i)).toBeInTheDocument();
+    expect(screen.getByText(/Tryb ręczny/i)).toBeInTheDocument();
 
     // Pole URL produktu jest UKRYTE w trybie ręcznym
     expect(
@@ -232,7 +232,7 @@ describe("CombinedProductReviewForm - New Flow", () => {
 
     // Wracamy do początkowych 3 elementów
     expect(
-      screen.getByText("Podaj nam link do oferty produktu")
+      screen.getByText("Masz link do oferty produktu?")
     ).toBeInTheDocument();
   });
 });

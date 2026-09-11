@@ -62,12 +62,12 @@ export function ProductShopSelector({
   };
 
   return (
-    <Field>
-      <FieldLabel>Sklep</FieldLabel>
+    <Field className="rounded-xl border border-border/80 bg-white p-3.5 sm:p-4 shadow-2xs transition-colors focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/10">
+      <FieldLabel className="text-sm font-medium text-foreground">Sklep</FieldLabel>
 
       {selectedShop ? (
         // Stan 1: Sklep jest wybrany (rozpoznany ze scrapera lub wybrany ręcznie)
-        <div className="flex items-center justify-between gap-3 p-3 rounded-lg border bg-card text-card-foreground shadow-xs">
+        <div className="flex items-center justify-between gap-3 p-3 rounded-lg border bg-muted/20 text-card-foreground">
           <div className="flex items-center gap-3 min-w-0">
             {selectedShop.logo ? (
               <div className="flex size-9 shrink-0 items-center justify-center rounded-md border bg-white p-1">
@@ -177,7 +177,7 @@ export function ProductShopSelector({
             renderTrigger={() => (
               <span className="text-xs font-medium">Wybierz z listy</span>
             )}
-            triggerClassName="h-8 px-3 text-xs shrink-0"
+            triggerClassName="h-10 sm:h-8 w-full sm:w-auto px-3 text-xs shrink-0 font-medium"
             renderItem={(item, isSelected) => (
               <div className="flex w-full items-center justify-between gap-2 py-1">
                 <div className="flex items-center gap-2.5 min-w-0">
