@@ -196,7 +196,7 @@ export function CombinedProductReviewForm({
   };
 
   return (
-    <Card className="border-none shadow-none ring-0 md:border md:shadow-xs bg-transparent md:bg-card">
+    <Card className="border-none shadow-none ring-0 md:border md:shadow-xs bg-transparent md:bg-card overflow-visible">
       <CardHeader className="px-0 md:px-6">
         <CardTitle className="text-xl">
           {" "}
@@ -222,7 +222,10 @@ export function CombinedProductReviewForm({
         ) : (
           /* STAN 2: Aktywny formularz (ścieżka automatyczna lub manualna) */
           <FormProvider {...methods}>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              className="space-y-4 md:space-y-6 pb-0"
+            >
               {errors.root?.message && (
                 <Alert variant="destructive">
                   <CircleAlert className="size-4" />
@@ -266,14 +269,15 @@ export function CombinedProductReviewForm({
               {/* Sub-form 2: Recenzja */}
               <ReviewFields />
 
-              <div className="sticky bottom-0 -mx-4 -mb-6 sm:mx-0 sm:mb-0 bg-background/95 backdrop-blur-xs border-t sm:border-t-0 p-3 sm:p-0 z-20 transition-all mt-4">
-                <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 max-w-2xl mx-auto">
+              {/* Dolny pasek akcji: przyklejony do dołu ekranu na mobile (< md), statyczny na desktopie (>= md) */}
+              <div className="fixed bottom-0 inset-x-0 z-40 bg-background/95 backdrop-blur-md border-t border-border px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-lg md:static md:inset-auto md:z-auto md:border-t-0 md:p-0 md:bg-transparent md:backdrop-blur-none md:shadow-none md:mt-6">
+                <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 max-w-2xl mx-auto">
                   <Button
                     type="button"
                     variant="ghost"
                     onClick={() => setPhase({ type: "URL_PROMPT" })}
                     disabled={isSubmitting}
-                    className="gap-1.5 text-muted-foreground hover:text-foreground w-full sm:w-auto"
+                    className="gap-1.5 text-muted-foreground hover:text-foreground w-full sm:w-auto h-8 sm:h-9 text-xs sm:text-sm"
                   >
                     <ArrowLeft className="size-4" />
                     Zmień sposób wprowadzania
@@ -285,7 +289,7 @@ export function CombinedProductReviewForm({
                       variant="outline"
                       onClick={onCancel}
                       disabled={isSubmitting}
-                      className="w-1/3 sm:w-auto"
+                      className="w-1/3 sm:w-auto h-11 sm:h-9"
                     >
                       Anuluj
                     </Button>

@@ -24,13 +24,13 @@ export default async function HomePage() {
       {/* 1. Big Text Hero */}
       <section className="text-center py-4 sm:py-8 md:py-10">
         <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-muted-foreground max-w-4xl mx-auto leading-tight">
-          Tylko tutaj znajdzie
+          Tylko tutaj znajdzie{" "}
           <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground">
-            {" "}prawdziwe
+            prawdziwe
           </span>
-          , całkowicie niezależne
+          , całkowicie niezależne{" "}
           <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground">
-            {" "}opinie
+            opinie
           </span>{" "}
           o produktach
         </h1>
