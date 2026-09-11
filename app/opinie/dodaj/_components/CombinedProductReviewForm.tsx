@@ -242,19 +242,6 @@ export function CombinedProductReviewForm({
                 />
               )}
 
-              {/* Informacja w ścieżce ręcznej */}
-              {phase.mode === "manual" && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPhase({ type: "URL_PROMPT" })}
-                  className="h-7 text-xs"
-                >
-                  Chcę jednak podać link
-                </Button>
-              )}
-
               {/* Sub-form 1: Produkt */}
               <ProductFields
                 hideProductUrl={
