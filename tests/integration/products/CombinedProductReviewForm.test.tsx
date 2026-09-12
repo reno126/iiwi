@@ -237,4 +237,47 @@ describe("CombinedProductReviewForm - New Flow", () => {
       screen.getByText("Masz link do oferty produktu?")
     ).toBeInTheDocument();
   });
+
+  it("marks scraped vs missing fields and reactively updates status when user completes missing data", async () => {
+    const user = userEvent.setup();
+    vi.mocked(productScrapeMetadata).mockResolvedValueOnce({
+      data: {
+        imageUrl: "https://example.com/keyboard.jpg",
+        name: "Klawiatura Mechaniczna Pro",
+        code: "",
+        shop: null,
+        scrapedFields: ["name", "imageUrl"],
+      },
+    });
+
+    render(
+      <CombinedProductReviewForm
+        onCancel={onCancelMock}
+        onSuccess={onSuccessMock}
+      />
+    );
+
+    const urlInput = screen.getByPlaceholderText("https://sklep.pl/produkt...");
+    await user.type(urlInput, "https://sklep.pl/keyboard");
+    await user.click(screen.getByRole("button", { name: /Pobierz info/i }));
+
+    const nameInput = screen.getByLabelText(/Nazwa produktu \*/i) as HTMLInputElement;
+    await waitFor(() => {
+      expect(nameInput.value).toBe("Klawiatura Mechaniczna Pro");
+    });
+
+    // 2 fields scraped (name, imageUrl) -> 2 "Uzupełnione"
+    // 2 fields missing (code, shop) -> 2 "Do uzupełnienia"
+    expect(screen.getAllByText("Uzupełnione").length).toBe(2);
+    expect(screen.getAllByText("Do uzupełnienia").length).toBe(2);
+
+    // User fills in missing code
+    const codeInput = screen.getByLabelText(/Kod produktu \/ EAN/i);
+    await user.type(codeInput, "5901234567890");
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Uzupełnione").length).toBe(3); // name, imageUrl, code
+      expect(screen.getAllByText("Do uzupełnienia").length).toBe(1); // shop
+    });
+  });
 });

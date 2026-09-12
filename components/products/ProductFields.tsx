@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { Sparkles, Trash2, ImageOff, CircleAlert, CheckCircle2 } from "lucide-react";
+import { Sparkles, Trash2, ImageOff, CircleAlert, CheckCircle2, Check } from "lucide-react";
 import { productScrapeMetadata } from "@/serverActions/productScrapeMetadata";
 import { shopMatchByUrlAction } from "@/serverActions/shopMatchByUrlAction";
 import { ProductShopSelector } from "@/components/products/ProductShopSelector";
@@ -27,6 +27,7 @@ interface ProductFieldsProps {
   legend?: string;
   initialShop?: MatchedShopResult | null;
   hideProductUrl?: boolean;
+  showFieldStatus?: boolean;
 }
 
 export function ProductFields({
@@ -34,6 +35,7 @@ export function ProductFields({
   legend = "Informacje o produkcie",
   initialShop = null,
   hideProductUrl = false,
+  showFieldStatus = false,
 }: ProductFieldsProps) {
   const {
     register,
@@ -52,6 +54,7 @@ export function ProductFields({
   }
 
   const [isPending, startTransition] = useTransition();
+  const [hasScrapedLocally, setHasScrapedLocally] = useState(false);
   const [isTier2NoticeVisible, setIsTier2NoticeVisible] = useState(false);
   const [scrapeNotice, setScrapeNotice] = useState<{
     type: "error" | "success";
@@ -59,8 +62,16 @@ export function ProductFields({
   } | null>(null);
   const [imageLoadError, setImageLoadError] = useState(false);
 
+  const isStatusActive = Boolean(showFieldStatus || hasScrapedLocally);
+
   const productUrlValue = watch("productUrl");
   const imageUrlValue = watch("imageUrl");
+  const nameValue = watch("name");
+  const codeValue = watch("code");
+
+  const isNameFilled = Boolean(nameValue && nameValue.trim().length > 0);
+  const isImageFilled = Boolean(imageUrlValue && imageUrlValue.trim().length > 0);
+  const isCodeFilled = Boolean(codeValue && codeValue.trim().length > 0);
 
   const [showPreviewOnly, setShowPreviewOnly] = useState<boolean>(() => Boolean(imageUrlValue?.trim()));
   const [prevImageUrlValue, setPrevImageUrlValue] = useState(imageUrlValue);
@@ -171,6 +182,7 @@ export function ProductFields({
       } finally {
         clearTimeout(timer);
         setIsTier2NoticeVisible(false);
+        setHasScrapedLocally(true);
       }
     });
   };
@@ -185,15 +197,56 @@ export function ProductFields({
     <FieldSet className={className}>
       {legend && <FieldLegend>{legend}</FieldLegend>}
       <FieldGroup className="gap-3 sm:gap-4">
-        <Field className="rounded-xl border border-border/80 bg-white p-3.5 sm:p-4 shadow-2xs transition-colors focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/10">
-          <FieldLabel htmlFor="product-name" className="text-sm font-medium text-foreground">
-            Nazwa produktu *
-          </FieldLabel>
+        <Field
+          className={cn(
+            "rounded-xl p-3.5 sm:p-4 shadow-2xs transition-all",
+            isStatusActive && isNameFilled
+              ? "border-2 border-emerald-500 bg-emerald-50/50 dark:border-emerald-600 dark:bg-emerald-950/20"
+              : isStatusActive
+                ? "border-2 border-gray-300 bg-gray-50/80 dark:border-gray-700 dark:bg-gray-900/30"
+                : "border border-border/80 bg-white focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/10"
+          )}
+        >
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <FieldLabel
+              htmlFor="product-name"
+              className={cn(
+                "text-sm font-medium",
+                isStatusActive && isNameFilled
+                  ? "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-600 text-white font-semibold shadow-xs"
+                  : isStatusActive
+                    ? "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-600 text-white font-semibold shadow-xs"
+                    : "text-foreground"
+              )}
+            >
+              {isStatusActive && (
+                isNameFilled ? (
+                  <Check className="size-3.5 sm:size-4 stroke-[2.5]" />
+                ) : (
+                  <CircleAlert className="size-3.5 sm:size-4" />
+                )
+              )}
+              <span>Nazwa produktu *</span>
+            </FieldLabel>
+
+            {isStatusActive && (
+              <span
+                className={cn(
+                  "inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-full shrink-0",
+                  isNameFilled
+                    ? "text-emerald-700 bg-emerald-100/90 dark:text-emerald-300 dark:bg-emerald-900/40"
+                    : "text-gray-600 bg-gray-200/90 dark:text-gray-300 dark:bg-gray-800/60"
+                )}
+              >
+                {isNameFilled ? "Uzupełnione" : "Do uzupełnienia"}
+              </span>
+            )}
+          </div>
           <Textarea
             id="product-name"
             rows={1}
             placeholder="np. Logitech MX Master 3S"
-            className="min-h-11 py-2.5 text-base sm:text-sm resize-none overflow-hidden"
+            className="min-h-11 py-2.5 text-base sm:text-sm resize-none overflow-hidden bg-white dark:bg-card"
             {...register("name")}
           />
           {errors.name?.message && (
@@ -272,14 +325,58 @@ export function ProductFields({
           selectedShop={selectedShop}
           onSelectShop={setSelectedShop}
           disabled={isPending}
+          showFieldStatus={isStatusActive}
         />
 
         {showPreviewOnly && imageUrlValue ? (
-          <Field className="rounded-xl border border-border/80 bg-white p-3.5 sm:p-4 shadow-2xs">
-            <FieldLabel className="text-sm font-medium text-foreground">Zdjęcie produktu</FieldLabel>
+          <Field
+            className={cn(
+              "rounded-xl p-3.5 sm:p-4 shadow-2xs transition-all",
+              isStatusActive && isImageFilled
+                ? "border-2 border-emerald-500 bg-emerald-50/50 dark:border-emerald-600 dark:bg-emerald-950/20"
+                : isStatusActive
+                  ? "border-2 border-gray-300 bg-gray-50/80 dark:border-gray-700 dark:bg-gray-900/30"
+                  : "border border-border/80 bg-white"
+            )}
+          >
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <FieldLabel
+                className={cn(
+                  "text-sm font-medium",
+                  isStatusActive && isImageFilled
+                    ? "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-600 text-white font-semibold shadow-xs"
+                    : isStatusActive
+                      ? "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-600 text-white font-semibold shadow-xs"
+                      : "text-foreground"
+                )}
+              >
+                {isStatusActive && (
+                  isImageFilled ? (
+                    <Check className="size-3.5 sm:size-4 stroke-[2.5]" />
+                  ) : (
+                    <CircleAlert className="size-3.5 sm:size-4" />
+                  )
+                )}
+                <span>Zdjęcie produktu</span>
+              </FieldLabel>
+
+              {isStatusActive && (
+                <span
+                  className={cn(
+                    "inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-full shrink-0",
+                    isImageFilled
+                      ? "text-emerald-700 bg-emerald-100/90 dark:text-emerald-300 dark:bg-emerald-900/40"
+                      : "text-gray-600 bg-gray-200/90 dark:text-gray-300 dark:bg-gray-800/60"
+                  )}
+                >
+                  {isImageFilled ? "Uzupełnione" : "Do uzupełnienia"}
+                </span>
+              )}
+            </div>
+
             <input type="hidden" {...register("imageUrl")} />
             {/* Podgląd miniatury zdjęcia z opcją usunięcia */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 rounded-lg border bg-muted/30 p-2.5">
+            <div className="flex flex-col sm:flex-row items-center gap-3 rounded-lg border bg-white dark:bg-card p-2.5 shadow-2xs">
               <div className="relative size-24 shrink-0 overflow-hidden rounded-md border bg-background flex items-center justify-center">
                 {imageLoadError ? (
                   <ImageOff className="size-6 text-muted-foreground" />
@@ -320,15 +417,56 @@ export function ProductFields({
             )}
           </Field>
         ) : (
-          <Field className="rounded-xl border border-border/80 bg-white p-3.5 sm:p-4 shadow-2xs transition-colors focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/10">
-            <FieldLabel htmlFor="product-image" className="text-sm font-medium text-foreground">
-              Adres URL zdjęcia
-            </FieldLabel>
+          <Field
+            className={cn(
+              "rounded-xl p-3.5 sm:p-4 shadow-2xs transition-all",
+              isStatusActive && isImageFilled
+                ? "border-2 border-emerald-500 bg-emerald-50/50 dark:border-emerald-600 dark:bg-emerald-950/20"
+                : isStatusActive
+                  ? "border-2 border-gray-300 bg-gray-50/80 dark:border-gray-700 dark:bg-gray-900/30"
+                  : "border border-border/80 bg-white focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/10"
+            )}
+          >
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <FieldLabel
+                htmlFor="product-image"
+                className={cn(
+                  "text-sm font-medium",
+                  isStatusActive && isImageFilled
+                    ? "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-600 text-white font-semibold shadow-xs"
+                    : isStatusActive
+                      ? "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-600 text-white font-semibold shadow-xs"
+                      : "text-foreground"
+                )}
+              >
+                {isStatusActive && (
+                  isImageFilled ? (
+                    <Check className="size-3.5 sm:size-4 stroke-[2.5]" />
+                  ) : (
+                    <CircleAlert className="size-3.5 sm:size-4" />
+                  )
+                )}
+                <span>Adres URL zdjęcia</span>
+              </FieldLabel>
+
+              {isStatusActive && (
+                <span
+                  className={cn(
+                    "inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-full shrink-0",
+                    isImageFilled
+                      ? "text-emerald-700 bg-emerald-100/90 dark:text-emerald-300 dark:bg-emerald-900/40"
+                      : "text-gray-600 bg-gray-200/90 dark:text-gray-300 dark:bg-gray-800/60"
+                  )}
+                >
+                  {isImageFilled ? "Uzupełnione" : "Do uzupełnienia"}
+                </span>
+              )}
+            </div>
             <Input
               id="product-image"
               type="url"
               inputMode="url"
-              className="h-11 text-base sm:text-sm"
+              className="h-11 text-base sm:text-sm bg-white dark:bg-card"
               placeholder="https://example.com/zdjecie.jpg"
               {...register("imageUrl")}
             />
@@ -338,14 +476,55 @@ export function ProductFields({
           </Field>
         )}
 
-        <Field className="rounded-xl border border-border/80 bg-white p-3.5 sm:p-4 shadow-2xs transition-colors focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/10">
-          <FieldLabel htmlFor="product-code" className="text-sm font-medium text-foreground">
-            Kod produktu / EAN
-          </FieldLabel>
+        <Field
+          className={cn(
+            "rounded-xl p-3.5 sm:p-4 shadow-2xs transition-all",
+            isStatusActive && isCodeFilled
+              ? "border-2 border-emerald-500 bg-emerald-50/50 dark:border-emerald-600 dark:bg-emerald-950/20"
+              : isStatusActive
+                ? "border-2 border-gray-300 bg-gray-50/80 dark:border-gray-700 dark:bg-gray-900/30"
+                : "border border-border/80 bg-white focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/10"
+          )}
+        >
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <FieldLabel
+              htmlFor="product-code"
+              className={cn(
+                "text-sm font-medium",
+                isStatusActive && isCodeFilled
+                  ? "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-600 text-white font-semibold shadow-xs"
+                  : isStatusActive
+                    ? "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-600 text-white font-semibold shadow-xs"
+                    : "text-foreground"
+              )}
+            >
+              {isStatusActive && (
+                isCodeFilled ? (
+                  <Check className="size-3.5 sm:size-4 stroke-[2.5]" />
+                ) : (
+                  <CircleAlert className="size-3.5 sm:size-4" />
+                )
+              )}
+              <span>Kod produktu / EAN</span>
+            </FieldLabel>
+
+            {isStatusActive && (
+              <span
+                className={cn(
+                  "inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-full shrink-0",
+                  isCodeFilled
+                    ? "text-emerald-700 bg-emerald-100/90 dark:text-emerald-300 dark:bg-emerald-900/40"
+                    : "text-gray-600 bg-gray-200/90 dark:text-gray-300 dark:bg-gray-800/60"
+                )}
+              >
+                {isCodeFilled ? "Uzupełnione" : "Do uzupełnienia"}
+              </span>
+            )}
+          </div>
           <Input
             id="product-code"
             inputMode="numeric"
-            className="h-11 text-base sm:text-sm"
+            className="h-11 text-base sm:text-sm bg-white dark:bg-card"
             placeholder="np. 5099206103734"
             {...register("code")}
           />

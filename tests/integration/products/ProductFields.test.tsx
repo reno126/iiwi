@@ -18,9 +18,10 @@ vi.mock("@/serverActions/shopMatchByUrlAction", () => ({
 interface WrapperProps {
   defaultValues?: Partial<ProductCreateInput>;
   hideProductUrl?: boolean;
+  showFieldStatus?: boolean;
 }
 
-function FormWrapper({ defaultValues, hideProductUrl }: WrapperProps) {
+function FormWrapper({ defaultValues, hideProductUrl, showFieldStatus }: WrapperProps) {
   const methods = useForm<ProductCreateInput>({
     defaultValues: {
       name: "",
@@ -34,7 +35,10 @@ function FormWrapper({ defaultValues, hideProductUrl }: WrapperProps) {
   return (
     <FormProvider {...methods}>
       <form>
-        <ProductFields hideProductUrl={hideProductUrl} />
+        <ProductFields
+          hideProductUrl={hideProductUrl}
+          showFieldStatus={showFieldStatus}
+        />
       </form>
     </FormProvider>
   );
@@ -237,5 +241,97 @@ describe("components/products/ProductFields", () => {
 
     expect(screen.getByLabelText(/Nazwa produktu/i)).toBeInTheDocument();
     expect(screen.queryByLabelText(/Adres URL do produktu/i)).not.toBeInTheDocument();
+  });
+
+  it("marks filled fields as 'Uzupełnione' and empty fields as 'Do uzupełnienia' when showFieldStatus is true", () => {
+    render(
+      <FormWrapper
+        showFieldStatus={true}
+        defaultValues={{
+          name: "Myszka bezprzewodowa",
+          code: "",
+        }}
+      />
+    );
+
+    // Name has value -> Uzupełnione
+    const uzupelnioneBadges = screen.getAllByText("Uzupełnione");
+    expect(uzupelnioneBadges.length).toBeGreaterThanOrEqual(1);
+
+    // Code, shop, imageUrl are empty -> Do uzupełnienia
+    const doUzupelnieniaBadges = screen.getAllByText("Do uzupełnienia");
+    expect(doUzupelnieniaBadges.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("reactively updates field status when user fills missing data and clears existing data", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <FormWrapper
+        showFieldStatus={true}
+        defaultValues={{
+          name: "Testowy Produkt",
+          code: "",
+        }}
+      />
+    );
+
+    const codeInput = screen.getByLabelText(/Kod produktu/i);
+    const nameInput = screen.getByLabelText(/Nazwa produktu/i);
+
+    // Initially code is empty ("Do uzupełnienia")
+    expect(screen.getAllByText("Do uzupełnienia").length).toBe(3); // imageUrl, shop, code
+    expect(screen.getAllByText("Uzupełnione").length).toBe(1); // name
+
+    // User types code -> code becomes "Uzupełnione"
+    await user.type(codeInput, "12345678");
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Uzupełnione").length).toBe(2); // name, code
+      expect(screen.getAllByText("Do uzupełnienia").length).toBe(2); // imageUrl, shop
+    });
+
+    // User clears name -> name becomes "Do uzupełnienia"
+    await user.clear(nameInput);
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Uzupełnione").length).toBe(1); // code
+      expect(screen.getAllByText("Do uzupełnienia").length).toBe(3); // name, imageUrl, shop
+    });
+  });
+
+  it("activates field status marking after in-form scrape completes", async () => {
+    const user = userEvent.setup();
+    vi.mocked(productScrapeMetadata).mockResolvedValueOnce({
+      data: {
+        imageUrl: "https://example.com/item.jpg",
+        name: "Produkt ze scrapera",
+        code: "",
+        shop: null,
+        scrapedFields: ["name", "imageUrl"],
+      },
+    });
+
+    render(<FormWrapper />);
+
+    // Before scraping, no status badges exist
+    expect(screen.queryByText("Uzupełnione")).not.toBeInTheDocument();
+    expect(screen.queryByText("Do uzupełnienia")).not.toBeInTheDocument();
+
+    const productUrlInput = screen.getByLabelText(/Adres URL do produktu/i);
+    const scrapeBtn = screen.getByRole("button", {
+      name: /Wyciągnij zdjęcie produktu/i,
+    });
+
+    await user.type(productUrlInput, "https://example.com/item");
+    await user.click(scrapeBtn);
+
+    // After scraping, status markers are activated
+    const nameInput = screen.getByLabelText(/Nazwa produktu/i) as HTMLInputElement;
+    await waitFor(() => {
+      expect(nameInput.value).toBe("Produkt ze scrapera");
+      expect(screen.getAllByText("Uzupełnione").length).toBe(2); // name, imageUrl
+      expect(screen.getAllByText("Do uzupełnienia").length).toBe(2); // code, shop
+    });
   });
 });

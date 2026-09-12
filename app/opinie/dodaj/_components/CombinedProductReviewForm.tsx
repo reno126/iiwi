@@ -249,6 +249,7 @@ export function CombinedProductReviewForm({
                 }
                 initialShop={detectedShop}
                 legend=""
+                showFieldStatus={phase.mode !== "manual"}
               />
 
               <Separator className="my-2" />
