@@ -29,14 +29,14 @@ test.describe("Product Creation Flow (End-to-End)", () => {
     await expect(page).toHaveURL(/\/opinie\/dodaj/);
 
     // 2. Open new product creation form
-    await page.getByRole("button", { name: "Dodaj produkt" }).click();
-    await expect(
-      page.getByText("Dodaj nowy produkt i opinię"),
-    ).toBeVisible();
+    await page.getByRole("button", { name: "Dodaj nowy produkt" }).click();
 
-    // Verify initial 3-element prompt is rendered
+    // Verify initial URL prompt step is rendered
     await expect(
-      page.getByText("Podaj nam link do oferty produktu"),
+      page.getByText("Masz link do oferty produktu?"),
+    ).toBeVisible();
+    await expect(
+      page.getByText("wklej go poniżej, to pójdzie szybko!"),
     ).toBeVisible();
 
     // Choose manual creation path
@@ -70,7 +70,7 @@ test.describe("Product Creation Flow (End-to-End)", () => {
   }) => {
     // 1. Navigate directly to /opinie/dodaj and open new product form
     await page.goto("/opinie/dodaj");
-    await page.getByRole("button", { name: "Dodaj produkt" }).click();
+    await page.getByRole("button", { name: "Dodaj nowy produkt" }).click();
 
     // 2. Select manual creation path
     await page.getByRole("button", { name: "Dodaj produkt ręcznie" }).click();

@@ -53,11 +53,6 @@ describe("components/products/ProductShopSelector", () => {
 
     expect(
       screen.getByText(
-        /Sklep zostanie rozpoznany automatycznie po pobraniu danych z linku/i
-      )
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(
         /Jeśli nie znasz sklepu lub nie ma go na liście pozostaw pole puste/i
       )
     ).toBeInTheDocument();
