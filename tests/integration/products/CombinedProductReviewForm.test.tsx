@@ -103,7 +103,7 @@ describe("CombinedProductReviewForm - New Flow", () => {
         name: "Słuchawki Sony XM5",
         code: "SKU-999",
         shop: null,
-        scrapedFields: ["name", "imageUrl", "code"],
+        scrapedFields: ["name", "imageUrl", "code", "shop"],
       },
     });
 
@@ -136,7 +136,9 @@ describe("CombinedProductReviewForm - New Flow", () => {
 
     // Powinien pojawić się baner sukcesu
     await waitFor(() => {
-      expect(screen.getByText("Pobrano dane ze sklepu:")).toBeInTheDocument();
+      expect(
+        screen.getByText("Pobrano wszystkie potrzebne dane produktu")
+      ).toBeInTheDocument();
     });
 
     // Pobrana nazwa powinna być wpisana
@@ -197,7 +199,7 @@ describe("CombinedProductReviewForm - New Flow", () => {
     // Oczekujemy baneru błędu
     await waitFor(() => {
       expect(
-        screen.getByText("Nie udało się automatycznie pobrać danych")
+        screen.getByText("Nie udało się pobrać danych")
       ).toBeInTheDocument();
     });
 

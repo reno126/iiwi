@@ -89,6 +89,7 @@ export function ProductShopSelector({
               <span className="font-medium text-sm truncate">
                 {selectedShop.name || "Nieznany sklep"}
               </span>
+              <span className="text-xs text-muted-foreground">Wybrany sklep</span>
             </div>
           </div>
 
@@ -155,6 +156,13 @@ export function ProductShopSelector({
       ) : (
         // Stan 2: Brak wybranego sklepu (pusty / oczekujący na link)
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 rounded-lg border border-dashed text-sm text-muted-foreground bg-muted/20">
+          <div className="flex items-center gap-2 min-w-0">
+            <Store className="size-4 shrink-0 text-muted-foreground" />
+            <span className="text-xs sm:text-sm">
+              Sklep zostanie rozpoznany automatycznie po pobraniu danych z linku.
+            </span>
+          </div>
+
           <ComboboxResponsive<ShopItem>
             items={shopsList || []}
             value={shopId || ""}
