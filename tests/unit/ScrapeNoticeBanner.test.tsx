@@ -38,11 +38,11 @@ describe("ScrapeNoticeBanner", () => {
     );
 
     expect(
-      screen.getByText("Pobrano wszystkie potrzebne dane produktu")
+      screen.getByText("Uzupełnij brakujące dane i dodaj swoją opinię")
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Poniższe dane możesz sprawdzić i dowolnie edytować przed dodaniem opinii."
+        "Udało się pobrać część danych"
       )
     ).toBeInTheDocument();
   });
