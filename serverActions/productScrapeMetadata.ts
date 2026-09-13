@@ -1,6 +1,5 @@
 "use server";
 
-import { safeActionUserCtx } from "@/lib/actions/safeActionUserCtx";
 import { productScrapeSchema } from "@/schemas/productScrape";
 import { validateUrlSafety } from "@/lib/scraper/ssrfProtection";
 import { extractProductMetadata } from "@/lib/scraper/extractMetadata";
@@ -9,7 +8,7 @@ import {
   findShopByUrl,
   type MatchedShopResult,
 } from "@/lib/shops/findShopByUrl";
-import { returnServerError } from "next-safe-action";
+import { createSafeActionClient, returnServerError } from "next-safe-action";
 
 export interface ScrapedMetadataResult {
   imageUrl?: string | null;
@@ -36,7 +35,7 @@ const BROWSER_HEADERS = {
   "Upgrade-Insecure-Requests": "1",
 };
 
-export const productScrapeMetadata = safeActionUserCtx
+export const productScrapeMetadata = createSafeActionClient()
   .inputSchema(productScrapeSchema)
   .action(async ({ parsedInput }) => {
     const { productUrl } = parsedInput;
