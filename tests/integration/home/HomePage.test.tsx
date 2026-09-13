@@ -68,7 +68,7 @@ describe("HomePage", () => {
     // 1. Big hero text
     expect(
       screen.getByRole("heading", {
-        name: /Tylko tutaj znajdzie prawdziwe, całkowicie niezależne opinie o produktach/i,
+        name: /Tylko tutaj znajdziesz prawdziwe, całkowicie niezależne opinie o produktach/i,
       }),
     ).toBeInTheDocument();
 
