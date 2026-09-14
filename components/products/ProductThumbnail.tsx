@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { Package } from "lucide-react";
 import { cn } from "cn";
 
@@ -35,12 +34,12 @@ export function ProductThumbnail({
       )}
     >
       {src ? (
-        <Image
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
           src={src}
           alt={alt}
-          fill
-          sizes="(max-width: 768px) 100px, 150px"
-          className="object-contain p-1"
+          className="size-full object-contain p-1"
+          loading="lazy"
         />
       ) : (
         <Package
