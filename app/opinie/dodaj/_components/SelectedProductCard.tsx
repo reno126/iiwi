@@ -3,7 +3,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Package, RotateCcw } from "lucide-react";
+import { RotateCcw } from "lucide-react";
+import { ProductThumbnail } from "@/components/products/ProductThumbnail";
 import type { Product } from "@/prisma/generated/client";
 
 interface SelectedProductCardProps {
@@ -19,18 +20,12 @@ export function SelectedProductCard({
     <Card className="border-primary/40 bg-primary/5 shadow-xs transition-all">
       <CardContent className="p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0 w-full sm:w-auto">
-          <div className="size-10 rounded-md bg-background border flex items-center justify-center shrink-0">
-            {product.imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={product.imageUrl}
-                alt={product.name}
-                className="size-12 object-contain rounded"
-              />
-            ) : (
-              <Package className="size-5 text-muted-foreground" />
-            )}
-          </div>
+          <ProductThumbnail
+            src={product.imageUrl}
+            alt={product.name}
+            size="xs"
+            className="size-10 rounded-md border shrink-0 bg-background"
+          />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-semibold text-foreground truncate">

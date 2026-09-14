@@ -9,14 +9,7 @@ import { CircleAlert } from "lucide-react";
 
 import { registerSchema, type RegisterInput } from "@/schemas/register";
 import { getReviewDraftReturnUrl } from "@/lib/storage/reviewDraftStorage";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { AuthCard } from "@/components/auth/AuthCard";
 import {
   Field,
   FieldError,
@@ -97,107 +90,11 @@ export function Register({ className }: RegisterProps) {
   };
 
   return (
-    <Card className={cn("w-full max-w-md", className)}>
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Utwórz konto</CardTitle>
-        <CardDescription>
-          Wprowadź swoje dane, aby utworzyć nowe konto
-        </CardDescription>
-      </CardHeader>
-
-      <CardContent className="space-y-4">
-        {errors.root?.message && (
-          <Alert variant="destructive">
-            <CircleAlert className="size-4" />
-            <AlertDescription>{errors.root.message}</AlertDescription>
-          </Alert>
-        )}
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-          <FieldGroup>
-            <Field data-invalid={!!errors.name}>
-              <FieldLabel htmlFor="name">
-                Imię<span className="text-destructive">*</span>
-              </FieldLabel>
-              <Input
-                id="name"
-                placeholder="Jan Kowalski"
-                autoComplete="name"
-                aria-invalid={!!errors.name}
-                disabled={isSubmitting}
-                {...register("name")}
-              />
-              <FieldError
-                role={errors.name ? "alert" : undefined}
-                aria-hidden={!errors.name}
-                className={cn(
-                  "min-h-5 text-sm font-normal text-destructive leading-tight",
-                  !errors.name && "invisible",
-                )}
-              >
-                {errors.name?.message || "\u00A0"}
-              </FieldError>
-            </Field>
-
-            <Field data-invalid={!!errors.email}>
-              <FieldLabel htmlFor="email">
-                Adres e-mail <span className="text-destructive">*</span>
-              </FieldLabel>
-              <Input
-                id="email"
-                type="email"
-                placeholder="twoj@email.com"
-                autoComplete="email"
-                aria-invalid={!!errors.email}
-                disabled={isSubmitting}
-                {...register("email")}
-              />
-              <FieldError
-                role={errors.email ? "alert" : undefined}
-                aria-hidden={!errors.email}
-                className={cn(
-                  "min-h-5 text-sm font-normal text-destructive leading-tight",
-                  !errors.email && "invisible",
-                )}
-              >
-                {errors.email?.message || "\u00A0"}
-              </FieldError>
-            </Field>
-
-            <Field data-invalid={!!errors.password}>
-              <FieldLabel htmlFor="password">
-                Hasło <span className="text-destructive">*</span>
-              </FieldLabel>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                autoComplete="new-password"
-                aria-invalid={!!errors.password}
-                disabled={isSubmitting}
-                {...register("password")}
-              />
-              <FieldError
-                role={errors.password ? "alert" : undefined}
-                aria-hidden={!errors.password}
-                className={cn(
-                  "min-h-5 text-sm font-normal text-destructive leading-tight",
-                  !errors.password && "invisible",
-                )}
-              >
-                {errors.password?.message || "\u00A0"}
-              </FieldError>
-            </Field>
-          </FieldGroup>
-
-          <Button type="submit" disabled={isSubmitting} className="w-full">
-            {isSubmitting && <Spinner className="mr-2" />}
-            {isSubmitting ? "Tworzenie konta..." : "Zarejestruj się"}
-          </Button>
-        </form>
-      </CardContent>
-
-      <CardFooter className="justify-center border-t border-border pt-4">
+    <AuthCard
+      title="Utwórz konto"
+      description="Wprowadź swoje dane, aby utworzyć nowe konto"
+      className={className}
+      footer={
         <p className="text-center text-sm text-muted-foreground">
           Masz już konto?{" "}
           <Link
@@ -207,7 +104,73 @@ export function Register({ className }: RegisterProps) {
             Zaloguj się
           </Link>
         </p>
-      </CardFooter>
-    </Card>
+      }
+    >
+      {errors.root?.message && (
+        <Alert variant="destructive">
+          <CircleAlert className="size-4" />
+          <AlertDescription>{errors.root.message}</AlertDescription>
+        </Alert>
+      )}
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+        <FieldGroup>
+          <Field data-invalid={!!errors.name}>
+            <FieldLabel htmlFor="name">
+              Imię<span className="text-destructive">*</span>
+            </FieldLabel>
+            <Input
+              id="name"
+              sizeVariant="touch"
+              placeholder="Jan Kowalski"
+              autoComplete="name"
+              aria-invalid={!!errors.name}
+              disabled={isSubmitting}
+              {...register("name")}
+            />
+            <FieldError reserveSpace>{errors.name?.message}</FieldError>
+          </Field>
+
+          <Field data-invalid={!!errors.email}>
+            <FieldLabel htmlFor="email">
+              Adres e-mail <span className="text-destructive">*</span>
+            </FieldLabel>
+            <Input
+              id="email"
+              type="email"
+              sizeVariant="touch"
+              placeholder="twoj@email.com"
+              autoComplete="email"
+              aria-invalid={!!errors.email}
+              disabled={isSubmitting}
+              {...register("email")}
+            />
+            <FieldError reserveSpace>{errors.email?.message}</FieldError>
+          </Field>
+
+          <Field data-invalid={!!errors.password}>
+            <FieldLabel htmlFor="password">
+              Hasło <span className="text-destructive">*</span>
+            </FieldLabel>
+            <Input
+              id="password"
+              type="password"
+              sizeVariant="touch"
+              placeholder="••••••••"
+              autoComplete="new-password"
+              aria-invalid={!!errors.password}
+              disabled={isSubmitting}
+              {...register("password")}
+            />
+            <FieldError reserveSpace>{errors.password?.message}</FieldError>
+          </Field>
+        </FieldGroup>
+
+        <Button type="submit" size="touch" disabled={isSubmitting} className="w-full">
+          {isSubmitting && <Spinner className="mr-2" />}
+          {isSubmitting ? "Tworzenie konta..." : "Zarejestruj się"}
+        </Button>
+      </form>
+    </AuthCard>
   );
 }

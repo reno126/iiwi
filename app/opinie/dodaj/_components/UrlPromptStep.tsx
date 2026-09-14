@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { ScrapeDelayNotice } from "@/components/products/ScrapeDelayNotice";
 import {
   Sparkles,
   ArrowLeft,
@@ -74,12 +75,10 @@ export function UrlPromptStep({
         </div>
 
         {/* Informacja o wydłużonym czasie Tier 2 */}
-        {isPending && isTier2NoticeVisible && (
-          <div className="flex items-center justify-center gap-2 pt-1 text-xs text-amber-600 dark:text-amber-400">
-            <Spinner className="size-3.5" />
-            <span>Zajmie to chwilę dłużej, ale nadal pracuję nad tym...</span>
-          </div>
-        )}
+        <ScrapeDelayNotice
+          isVisible={isPending && isTier2NoticeVisible}
+          className="justify-center pt-1"
+        />
       </form>
 
       {/* Opcja alternatywna: brak linku / dodawanie ręczne */}

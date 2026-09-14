@@ -164,8 +164,8 @@ export function ReviewForm({
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} className={className}>
         {isDraftRestored && (
-          <Alert className="mb-4 border-primary/30 bg-primary/5 text-foreground">
-            <CheckCircle2 className="size-4 text-primary" />
+          <Alert variant="info" className="mb-4">
+            <CheckCircle2 className="size-4" />
             <AlertDescription>
               Twoja opinia została przywrócona po zalogowaniu.
             </AlertDescription>

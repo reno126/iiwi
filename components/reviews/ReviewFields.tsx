@@ -51,16 +51,7 @@ export function ReviewFields({
               />
             )}
           />
-          <FieldError
-            role={errors.rate ? "alert" : undefined}
-            aria-hidden={!errors.rate}
-            className={cn(
-              "min-h-5 text-sm font-normal text-destructive leading-tight",
-              !errors.rate && "invisible",
-            )}
-          >
-            {errors.rate?.message || "\u00A0"}
-          </FieldError>
+          <FieldError reserveSpace>{errors.rate?.message}</FieldError>
         </Field>
 
         <Field
@@ -80,16 +71,7 @@ export function ReviewFields({
             className="min-h-28 text-base sm:text-sm"
             {...register("description")}
           />
-          <FieldError
-            role={errors.description ? "alert" : undefined}
-            aria-hidden={!errors.description}
-            className={cn(
-              "min-h-5 text-sm font-normal text-destructive leading-tight",
-              !errors.description && "invisible",
-            )}
-          >
-            {errors.description?.message || "\u00A0"}
-          </FieldError>
+          <FieldError reserveSpace>{errors.description?.message}</FieldError>
         </Field>
       </FieldGroup>
     </FieldSet>

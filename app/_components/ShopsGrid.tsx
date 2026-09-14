@@ -1,5 +1,5 @@
-import { Store } from "lucide-react";
 import type { ShopItem } from "@/serverActions/shopsGet";
+import { ShopLogo } from "@/components/shops/ShopLogo";
 
 interface ShopsGridProps {
   shops: ShopItem[];
@@ -22,16 +22,12 @@ export function ShopsGrid({ shops }: ShopsGridProps) {
           className="flex flex-col items-center justify-center p-4 rounded-xl border bg-white shadow-2xs hover:border-primary/50 hover:shadow-xs transition-all text-center gap-2.5 h-28 sm:h-32"
         >
           <div className="h-12 w-full flex items-center justify-center p-1">
-            {shop.logo ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={shop.logo}
-                alt={shop.name || "Logo sklepu"}
-                className="max-h-full max-w-full object-contain"
-              />
-            ) : (
-              <Store className="size-7 text-muted-foreground" />
-            )}
+            <ShopLogo
+              logo={shop.logo}
+              name={shop.name}
+              size="lg"
+              className="border-0 shadow-none bg-transparent"
+            />
           </div>
           <span className="text-xs sm:text-sm font-medium text-foreground line-clamp-1 w-full px-1">
             {shop.name || "Sklep"}

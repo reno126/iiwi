@@ -11,14 +11,7 @@ import { CircleAlert } from "lucide-react";
 
 import { loginSchema, type LoginInput } from "@/schemas/login";
 import { getReviewDraftReturnUrl } from "@/lib/storage/reviewDraftStorage";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { AuthCard } from "@/components/auth/AuthCard";
 import {
   Field,
   FieldError,
@@ -126,105 +119,11 @@ export function SignIn({ className }: SignInProps) {
   };
 
   return (
-    <Card className={cn("w-full max-w-md", className)}>
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Zaloguj się</CardTitle>
-        <CardDescription>
-          Wprowadź swoje dane, aby uzyskać dostęp do konta
-        </CardDescription>
-      </CardHeader>
-
-      <CardContent className="space-y-4">
-        {displayedError && (
-          <Alert variant="destructive">
-            <CircleAlert className="size-4" />
-            <AlertDescription>{displayedError}</AlertDescription>
-          </Alert>
-        )}
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-          <FieldGroup>
-            <Field data-invalid={!!errors.email}>
-              <FieldLabel htmlFor="email">Adres e-mail</FieldLabel>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                placeholder="twoj@email.com"
-                aria-invalid={!!errors.email}
-                disabled={isSubmitting || isGooglePending}
-                {...register("email")}
-              />
-              <FieldError
-                role={errors.email ? "alert" : undefined}
-                aria-hidden={!errors.email}
-                className={cn(
-                  "min-h-5 text-sm font-normal text-destructive leading-tight",
-                  !errors.email && "invisible",
-                )}
-              >
-                {errors.email?.message || "\u00A0"}
-              </FieldError>
-            </Field>
-
-            <Field data-invalid={!!errors.password}>
-              <FieldLabel htmlFor="password">Hasło</FieldLabel>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                placeholder="••••••••"
-                aria-invalid={!!errors.password}
-                disabled={isSubmitting || isGooglePending}
-                {...register("password")}
-              />
-              <FieldError
-                role={errors.password ? "alert" : undefined}
-                aria-hidden={!errors.password}
-                className={cn(
-                  "min-h-5 text-sm font-normal text-destructive leading-tight",
-                  !errors.password && "invisible",
-                )}
-              >
-                {errors.password?.message || "\u00A0"}
-              </FieldError>
-            </Field>
-          </FieldGroup>
-
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isSubmitting || isGooglePending}
-          >
-            {isSubmitting && <Spinner className="mr-2" />}
-            {isSubmitting ? "Logowanie..." : "Zaloguj się"}
-          </Button>
-        </form>
-
-        <div className="relative my-4 flex items-center justify-center">
-          <Separator className="w-full" />
-          <span className="absolute bg-card px-2 text-xs text-muted-foreground uppercase">
-            Lub kontynuuj przez
-          </span>
-        </div>
-
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={handleGoogleSignIn}
-          disabled={isSubmitting || isGooglePending}
-        >
-          {isGooglePending ? (
-            <Spinner className="mr-2" />
-          ) : (
-            <FaGoogle className="mr-2 text-red-500" />
-          )}
-          {isGooglePending ? "Przekierowywanie..." : "Zaloguj się przez Google"}
-        </Button>
-      </CardContent>
-
-      <CardFooter className="justify-center border-t border-border pt-4">
+    <AuthCard
+      title="Zaloguj się"
+      description="Wprowadź swoje dane, aby uzyskać dostęp do konta"
+      className={className}
+      footer={
         <p className="text-center text-sm text-muted-foreground">
           Nie masz jeszcze konta?{" "}
           <Link
@@ -234,8 +133,82 @@ export function SignIn({ className }: SignInProps) {
             Zarejestruj się
           </Link>
         </p>
-      </CardFooter>
-    </Card>
+      }
+    >
+      {displayedError && (
+        <Alert variant="destructive">
+          <CircleAlert className="size-4" />
+          <AlertDescription>{displayedError}</AlertDescription>
+        </Alert>
+      )}
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+        <FieldGroup>
+          <Field data-invalid={!!errors.email}>
+            <FieldLabel htmlFor="email">Adres e-mail</FieldLabel>
+            <Input
+              id="email"
+              type="email"
+              sizeVariant="touch"
+              autoComplete="email"
+              placeholder="twoj@email.com"
+              aria-invalid={!!errors.email}
+              disabled={isSubmitting || isGooglePending}
+              {...register("email")}
+            />
+            <FieldError reserveSpace>{errors.email?.message}</FieldError>
+          </Field>
+
+          <Field data-invalid={!!errors.password}>
+            <FieldLabel htmlFor="password">Hasło</FieldLabel>
+            <Input
+              id="password"
+              type="password"
+              sizeVariant="touch"
+              autoComplete="current-password"
+              placeholder="••••••••"
+              aria-invalid={!!errors.password}
+              disabled={isSubmitting || isGooglePending}
+              {...register("password")}
+            />
+            <FieldError reserveSpace>{errors.password?.message}</FieldError>
+          </Field>
+        </FieldGroup>
+
+        <Button
+          type="submit"
+          size="touch"
+          className="w-full"
+          disabled={isSubmitting || isGooglePending}
+        >
+          {isSubmitting && <Spinner className="mr-2" />}
+          {isSubmitting ? "Logowanie..." : "Zaloguj się"}
+        </Button>
+      </form>
+
+      <div className="relative my-4 flex items-center justify-center">
+        <Separator className="w-full" />
+        <span className="absolute bg-card px-2 text-xs text-muted-foreground uppercase">
+          Lub kontynuuj przez
+        </span>
+      </div>
+
+      <Button
+        type="button"
+        variant="outline"
+        size="touch"
+        className="w-full"
+        onClick={handleGoogleSignIn}
+        disabled={isSubmitting || isGooglePending}
+      >
+        {isGooglePending ? (
+          <Spinner className="mr-2" />
+        ) : (
+          <FaGoogle className="mr-2 text-red-500" />
+        )}
+        {isGooglePending ? "Przekierowywanie..." : "Zaloguj się przez Google"}
+      </Button>
+    </AuthCard>
   );
 }
 

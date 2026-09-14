@@ -13,7 +13,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
+import { ScrapeDelayNotice } from "@/components/products/ScrapeDelayNotice";
 import { Sparkles, Trash2, ImageOff, CircleAlert, CheckCircle2, Check } from "lucide-react";
 import { productScrapeMetadata } from "@/serverActions/productScrapeMetadata";
 import { shopMatchByUrlAction } from "@/serverActions/shopMatchByUrlAction";
@@ -230,16 +233,12 @@ export function ProductFields({
             </FieldLabel>
 
             {isStatusActive && (
-              <span
-                className={cn(
-                  "inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-full shrink-0",
-                  isNameFilled
-                    ? "text-emerald-700 bg-emerald-100/90 dark:text-emerald-300 dark:bg-emerald-900/40"
-                    : "text-gray-600 bg-gray-200/90 dark:text-gray-300 dark:bg-gray-800/60"
-                )}
+              <Badge
+                variant={isNameFilled ? "success" : "neutral"}
+                className="shrink-0 text-xs"
               >
                 {isNameFilled ? "Uzupełnione" : "Do uzupełnienia"}
-              </span>
+              </Badge>
             )}
           </div>
           <Textarea
@@ -287,30 +286,26 @@ export function ProductFields({
             </div>
 
             {/* Komunikat o wydłużonym czasie Tier 2 */}
-            {isPending && isTier2NoticeVisible && (
-              <div className="mt-2 flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400">
-                <Spinner className="size-3.5" />
-                <span>Zajmie to chwilę dłużej, ale nadal pracuję nad tym...</span>
-              </div>
-            )}
+            <ScrapeDelayNotice
+              isVisible={isPending && isTier2NoticeVisible}
+              className="mt-2"
+            />
 
             {/* Nieblokujący komunikat o wyniku scrapowania */}
             {scrapeNotice && (
-              <div
-                className={cn(
-                  "mt-2 flex items-start gap-2 rounded-md border p-2.5 text-xs",
-                  scrapeNotice.type === "error"
-                    ? "border-destructive/30 bg-destructive/10 text-destructive dark:bg-destructive/20"
-                    : "border-emerald-500/30 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300"
-                )}
+              <Alert
+                variant={scrapeNotice.type === "error" ? "destructive" : "success"}
+                className="mt-2 text-xs py-2 px-3"
               >
                 {scrapeNotice.type === "error" ? (
-                  <CircleAlert className="mt-0.5 size-4 shrink-0" />
+                  <CircleAlert className="size-4 shrink-0" />
                 ) : (
-                  <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
+                  <CheckCircle2 className="size-4 shrink-0" />
                 )}
-                <span className="flex-1 leading-relaxed">{scrapeNotice.message}</span>
-              </div>
+                <AlertDescription className="text-xs leading-relaxed">
+                  {scrapeNotice.message}
+                </AlertDescription>
+              </Alert>
             )}
 
             {errors.productUrl?.message && (

@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Package, Star } from "lucide-react";
 import type { RecentReviewItem } from "@/serverActions/recentReviewsGet";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ProductThumbnail } from "@/components/products/ProductThumbnail";
+import { StarRating } from "@/components/reviews/StarRating";
 import { formatPolishDate, formatReviewCount } from "@/lib/formatters";
 
 interface RecentReviewsBannerProps {
@@ -36,18 +37,12 @@ export function RecentReviewsBanner({ reviews }: RecentReviewsBannerProps) {
               <div>
                 {/* Product header: thumbnail + name + shop */}
                 <div className="flex items-start gap-3">
-                  <div className="size-16 rounded-lg bg-muted border flex items-center justify-center shrink-0 overflow-hidden">
-                    {review.product.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={review.product.imageUrl}
-                        alt={review.product.name}
-                        className="size-full object-contain p-1"
-                      />
-                    ) : (
-                      <Package className="size-6 text-muted-foreground" />
-                    )}
-                  </div>
+                  <ProductThumbnail
+                    src={review.product.imageUrl}
+                    alt={review.product.name}
+                    size="md"
+                    className="size-16 rounded-lg border shrink-0"
+                  />
 
                   <div className="min-w-0 flex-1 space-y-1">
                     <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug">
@@ -56,7 +51,10 @@ export function RecentReviewsBanner({ reviews }: RecentReviewsBannerProps) {
 
                     <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
                       {review.product.shop?.name && (
-                        <Badge variant="secondary" className="text-xs px-2 py-0.5">
+                        <Badge
+                          variant="secondary"
+                          className="text-xs px-2 py-0.5"
+                        >
                           {review.product.shop.name}
                         </Badge>
                       )}
@@ -72,10 +70,7 @@ export function RecentReviewsBanner({ reviews }: RecentReviewsBannerProps) {
                 {/* Rating & Review content snippet */}
                 <div className="my-3 space-y-2">
                   <div className="flex items-center gap-1.5">
-                    <Star className="size-4 fill-amber-400 text-amber-500 shrink-0" />
-                    <span className="text-sm font-semibold text-foreground">
-                      {rating.toFixed(1)} / 5
-                    </span>
+                    <StarRating rate={rating} size="sm" showValue />
                     {review.product.rate_count > 0 && (
                       <span className="text-xs text-muted-foreground">
                         ({formatReviewCount(review.product.rate_count)})
