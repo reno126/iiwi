@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
-import { AsyncSearch } from "@/components/AsyncSearch";
+import { AsyncSearch } from "@/app/opinie/dodaj/_components/AsyncSearch";
 
 interface TestProduct {
   id: string;
@@ -15,7 +15,7 @@ const mockProducts: TestProduct[] = [
   { id: "3", name: "Klawiatura mechaniczna Keychron", code: "KEY-03", price: 450 },
 ];
 
-describe("components/AsyncSearch (Generic Search Component)", () => {
+describe("app/opinie/dodaj/_components/AsyncSearch", () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });

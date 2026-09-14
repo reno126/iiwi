@@ -19,7 +19,7 @@ import {
 import { ReviewForm } from "@/components/reviews/ReviewForm";
 import { StarRating } from "@/components/reviews/StarRating";
 import { ProductOverviewCard } from "./ProductOverviewCard";
-import { ProductReviewItem } from "@/components/reviews/ProductReviewItem";
+import { ProductReviewItem } from "./ProductReviewItem";
 import { getReviewDraft } from "@/lib/storage/reviewDraftStorage";
 import { cn } from "cn";
 

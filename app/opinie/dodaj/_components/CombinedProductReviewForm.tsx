@@ -16,7 +16,7 @@ import {
   getReviewDraft,
   clearReviewDraft,
 } from "@/lib/storage/reviewDraftStorage";
-import { ProductFields } from "@/components/products/ProductFields";
+import { ProductFields } from "./ProductFields";
 import { ReviewFields } from "@/components/reviews/ReviewFields";
 import {
   Card,
@@ -30,7 +30,7 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CircleAlert, ArrowLeft, CheckCircle2 } from "lucide-react";
-import { StickyFormActionBar } from "@/components/common/StickyFormActionBar";
+import { StickyFormActionBar } from "./StickyFormActionBar";
 import { UrlPromptStep } from "./UrlPromptStep";
 import {
   ScrapeNoticeBanner,

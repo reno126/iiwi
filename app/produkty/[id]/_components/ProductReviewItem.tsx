@@ -1,7 +1,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { StarRating } from "@/components/reviews/StarRating";
-import { ReadMore } from "@/components/ReadMore";
+import { ReadMore } from "./ReadMore";
 import { Calendar } from "lucide-react";
 import { formatPolishDate } from "@/lib/formatters";
 

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { ScrapeDelayNotice } from "@/components/products/ScrapeDelayNotice";
+import { ScrapeDelayNotice } from "./ScrapeDelayNotice";
 import {
   Sparkles,
   ArrowLeft,

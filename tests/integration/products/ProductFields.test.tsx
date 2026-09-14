@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useForm, FormProvider } from "react-hook-form";
-import { ProductFields } from "@/components/products/ProductFields";
+import { ProductFields } from "@/app/opinie/dodaj/_components/ProductFields";
 import { productScrapeMetadata } from "@/serverActions/productScrapeMetadata";
 import type { ProductCreateInput } from "@/schemas/product";
 
@@ -44,7 +44,7 @@ function FormWrapper({ defaultValues, hideProductUrl, showFieldStatus }: Wrapper
   );
 }
 
-describe("components/products/ProductFields", () => {
+describe("app/opinie/dodaj/_components/ProductFields", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
