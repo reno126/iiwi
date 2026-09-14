@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -22,6 +22,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ReadMore } from "@/components/ReadMore";
 import { ReviewForm } from "@/components/reviews/ReviewForm";
+import { getReviewDraft } from "@/lib/storage/reviewDraftStorage";
 import { formatPolishDate, formatReviewCount } from "@/lib/formatters";
 import { cn } from "cn";
 
@@ -63,7 +64,25 @@ export interface ProductDetailsProps {
 
 export function ProductDetails({ product }: ProductDetailsProps) {
   const router = useRouter();
-  const [isReviewFormOpen, setIsReviewFormOpen] = useState(false);
+  const [isReviewFormOpen, setIsReviewFormOpen] = useState(() => {
+    const draft = getReviewDraft();
+    return Boolean(
+      draft?.type === "REVIEW_EXISTING_PRODUCT" && draft.productId === product.id
+    );
+  });
+
+  useEffect(() => {
+    const draft = getReviewDraft();
+    if (
+      draft?.type === "REVIEW_EXISTING_PRODUCT" &&
+      draft.productId === product.id
+    ) {
+      const el = document.getElementById("review-form");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  }, [product.id]);
 
   const handleReviewSuccess = () => {
     setIsReviewFormOpen(false);
@@ -231,7 +250,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
       {/* Reviews or Review Form Section */}
       {isReviewFormOpen ? (
-        <section aria-labelledby="review-form-heading" className="space-y-4">
+        <section id="review-form" aria-labelledby="review-form-heading" className="space-y-4">
           <div className="border-b border-border pb-3">
             <h2
               id="review-form-heading"
@@ -244,6 +263,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             <CardContent className="p-0">
               <ReviewForm
                 productId={product.id}
+                product={product}
                 onSuccess={handleReviewSuccess}
                 onCancel={handleCancelReview}
                 autoFocus

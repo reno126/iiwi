@@ -22,14 +22,21 @@ describe("serverActions/shopMatchByUrlAction", () => {
     });
   });
 
-  it("returns server error when called unauthenticated", async () => {
+  it("allows unauthenticated callers to match shops by url", async () => {
     vi.mocked(auth).mockResolvedValueOnce(null);
+    const mockShop = {
+      id: "shop-me",
+      name: "Media Expert",
+      logo: "https://example.com/me.png",
+    };
+    vi.mocked(findShopByUrl).mockResolvedValueOnce(mockShop);
 
     const result = await shopMatchByUrlAction({
       url: "https://mediaexpert.pl",
     });
 
-    expect(result?.serverError).toBeDefined();
+    expect(result?.data).toEqual(mockShop);
+    expect(result?.serverError).toBeUndefined();
   });
 
   it("calls findShopByUrl and returns matched shop data", async () => {

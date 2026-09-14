@@ -44,7 +44,7 @@ test.describe("Authentication and Route Protection Flows", () => {
     ).toBeVisible();
   });
 
-  test("completes registration flow and shows success card", async ({
+  test("completes registration flow and automatically logs in to dashboard", async ({
     page,
   }) => {
     await page.goto("/register");
@@ -57,16 +57,11 @@ test.describe("Authentication and Route Protection Flows", () => {
 
     await page.getByRole("button", { name: "Zarejestruj się" }).click();
 
-    // Success card appears
+    // Automatically logged in and redirected to dashboard
+    await expect(page).toHaveURL(/\/dashboard/);
     await expect(page.locator("[data-slot='card-title']")).toContainText(
-      "Rejestracja zakończona sukcesem",
+      "Panel główny",
     );
-    await expect(
-      page.getByText(/Twoje konto zostało pomyślnie utworzone/i),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: "Przejdź do logowania" }),
-    ).toBeVisible();
   });
 
   test("shows conflict error when attempting to register with already registered email", async ({
@@ -76,17 +71,16 @@ test.describe("Authentication and Route Protection Flows", () => {
 
     const duplicateEmail = `${E2E_TEST_PREFIX}dup_${Date.now()}@example.com`;
 
-    // 1. Register first user
+    // 1. Register first user (automatically redirects to dashboard)
     await page.getByLabel(/Imię/i).fill(`${E2E_TEST_PREFIX} Pierwszy Użytkownik`);
     await page.getByLabel(/Adres e-mail/i).fill(duplicateEmail);
     await page.getByLabel(/Hasło/i).fill("bezpieczneHaslo123");
     await page.getByRole("button", { name: "Zarejestruj się" }).click();
 
-    await expect(page.locator("[data-slot='card-title']")).toContainText(
-      "Rejestracja zakończona sukcesem",
-    );
+    await expect(page).toHaveURL(/\/dashboard/);
 
-    // 2. Try to register second time with same email
+    // 2. Clear cookies so second attempt starts as unauthenticated visitor
+    await page.context().clearCookies();
     await page.goto("/register");
     await page.getByLabel(/Imię/i).fill(`${E2E_TEST_PREFIX} Drugi Użytkownik`);
     await page.getByLabel(/Adres e-mail/i).fill(duplicateEmail);

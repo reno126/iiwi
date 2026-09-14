@@ -6,6 +6,10 @@ import type { Product } from "@/prisma/generated/client";
 import { AsyncSearch } from "@/components/AsyncSearch";
 import { productSearch } from "@/serverActions/productSearch";
 import { ReviewForm } from "@/components/reviews/ReviewForm";
+import {
+  getReviewDraft,
+  clearReviewDraft,
+} from "@/lib/storage/reviewDraftStorage";
 import { SelectedProductCard } from "./SelectedProductCard";
 import { CombinedProductReviewForm } from "./CombinedProductReviewForm";
 import { Button } from "@/components/ui/button";
@@ -18,9 +22,19 @@ export type FlowMode =
 
 export function AddReviewFlow() {
   const router = useRouter();
-  const [mode, setMode] = useState<FlowMode>({ type: "SEARCHING" });
+  const [mode, setMode] = useState<FlowMode>(() => {
+    const draft = getReviewDraft();
+    if (draft?.type === "NEW_PRODUCT_AND_REVIEW") {
+      return { type: "NEW_PRODUCT_AND_REVIEW" };
+    }
+    if (draft?.type === "REVIEW_EXISTING_PRODUCT" && draft.product) {
+      return { type: "REVIEW_EXISTING_PRODUCT", product: draft.product };
+    }
+    return { type: "SEARCHING" };
+  });
 
   const handleSuccess = (productId: string) => {
+    clearReviewDraft();
     router.push(`/produkty/${productId}`);
   };
 
@@ -76,15 +90,22 @@ export function AddReviewFlow() {
         <div className="space-y-6">
           <SelectedProductCard
             product={mode.product}
-            onReselect={() => setMode({ type: "SEARCHING" })}
+            onReselect={() => {
+              clearReviewDraft();
+              setMode({ type: "SEARCHING" });
+            }}
           />
 
           <div className="p-6 border rounded-lg bg-card shadow-xs">
             <h2 className="text-lg font-semibold mb-4">Napisz swoją opinię</h2>
             <ReviewForm
               productId={mode.product.id}
+              product={mode.product}
               onSuccess={handleSuccess}
-              onCancel={() => setMode({ type: "SEARCHING" })}
+              onCancel={() => {
+                clearReviewDraft();
+                setMode({ type: "SEARCHING" });
+              }}
             />
           </div>
         </div>
@@ -93,7 +114,10 @@ export function AddReviewFlow() {
       {/* STAN 3: NEW_PRODUCT_AND_REVIEW */}
       {mode.type === "NEW_PRODUCT_AND_REVIEW" && (
         <CombinedProductReviewForm
-          onCancel={() => setMode({ type: "SEARCHING" })}
+          onCancel={() => {
+            clearReviewDraft();
+            setMode({ type: "SEARCHING" });
+          }}
           onSuccess={handleSuccess}
         />
       )}

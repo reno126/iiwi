@@ -1,13 +1,28 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { CombinedProductReviewForm } from "@/app/opinie/dodaj/_components/CombinedProductReviewForm";
 import { productScrapeMetadata } from "@/serverActions/productScrapeMetadata";
 import { productWithReviewCreate } from "@/serverActions/productWithReviewCreate";
+import {
+  saveReviewDraft,
+  getReviewDraft,
+  clearReviewDraft,
+} from "@/lib/storage/reviewDraftStorage";
 
 import type { Product, Review } from "@/prisma/generated/client";
 
 // Mocks
+vi.mock("next-auth/react", () => ({
+  useSession: vi.fn(),
+}));
+
+vi.mock("next/navigation", () => ({
+  useRouter: vi.fn(),
+}));
+
 vi.mock("@/serverActions/productScrapeMetadata", () => ({
   productScrapeMetadata: vi.fn(),
 }));
@@ -23,9 +38,19 @@ vi.mock("@/serverActions/shopMatchByUrlAction", () => ({
 describe("CombinedProductReviewForm - New Flow", () => {
   const onCancelMock = vi.fn();
   const onSuccessMock = vi.fn();
+  const pushMock = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
+    clearReviewDraft();
+    vi.mocked(useRouter).mockReturnValue({
+      push: pushMock,
+    } as unknown as ReturnType<typeof useRouter>);
+    vi.mocked(useSession).mockReturnValue({
+      data: { user: { id: "test-user-1" }, expires: "9999-12-31" },
+      status: "authenticated",
+      update: vi.fn(),
+    });
   });
 
   it("initially renders only the 3 main elements and the manual addition option", () => {
@@ -280,4 +305,127 @@ describe("CombinedProductReviewForm - New Flow", () => {
       expect(screen.getAllByText("Do uzupełnienia").length).toBe(1); // shop
     });
   });
+
+  it("when unauthenticated, tries session refresh and redirects to login saving draft in localStorage", async () => {
+    const user = userEvent.setup();
+    const updateMock = vi.fn().mockResolvedValue(null);
+
+    vi.mocked(useSession).mockReturnValue({
+      data: null,
+      status: "unauthenticated",
+      update: updateMock,
+    });
+
+    render(
+      <CombinedProductReviewForm
+        onCancel={onCancelMock}
+        onSuccess={onSuccessMock}
+      />
+    );
+
+    // Przejście do trybu manualnego
+    await user.click(screen.getByRole("button", { name: /Dodaj produkt ręcznie/i }));
+
+    // Wypełnienie formularza
+    const nameInput = screen.getByLabelText(/Nazwa produktu \*/i);
+    await user.type(nameInput, "Część zapasowa XYZ");
+
+    const starRadio = screen.getByRole("radio", { name: "4 z 5 gwiazdek" });
+    await user.click(starRadio);
+
+    const reviewTextarea = screen.getByLabelText(/Treść recenzji \*/i);
+    await user.type(reviewTextarea, "Dobra jakość, polecam!");
+
+    // Kliknięcie "Dodaj produkt i opinię"
+    await user.click(screen.getByRole("button", { name: /Dodaj produkt i opinię/i }));
+
+    // Powinno podjąć próbę odświeżenia sesji
+    expect(updateMock).toHaveBeenCalled();
+
+    // Ponieważ odświeżenie zwróciło null, nie powinno wywoływać server action
+    expect(productWithReviewCreate).not.toHaveBeenCalled();
+
+    // Powinno zapisać draft do localStorage
+    const savedDraft = getReviewDraft();
+    expect(savedDraft).toBeDefined();
+    expect(savedDraft?.type).toBe("NEW_PRODUCT_AND_REVIEW");
+    if (savedDraft?.type === "NEW_PRODUCT_AND_REVIEW") {
+      expect(savedDraft.formData.name).toBe("Część zapasowa XYZ");
+      expect(savedDraft.formData.rate).toBe(4);
+      expect(savedDraft.formData.description).toBe("Dobra jakość, polecam!");
+      expect(savedDraft.phase?.mode).toBe("manual");
+    }
+
+    // Powinno przekierować do logowania z callbackUrl
+    expect(pushMock).toHaveBeenCalledWith(
+      expect.stringContaining("/login?callbackUrl=")
+    );
+  });
+
+  it("restores form data and active phase from existing localStorage draft on mount, and displays banner", async () => {
+    const user = userEvent.setup();
+
+    // Zapisujemy draft z wyprzedzeniem
+    saveReviewDraft({
+      type: "NEW_PRODUCT_AND_REVIEW",
+      formData: {
+        name: "Przywrócony produkt",
+        productUrl: "https://sklep.pl/item-restored",
+        imageUrl: "https://sklep.pl/image-restored.jpg",
+        code: "RESTORED-123",
+        shopId: "",
+        rate: 5,
+        description: "Opinia przywrócona ze szkicu.",
+      },
+      phase: {
+        mode: "scraped_success",
+        scrapedFields: ["name", "imageUrl", "code"],
+      },
+      detectedShop: null,
+    });
+
+    vi.mocked(productWithReviewCreate).mockResolvedValueOnce({
+      data: {
+        product: { id: "restored-prod-id" } as unknown as Product,
+        review: { id: "restored-rev-id" } as unknown as Review,
+      },
+    });
+
+    render(
+      <CombinedProductReviewForm
+        onCancel={onCancelMock}
+        onSuccess={onSuccessMock}
+      />
+    );
+
+    // Powinien od razu pojawić się komunikat o przywróceniu danych
+    expect(
+      screen.getByText(/Twoje dane zostały przywrócone po zalogowaniu/i)
+    ).toBeInTheDocument();
+
+    // Nazwa i treść recenzji powinny być wypełnione
+    const nameInput = screen.getByLabelText(/Nazwa produktu \*/i) as HTMLInputElement;
+    expect(nameInput.value).toBe("Przywrócony produkt");
+
+    const descTextarea = screen.getByLabelText(/Treść recenzji \*/i) as HTMLTextAreaElement;
+    expect(descTextarea.value).toBe("Opinia przywrócona ze szkicu.");
+
+    // Klikamy "Dodaj produkt i opinię"
+    await user.click(screen.getByRole("button", { name: /Dodaj produkt i opinię/i }));
+
+    await waitFor(() => {
+      expect(productWithReviewCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: "Przywrócony produkt",
+          rate: 5,
+          description: "Opinia przywrócona ze szkicu.",
+        })
+      );
+      expect(onSuccessMock).toHaveBeenCalledWith("restored-prod-id");
+    });
+
+    // Po udanym zapisie szkic powinien zostać wyczyszczony z localStorage
+    expect(getReviewDraft()).toBeNull();
+  });
 });
+

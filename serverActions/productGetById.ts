@@ -9,6 +9,7 @@ export type ProductWithReviews = {
   imageUrl: string | null;
   code: string | null;
   creatorId: string;
+  shopId: string | null;
   rate_avg: number;
   rate_count: number;
   createdAt: Date;

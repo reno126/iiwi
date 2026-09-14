@@ -35,7 +35,9 @@ const BROWSER_HEADERS = {
   "Upgrade-Insecure-Requests": "1",
 };
 
-export const productScrapeMetadata = createSafeActionClient()
+export const productScrapeMetadata = createSafeActionClient({
+  defaultValidationErrorsShape: "flattened",
+})
   .inputSchema(productScrapeSchema)
   .action(async ({ parsedInput }) => {
     const { productUrl } = parsedInput;

@@ -3,8 +3,13 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SignIn } from "@/app/login/_components/SignIn";
 import { signIn } from "next-auth/react";
+import {
+  saveReviewDraft,
+  clearReviewDraft,
+} from "@/lib/storage/reviewDraftStorage";
 
 const mockPush = vi.fn();
+const mockRefresh = vi.fn();
 let mockSearchParams = new URLSearchParams();
 
 vi.mock("next/navigation", () => ({
@@ -12,6 +17,7 @@ vi.mock("next/navigation", () => ({
     push: mockPush,
     replace: vi.fn(),
     prefetch: vi.fn(),
+    refresh: mockRefresh,
     back: vi.fn(),
   }),
   useSearchParams: () => mockSearchParams,
@@ -170,5 +176,80 @@ describe("app/login/_components/SignIn", () => {
         callbackUrl: "/dashboard",
       });
     });
+  });
+
+  it("redirects credentials sign-in to review draft return URL when draft exists in localStorage", async () => {
+    saveReviewDraft({
+      type: "NEW_PRODUCT_AND_REVIEW",
+      returnUrl: "/opinie/dodaj?step=2",
+      formData: {
+        name: "Test Produkt",
+        productUrl: "https://shop.pl/test",
+        description: "Super opinia",
+        rate: 5,
+      },
+    });
+
+    const user = userEvent.setup();
+    vi.mocked(signIn).mockResolvedValueOnce({
+      error: null,
+      status: 200,
+      ok: true,
+      url: "/dashboard",
+    });
+
+    render(<SignIn />);
+
+    await user.type(screen.getByLabelText(/Adres e-mail/i), "test@example.com");
+    await user.type(screen.getByLabelText(/Hasło/i), "password123");
+
+    await user.click(screen.getByRole("button", { name: "Zaloguj się" }));
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith("/opinie/dodaj?step=2");
+      expect(mockRefresh).toHaveBeenCalled();
+    });
+
+    clearReviewDraft();
+  });
+
+  it("triggers Google OAuth flow with review draft return URL when draft exists in localStorage", async () => {
+    saveReviewDraft({
+      type: "REVIEW_EXISTING_PRODUCT",
+      returnUrl: "/produkty/prod-123",
+      productId: "prod-123",
+      formData: {
+        productId: "prod-123",
+        description: "Opinia produktu",
+        rate: 5,
+      },
+    });
+
+    const user = userEvent.setup();
+    render(<SignIn />);
+
+    const googleBtn = screen.getByRole("button", {
+      name: "Zaloguj się przez Google",
+    });
+    await user.click(googleBtn);
+
+    await waitFor(() => {
+      expect(signIn).toHaveBeenCalledWith("google", {
+        callbackUrl: "/produkty/prod-123",
+      });
+    });
+
+    clearReviewDraft();
+  });
+
+  it("preserves callbackUrl in register link when callbackUrl is in searchParams", () => {
+    mockSearchParams = new URLSearchParams("callbackUrl=/opinie/dodaj");
+    render(<SignIn />);
+
+    const registerLink = screen.getByRole("link", { name: "Zarejestruj się" });
+    expect(registerLink).toHaveAttribute(
+      "href",
+      "/register?callbackUrl=%2Fopinie%2Fdodaj",
+    );
   });
 });

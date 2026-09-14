@@ -5,10 +5,23 @@ import { ProductDetails } from "@/app/produkty/[id]/_components/ProductDetails";
 import type { ProductWithReviews } from "@/serverActions/productGetById";
 import { reviewCreate } from "@/serverActions/reviewCreate";
 import { useRouter } from "next/navigation";
+import {
+  saveReviewDraft,
+  clearReviewDraft,
+} from "@/lib/storage/reviewDraftStorage";
 
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
   useRouter: vi.fn(),
+}));
+
+// Mock next-auth/react
+vi.mock("next-auth/react", () => ({
+  useSession: () => ({
+    data: { user: { id: "user-test-1" } },
+    status: "authenticated",
+    update: vi.fn(),
+  }),
 }));
 
 // Mock reviewCreate server action
@@ -23,6 +36,7 @@ const mockProduct: ProductWithReviews = {
   imageUrl: "https://example.com/headphones.png",
   code: "SKU-999",
   creatorId: "user-creator-1",
+  shopId: null,
   rate_avg: 4.5,
   rate_count: 2,
   createdAt: new Date("2026-01-01T10:00:00Z"),
@@ -308,5 +322,26 @@ describe("app/produkty/[id]/_components/ProductDetails", () => {
       expect(errorContainers[0]).not.toHaveClass("invisible");
       expect(errorContainers[1]).not.toHaveClass("invisible");
     });
+  });
+
+  it("automatically opens review form and restores draft when review draft exists for this product in localStorage", () => {
+    saveReviewDraft({
+      type: "REVIEW_EXISTING_PRODUCT",
+      productId: mockProduct.id,
+      formData: {
+        productId: mockProduct.id,
+        rate: 4,
+        description: "Zapamiętana wersja robocza opinii",
+      },
+    });
+
+    render(<ProductDetails product={mockProduct} />);
+
+    // Review form should be open automatically
+    expect(screen.getByRole("heading", { name: "Napisz swoją opinię" })).toBeInTheDocument();
+    expect(screen.getByText("Twoja opinia została przywrócona po zalogowaniu.")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("Zapamiętana wersja robocza opinii")).toBeInTheDocument();
+
+    clearReviewDraft();
   });
 });

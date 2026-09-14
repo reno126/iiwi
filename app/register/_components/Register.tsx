@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CircleAlert, CircleCheck } from "lucide-react";
+import { signIn } from "next-auth/react";
+import { CircleAlert } from "lucide-react";
 
 import { registerSchema, type RegisterInput } from "@/schemas/register";
+import { getReviewDraftReturnUrl } from "@/lib/storage/reviewDraftStorage";
 import {
   Card,
   CardContent,
@@ -23,7 +24,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "cn";
@@ -34,20 +35,33 @@ interface RegisterProps {
 
 export function Register({ className }: RegisterProps) {
   const router = useRouter();
-  const [isRegistered, setRegistered] = useState(false);
-  const [apiError, setApiError] = useState("");
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
+
+  const loginHref =
+    callbackUrl && callbackUrl !== "/dashboard"
+      ? `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
+      : "/login";
 
   const {
     register,
     handleSubmit,
+    setError,
+    clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
     mode: "onTouched",
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+    },
   });
 
   const onSubmit = async (data: RegisterInput) => {
-    setApiError("");
+    clearErrors("root");
+
     const response = await fetch("/api/register", {
       method: "POST",
       headers: {
@@ -56,45 +70,31 @@ export function Register({ className }: RegisterProps) {
       body: JSON.stringify(data),
     });
 
-    if (response.ok) {
-      setRegistered(true);
-      setTimeout(() => {
-        router.push("/login");
-      }, 2000);
-    } else {
+    if (!response.ok) {
       const resData = await response.json().catch(() => ({}));
-      setApiError(resData.error || "Wystąpił błąd podczas rejestracji");
+      setError("root", {
+        message: resData.error || "Wystąpił błąd podczas rejestracji",
+      });
+      return;
+    }
+
+    const result = await signIn("credentials", {
+      email: data.email,
+      password: data.password,
+      redirect: false,
+    });
+
+    if (result?.ok) {
+      const targetUrl =
+        callbackUrl && callbackUrl !== "/dashboard"
+          ? callbackUrl
+          : getReviewDraftReturnUrl("/dashboard");
+      router.push(targetUrl);
+      router.refresh();
+    } else {
+      router.push(loginHref);
     }
   };
-
-  if (isRegistered) {
-    return (
-      <Card className={cn("w-full max-w-md", className)}>
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Rejestracja zakończona sukcesem</CardTitle>
-          <CardDescription>
-            Twoje konto zostało pomyślnie utworzone.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Alert className="border-green-200 bg-green-50 text-green-800 dark:border-green-900/50 dark:bg-green-950/30 dark:text-green-300">
-            <CircleCheck className="size-4 text-green-600 dark:text-green-400" />
-            <AlertDescription>
-              Możesz się teraz zalogować za pomocą swoich danych. Trwa przekierowywanie do strony logowania...
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-        <CardFooter className="justify-center border-t border-border pt-4">
-          <Link
-            href="/login"
-            className={cn(buttonVariants({ variant: "outline" }), "w-full")}
-          >
-            Przejdź do logowania
-          </Link>
-        </CardFooter>
-      </Card>
-    );
-  }
 
   return (
     <Card className={cn("w-full max-w-md", className)}>
@@ -106,10 +106,10 @@ export function Register({ className }: RegisterProps) {
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {apiError && (
+        {errors.root?.message && (
           <Alert variant="destructive">
             <CircleAlert className="size-4" />
-            <AlertDescription>{apiError}</AlertDescription>
+            <AlertDescription>{errors.root.message}</AlertDescription>
           </Alert>
         )}
 
@@ -201,7 +201,7 @@ export function Register({ className }: RegisterProps) {
         <p className="text-center text-sm text-muted-foreground">
           Masz już konto?{" "}
           <Link
-            href="/login"
+            href={loginHref}
             className="font-medium text-foreground underline underline-offset-4 hover:text-primary"
           >
             Zaloguj się

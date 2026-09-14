@@ -10,6 +10,7 @@ import { FaGoogle } from "react-icons/fa";
 import { CircleAlert } from "lucide-react";
 
 import { loginSchema, type LoginInput } from "@/schemas/login";
+import { getReviewDraftReturnUrl } from "@/lib/storage/reviewDraftStorage";
 import {
   Card,
   CardContent,
@@ -38,8 +39,13 @@ interface SignInProps {
 export function SignIn({ className }: SignInProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const callbackUrl = searchParams.get("callbackUrl");
   const [isGooglePending, startGoogleTransition] = useTransition();
+
+  const registerHref =
+    callbackUrl && callbackUrl !== "/dashboard"
+      ? `/register?callbackUrl=${encodeURIComponent(callbackUrl)}`
+      : "/register";
 
   const {
     register,
@@ -99,13 +105,23 @@ export function SignIn({ className }: SignInProps) {
         });
       }
     } else {
-      router.push(callbackUrl);
+      const targetUrl =
+        callbackUrl && callbackUrl !== "/dashboard"
+          ? callbackUrl
+          : getReviewDraftReturnUrl("/dashboard");
+      router.push(targetUrl);
+      router.refresh();
     }
   };
 
   const handleGoogleSignIn = () => {
+    const targetUrl =
+      callbackUrl && callbackUrl !== "/dashboard"
+        ? callbackUrl
+        : getReviewDraftReturnUrl("/dashboard");
+
     startGoogleTransition(async () => {
-      await signIn("google", { callbackUrl });
+      await signIn("google", { callbackUrl: targetUrl });
     });
   };
 
@@ -212,7 +228,7 @@ export function SignIn({ className }: SignInProps) {
         <p className="text-center text-sm text-muted-foreground">
           Nie masz jeszcze konta?{" "}
           <Link
-            href="/register"
+            href={registerHref}
             className="font-medium text-foreground underline underline-offset-4 hover:text-primary"
           >
             Zarejestruj się

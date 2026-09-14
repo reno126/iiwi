@@ -9,6 +9,13 @@ import {
 } from "@/schemas/productWithReview";
 import { productWithReviewCreate } from "@/serverActions/productWithReviewCreate";
 import { productScrapeMetadata } from "@/serverActions/productScrapeMetadata";
+import { UNAUTHORIZED_ERROR_MESSAGE } from "@/lib/constants/authErrors";
+import { useEnsureAuthenticated } from "@/lib/auth/useEnsureAuthenticated";
+import {
+  saveReviewDraft,
+  getReviewDraft,
+  clearReviewDraft,
+} from "@/lib/storage/reviewDraftStorage";
 import { ProductFields } from "@/components/products/ProductFields";
 import { ReviewFields } from "@/components/reviews/ReviewFields";
 import {
@@ -22,7 +29,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CircleAlert, ArrowLeft } from "lucide-react";
+import { CircleAlert, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { UrlPromptStep } from "./UrlPromptStep";
 import {
   ScrapeNoticeBanner,
@@ -48,17 +55,36 @@ export function CombinedProductReviewForm({
   onCancel,
   onSuccess,
 }: CombinedProductReviewFormProps) {
-  const [phase, setPhase] = useState<FormPhase>({ type: "URL_PROMPT" });
+  const { ensureAuthenticated } = useEnsureAuthenticated();
+
+  const [draft] = useState(() => {
+    const d = getReviewDraft();
+    return d?.type === "NEW_PRODUCT_AND_REVIEW" ? d : null;
+  });
+
+  const [phase, setPhase] = useState<FormPhase>(() => {
+    if (draft) {
+      return {
+        type: "ACTIVE_FORM",
+        mode: draft.phase?.mode ?? "manual",
+        scrapedFields: draft.phase?.scrapedFields,
+        scrapeError: draft.phase?.scrapeError,
+      };
+    }
+    return { type: "URL_PROMPT" };
+  });
+
   const [isScraping, startScrapingTransition] = useTransition();
   const [isTier2NoticeVisible, setIsTier2NoticeVisible] = useState(false);
   const [detectedShop, setDetectedShop] = useState<MatchedShopResult | null>(
-    null,
+    () => draft?.detectedShop ?? null
   );
+  const [isDraftRestored] = useState(() => Boolean(draft));
 
   const methods = useForm<ProductWithReviewCreateInput>({
     resolver: zodResolver(productWithReviewCreateSchema),
     mode: "onChange",
-    defaultValues: {
+    defaultValues: draft?.formData ?? {
       name: "",
       productUrl: "",
       imageUrl: "",
@@ -75,6 +101,11 @@ export function CombinedProductReviewForm({
     clearErrors,
     formState: { errors, isSubmitting },
   } = methods;
+
+  const handleCancel = () => {
+    clearReviewDraft();
+    onCancel();
+  };
 
   const handleScrape = (inputUrl: string) => {
     let url = inputUrl.trim();
@@ -166,7 +197,72 @@ export function CombinedProductReviewForm({
 
   const onSubmit = async (data: ProductWithReviewCreateInput) => {
     clearErrors("root");
+
+    // 1. Sprawdzenie sesji i ewentualna próba odświeżenia przed wysyłką
+    const isAuthenticated = await ensureAuthenticated({
+      onUnauthenticated: () => {
+        saveReviewDraft({
+          type: "NEW_PRODUCT_AND_REVIEW",
+          returnUrl:
+            typeof window !== "undefined"
+              ? window.location.pathname + window.location.search
+              : "/opinie/dodaj",
+          formData: data,
+          phase:
+            phase.type === "ACTIVE_FORM"
+              ? {
+                  mode: phase.mode,
+                  scrapedFields: phase.scrapedFields,
+                  scrapeError: phase.scrapeError,
+                }
+              : undefined,
+          detectedShop,
+        });
+      },
+    });
+
+    if (!isAuthenticated) {
+      return;
+    }
+
     const res = await productWithReviewCreate(data);
+
+    // 2. Obsługa desynchronizacji sesji po stronie serwera
+    if (res?.serverError === UNAUTHORIZED_ERROR_MESSAGE) {
+      const isStillAuth = await ensureAuthenticated({
+        onUnauthenticated: () => {
+          saveReviewDraft({
+            type: "NEW_PRODUCT_AND_REVIEW",
+            returnUrl:
+              typeof window !== "undefined"
+                ? window.location.pathname + window.location.search
+                : "/opinie/dodaj",
+            formData: data,
+            phase:
+              phase.type === "ACTIVE_FORM"
+                ? {
+                    mode: phase.mode,
+                    scrapedFields: phase.scrapedFields,
+                    scrapeError: phase.scrapeError,
+                  }
+                : undefined,
+            detectedShop,
+          });
+        },
+      });
+      if (!isStillAuth) return;
+
+      const retryRes = await productWithReviewCreate(data);
+      if (retryRes?.data) {
+        clearReviewDraft();
+        onSuccess(retryRes.data.product.id);
+        return;
+      }
+      if (retryRes?.serverError) {
+        setError("root", { message: retryRes.serverError });
+        return;
+      }
+    }
 
     if (res?.serverError) {
       setError("root", { message: res.serverError });
@@ -191,6 +287,7 @@ export function CombinedProductReviewForm({
     }
 
     if (res?.data) {
+      clearReviewDraft();
       onSuccess(res.data.product.id);
     }
   };
@@ -215,7 +312,7 @@ export function CombinedProductReviewForm({
           <UrlPromptStep
             onScrape={handleScrape}
             onManualSelect={handleManualSelect}
-            onCancel={onCancel}
+            onCancel={handleCancel}
             isPending={isScraping}
             isTier2NoticeVisible={isTier2NoticeVisible}
           />
@@ -226,6 +323,15 @@ export function CombinedProductReviewForm({
               onSubmit={handleSubmit(onSubmit)}
               className="space-y-4 md:space-y-6 pb-0"
             >
+              {isDraftRestored && (
+                <Alert className="border-primary/30 bg-primary/5 text-foreground">
+                  <CheckCircle2 className="size-4 text-primary" />
+                  <AlertDescription>
+                    Twoje dane zostały przywrócone po zalogowaniu. Sprawdź je i dodaj opinię.
+                  </AlertDescription>
+                </Alert>
+              )}
+
               {errors.root?.message && (
                 <Alert variant="destructive">
                   <CircleAlert className="size-4" />
@@ -263,7 +369,10 @@ export function CombinedProductReviewForm({
                   <Button
                     type="button"
                     variant="ghost"
-                    onClick={() => setPhase({ type: "URL_PROMPT" })}
+                    onClick={() => {
+                      clearReviewDraft();
+                      setPhase({ type: "URL_PROMPT" });
+                    }}
                     disabled={isSubmitting}
                     className="gap-1.5 text-muted-foreground hover:text-foreground w-full sm:w-auto h-8 sm:h-9 text-xs sm:text-sm"
                   >
@@ -275,7 +384,7 @@ export function CombinedProductReviewForm({
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={onCancel}
+                      onClick={handleCancel}
                       disabled={isSubmitting}
                       className="w-1/3 sm:w-auto h-11 sm:h-9"
                     >
