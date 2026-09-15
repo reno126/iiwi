@@ -9,7 +9,7 @@ import { BrandLogo } from "@/components/BrandLogo";
 import { Inter } from "next/font/google";
 import { cn } from "cn";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const inter = Inter({ subsets: ["latin", "latin-ext"], variable: "--font-sans" });
 
 export const viewport: Viewport = {
   width: "device-width",

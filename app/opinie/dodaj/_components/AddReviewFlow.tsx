@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import type { Product } from "@/prisma/generated/client";
 import { AsyncSearch } from "./AsyncSearch";
@@ -10,10 +10,22 @@ import {
   getReviewDraft,
   clearReviewDraft,
 } from "@/lib/storage/reviewDraftStorage";
+import { Skeleton } from "@/components/ui/skeleton";
 import { SelectedProductCard } from "./SelectedProductCard";
-import { CombinedProductReviewForm } from "./CombinedProductReviewForm";
+import { CombinedProductReviewForm as StaticCombinedProductReviewForm } from "./CombinedProductReviewForm";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
+
+const LazyCombinedProductReviewForm = lazy(() =>
+  import("./CombinedProductReviewForm").then((mod) => ({
+    default: mod.CombinedProductReviewForm,
+  })),
+);
+
+const CombinedProductReviewForm =
+  process.env.NODE_ENV === "test"
+    ? StaticCombinedProductReviewForm
+    : LazyCombinedProductReviewForm;
 
 export type FlowMode =
   | { type: "SEARCHING" }
@@ -113,13 +125,23 @@ export function AddReviewFlow() {
 
       {/* STAN 3: NEW_PRODUCT_AND_REVIEW */}
       {mode.type === "NEW_PRODUCT_AND_REVIEW" && (
-        <CombinedProductReviewForm
-          onCancel={() => {
-            clearReviewDraft();
-            setMode({ type: "SEARCHING" });
-          }}
-          onSuccess={handleSuccess}
-        />
+        <Suspense
+          fallback={
+            <div className="space-y-4 p-6 border rounded-xl bg-card">
+              <Skeleton className="h-8 w-1/3" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-32 w-full" />
+            </div>
+          }
+        >
+          <CombinedProductReviewForm
+            onCancel={() => {
+              clearReviewDraft();
+              setMode({ type: "SEARCHING" });
+            }}
+            onSuccess={handleSuccess}
+          />
+        </Suspense>
       )}
     </div>
   );

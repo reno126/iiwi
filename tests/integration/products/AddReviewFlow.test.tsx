@@ -46,7 +46,7 @@ describe("AddReviewFlow - Rehydration", () => {
     ).toBeInTheDocument();
   });
 
-  it("rehydrates directly into NEW_PRODUCT_AND_REVIEW mode when a new product draft exists", () => {
+  it("rehydrates directly into NEW_PRODUCT_AND_REVIEW mode when a new product draft exists", async () => {
     saveReviewDraft({
       type: "NEW_PRODUCT_AND_REVIEW",
       formData: {
@@ -63,7 +63,7 @@ describe("AddReviewFlow - Rehydration", () => {
       screen.queryByText("Wybierz produkt z bazy lub dodaj nowy, aby podzielić się swoją opinią.")
     ).not.toBeInTheDocument();
     expect(
-      screen.getByText(/Twoje dane zostały przywrócone po zalogowaniu/i)
+      screen.getByText(/Twoje dane zostały przywrócone po zalogowaniu/i),
     ).toBeInTheDocument();
   });
 

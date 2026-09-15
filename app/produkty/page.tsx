@@ -1,22 +1,34 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { PlusCircle } from "lucide-react";
-import { productsGet } from "@/serverActions/productsGet";
-import { ProductsList } from "./_components/ProductsList";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "cn";
+import { ProductsListSection } from "./_components/ProductsListSection";
+import { ProductsListSkeleton } from "./_components/ProductsListSkeleton";
 
 export const metadata: Metadata = {
   title: "Produkty | TrueReview",
-  description: "Przeglądaj wszystkie produkty i rzetelne opinie użytkowników w serwisie TrueReview.",
+  description:
+    "Przeglądaj wszystkie produkty i rzetelne opinie użytkowników w serwisie TrueReview.",
 };
 
-export default async function ProductsPage() {
-  const products = await productsGet();
+export const revalidate = 60;
+
+interface ProductsPageProps {
+  searchParams?: Promise<{ page?: string }>;
+}
+
+export default async function ProductsPage({
+  searchParams,
+}: ProductsPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const pageParam = resolvedSearchParams?.page;
+  const page = pageParam ? Math.max(1, parseInt(pageParam, 10) || 1) : 1;
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 py-4">
-      {/* Header section with page title & action */}
+      {/* Header section with page title & action (streams immediately) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
@@ -39,8 +51,9 @@ export default async function ProductsPage() {
         </Link>
       </div>
 
-      {/* Product List: Always renders 1 product per row on each resolution */}
-      <ProductsList products={products} />
+      <Suspense key={page} fallback={<ProductsListSkeleton count={6} />}>
+        <ProductsListSection page={page} />
+      </Suspense>
     </div>
   );
 }

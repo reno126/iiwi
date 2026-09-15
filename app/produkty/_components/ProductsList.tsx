@@ -41,8 +41,12 @@ export function ProductsList({ products }: ProductsListProps) {
 
   return (
     <div className="flex flex-col gap-4 w-full" data-slot="products-list">
-      {products.map((product) => (
-        <ProductListItemCard key={product.id} product={product} />
+      {products.map((product, index) => (
+        <ProductListItemCard
+          key={product.id}
+          product={product}
+          priority={index < 3}
+        />
       ))}
     </div>
   );

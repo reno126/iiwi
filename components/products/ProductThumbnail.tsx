@@ -7,6 +7,8 @@ interface ProductThumbnailProps {
   size?: "xs" | "sm" | "md" | "lg" | "xl";
   aspectRatio?: "square" | "video";
   className?: string;
+  priority?: boolean;
+  loading?: "eager" | "lazy";
 }
 
 export function ProductThumbnail({
@@ -15,6 +17,8 @@ export function ProductThumbnail({
   size = "md",
   aspectRatio = "square",
   className,
+  priority = false,
+  loading,
 }: ProductThumbnailProps) {
   const sizeClasses = {
     xs: "size-8",
@@ -23,6 +27,8 @@ export function ProductThumbnail({
     lg: "size-24",
     xl: "size-32",
   };
+
+  const imageLoading = priority ? "eager" : loading || "lazy";
 
   return (
     <div
@@ -39,7 +45,7 @@ export function ProductThumbnail({
           src={src}
           alt={alt}
           className="size-full object-contain p-1"
-          loading="lazy"
+          loading={imageLoading}
         />
       ) : (
         <Package

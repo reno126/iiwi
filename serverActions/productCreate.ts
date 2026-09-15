@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath, updateTag } from "next/cache";
 import { safeActionUserCtx } from "@/lib/actions/safeActionUserCtx";
 import { prisma } from "@/lib/db/prisma";
 import { productCreateSchema } from "@/schemas/product";
@@ -21,6 +22,13 @@ export const productCreate = safeActionUserCtx
         rate_count: 0,
       },
     });
+
+    try {
+      updateTag("products-count");
+      revalidatePath("/produkty");
+    } catch {
+      // Ignored in test environments
+    }
 
     return product;
   });

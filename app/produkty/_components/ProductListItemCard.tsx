@@ -9,9 +9,13 @@ import { formatReviewCount } from "@/lib/formatters";
 
 interface ProductListItemCardProps {
   product: ProductListItem;
+  priority?: boolean;
 }
 
-export function ProductListItemCard({ product }: ProductListItemCardProps) {
+export function ProductListItemCard({
+  product,
+  priority = false,
+}: ProductListItemCardProps) {
   return (
     <Link href={`/produkty/${product.id}`} className="group">
       <Card className="transition-all hover:border-primary/50 hover:shadow-sm py-1 md:py-5">
@@ -22,6 +26,7 @@ export function ProductListItemCard({ product }: ProductListItemCardProps) {
                 src={product.imageUrl}
                 alt={product.name}
                 size="lg"
+                priority={priority}
                 className="size-20 rounded-lg md:bg-muted md:border shrink-0"
               />
 

@@ -1,5 +1,6 @@
 "use server";
 
+import { cache } from "react";
 import { prisma } from "@/lib/db/prisma";
 
 export type ProductWithReviews = {
@@ -41,7 +42,7 @@ export type ProductWithReviews = {
   averageRate: number | null;
 };
 
-export async function productGetById(
+export const productGetById = cache(async function productGetById(
   id: string,
 ): Promise<ProductWithReviews | null> {
   const trimmedId = id?.trim();
@@ -94,4 +95,4 @@ export async function productGetById(
       reviews: reviewCount,
     },
   };
-}
+});

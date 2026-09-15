@@ -13,6 +13,8 @@ export const metadata: Metadata = {
     "Tylko tutaj znajdzie prawdziwe, całkowicie niezależne opinie o produktach.",
 };
 
+export const revalidate = 60;
+
 export default async function HomePage() {
   const [recentReviews, shops] = await Promise.all([
     recentReviewsGet(3),

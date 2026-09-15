@@ -45,6 +45,7 @@ export function ProductOverviewCard({
             src={product.imageUrl}
             alt={product.name}
             size="xl"
+            priority={true}
             className="size-36 sm:size-44 rounded-xl border mx-auto sm:mx-0"
           />
 
