@@ -41,6 +41,7 @@ export function RecentReviewsBanner({ reviews }: RecentReviewsBannerProps) {
                     src={review.product.imageUrl}
                     alt={review.product.name}
                     size="md"
+                    priority={true}
                     className="size-16 rounded-lg border shrink-0"
                   />
 

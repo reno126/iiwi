@@ -56,6 +56,8 @@ export function ShopLogo({
         src={logo}
         alt={name || "Sklep"}
         className="max-h-full max-w-full object-contain"
+        loading="lazy"
+        decoding="async"
       />
     </div>
   );

@@ -46,6 +46,8 @@ export function ProductThumbnail({
           alt={alt}
           className="size-full object-contain p-1"
           loading={imageLoading}
+          fetchPriority={priority ? "high" : "auto"}
+          decoding="async"
         />
       ) : (
         <Package
