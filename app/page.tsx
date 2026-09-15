@@ -1,29 +1,25 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "cn";
-import { recentReviewsGet } from "@/serverActions/recentReviewsGet";
-import { shopsGet } from "@/serverActions/shopsGet";
-import { RecentReviewsBanner } from "./_components/RecentReviewsBanner";
-import { ShopsGrid } from "./_components/ShopsGrid";
+import { RecentReviewsSection } from "./_components/RecentReviewsSection";
+import { RecentReviewsSkeleton } from "./_components/RecentReviewsSkeleton";
+import { ShopsSection } from "./_components/ShopsSection";
+import { ShopsSkeleton } from "./_components/ShopsSkeleton";
 
 export const metadata: Metadata = {
   title: "Prawdziwe, niezależne opinie o produktach",
   description:
-    "Tylko tutaj znajdzie prawdziwe, całkowicie niezależne opinie o produktach.",
+    "Tylko tutaj znajdziesz prawdziwe, całkowicie niezależne opinie o produktach.",
 };
 
 export const revalidate = 60;
 
-export default async function HomePage() {
-  const [recentReviews, shops] = await Promise.all([
-    recentReviewsGet(3),
-    shopsGet(),
-  ]);
-
+export default function HomePage() {
   return (
     <div className="flex flex-col gap-10 sm:gap-14 md:gap-16 w-full max-w-5xl mx-auto py-4 sm:py-8">
-      {/* 1. Big Text Hero */}
+      {/* 1. Big Text Hero (Streams immediately - instant FCP & LCP) */}
       <section className="text-center py-4 sm:py-8 md:py-10">
         <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-muted-foreground max-w-4xl mx-auto leading-tight">
           Tylko tutaj znajdziesz{" "}
@@ -38,7 +34,7 @@ export default async function HomePage() {
         </h1>
       </section>
 
-      {/* 2. Section without title with 2 buttons: "Zobacz wszystkie opinie" "Dodaj opinię" */}
+      {/* 2. Section without title with 2 buttons: "Zobacz wszystkie opinie" "Dodaj opinię" (Streams immediately) */}
       <section className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full max-w-md mx-auto">
         <Link
           href="/produkty"
@@ -60,17 +56,19 @@ export default async function HomePage() {
         </Link>
       </section>
 
-      {/* 3. Banner with 3 static, latest reviews: "Ostatnio dodane opinie" */}
+      {/* 3. Banner with 3 static, latest reviews: "Ostatnio dodane opinie" (Streamed via Suspense) */}
       <section className="w-full space-y-6">
         <div className="text-center sm:text-left">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
             Ostatnio dodane opinie
           </h2>
         </div>
-        <RecentReviewsBanner reviews={recentReviews} />
+        <Suspense fallback={<RecentReviewsSkeleton />}>
+          <RecentReviewsSection />
+        </Suspense>
       </section>
 
-      {/* 4. Shops grid: "Opinie z dowolnych sklepów stacjonarnych i internetowych", "Popularne sklepy" */}
+      {/* 4. Shops grid: "Opinie z dowolnych sklepów stacjonarnych i internetowych", "Popularne sklepy" (Streamed via Suspense) */}
       <section className="w-full space-y-6">
         <div className="space-y-1 text-center sm:text-left">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
@@ -80,10 +78,12 @@ export default async function HomePage() {
             Popularne sklepy
           </p>
         </div>
-        <ShopsGrid shops={shops} />
+        <Suspense fallback={<ShopsSkeleton />}>
+          <ShopsSection />
+        </Suspense>
       </section>
 
-      {/* 5. Section without title with 1 button: "Dodaj opinię" */}
+      {/* 5. Section without title with 1 button: "Dodaj opinię" (Streams immediately) */}
       <section className="flex justify-center w-full py-2 sm:py-4">
         <Link
           href="/opinie/dodaj"

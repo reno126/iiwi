@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, act } from "@testing-library/react";
 import HomePage from "@/app/page";
 import * as recentReviewsGetModule from "@/serverActions/recentReviewsGet";
 import * as shopsGetModule from "@/serverActions/shopsGet";
@@ -62,8 +62,9 @@ describe("HomePage", () => {
       },
     ]);
 
-    const pageElement = await HomePage();
-    render(pageElement);
+    await act(async () => {
+      render(<HomePage />);
+    });
 
     // 1. Big hero text
     expect(
@@ -87,12 +88,12 @@ describe("HomePage", () => {
     expect(
       screen.getByRole("heading", { name: "Ostatnio dodane opinie" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Testowy Produkt 1")).toBeInTheDocument();
-    expect(screen.getByText("Testowy Produkt 2")).toBeInTheDocument();
+    expect(await screen.findByText("Testowy Produkt 1")).toBeInTheDocument();
+    expect(await screen.findByText("Testowy Produkt 2")).toBeInTheDocument();
     expect(
-      screen.getByText("“Doskonały produkt, bardzo polecam!”"),
+      await screen.findByText("“Doskonały produkt, bardzo polecam!”"),
     ).toBeInTheDocument();
-    expect(screen.getByText("Jan Tester")).toBeInTheDocument();
+    expect(await screen.findByText("Jan Tester")).toBeInTheDocument();
 
     // Verify recentReviewsGet was called with limit 3
     expect(recentReviewsGetModule.recentReviewsGet).toHaveBeenCalledWith(3);
@@ -103,10 +104,10 @@ describe("HomePage", () => {
         name: "Opinie z dowolnych sklepów stacjonarnych i internetowych",
       }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Popularne sklepy")).toBeInTheDocument();
+    expect(await screen.findByText("Popularne sklepy")).toBeInTheDocument();
 
     // Verify shop names and logos are rendered
-    expect(screen.getAllByText("Media Expert").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("Allegro").length).toBeGreaterThanOrEqual(1);
+    expect((await screen.findAllByText("Media Expert")).length).toBeGreaterThanOrEqual(1);
+    expect((await screen.findAllByText("Allegro")).length).toBeGreaterThanOrEqual(1);
   });
 });
