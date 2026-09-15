@@ -28,7 +28,6 @@ export default async function ProductsPage({
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 py-4">
-      {/* Header section with page title & action (streams immediately) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">

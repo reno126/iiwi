@@ -65,9 +65,13 @@ export function ReviewForm({
   } = methods;
 
   useEffect(() => {
-    if (autoFocus) {
-      setFocus("description");
+    function focusDescriptionFieldIfRequested() {
+      if (autoFocus) {
+        setFocus("description");
+      }
     }
+
+    focusDescriptionFieldIfRequested();
   }, [autoFocus, setFocus]);
 
   const handleCancel = () => {

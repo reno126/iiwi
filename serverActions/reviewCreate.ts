@@ -48,7 +48,7 @@ export const reviewCreate = safeActionUserCtx
       revalidatePath(`/produkty/${productId}`);
       revalidatePath("/produkty");
     } catch {
-      // Ignore when invoked outside Next.js request context (e.g. unit tests)
+      return result;
     }
 
     return result;

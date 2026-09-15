@@ -35,7 +35,6 @@ export function RecentReviewsBanner({ reviews }: RecentReviewsBannerProps) {
           >
             <Card className="h-full flex flex-col justify-between transition-all hover:border-primary/50 hover:shadow-md bg-white p-4 sm:p-5">
               <div>
-                {/* Product header: thumbnail + name + shop */}
                 <div className="flex items-start gap-3">
                   <ProductThumbnail
                     src={review.product.imageUrl}
@@ -68,7 +67,6 @@ export function RecentReviewsBanner({ reviews }: RecentReviewsBannerProps) {
                   </div>
                 </div>
 
-                {/* Rating & Review content snippet */}
                 <div className="my-3 space-y-2">
                   <div className="flex items-center gap-1.5">
                     <StarRating rate={rating} size="sm" showValue />
@@ -91,7 +89,6 @@ export function RecentReviewsBanner({ reviews }: RecentReviewsBannerProps) {
                 </div>
               </div>
 
-              {/* Card footer: author & date */}
               <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 border-t border-border mt-auto">
                 <span className="font-medium truncate max-w-40">
                   {authorName}

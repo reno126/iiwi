@@ -6,6 +6,46 @@ export interface ZenRowsScrapeOptions {
   waitFor?: string;
 }
 
+function extractPageTitle(html: string): string {
+  const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+  return titleMatch ? titleMatch[1].trim() : "Brak <title>";
+}
+
+function isBotChallengeDetected(html: string): boolean {
+  const challengeTitlePattern =
+    /<title>.*(Just a moment|Attention Required|Security Check|Access Denied).*<\/title>/i;
+  return (
+    challengeTitlePattern.test(html) ||
+    html.includes("challenge-running") ||
+    html.includes("cf-browser-verification") ||
+    html.includes("turnstile")
+  );
+}
+
+async function saveDebugHtmlSnapshotIfDevelopment(
+  html: string,
+  targetUrl: string
+): Promise<void> {
+  if (process.env.NODE_ENV === "production") {
+    return;
+  }
+
+  try {
+    const fs = await import("fs");
+    const path = await import("path");
+    const debugDir = path.resolve(process.cwd(), "tmp", "scrapes");
+    if (!fs.existsSync(debugDir)) {
+      fs.mkdirSync(debugDir, { recursive: true });
+    }
+    const hostname = new URL(targetUrl).hostname.replace(/[^a-zA-Z0-9.-]/g, "_");
+    const debugFile = path.join(debugDir, `${hostname}_last_zenrows.html`);
+    fs.writeFileSync(debugFile, html, "utf-8");
+    console.log(`[ZenRows] Debug HTML snapshot saved to: ${debugFile}`);
+  } catch {
+    return;
+  }
+}
+
 export async function fetchWithZenRows(
   targetUrl: string,
   options: ZenRowsScrapeOptions = {}
@@ -74,21 +114,9 @@ export async function fetchWithZenRows(
     }
 
     const html = await response.text();
+    const pageTitle = extractPageTitle(html);
 
-    // Wyciągnięcie <title> w celach diagnostycznych
-    const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-    const pageTitle = titleMatch ? titleMatch[1].trim() : "Brak <title>";
-
-    // Sprawdzenie obecności ekranu blokady / wyzwania antybotowego
-    const isBotChallenge =
-      /<title>.*(Just a moment|Attention Required|Security Check|Access Denied).*<\/title>/i.test(
-        html
-      ) ||
-      html.includes("challenge-running") ||
-      html.includes("cf-browser-verification") ||
-      html.includes("turnstile");
-
-    if (isBotChallenge) {
+    if (isBotChallengeDetected(html)) {
       console.warn(
         `[ZenRows] WARNING: Bot challenge / captcha detected in returned HTML despite HTTP ${response.status}! Title: "${pageTitle}"`
       );
@@ -98,23 +126,7 @@ export async function fetchWithZenRows(
       );
     }
 
-    // W środowisku lokalnym / developerskim zapisujemy zrzut HTML do pliku debugowego
-    if (process.env.NODE_ENV !== "production") {
-      try {
-        const fs = await import("fs");
-        const path = await import("path");
-        const debugDir = path.resolve(process.cwd(), "tmp", "scrapes");
-        if (!fs.existsSync(debugDir)) {
-          fs.mkdirSync(debugDir, { recursive: true });
-        }
-        const hostname = new URL(targetUrl).hostname.replace(/[^a-zA-Z0-9.-]/g, "_");
-        const debugFile = path.join(debugDir, `${hostname}_last_zenrows.html`);
-        fs.writeFileSync(debugFile, html, "utf-8");
-        console.log(`[ZenRows] Debug HTML snapshot saved to: ${debugFile}`);
-      } catch {
-        // Ignorujemy błędy zapisu na środowiskach z restrykcją systemu plików
-      }
-    }
+    await saveDebugHtmlSnapshotIfDevelopment(html, targetUrl);
 
     return html;
   } catch (err: unknown) {

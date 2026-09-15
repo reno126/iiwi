@@ -3,17 +3,12 @@ export interface StorageItemWithTtl<T> {
   expiresAt: number;
 }
 
-/** Default TTL: 1 hour in milliseconds */
 export const DEFAULT_TTL_MS = 60 * 60 * 1000;
 
-/**
- * Stores a value in localStorage with an expiration timestamp.
- *
- * @param key - The localStorage key
- * @param value - The value to serialize and store
- * @param ttlMs - Time to live in milliseconds (defaults to 1 hour)
- * @returns boolean indicating whether storage succeeded
- */
+function isExpired<T>(item: StorageItemWithTtl<T>): boolean {
+  return typeof item?.expiresAt !== "number" || Date.now() > item.expiresAt;
+}
+
 export function setItemWithTtl<T>(
   key: string,
   value: T,
@@ -36,13 +31,6 @@ export function setItemWithTtl<T>(
   }
 }
 
-/**
- * Retrieves a value from localStorage, verifying its TTL.
- * If expired or invalid, removes the item and returns null.
- *
- * @param key - The localStorage key
- * @returns The stored value or null if expired, missing, or error
- */
 export function getItemWithTtl<T>(key: string): T | null {
   if (typeof window === "undefined" || !window.localStorage) {
     return null;
@@ -56,7 +44,7 @@ export function getItemWithTtl<T>(key: string): T | null {
 
     const item: StorageItemWithTtl<T> = JSON.parse(raw);
 
-    if (typeof item?.expiresAt !== "number" || Date.now() > item.expiresAt) {
+    if (isExpired(item)) {
       window.localStorage.removeItem(key);
       return null;
     }
@@ -67,17 +55,12 @@ export function getItemWithTtl<T>(key: string): T | null {
     try {
       window.localStorage.removeItem(key);
     } catch {
-      // ignore secondary errors during cleanup
+      return null;
     }
     return null;
   }
 }
 
-/**
- * Removes a key from localStorage.
- *
- * @param key - The localStorage key to remove
- */
 export function removeItemWithTtl(key: string): void {
   if (typeof window === "undefined" || !window.localStorage) {
     return;

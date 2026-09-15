@@ -59,7 +59,7 @@ export const productWithReviewCreate = safeActionUserCtx
         updateTag("products-count");
         revalidatePath("/produkty");
       } catch {
-        // Ignored in test environments
+        return { product: updatedProduct, review };
       }
 
       return { product: updatedProduct, review };

@@ -32,7 +32,6 @@ export function ProductShopSelector({
   const [shopsList, setShopsList] = useState<ShopItem[] | null>(null);
   const [isLoadingShops, startTransition] = useTransition();
 
-  // Leniwe pobieranie słownika sklepów na żądanie (on-demand)
   const loadShopsIfNeeded = useCallback(() => {
     if (shopsList === null && !isLoadingShops) {
       startTransition(async () => {
@@ -113,7 +112,6 @@ export function ProductShopSelector({
       </div>
 
       {selectedShop ? (
-        // Stan 1: Sklep jest wybrany (rozpoznany ze scrapera lub wybrany ręcznie)
         <div className="flex flex-col md:flex-row items-center justify-between gap-3 p-3 rounded-lg border bg-white dark:bg-card text-card-foreground shadow-2xs">
           <div className="flex items-center gap-3 min-w-0">
             <ShopLogo
@@ -179,7 +177,6 @@ export function ProductShopSelector({
           </div>
         </div>
       ) : (
-        // Stan 2: Brak wybranego sklepu (pusty / oczekujący na link)
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 rounded-lg border border-dashed text-sm text-muted-foreground bg-white dark:bg-card">
 
           <ComboboxResponsive<ShopItem>

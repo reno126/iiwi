@@ -52,7 +52,6 @@ export function AddReviewFlow() {
 
   return (
     <div className="space-y-6">
-      {/* STAN 1: SEARCHING */}
       {mode.type === "SEARCHING" && (
         <div className="space-y-4">
           <div className="flex flex-col items-center justify-between gap-4">
@@ -97,7 +96,6 @@ export function AddReviewFlow() {
         </div>
       )}
 
-      {/* STAN 2: REVIEW_EXISTING_PRODUCT */}
       {mode.type === "REVIEW_EXISTING_PRODUCT" && (
         <div className="space-y-6">
           <SelectedProductCard
@@ -123,7 +121,6 @@ export function AddReviewFlow() {
         </div>
       )}
 
-      {/* STAN 3: NEW_PRODUCT_AND_REVIEW */}
       {mode.type === "NEW_PRODUCT_AND_REVIEW" && (
         <Suspense
           fallback={

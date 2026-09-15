@@ -116,7 +116,6 @@ export function CombinedProductReviewForm({
       url = `https://${url}`;
     }
 
-    // Wstępnie zapisujemy productUrl w formularzu
     setValue("productUrl", url, { shouldValidate: true, shouldDirty: true });
 
     setIsTier2NoticeVisible(false);
@@ -159,7 +158,6 @@ export function CombinedProductReviewForm({
           return;
         }
 
-        // Błąd ze strony serwera lub walidacji
         const errorMsg =
           res?.serverError ||
           res?.validationErrors?.fieldErrors?.productUrl?.[0] ||
@@ -188,7 +186,6 @@ export function CombinedProductReviewForm({
   };
 
   const handleManualSelect = () => {
-    // Ścieżka 2: Użytkownik nie ma linku - czyścimy pole productUrl
     setValue("productUrl", "", { shouldValidate: false, shouldDirty: false });
     setPhase({
       type: "ACTIVE_FORM",
@@ -196,30 +193,31 @@ export function CombinedProductReviewForm({
     });
   };
 
+  const saveCurrentFormDraft = (formData: ProductWithReviewCreateInput) => {
+    saveReviewDraft({
+      type: "NEW_PRODUCT_AND_REVIEW",
+      returnUrl:
+        typeof window !== "undefined"
+          ? window.location.pathname + window.location.search
+          : "/opinie/dodaj",
+      formData,
+      phase:
+        phase.type === "ACTIVE_FORM"
+          ? {
+              mode: phase.mode,
+              scrapedFields: phase.scrapedFields,
+              scrapeError: phase.scrapeError,
+            }
+          : undefined,
+      detectedShop,
+    });
+  };
+
   const onSubmit = async (data: ProductWithReviewCreateInput) => {
     clearErrors("root");
 
-    // 1. Sprawdzenie sesji i ewentualna próba odświeżenia przed wysyłką
     const isAuthenticated = await ensureAuthenticated({
-      onUnauthenticated: () => {
-        saveReviewDraft({
-          type: "NEW_PRODUCT_AND_REVIEW",
-          returnUrl:
-            typeof window !== "undefined"
-              ? window.location.pathname + window.location.search
-              : "/opinie/dodaj",
-          formData: data,
-          phase:
-            phase.type === "ACTIVE_FORM"
-              ? {
-                  mode: phase.mode,
-                  scrapedFields: phase.scrapedFields,
-                  scrapeError: phase.scrapeError,
-                }
-              : undefined,
-          detectedShop,
-        });
-      },
+      onUnauthenticated: () => saveCurrentFormDraft(data),
     });
 
     if (!isAuthenticated) {
@@ -228,28 +226,9 @@ export function CombinedProductReviewForm({
 
     const res = await productWithReviewCreate(data);
 
-    // 2. Obsługa desynchronizacji sesji po stronie serwera
     if (res?.serverError === UNAUTHORIZED_ERROR_MESSAGE) {
       const isStillAuth = await ensureAuthenticated({
-        onUnauthenticated: () => {
-          saveReviewDraft({
-            type: "NEW_PRODUCT_AND_REVIEW",
-            returnUrl:
-              typeof window !== "undefined"
-                ? window.location.pathname + window.location.search
-                : "/opinie/dodaj",
-            formData: data,
-            phase:
-              phase.type === "ACTIVE_FORM"
-                ? {
-                    mode: phase.mode,
-                    scrapedFields: phase.scrapedFields,
-                    scrapeError: phase.scrapeError,
-                  }
-                : undefined,
-            detectedShop,
-          });
-        },
+        onUnauthenticated: () => saveCurrentFormDraft(data),
       });
       if (!isStillAuth) return;
 
@@ -340,7 +319,6 @@ export function CombinedProductReviewForm({
                 </Alert>
               )}
 
-              {/* Baner informacyjny o wyniku scrapowania */}
               {phase.mode !== "manual" && (
                 <ScrapeNoticeBanner
                   mode={phase.mode}
@@ -349,7 +327,6 @@ export function CombinedProductReviewForm({
                 />
               )}
 
-              {/* Sub-form 1: Produkt */}
               <ProductFields
                 hideProductUrl={
                   phase.mode === "manual" || phase.mode === "scraped_success"
@@ -361,10 +338,8 @@ export function CombinedProductReviewForm({
 
               <Separator className="my-2" />
 
-              {/* Sub-form 2: Recenzja */}
               <ReviewFields />
 
-              {/* Dolny pasek akcji */}
               <StickyFormActionBar
                 onBack={() => {
                   clearReviewDraft();

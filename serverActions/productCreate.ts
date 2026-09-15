@@ -27,7 +27,7 @@ export const productCreate = safeActionUserCtx
       updateTag("products-count");
       revalidatePath("/produkty");
     } catch {
-      // Ignored in test environments
+      return product;
     }
 
     return product;

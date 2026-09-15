@@ -32,7 +32,6 @@ export function ProductReviewItem({ review }: ProductReviewItemProps) {
     <Card className="border shadow-2xs">
       <CardHeader className="p-4 pb-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          {/* Reviewer identity & Date */}
           <div className="flex items-center gap-2.5">
             <Avatar size="default">
               <AvatarFallback>
@@ -50,7 +49,6 @@ export function ProductReviewItem({ review }: ProductReviewItemProps) {
             </div>
           </div>
 
-          {/* Review Rating Stars */}
           <StarRating rate={review.rate} />
         </div>
       </CardHeader>

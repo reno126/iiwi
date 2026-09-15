@@ -16,7 +16,6 @@ export function ProductsPagination({
     return null;
   }
 
-  // Generate page numbers with ellipsis if many pages
   const getPageNumbers = () => {
     const pages: (number | "ellipsis")[] = [];
     const maxVisible = 5;

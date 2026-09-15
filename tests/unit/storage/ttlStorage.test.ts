@@ -68,7 +68,7 @@ describe("lib/storage/ttlStorage", () => {
   it("uses DEFAULT_TTL_MS (1 hour) when no ttlMs provided", () => {
     const key = "default_ttl";
     const originalNow = Date.now;
-    let mockedTime = 1000000;
+    const mockedTime = 1000000;
     Date.now = vi.fn(() => mockedTime);
 
     setItemWithTtl(key, "value");

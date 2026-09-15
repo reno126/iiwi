@@ -203,11 +203,9 @@ export function AsyncSearch<T>({
   const [internalQuery, setInternalQuery] = useState(defaultValue);
   const query = isControlled ? value : internalQuery;
 
-  // React deferred value for non-blocking UI updates
   const deferredQuery = useDeferredValue(query);
   const isDeferredPending = query !== deferredQuery;
 
-  // React 19 transition for async server action execution
   const [isActionPending, startTransition] = useTransition();
 
   const [rawResults, setRawResults] = useState<T[]>([]);
@@ -224,59 +222,60 @@ export function AsyncSearch<T>({
   const trimmedDeferred = deferredQuery.trim();
   const hasMinChars = trimmedDeferred.length >= minChars;
 
-  // Derive active results and searched state based on query threshold
   const results = hasMinChars ? rawResults : [];
   const hasSearched = hasMinChars ? rawHasSearched : false;
 
-  // Handle async search debouncing with useDeferredValue
   useEffect(() => {
-    if (!hasMinChars) {
-      return;
+    function executeDebouncedSearch() {
+      if (!hasMinChars) {
+        return;
+      }
+
+      const requestId = ++latestRequestIdRef.current;
+
+      const timer = setTimeout(() => {
+        startTransition(async () => {
+          try {
+            const response = await searchAction(trimmedDeferred);
+
+            if (requestId !== latestRequestIdRef.current) {
+              return;
+            }
+
+            const items: T[] = Array.isArray(response)
+              ? response
+              : Array.isArray((response as { data?: T[] | null })?.data)
+                ? (((response as { data?: T[] | null }).data as T[]) ?? [])
+                : [];
+
+            setRawResults(items);
+            setRawHasSearched(true);
+            setLastSearchedQuery(trimmedDeferred);
+            setError(null);
+            setHighlightedIndex(-1);
+          } catch (err) {
+            if (requestId !== latestRequestIdRef.current) {
+              return;
+            }
+            setError(
+              err instanceof Error
+                ? err.message
+                : "Wystąpił błąd podczas wyszukiwania.",
+            );
+            setRawResults([]);
+            setRawHasSearched(true);
+            setLastSearchedQuery(trimmedDeferred);
+            setHighlightedIndex(-1);
+          }
+        });
+      }, debounceMs);
+
+      return () => {
+        clearTimeout(timer);
+      };
     }
 
-    const requestId = ++latestRequestIdRef.current;
-
-    const timer = setTimeout(() => {
-      startTransition(async () => {
-        try {
-          const response = await searchAction(trimmedDeferred);
-
-          // Discard response if a newer query was issued
-          if (requestId !== latestRequestIdRef.current) {
-            return;
-          }
-
-          const items: T[] = Array.isArray(response)
-            ? response
-            : Array.isArray((response as { data?: T[] | null })?.data)
-              ? (((response as { data?: T[] | null }).data as T[]) ?? [])
-              : [];
-
-          setRawResults(items);
-          setRawHasSearched(true);
-          setLastSearchedQuery(trimmedDeferred);
-          setError(null);
-          setHighlightedIndex(-1);
-        } catch (err) {
-          if (requestId !== latestRequestIdRef.current) {
-            return;
-          }
-          setError(
-            err instanceof Error
-              ? err.message
-              : "Wystąpił błąd podczas wyszukiwania.",
-          );
-          setRawResults([]);
-          setRawHasSearched(true);
-          setLastSearchedQuery(trimmedDeferred);
-          setHighlightedIndex(-1);
-        }
-      });
-    }, debounceMs);
-
-    return () => {
-      clearTimeout(timer);
-    };
+    return executeDebouncedSearch();
   }, [trimmedDeferred, hasMinChars, debounceMs, searchAction]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -345,7 +344,6 @@ export function AsyncSearch<T>({
 
   return (
     <div className={cn("relative flex flex-col w-full gap-2", className)}>
-      {/* Search Input Bar */}
       <div className="relative flex items-center w-full">
         <SearchIcon
           className="absolute left-3 size-4 text-muted-foreground pointer-events-none"
@@ -372,7 +370,6 @@ export function AsyncSearch<T>({
           )}
         />
 
-        {/* Status Indicators & Clear Action */}
         <div className="absolute right-2 flex items-center gap-1">
           {isLoading && (
             <Spinner
@@ -397,7 +394,6 @@ export function AsyncSearch<T>({
         </div>
       </div>
 
-      {/* Min Characters Hint - space reserved to prevent screen flickering */}
       {showMinCharsHint && (
         <div className="h-5 px-2 flex items-center" aria-live="polite">
           {query.trim().length > 0 && query.trim().length < minChars && (
@@ -410,7 +406,6 @@ export function AsyncSearch<T>({
         </div>
       )}
 
-      {/* Results Section */}
       {hasResultsToShow && (
         <div
           className={cn(
@@ -419,14 +414,12 @@ export function AsyncSearch<T>({
               "absolute top-full left-0 right-0 z-50 mt-1 shadow-lg",
           )}
         >
-          {/* 1. Optional custom loading state */}
           {loadingComponent &&
             isLoading &&
             results.length === 0 &&
             hasMinChars &&
             loadingComponent}
 
-          {/* 2. Error State */}
           {error && !isLoading && (
             <Card
               className="border-destructive/30 bg-destructive/5 text-destructive p-4 text-sm"
@@ -436,7 +429,6 @@ export function AsyncSearch<T>({
             </Card>
           )}
 
-          {/* 3. Zero Results State */}
           {hasSearched && results.length === 0 && hasMinChars && (
             <div className={cn(isLoading && "opacity-60 transition-opacity")}>
               {emptyState ?? (
@@ -466,7 +458,6 @@ export function AsyncSearch<T>({
             </div>
           )}
 
-          {/* 4. Results List */}
           {results.length > 0 && (
             <Card
               className={cn(
@@ -528,7 +519,6 @@ export function AsyncSearch<T>({
   );
 }
 
-// Aliases for convenience and backward compatibility
 export const Search = AsyncSearch;
 export type SearchProps<T> = AsyncSearchProps<T>;
 export const GenericSearch = AsyncSearch;

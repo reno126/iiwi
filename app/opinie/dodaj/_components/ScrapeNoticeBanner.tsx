@@ -17,8 +17,8 @@ export function ScrapeNoticeBanner({
   mode,
   scrapedFields = [],
 }: ScrapeNoticeBannerProps) {
-  // Case 2: Nie udało się pobrać danych (błąd scrapowania lub 0 pobranych pól)
-  if (mode === "scraped_failed" || scrapedFields.length === 0) {
+  const isScrapeFailed = mode === "scraped_failed" || scrapedFields.length === 0;
+  if (isScrapeFailed) {
     return (
       <Alert variant="destructive">
         <CircleAlert className="size-4" />
@@ -34,7 +34,6 @@ export function ScrapeNoticeBanner({
 
   const hasAllData = allFields.every((field) => scrapedFields.includes(field));
 
-  // Case 1: Pobrano wszystkie potrzebne dane produktu (statyczny baner sukcesu)
   if (hasAllData) {
     return (
       <Alert variant="success">
@@ -50,7 +49,6 @@ export function ScrapeNoticeBanner({
     );
   }
 
-  // Case 3: Udało się pobrać część danych (co najmniej jedno pole, ale brakuje wymaganych danych)
   return (
     <Alert variant="warning">
       <AlertTriangle className="size-4 text-amber-600 dark:text-amber-400" />

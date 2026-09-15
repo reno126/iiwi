@@ -100,7 +100,7 @@ export function ProductFields({
         setSelectedShop(res.data);
       }
     } catch {
-      // Ignorujemy błędy cichego dopasowania w tle
+      return;
     }
   };
 
@@ -108,7 +108,6 @@ export function ProductFields({
     let url = (getValues("productUrl") || "").trim();
     if (!url) return;
 
-    // Automatyczne uzupełnienie brakującego protokołu
     if (!/^https?:\/\//i.test(url)) {
       url = `https://${url}`;
       setValue("productUrl", url, { shouldValidate: true, shouldDirty: true });
@@ -149,19 +148,16 @@ export function ProductFields({
             setShowPreviewOnly(true);
           }
 
-          // 4b: Pomocnicze uzupełnienie nazwy tylko jeśli pole jest puste
           const currentName = (getValues("name") || "").trim();
           if (!currentName && name) {
             setValue("name", name, { shouldValidate: true, shouldDirty: true });
           }
 
-          // 4c: Pomocnicze uzupełnienie kodu tylko jeśli pole jest puste
           const currentCode = (getValues("code") || "").trim();
           if (!currentCode && code) {
             setValue("code", code, { shouldValidate: true, shouldDirty: true });
           }
 
-          // 4d: Pomocnicze uzupełnienie sklepu jeśli dopasowano i pole jest puste
           if (shop) {
             setValue("shopId", shop.id, { shouldValidate: true, shouldDirty: true });
             setSelectedShop(shop);
@@ -285,13 +281,11 @@ export function ProductFields({
               </Button>
             </div>
 
-            {/* Komunikat o wydłużonym czasie Tier 2 */}
             <ScrapeDelayNotice
               isVisible={isPending && isTier2NoticeVisible}
               className="mt-2"
             />
 
-            {/* Nieblokujący komunikat o wyniku scrapowania */}
             {scrapeNotice && (
               <Alert
                 variant={scrapeNotice.type === "error" ? "destructive" : "success"}
@@ -370,7 +364,6 @@ export function ProductFields({
             </div>
 
             <input type="hidden" {...register("imageUrl")} />
-            {/* Podgląd miniatury zdjęcia z opcją usunięcia */}
             <div className="flex flex-col sm:flex-row items-center gap-3 rounded-lg border bg-white dark:bg-card p-2.5 shadow-2xs">
               <div className="relative size-24 shrink-0 overflow-hidden rounded-md border bg-background flex items-center justify-center">
                 {imageLoadError ? (

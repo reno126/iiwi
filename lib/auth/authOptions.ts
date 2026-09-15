@@ -36,7 +36,6 @@ export const authOptions = {
 
         if (!user) return null;
 
-        // Dla użytkowników zarejestrowanych przez dostawcę społecznościowego (np. Google) bez hasła
         if (!user.password) {
           throw new Error("OAuthAccountOnly");
         }

@@ -5,56 +5,49 @@ import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 
 export interface EnsureAuthenticatedOptions {
-  /**
-   * Callback invoked before redirecting to login.
-   * Useful for persisting form drafts or state to localStorage.
-   */
   onUnauthenticated?: () => void;
-  /**
-   * Target URL to redirect after successful login.
-   * Defaults to current window.location.pathname + window.location.search.
-   */
   callbackUrl?: string;
 }
 
-/**
- * Decoupled hook to verify user authentication.
- *
- * If unauthenticated, attempts to refresh the session via NextAuth's `update()`.
- * If refresh is unsuccessful, calls `onUnauthenticated` (e.g. to preserve draft data)
- * and redirects the user to the login page with a `callbackUrl`.
- */
 export function useEnsureAuthenticated() {
   const { data: session, update } = useSession();
   const router = useRouter();
 
   const ensureAuthenticated = useCallback(
     async (options?: EnsureAuthenticatedOptions): Promise<boolean> => {
-      // 1. Szybkie sprawdzenie czy sesja jest już aktywna w kontekście klienta
-      if (session?.user?.id) {
+      const isSessionActive = Boolean(session?.user?.id);
+      if (isSessionActive) {
         return true;
       }
 
-      // 2. Próba cichego odświeżenia sesji (np. logowanie w innej karcie lub wygasły token)
-      try {
-        const refreshed = await update();
-        if (refreshed?.user?.id) {
-          return true;
+      async function attemptSessionRefresh(): Promise<boolean> {
+        try {
+          const refreshed = await update();
+          return Boolean(refreshed?.user?.id);
+        } catch (err) {
+          console.warn("[useEnsureAuthenticated] Błąd podczas próby odświeżenia sesji:", err);
+          return false;
         }
-      } catch (err) {
-        console.warn("[useEnsureAuthenticated] Błąd podczas próby odświeżenia sesji:", err);
       }
 
-      // 3. Użytkownik jest niezalogowany - wywołaj callback zabezpieczający dane (np. draft w localStorage)
+      const wasRefreshed = await attemptSessionRefresh();
+      if (wasRefreshed) {
+        return true;
+      }
+
+      function resolveRedirectTargetUrl(): string {
+        if (options?.callbackUrl) {
+          return options.callbackUrl;
+        }
+        if (typeof window !== "undefined") {
+          return window.location.pathname + window.location.search;
+        }
+        return "/";
+      }
+
       options?.onUnauthenticated?.();
 
-      // 4. Przekierowanie do strony logowania z zachowaniem callbackUrl
-      const targetUrl =
-        options?.callbackUrl ||
-        (typeof window !== "undefined"
-          ? window.location.pathname + window.location.search
-          : "/");
-
+      const targetUrl = resolveRedirectTargetUrl();
       router.push(`/login?callbackUrl=${encodeURIComponent(targetUrl)}`);
       return false;
     },

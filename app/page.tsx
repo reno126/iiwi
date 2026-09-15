@@ -19,7 +19,6 @@ export const revalidate = 60;
 export default function HomePage() {
   return (
     <div className="flex flex-col gap-10 sm:gap-14 md:gap-16 w-full max-w-5xl mx-auto py-4 sm:py-8">
-      {/* 1. Big Text Hero (Streams immediately - instant FCP & LCP) */}
       <section className="text-center py-4 sm:py-8 md:py-10">
         <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-muted-foreground max-w-4xl mx-auto leading-tight">
           Tylko tutaj znajdziesz{" "}
@@ -34,7 +33,6 @@ export default function HomePage() {
         </h1>
       </section>
 
-      {/* 2. Section without title with 2 buttons: "Zobacz wszystkie opinie" "Dodaj opinię" (Streams immediately) */}
       <section className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full max-w-md mx-auto">
         <Link
           href="/produkty"
@@ -56,7 +54,6 @@ export default function HomePage() {
         </Link>
       </section>
 
-      {/* 3. Banner with 3 static, latest reviews: "Ostatnio dodane opinie" (Streamed via Suspense) */}
       <section className="w-full space-y-6">
         <div className="text-center sm:text-left">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
@@ -68,7 +65,6 @@ export default function HomePage() {
         </Suspense>
       </section>
 
-      {/* 4. Shops grid: "Opinie z dowolnych sklepów stacjonarnych i internetowych", "Popularne sklepy" (Streamed via Suspense) */}
       <section className="w-full space-y-6">
         <div className="space-y-1 text-center sm:text-left">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
@@ -83,7 +79,6 @@ export default function HomePage() {
         </Suspense>
       </section>
 
-      {/* 5. Section without title with 1 button: "Dodaj opinię" (Streams immediately) */}
       <section className="flex justify-center w-full py-2 sm:py-4">
         <Link
           href="/opinie/dodaj"

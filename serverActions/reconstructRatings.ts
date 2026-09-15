@@ -21,11 +21,6 @@ export interface ReconstructRatingsResult {
   error?: string;
 }
 
-/**
- * Reconstructs `rate_avg` and `rate_count` for products based on the `rate` field of their associated reviews.
- * If a `productId` is provided, the calculation runs only for that product.
- * If not provided (or undefined), it recalculates for all products in the database.
- */
 export async function reconstructRatings(
   input?: string | ReconstructRatingsInput,
 ): Promise<ReconstructRatingsResult> {
@@ -46,7 +41,6 @@ export async function reconstructRatings(
 
   const targetProductId = parsed.data.productId;
 
-  // Retrieve products and their reviews' rates
   const products = await prisma.product.findMany({
     where: targetProductId ? { id: targetProductId } : undefined,
     select: {
@@ -92,7 +86,6 @@ export async function reconstructRatings(
     });
   }
 
-  // Update each product row in the database
   if (updates.length > 0) {
     await prisma.$transaction(
       updates.map((item) =>

@@ -35,9 +35,6 @@ export interface ExistingProductReviewDraft {
 
 export type ReviewDraft = NewProductReviewDraft | ExistingProductReviewDraft;
 
-/**
- * Saves review flow draft into localStorage with an expiration TTL (defaults to 1 hour).
- */
 export function saveReviewDraft(
   draft: ReviewDraft,
   ttlMs: number = DEFAULT_TTL_MS
@@ -45,18 +42,10 @@ export function saveReviewDraft(
   return setItemWithTtl<ReviewDraft>(REVIEW_DRAFT_STORAGE_KEY, draft, ttlMs);
 }
 
-/**
- * Retrieves the review draft from localStorage.
- * Returns null if expired, missing, or corrupt.
- */
 export function getReviewDraft(): ReviewDraft | null {
   return getItemWithTtl<ReviewDraft>(REVIEW_DRAFT_STORAGE_KEY);
 }
 
-/**
- * Returns the target redirect URL from the stored review draft,
- * or the provided fallback URL if no draft is present in localStorage.
- */
 export function getReviewDraftReturnUrl(fallbackUrl = "/dashboard"): string {
   const draft = getReviewDraft();
   if (!draft) return fallbackUrl;
@@ -70,9 +59,6 @@ export function getReviewDraftReturnUrl(fallbackUrl = "/dashboard"): string {
   return fallbackUrl;
 }
 
-/**
- * Clears the review flow draft from localStorage.
- */
 export function clearReviewDraft(): void {
   removeItemWithTtl(REVIEW_DRAFT_STORAGE_KEY);
 }

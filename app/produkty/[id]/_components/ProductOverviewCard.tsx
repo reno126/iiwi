@@ -40,7 +40,6 @@ export function ProductOverviewCard({
     <Card className="overflow-hidden border shadow-sm">
       <CardContent className="p-6 sm:p-8">
         <div className="flex flex-col sm:flex-row gap-6 sm:gap-8">
-          {/* Product Image */}
           <ProductThumbnail
             src={product.imageUrl}
             alt={product.name}
@@ -49,7 +48,6 @@ export function ProductOverviewCard({
             className="size-36 sm:size-44 rounded-xl border mx-auto sm:mx-0"
           />
 
-          {/* Product Metadata & Details */}
           <div className="flex-1 min-w-0 space-y-4">
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2">
@@ -64,7 +62,6 @@ export function ProductOverviewCard({
                 )}
               </div>
 
-              {/* Rating Overview */}
               <div className="flex flex-wrap items-center gap-3">
                 {product.rate_count > 0 ? (
                   <StarRating rate={product.rate_avg} size="md" showValue />
@@ -83,9 +80,7 @@ export function ProductOverviewCard({
 
             <Separator />
 
-            {/* All Product Fields Grid */}
             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 text-xs text-muted-foreground">
-              {/* Product URL */}
               {product.productUrl && (
                 <div className="sm:col-span-2 flex items-center gap-1.5">
                   <dt className="font-medium text-foreground">
@@ -105,7 +100,6 @@ export function ProductOverviewCard({
                 </div>
               )}
 
-              {/* Product Code */}
               {product.code && (
                 <div className="flex items-center gap-1.5">
                   <dt className="font-medium text-foreground">Kod SKU / EAN:</dt>
@@ -113,7 +107,6 @@ export function ProductOverviewCard({
                 </div>
               )}
 
-              {/* Creator */}
               <div className="flex items-center gap-1.5">
                 <dt className="font-medium text-foreground">Dodany przez:</dt>
                 <dd className="flex items-center gap-1 text-foreground">
@@ -122,7 +115,6 @@ export function ProductOverviewCard({
                 </dd>
               </div>
 
-              {/* Date of Creation */}
               <div className="flex items-center gap-1.5">
                 <dt className="font-medium text-foreground">Data utworzenia:</dt>
                 <dd className="flex items-center gap-1">
@@ -131,7 +123,6 @@ export function ProductOverviewCard({
                 </dd>
               </div>
 
-              {/* Date of Update */}
               {hasDistinctUpdateDate && (
                 <div className="flex items-center gap-1.5">
                   <dt className="font-medium text-foreground">
@@ -145,7 +136,6 @@ export function ProductOverviewCard({
               )}
             </dl>
 
-            {/* Action: Add Review */}
             <div className="pt-2">
               <Button
                 type="button"

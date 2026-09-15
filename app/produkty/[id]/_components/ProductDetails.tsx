@@ -32,24 +32,32 @@ export interface ProductDetailsProps {
 export function ProductDetails({ product }: ProductDetailsProps) {
   const router = useRouter();
   const [isReviewFormOpen, setIsReviewFormOpen] = useState(() => {
-    const draft = getReviewDraft();
-    return Boolean(
-      draft?.type === "REVIEW_EXISTING_PRODUCT" &&
-        draft.productId === product.id,
-    );
+    function checkInitialReviewFormOpenState(): boolean {
+      const draft = getReviewDraft();
+      return Boolean(
+        draft?.type === "REVIEW_EXISTING_PRODUCT" &&
+          draft.productId === product.id,
+      );
+    }
+    return checkInitialReviewFormOpenState();
   });
 
   useEffect(() => {
-    const draft = getReviewDraft();
-    if (
-      draft?.type === "REVIEW_EXISTING_PRODUCT" &&
-      draft.productId === product.id
-    ) {
-      const el = document.getElementById("review-form");
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
+    function scrollToReviewFormIfDraftExists() {
+      const draft = getReviewDraft();
+      const hasDraftForCurrentProduct =
+        draft?.type === "REVIEW_EXISTING_PRODUCT" &&
+        draft.productId === product.id;
+
+      if (!hasDraftForCurrentProduct) {
+        return;
       }
+
+      const reviewFormElement = document.getElementById("review-form");
+      reviewFormElement?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+
+    scrollToReviewFormIfDraftExists();
   }, [product.id]);
 
   const handleReviewSuccess = () => {
@@ -63,7 +71,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
   return (
     <div className="mx-auto max-w-4xl space-y-8 py-4">
-      {/* Back Navigation */}
       <div>
         <Link
           href="/produkty"
@@ -77,14 +84,12 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         </Link>
       </div>
 
-      {/* Main Product Card */}
       <ProductOverviewCard
         product={product}
         onAddReview={() => setIsReviewFormOpen(true)}
         isReviewFormOpen={isReviewFormOpen}
       />
 
-      {/* Reviews or Review Form Section */}
       {isReviewFormOpen ? (
         <section
           id="review-form"
@@ -125,7 +130,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             </h2>
           </div>
 
-          {/* Empty state when there are no reviews */}
           {product.reviews.length === 0 ? (
             <Empty className="border p-8 text-center">
               <EmptyHeader>
@@ -150,14 +154,12 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             </Empty>
           ) : (
             <div className="space-y-6">
-              {/* List of Reviews */}
               <div className="flex flex-col gap-4">
                 {product.reviews.map((review) => (
                   <ProductReviewItem key={review.id} review={review} />
                 ))}
               </div>
 
-              {/* Action: Add Review at bottom of review list */}
               <div className="pt-2">
                 <Button
                   type="button"

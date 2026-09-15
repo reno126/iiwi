@@ -41,14 +41,12 @@ export function UrlPromptStep({
 
   return (
     <div className="space-y-6">
-      {/* 1. Element 1: Nagłówek i podtytuł mniejszymi literami */}
       <div className="">
         <p className="text-sm text-muted-foreground">
           wklej go poniżej, to pójdzie szybko!
         </p>
       </div>
 
-      {/* 2. & 3. Element 2 (pole do url) + Element 3 (przycisk: Pobierz info) */}
       <form onSubmit={handleSubmit} className="space-y-3">
         <div className="flex flex-col sm:flex-row gap-2">
           <Input
@@ -74,14 +72,12 @@ export function UrlPromptStep({
           </Button>
         </div>
 
-        {/* Informacja o wydłużonym czasie Tier 2 */}
         <ScrapeDelayNotice
           isVisible={isPending && isTier2NoticeVisible}
           className="justify-center pt-1"
         />
       </form>
 
-      {/* Opcja alternatywna: brak linku / dodawanie ręczne */}
       <div className="border-t pt-6 text-center space-y-2">
         <span className="block text-sm font-medium text-foreground">
           Nie masz linku do oferty?
@@ -100,7 +96,6 @@ export function UrlPromptStep({
         </span>
       </div>
 
-      {/* Powrót do wyszukiwania w bazie */}
       {onCancel && (
         <div className="text-center pt-2">
           <Button

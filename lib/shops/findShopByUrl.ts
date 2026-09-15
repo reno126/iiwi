@@ -7,10 +7,30 @@ export interface MatchedShopResult {
   logo: string | null;
 }
 
-/**
- * Dopasowuje sklep na podstawie adresu URL produktu.
- * Wykorzystuje zapytanie PostgreSQL z operatorem przecięcia tablic (Prisma `hasSome` z indeksem GIN).
- */
+interface RankedShop {
+  id: string;
+  name: string | null;
+  logo: string | null;
+  matcherKeys: string[];
+}
+
+function compareShopsByCandidatePriority(
+  firstShop: RankedShop,
+  secondShop: RankedShop,
+  candidates: string[],
+): number {
+  function findBestCandidateRank(shopKeys: string[]): number {
+    for (let index = 0; index < candidates.length; index++) {
+      if (shopKeys.includes(candidates[index])) {
+        return index;
+      }
+    }
+    return Number.MAX_SAFE_INTEGER;
+  }
+
+  return findBestCandidateRank(firstShop.matcherKeys) - findBestCandidateRank(secondShop.matcherKeys);
+}
+
 export async function findShopByUrl(
   url: string | null | undefined,
 ): Promise<MatchedShopResult | null> {
@@ -37,17 +57,14 @@ export async function findShopByUrl(
     return { id, name, logo };
   }
 
-  // Tie-breaking: dopasowanie o najwyższym priorytecie wg kolejności kandydatów
-  matchedShops.sort((a, b) => {
-    const getBestRank = (shopKeys: string[]) => {
-      for (let i = 0; i < candidates.length; i++) {
-        if (shopKeys.includes(candidates[i])) return i;
-      }
-      return 999;
-    };
-    return getBestRank(a.matcherKeys) - getBestRank(b.matcherKeys);
-  });
+  matchedShops.sort((firstShop, secondShop) =>
+    compareShopsByCandidatePriority(firstShop, secondShop, candidates)
+  );
 
-  const best = matchedShops[0];
-  return { id: best.id, name: best.name, logo: best.logo };
+  const bestRankedShop = matchedShops[0];
+  return {
+    id: bestRankedShop.id,
+    name: bestRankedShop.name,
+    logo: bestRankedShop.logo,
+  };
 }

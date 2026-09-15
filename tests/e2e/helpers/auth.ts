@@ -19,7 +19,6 @@ export async function createAuthenticatedSession(
     `${E2E_TEST_PREFIX}authed_${Date.now()}_${Math.random().toString(36).slice(2, 7)}@example.com`;
   const name = `${E2E_TEST_PREFIX} Authed User`;
 
-  // 1. Create user directly in the database (fast seed)
   const user = await prisma.user.create({
     data: {
       email,
@@ -28,7 +27,6 @@ export async function createAuthenticatedSession(
     },
   });
 
-  // 2. Generate signed NextAuth JWT session token
   const secret =
     process.env.NEXTAUTH_SECRET ||
     "a3f5c7d9e3b4f8a1c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7";
@@ -43,7 +41,6 @@ export async function createAuthenticatedSession(
     secret,
   });
 
-  // 3. Inject session cookie into the browser context
   await context.addCookies([
     {
       name: "next-auth.session-token",
@@ -68,7 +65,6 @@ export async function deleteTestUser(userId: string): Promise<void> {
       where: { id: userId },
     });
   } catch {
-    // Ignore if already deleted
   }
 }
 

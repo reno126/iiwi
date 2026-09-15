@@ -1,15 +1,51 @@
-/**
- * Ochrona przed atakami Server-Side Request Forgery (SSRF).
- * Weryfikuje, czy dany adres URL nie prowadzi do zasobów lokalnych, prywatnych sieci lub serwisów chmurowych metadanych.
- */
-
 export interface UrlSafetyResult {
   isValid: boolean;
   error?: string;
 }
 
+function isCurrentNetworkIPv4(o1: number): boolean {
+  return o1 === 0;
+}
+
+function isLoopbackIPv4(o1: number): boolean {
+  return o1 === 127;
+}
+
+function isLinkLocalOrCloudMetadataIPv4(o1: number, o2: number): boolean {
+  return o1 === 169 && o2 === 254;
+}
+
+function isPrivateNetworkRFC1918(o1: number, o2: number): boolean {
+  const isClassA = o1 === 10;
+  const isClassB = o1 === 172 && o2 >= 16 && o2 <= 31;
+  const isClassC = o1 === 192 && o2 === 168;
+  return isClassA || isClassB || isClassC;
+}
+
+function isCarrierGradeNatIPv4(o1: number, o2: number): boolean {
+  return o1 === 100 && o2 >= 64 && o2 <= 127;
+}
+
+function isReservedOrBenchmarkIPv4(o1: number, o2: number, o3: number): boolean {
+  const isIetfProtocolAssignment = o1 === 192 && o2 === 0 && o3 === 0;
+  const isTestNet1 = o1 === 192 && o2 === 0 && o3 === 2;
+  const isBenchmark = o1 === 198 && (o2 === 18 || o2 === 19);
+  const isTestNet2 = o1 === 198 && o2 === 51 && o3 === 100;
+  const isTestNet3 = o1 === 203 && o2 === 0 && o3 === 113;
+  return (
+    isIetfProtocolAssignment ||
+    isTestNet1 ||
+    isBenchmark ||
+    isTestNet2 ||
+    isTestNet3
+  );
+}
+
+function isMulticastOrBroadcastIPv4(o1: number): boolean {
+  return o1 >= 224;
+}
+
 function isPrivateOrReservedIPv4(hostname: string): boolean {
-  // Sprawdzenie standardowej notacji kropkowej IPv4 (np. 192.168.1.1)
   const ipv4Pattern = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
   const match = hostname.match(ipv4Pattern);
 
@@ -21,83 +57,61 @@ function isPrivateOrReservedIPv4(hostname: string): boolean {
   const o3 = Number(oct3);
   const o4 = Number(oct4);
 
-  if ([o1, o2, o3, o4].some((o) => o < 0 || o > 255)) {
-    return true; // nieprawidłowy/zniekształcony IP traktujemy jako niebezpieczny
+  const hasInvalidOctet = [o1, o2, o3, o4].some((o) => o < 0 || o > 255);
+  if (hasInvalidOctet) {
+    return true;
   }
 
-  // 0.0.0.0/8 (Bieżąca sieć)
-  if (o1 === 0) return true;
+  return (
+    isCurrentNetworkIPv4(o1) ||
+    isPrivateNetworkRFC1918(o1, o2) ||
+    isCarrierGradeNatIPv4(o1, o2) ||
+    isLoopbackIPv4(o1) ||
+    isLinkLocalOrCloudMetadataIPv4(o1, o2) ||
+    isReservedOrBenchmarkIPv4(o1, o2, o3) ||
+    isMulticastOrBroadcastIPv4(o1)
+  );
+}
 
-  // 10.0.0.0/8 (Sieć prywatna RFC 1918)
-  if (o1 === 10) return true;
+function isLoopbackIPv6(host: string): boolean {
+  return host === "::1" || host === "0000:0000:0000:0000:0000:0000:0000:0001";
+}
 
-  // 100.64.0.0/10 (Shared Address Space / CGNAT RFC 6598)
-  if (o1 === 100 && o2 >= 64 && o2 <= 127) return true;
+function isUnspecifiedIPv6(host: string): boolean {
+  return host === "::" || host === "0000:0000:0000:0000:0000:0000:0000:0000";
+}
 
-  // 127.0.0.0/8 (Pętla zwrotna / Loopback RFC 1122)
-  if (o1 === 127) return true;
+function isUniqueLocalAddressIPv6(host: string): boolean {
+  return host.startsWith("fc") || host.startsWith("fd");
+}
 
-  // 169.254.0.0/16 (Link-local, w tym AWS/GCP/Azure metadata 169.254.169.254 RFC 3927)
-  if (o1 === 169 && o2 === 254) return true;
+function isLinkLocalIPv6(host: string): boolean {
+  return (
+    host.startsWith("fe8") ||
+    host.startsWith("fe9") ||
+    host.startsWith("fea") ||
+    host.startsWith("feb")
+  );
+}
 
-  // 172.16.0.0/12 (Sieć prywatna RFC 1918: 172.16.0.0 - 172.31.255.255)
-  if (o1 === 172 && o2 >= 16 && o2 <= 31) return true;
-
-  // 192.0.0.0/24 (IETF Protocol Assignments)
-  if (o1 === 192 && o2 === 0 && o3 === 0) return true;
-
-  // 192.0.2.0/24 (TEST-NET-1)
-  if (o1 === 192 && o2 === 0 && o3 === 2) return true;
-
-  // 192.168.0.0/16 (Sieć prywatna RFC 1918)
-  if (o1 === 192 && o2 === 168) return true;
-
-  // 198.18.0.0/15 (Benchmarking)
-  if (o1 === 198 && (o2 === 18 || o2 === 19)) return true;
-
-  // 198.51.100.0/24 (TEST-NET-2)
-  if (o1 === 198 && o2 === 51 && o3 === 100) return true;
-
-  // 203.0.113.0/24 (TEST-NET-3)
-  if (o1 === 203 && o2 === 0 && o3 === 113) return true;
-
-  // 224.0.0.0/4 (Multicast) & 240.0.0.0/4 (Reserved) & 255.255.255.255 (Broadcast)
-  if (o1 >= 224) return true;
-
+function isIPv4MappedIPv6(host: string): boolean {
+  if (host.startsWith("::ffff:") || host.startsWith("0:0:0:0:0:ffff:")) {
+    const ipv4Part = host.split(":").pop();
+    return Boolean(ipv4Part && isPrivateOrReservedIPv4(ipv4Part));
+  }
   return false;
 }
 
 function isPrivateOrReservedIPv6(cleanHost: string): boolean {
   const host = cleanHost.toLowerCase();
 
-  // Loopback ::1
-  if (host === "::1" || host === "0000:0000:0000:0000:0000:0000:0000:0001") return true;
-
-  // Unspecified ::
-  if (host === "::" || host === "0000:0000:0000:0000:0000:0000:0000:0000") return true;
-
-  // Unique Local Address (ULA) fc00::/7 (fc00:: - fdff::)
-  if (host.startsWith("fc") || host.startsWith("fd")) return true;
-
-  // Link-Local fe80::/10
-  if (
-    host.startsWith("fe8") ||
-    host.startsWith("fe9") ||
-    host.startsWith("fea") ||
-    host.startsWith("feb")
-  ) {
-    return true;
-  }
-
-  // IPv4-mapped IPv6 (np. ::ffff:127.0.0.1 lub ::ffff:7f00:1)
-  if (host.startsWith("::ffff:") || host.startsWith("0:0:0:0:0:ffff:")) {
-    const ipv4Part = host.split(":").pop();
-    if (ipv4Part && isPrivateOrReservedIPv4(ipv4Part)) {
-      return true;
-    }
-  }
-
-  return false;
+  return (
+    isLoopbackIPv6(host) ||
+    isUnspecifiedIPv6(host) ||
+    isUniqueLocalAddressIPv6(host) ||
+    isLinkLocalIPv6(host) ||
+    isIPv4MappedIPv6(host)
+  );
 }
 
 const FORBIDDEN_HOSTS = new Set([
@@ -106,6 +120,29 @@ const FORBIDDEN_HOSTS = new Set([
   "metadata",
   "instance-data",
 ]);
+
+function isForbiddenDomainOrLocalSuffix(host: string): boolean {
+  if (FORBIDDEN_HOSTS.has(host)) {
+    return true;
+  }
+
+  const forbiddenSuffixes = [
+    ".localhost",
+    ".internal",
+    ".local",
+    ".lan",
+    ".corp",
+  ];
+
+  return forbiddenSuffixes.some((suffix) => host.endsWith(suffix));
+}
+
+function stripIpv6Brackets(hostname: string): string {
+  if (hostname.startsWith("[") && hostname.endsWith("]")) {
+    return hostname.slice(1, -1);
+  }
+  return hostname;
+}
 
 export function validateUrlSafety(inputUrl: string): UrlSafetyResult {
   let parsed: URL;
@@ -118,8 +155,8 @@ export function validateUrlSafety(inputUrl: string): UrlSafetyResult {
     };
   }
 
-  // Dozwolone wyłącznie protokoły http oraz https
-  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+  const isHttpOrHttps = parsed.protocol === "http:" || parsed.protocol === "https:";
+  if (!isHttpOrHttps) {
     return {
       isValid: false,
       error: "Niedozwolony protokół. Dozwolone są wyłącznie http:// oraz https://",
@@ -127,7 +164,6 @@ export function validateUrlSafety(inputUrl: string): UrlSafetyResult {
   }
 
   const rawHost = parsed.hostname.toLowerCase().trim();
-
   if (!rawHost) {
     return {
       isValid: false,
@@ -135,28 +171,15 @@ export function validateUrlSafety(inputUrl: string): UrlSafetyResult {
     };
   }
 
-  // Usunięcie nawiasów kwadratowych dla IPv6 (np. [::1] -> ::1)
-  const cleanHost =
-    rawHost.startsWith("[") && rawHost.endsWith("]")
-      ? rawHost.slice(1, -1)
-      : rawHost;
+  const cleanHost = stripIpv6Brackets(rawHost);
 
-  // Sprawdzenie znanych nazw lokalnych i metadanych
-  if (
-    FORBIDDEN_HOSTS.has(cleanHost) ||
-    cleanHost.endsWith(".localhost") ||
-    cleanHost.endsWith(".internal") ||
-    cleanHost.endsWith(".local") ||
-    cleanHost.endsWith(".lan") ||
-    cleanHost.endsWith(".corp")
-  ) {
+  if (isForbiddenDomainOrLocalSuffix(cleanHost)) {
     return {
       isValid: false,
       error: "Podany adres wskazuje na sieć wewnętrzną, lokalną lub metadane chmurowe.",
     };
   }
 
-  // Sprawdzenie adresów IPv4
   if (isPrivateOrReservedIPv4(cleanHost)) {
     return {
       isValid: false,
@@ -164,7 +187,6 @@ export function validateUrlSafety(inputUrl: string): UrlSafetyResult {
     };
   }
 
-  // Sprawdzenie adresów IPv6
   if (cleanHost.includes(":") && isPrivateOrReservedIPv6(cleanHost)) {
     return {
       isValid: false,
@@ -172,16 +194,16 @@ export function validateUrlSafety(inputUrl: string): UrlSafetyResult {
     };
   }
 
-  // Domena publiczna musi zawierać co najmniej jedną kropkę (np. sklep.pl, amazon.com)
-  // i nie może zaczynać się ani kończyć kropką
-  if (!cleanHost.includes(".") && !cleanHost.includes(":")) {
+  const lacksDomainSeparator = !cleanHost.includes(".") && !cleanHost.includes(":");
+  if (lacksDomainSeparator) {
     return {
       isValid: false,
       error: "Podana nazwa domeny jest nieprawidłowa (wymagana domena najwyższego poziomu).",
     };
   }
 
-  if (cleanHost.startsWith(".") || cleanHost.endsWith(".")) {
+  const hasLeadingOrTrailingDot = cleanHost.startsWith(".") || cleanHost.endsWith(".");
+  if (hasLeadingOrTrailingDot) {
     return {
       isValid: false,
       error: "Nieprawidłowy format nazwy hosta.",
