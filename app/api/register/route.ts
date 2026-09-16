@@ -1,4 +1,4 @@
-import { registerSchema } from "@/schemas/register";
+import { registerSchema, REGISTER_API_MESSAGES } from "@/schemas/register";
 import { prisma } from "@/lib/db/prisma";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
@@ -8,7 +8,7 @@ export async function POST(req: Request) {
   const validated = registerSchema.safeParse(body);
 
   if (!validated.success) {
-    return NextResponse.json({ error: "Nieprawidłowe dane" }, { status: 400 });
+    return NextResponse.json({ error: REGISTER_API_MESSAGES.invalidData }, { status: 400 });
   }
 
   const { email, password, name } = validated.data;
@@ -25,14 +25,14 @@ export async function POST(req: Request) {
         .join(", ");
       return NextResponse.json(
         {
-          error: `Konto z tym adresem e-mail już istnieje i jest połączone z ${providers}. Zaloguj się przez ${providers}.`,
+          error: REGISTER_API_MESSAGES.oauthAccountLinked(providers),
         },
         { status: 409 },
       );
     }
 
     return NextResponse.json(
-      { error: "Ten adres e-mail jest już zajęty. Zaloguj się na swoje konto." },
+      { error: REGISTER_API_MESSAGES.emailTaken },
       { status: 409 },
     );
   }
@@ -47,5 +47,5 @@ export async function POST(req: Request) {
     },
   });
 
-  return NextResponse.json({ success: "Użytkownik został utworzony" }, { status: 201 });
+  return NextResponse.json({ success: REGISTER_API_MESSAGES.userCreated }, { status: 201 });
 }

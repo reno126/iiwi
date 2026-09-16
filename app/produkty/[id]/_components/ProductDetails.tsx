@@ -25,6 +25,17 @@ import { cn } from "cn";
 
 export { StarRating };
 
+export const PRODUCT_DETAILS_MESSAGES = {
+  backToList: "Wróć do listy produktów",
+  formHeading: "Napisz swoją opinię",
+  reviewsHeading: "Opinie użytkowników",
+  emptyTitle: "Brak opinii dla tego produktu",
+  emptyDescription:
+    "Ten produkt nie ma jeszcze żadnych recenzji. Podziel się swoim doświadczeniem i pomóż innym w wyborze!",
+  firstReviewButton: "Bądź pierwszą osobą, która doda recenzję",
+  addReviewButton: "Napisz opinię dla tego produktu",
+} as const;
+
 export interface ProductDetailsProps {
   product: ProductWithReviews;
 }
@@ -80,7 +91,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           )}
         >
           <ChevronLeft className="size-4" />
-          Wróć do listy produktów
+          {PRODUCT_DETAILS_MESSAGES.backToList}
         </Link>
       </div>
 
@@ -101,7 +112,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               id="review-form-heading"
               className="text-xl font-bold tracking-tight text-foreground"
             >
-              Napisz swoją opinię
+              {PRODUCT_DETAILS_MESSAGES.formHeading}
             </h2>
           </div>
           <Card className="border p-6 shadow-sm">
@@ -123,7 +134,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               id="reviews-heading"
               className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2"
             >
-              Opinie użytkowników
+              {PRODUCT_DETAILS_MESSAGES.reviewsHeading}
               <Badge variant="outline" className="text-xs">
                 {product.reviews.length}
               </Badge>
@@ -136,10 +147,9 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 <EmptyMedia variant="icon">
                   <MessageSquare className="size-6" />
                 </EmptyMedia>
-                <EmptyTitle>Brak opinii dla tego produktu</EmptyTitle>
+                <EmptyTitle>{PRODUCT_DETAILS_MESSAGES.emptyTitle}</EmptyTitle>
                 <EmptyDescription>
-                  Ten produkt nie ma jeszcze żadnych recenzji. Podziel się swoim
-                  doświadczeniem i pomóż innym w wyborze!
+                  {PRODUCT_DETAILS_MESSAGES.emptyDescription}
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>
@@ -148,7 +158,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   size="sm"
                   onClick={() => setIsReviewFormOpen(true)}
                 >
-                  Bądź pierwszą osobą, która doda recenzję
+                  {PRODUCT_DETAILS_MESSAGES.firstReviewButton}
                 </Button>
               </EmptyContent>
             </Empty>
@@ -168,7 +178,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   className="gap-1.5"
                 >
                   <PlusCircle className="size-4" />
-                  Napisz opinię dla tego produktu
+                  {PRODUCT_DETAILS_MESSAGES.addReviewButton}
                 </Button>
               </div>
             </div>

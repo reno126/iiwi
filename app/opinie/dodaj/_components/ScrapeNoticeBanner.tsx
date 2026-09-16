@@ -5,6 +5,22 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export type ScrapedFieldType = "name" | "imageUrl" | "code" | "shop";
 
+export const SCRAPE_BANNER_MESSAGES = {
+  success: {
+    title: "Pobrano wszystkie potrzebne dane produktu",
+    description:
+      "Poniższe dane możesz sprawdzić i dowolnie edytować przed dodaniem opinii.",
+  },
+  failed: {
+    title: "Nie udało się pobrać danych",
+    description: "Uzupełnij brakujące dane i dodaj swoją opinię",
+  },
+  partial: {
+    title: "Udało się pobrać część danych",
+    description: "Uzupełnij brakujące dane i dodaj swoją opinię",
+  },
+} as const;
+
 const allFields: ScrapedFieldType[] = ["name", "imageUrl", "code", "shop"];
 
 interface ScrapeNoticeBannerProps {
@@ -23,10 +39,10 @@ export function ScrapeNoticeBanner({
       <Alert variant="destructive">
         <CircleAlert className="size-4" />
         <AlertTitle className="font-semibold text-sm">
-          Nie udało się pobrać danych
+          {SCRAPE_BANNER_MESSAGES.failed.title}
         </AlertTitle>
         <AlertDescription className="text-xs sm:text-sm leading-relaxed mt-0.5">
-          Uzupełnij brakujące dane i dodaj swoją opinię
+          {SCRAPE_BANNER_MESSAGES.failed.description}
         </AlertDescription>
       </Alert>
     );
@@ -39,11 +55,10 @@ export function ScrapeNoticeBanner({
       <Alert variant="success">
         <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />
         <AlertTitle className="font-semibold text-sm">
-          Pobrano wszystkie potrzebne dane produktu
+          {SCRAPE_BANNER_MESSAGES.success.title}
         </AlertTitle>
         <AlertDescription className="text-xs sm:text-sm mt-0.5">
-          Poniższe dane możesz sprawdzić i dowolnie edytować przed dodaniem
-          opinii.
+          {SCRAPE_BANNER_MESSAGES.success.description}
         </AlertDescription>
       </Alert>
     );
@@ -53,10 +68,10 @@ export function ScrapeNoticeBanner({
     <Alert variant="warning">
       <AlertTriangle className="size-4 text-amber-600 dark:text-amber-400" />
       <AlertTitle className="font-semibold text-sm">
-        Udało się pobrać część danych
+        {SCRAPE_BANNER_MESSAGES.partial.title}
       </AlertTitle>
       <AlertDescription className="text-xs sm:text-sm mt-0.5">
-        Uzupełnij brakujące dane i dodaj swoją opinię
+        {SCRAPE_BANNER_MESSAGES.partial.description}
       </AlertDescription>
     </Alert>
   );

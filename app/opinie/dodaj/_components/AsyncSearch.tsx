@@ -25,133 +25,48 @@ import {
 } from "@/components/ui/empty";
 import { cn } from "cn";
 
+export const ASYNC_SEARCH_MESSAGES = {
+  defaultPlaceholder: "Szukaj (min. 3 znaki)...",
+  defaultEmptyTitle: "Brak wyników",
+  loadingAriaLabel: "Ładowanie wyników",
+  clearAriaLabel: "Wyczyść wyszukiwanie",
+  resultsAriaLabel: "Wyniki wyszukiwania",
+  defaultError: "Wystąpił błąd podczas wyszukiwania.",
+  minCharsHint: (charsLeft: number) =>
+    `Wpisz jeszcze co najmniej ${charsLeft} ${charsLeft === 1 ? "znak" : "znaki"}, aby wyszukać.`,
+  defaultEmptyDescription: (query: string) =>
+    `Nie znaleziono żadnych wyników dla frazy „${query}”.`,
+} as const;
+
 export interface AsyncSearchProps<T> {
-  /**
-   * Async server action or function called with the search query.
-   * Resolves to an array of items or an object containing a `data` array.
-   */
   searchAction: (
     query: string,
   ) => Promise<T[] | { data?: T[] | null } | null | undefined>;
-
-  /**
-   * Function to extract the text label of an item for default rendering and accessibility.
-   */
   getItemLabel?: (item: T) => string;
-
-  /**
-   * Callback invoked when a user clicks or selects a result item.
-   */
   onResultSelect?: (item: T) => void;
-
-  /**
-   * Custom item renderer. Receives the item, whether it is highlighted, and its index.
-   */
   renderItem?: (
     item: T,
     isHighlighted: boolean,
     index: number,
   ) => React.ReactNode;
-
-  /**
-   * Function to extract a unique key for each item in the results list.
-   * Defaults to `item.id ?? item.key ?? index`.
-   */
   getKey?: (item: T, index: number) => string | number;
-
-  /**
-   * Minimum number of characters required to trigger the search.
-   * Defaults to 3.
-   */
   minChars?: number;
-
-  /**
-   * Debounce delay in milliseconds before invoking `searchAction` with `deferredQuery`.
-   * Defaults to 300ms.
-   */
   debounceMs?: number;
-
-  /**
-   * Placeholder text for the search input.
-   * Defaults to "Szukaj (min. 3 znaki)...".
-   */
   placeholder?: string;
-
-  /**
-   * Placement of the results list: "inline" (default) or "dropdown" (absolute overlay).
-   */
   resultsPlacement?: "inline" | "dropdown";
-
-  /**
-   * Custom component or content to display when no results are found.
-   */
   emptyState?: React.ReactNode;
-
-  /**
-   * Title text for the default zero-result empty state.
-   */
   emptyTitle?: string;
-
-  /**
-   * Description text for the default zero-result empty state.
-   */
   emptyDescription?: string;
-
-  /**
-   * Custom loading component displayed below the input while searching.
-   */
   loadingComponent?: React.ReactNode;
-
-  /**
-   * Whether to display a character count hint when `0 < query.length < minChars`.
-   * Defaults to true.
-   */
   showMinCharsHint?: boolean;
-
-  /**
-   * Whether to clear the search input upon selecting an item.
-   * Defaults to false.
-   */
   clearOnSelect?: boolean;
-
-  /**
-   * Custom class names for the root container.
-   */
   className?: string;
-
-  /**
-   * Custom class names for the input element.
-   */
   inputClassName?: string;
-
-  /**
-   * Custom class names for the results scroll area.
-   */
   resultsClassName?: string;
-
-  /**
-   * Disabled state for the input.
-   */
   disabled?: boolean;
-
-  /**
-   * Auto focus the input upon mount.
-   */
   autoFocus?: boolean;
-
-  /**
-   * Initial search query.
-   */
   defaultValue?: string;
-
-  /**
-   * Controlled query string.
-   */
   value?: string;
-
-  /**
-   * Callback invoked whenever the input text changes.
-   */
   onQueryChange?: (query: string) => void;
 }
 
@@ -182,10 +97,10 @@ export function AsyncSearch<T>({
   getItemLabel,
   minChars = 3,
   debounceMs = 300,
-  placeholder = "Szukaj (min. 3 znaki)...",
+  placeholder = ASYNC_SEARCH_MESSAGES.defaultPlaceholder,
   resultsPlacement = "inline",
   emptyState,
-  emptyTitle = "Brak wyników",
+  emptyTitle = ASYNC_SEARCH_MESSAGES.defaultEmptyTitle,
   emptyDescription,
   loadingComponent,
   showMinCharsHint = true,
@@ -260,7 +175,7 @@ export function AsyncSearch<T>({
             setError(
               err instanceof Error
                 ? err.message
-                : "Wystąpił błąd podczas wyszukiwania.",
+                : ASYNC_SEARCH_MESSAGES.defaultError,
             );
             setRawResults([]);
             setRawHasSearched(true);
@@ -374,7 +289,7 @@ export function AsyncSearch<T>({
           {isLoading && (
             <Spinner
               className="size-4 text-muted-foreground animate-spin"
-              aria-label="Ładowanie wyników"
+              aria-label={ASYNC_SEARCH_MESSAGES.loadingAriaLabel}
             />
           )}
 
@@ -385,7 +300,7 @@ export function AsyncSearch<T>({
               size="icon-xs"
               onClick={handleClear}
               disabled={disabled}
-              aria-label="Wyczyść wyszukiwanie"
+              aria-label={ASYNC_SEARCH_MESSAGES.clearAriaLabel}
               className="text-muted-foreground hover:text-foreground size-6 p-0 rounded-full"
             >
               <X className="size-3.5" aria-hidden="true" />
@@ -398,9 +313,7 @@ export function AsyncSearch<T>({
         <div className="h-5 px-2 flex items-center" aria-live="polite">
           {query.trim().length > 0 && query.trim().length < minChars && (
             <p className="text-xs text-muted-foreground" role="status">
-              Wpisz jeszcze co najmniej {minChars - query.trim().length}{" "}
-              {minChars - query.trim().length === 1 ? "znak" : "znaki"}, aby
-              wyszukać.
+              {ASYNC_SEARCH_MESSAGES.minCharsHint(minChars - query.trim().length)}
             </p>
           )}
         </div>
@@ -448,7 +361,9 @@ export function AsyncSearch<T>({
                         <EmptyTitle>{emptyTitle}</EmptyTitle>
                         <EmptyDescription>
                           {emptyDescription ??
-                            `Nie znaleziono żadnych wyników dla frazy „${lastSearchedQuery || trimmedDeferred}”.`}
+                            ASYNC_SEARCH_MESSAGES.defaultEmptyDescription(
+                              lastSearchedQuery || trimmedDeferred,
+                            )}
                         </EmptyDescription>
                       </EmptyHeader>
                     </Empty>
@@ -470,7 +385,7 @@ export function AsyncSearch<T>({
                 <div
                   id={listboxId}
                   role="listbox"
-                  aria-label="Wyniki wyszukiwania"
+                  aria-label={ASYNC_SEARCH_MESSAGES.resultsAriaLabel}
                   className="p-1 space-y-0.5"
                 >
                   {results.map((item, index) => {

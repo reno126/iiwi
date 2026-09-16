@@ -27,6 +27,16 @@ const CombinedProductReviewForm =
     ? StaticCombinedProductReviewForm
     : LazyCombinedProductReviewForm;
 
+export const ADD_REVIEW_FLOW_MESSAGES = {
+  searchingDescription:
+    "Wybierz produkt z bazy lub dodaj nowy, aby podzielić się swoją opinią.",
+  addNewProductButton: "Dodaj nowy produkt",
+  searchPlaceholder: "Wpisz nazwę lub kod produktu (min. 3 znaki)...",
+  emptySearchDescription: "Nie znaleziono takiego produktu w bazie.",
+  emptySearchAddReviewButton: "Dodaj recenzję dla nowego produktu",
+  formHeading: "Napisz swoją opinię",
+} as const;
+
 export type FlowMode =
   | { type: "SEARCHING" }
   | { type: "REVIEW_EXISTING_PRODUCT"; product: Product }
@@ -56,8 +66,7 @@ export function AddReviewFlow() {
         <div className="space-y-4">
           <div className="flex flex-col items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground">
-              Wybierz produkt z bazy lub dodaj nowy, aby podzielić się swoją
-              opinią.
+              {ADD_REVIEW_FLOW_MESSAGES.searchingDescription}
             </p>
             <Button
               type="button"
@@ -65,14 +74,14 @@ export function AddReviewFlow() {
               className="shrink-0 gap-1.5 w-full md:w-auto"
             >
               <PlusCircle className="size-4" />
-              Dodaj nowy produkt
+              {ADD_REVIEW_FLOW_MESSAGES.addNewProductButton}
             </Button>
           </div>
 
           <AsyncSearch<Product>
             autoFocus={true}
             searchAction={productSearch}
-            placeholder="Wpisz nazwę lub kod produktu (min. 3 znaki)..."
+            placeholder={ADD_REVIEW_FLOW_MESSAGES.searchPlaceholder}
             getItemLabel={(p) => p.name}
             onResultSelect={(product) =>
               setMode({ type: "REVIEW_EXISTING_PRODUCT", product })
@@ -80,7 +89,7 @@ export function AddReviewFlow() {
             emptyState={
               <div className="p-6 border border-dashed rounded-lg text-center space-y-3">
                 <p className="text-sm text-muted-foreground">
-                  Nie znaleziono takiego produktu w bazie.
+                  {ADD_REVIEW_FLOW_MESSAGES.emptySearchDescription}
                 </p>
                 <Button
                   variant="outline"
@@ -88,7 +97,7 @@ export function AddReviewFlow() {
                   onClick={() => setMode({ type: "NEW_PRODUCT_AND_REVIEW" })}
                 >
                   <PlusCircle className="size-4 mr-2" />
-                  Dodaj recenzję dla nowego produktu
+                  {ADD_REVIEW_FLOW_MESSAGES.emptySearchAddReviewButton}
                 </Button>
               </div>
             }
@@ -107,7 +116,9 @@ export function AddReviewFlow() {
           />
 
           <div className="p-6 border rounded-lg bg-card shadow-xs">
-            <h2 className="text-lg font-semibold mb-4">Napisz swoją opinię</h2>
+            <h2 className="text-lg font-semibold mb-4">
+              {ADD_REVIEW_FLOW_MESSAGES.formHeading}
+            </h2>
             <ReviewForm
               productId={mode.product.id}
               product={mode.product}

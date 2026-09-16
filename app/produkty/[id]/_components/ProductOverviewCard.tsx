@@ -15,6 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { StarRating } from "@/components/reviews/StarRating";
 import { ProductThumbnail } from "@/components/products/ProductThumbnail";
 import { formatPolishDate, formatReviewCount } from "@/lib/formatters";
+import { PRODUCT_DETAILS_MESSAGES } from "./ProductDetails";
 
 interface ProductOverviewCardProps {
   product: ProductWithReviews;
@@ -143,7 +144,7 @@ export function ProductOverviewCard({
                 className="gap-1.5"
               >
                 <PlusCircle className="size-4" />
-                Napisz opinię dla tego produktu
+                {PRODUCT_DETAILS_MESSAGES.addReviewButton}
               </Button>
             </div>
           </div>

@@ -3,7 +3,15 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { CombinedProductReviewForm } from "@/app/opinie/dodaj/_components/CombinedProductReviewForm";
+import {
+  CombinedProductReviewForm,
+  COMBINED_FORM_MESSAGES,
+} from "@/app/opinie/dodaj/_components/CombinedProductReviewForm";
+import { URL_PROMPT_MESSAGES } from "@/app/opinie/dodaj/_components/UrlPromptStep";
+import { SCRAPE_BANNER_MESSAGES } from "@/app/opinie/dodaj/_components/ScrapeNoticeBanner";
+import { PRODUCT_FIELDS_MESSAGES } from "@/app/opinie/dodaj/_components/ProductFields";
+import { REVIEW_FIELDS_MESSAGES } from "@/components/reviews/ReviewFields";
+import { RATING_INPUT_MESSAGES } from "@/components/reviews/RatingInput";
 import { productScrapeMetadata } from "@/serverActions/productScrapeMetadata";
 import { productWithReviewCreate } from "@/serverActions/productWithReviewCreate";
 import {
@@ -38,25 +46,43 @@ function createCombinedReviewDriver() {
   return {
     user,
     urlPromptHeading: () =>
-      screen.getByRole("heading", { name: /masz link do oferty produktu/i }),
-    urlInput: () => screen.getByRole("textbox", { name: /link do oferty produktu/i }),
-    scrapeButton: () => screen.getByRole("button", { name: /pobierz info/i }),
+      screen.getByRole("heading", {
+        name: COMBINED_FORM_MESSAGES.urlPromptTitle,
+      }),
+    urlInput: () =>
+      screen.getByRole("textbox", {
+        name: URL_PROMPT_MESSAGES.urlInputAriaLabel,
+      }),
+    scrapeButton: () =>
+      screen.getByRole("button", {
+        name: URL_PROMPT_MESSAGES.scrapeButton,
+      }),
     manualModeButton: () =>
-      screen.getByRole("button", { name: /dodaj produkt ręcznie/i }),
+      screen.getByRole("button", {
+        name: URL_PROMPT_MESSAGES.manualButton,
+      }),
     changeModeButton: () =>
-      screen.getByRole("button", { name: /zmień sposób wprowadzania/i }),
-    nameInput: () => screen.getByLabelText(/nazwa produktu/i),
-    productUrlInput: () => screen.getByLabelText(/adres url do produktu/i),
-    codeInput: () => screen.getByLabelText(/kod produktu \/ ean/i),
+      screen.getByRole("button", {
+        name: COMBINED_FORM_MESSAGES.backLabel,
+      }),
+    nameInput: () =>
+      screen.getByLabelText(PRODUCT_FIELDS_MESSAGES.nameLabel),
+    productUrlInput: () =>
+      screen.getByLabelText(PRODUCT_FIELDS_MESSAGES.productUrlLabel),
+    codeInput: () =>
+      screen.getByLabelText(PRODUCT_FIELDS_MESSAGES.codeLabel),
     ratingRadio: (rating: number) =>
       screen.getByRole("radio", {
-        name: new RegExp(`${rating} z 5 gwiazdek`, "i"),
+        name: RATING_INPUT_MESSAGES.starAriaLabel(rating),
       }),
-    reviewTextarea: () => screen.getByLabelText(/treść recenzji/i),
+    reviewTextarea: () =>
+      screen.getByLabelText(REVIEW_FIELDS_MESSAGES.descriptionLabel),
     submitButton: () =>
-      screen.getByRole("button", { name: /dodaj produkt i opinię/i }),
+      screen.getByRole("button", {
+        name: COMBINED_FORM_MESSAGES.submitLabel,
+      }),
     alert: () => screen.getByRole("alert"),
-    statusBadges: (label: RegExp | string) => screen.getAllByText(label),
+    statusBadges: (label: string) => screen.getAllByText(label),
   };
 }
 
@@ -89,7 +115,7 @@ describe("CombinedProductReviewForm - New Flow", () => {
 
     expect(driver.urlPromptHeading()).toBeInTheDocument();
     expect(
-      screen.getByText(/wklej go poniżej, to pójdzie szybko!/i),
+      screen.getByText(URL_PROMPT_MESSAGES.subtitle),
     ).toBeInTheDocument();
 
     expect(driver.urlInput()).toBeInTheDocument();
@@ -98,16 +124,22 @@ describe("CombinedProductReviewForm - New Flow", () => {
     expect(driver.scrapeButton()).toBeDisabled();
 
     expect(
-      screen.getByText(/nie masz linku do oferty\?/i),
+      screen.getByText(URL_PROMPT_MESSAGES.noLinkQuestion),
     ).toBeInTheDocument();
     expect(driver.manualModeButton()).toBeInTheDocument();
     expect(
-      screen.getByText(/wymagamy tylko nazwy, no i opinii/i),
+      screen.getByText(URL_PROMPT_MESSAGES.manualHint),
     ).toBeInTheDocument();
 
-    expect(screen.queryByLabelText(/nazwa produktu/i)).not.toBeInTheDocument();
-    expect(screen.queryByLabelText(/ocena/i)).not.toBeInTheDocument();
-    expect(screen.queryByLabelText(/treść recenzji/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText(PRODUCT_FIELDS_MESSAGES.nameLabel),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText(REVIEW_FIELDS_MESSAGES.rateLabel),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText(REVIEW_FIELDS_MESSAGES.descriptionLabel),
+    ).not.toBeInTheDocument();
   });
 
   it("navigates immediately to manual form without URL field when clicking 'Dodaj produkt ręcznie'", async () => {
@@ -122,11 +154,15 @@ describe("CombinedProductReviewForm - New Flow", () => {
     await driver.user.click(driver.manualModeButton());
 
     expect(driver.nameInput()).toBeInTheDocument();
-    expect(screen.getByText(/tryb ręczny/i)).toBeInTheDocument();
     expect(
-      screen.queryByLabelText(/adres url do produktu/i),
+      screen.getByText(COMBINED_FORM_MESSAGES.manualTitle),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByLabelText(PRODUCT_FIELDS_MESSAGES.productUrlLabel),
     ).not.toBeInTheDocument();
-    expect(screen.getByText(/twoja opinia/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(REVIEW_FIELDS_MESSAGES.legend),
+    ).toBeInTheDocument();
     expect(driver.reviewTextarea()).toBeInTheDocument();
   });
 
@@ -169,7 +205,7 @@ describe("CombinedProductReviewForm - New Flow", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(/pobrano wszystkie potrzebne dane produktu/i),
+        screen.getByText(SCRAPE_BANNER_MESSAGES.success.title),
       ).toBeInTheDocument();
     });
 
@@ -177,17 +213,19 @@ describe("CombinedProductReviewForm - New Flow", () => {
     expect(nameInput.value).toBe("Słuchawki Sony XM5");
 
     expect(
-      screen.queryByLabelText(/adres url do produktu/i),
+      screen.queryByLabelText(PRODUCT_FIELDS_MESSAGES.productUrlLabel),
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: /wyciągnij zdjęcie produktu/i }),
+      screen.queryByRole("button", {
+        name: PRODUCT_FIELDS_MESSAGES.scrapeButton,
+      }),
     ).not.toBeInTheDocument();
 
     expect(
-      screen.queryByLabelText(/adres url zdjęcia/i),
+      screen.queryByLabelText(PRODUCT_FIELDS_MESSAGES.imageUrlLabel),
     ).not.toBeInTheDocument();
     expect(
-      screen.getByText(/podgląd zdjęcia produktu/i),
+      screen.getByText(PRODUCT_FIELDS_MESSAGES.imagePreviewAlt),
     ).toBeInTheDocument();
 
     await driver.user.click(driver.ratingRadio(5));
@@ -229,7 +267,7 @@ describe("CombinedProductReviewForm - New Flow", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(/nie udało się pobrać danych/i),
+        screen.getByText(SCRAPE_BANNER_MESSAGES.failed.title),
       ).toBeInTheDocument();
     });
 
@@ -285,14 +323,22 @@ describe("CombinedProductReviewForm - New Flow", () => {
       expect(nameInput.value).toBe("Klawiatura Mechaniczna Pro");
     });
 
-    expect(driver.statusBadges(/uzupełnione/i).length).toBe(2);
-    expect(driver.statusBadges(/do uzupełnienia/i).length).toBe(2);
+    expect(
+      driver.statusBadges(PRODUCT_FIELDS_MESSAGES.statusFilled).length,
+    ).toBe(2);
+    expect(
+      driver.statusBadges(PRODUCT_FIELDS_MESSAGES.statusMissing).length,
+    ).toBe(2);
 
     await driver.user.type(driver.codeInput(), "5901234567890");
 
     await waitFor(() => {
-      expect(driver.statusBadges(/uzupełnione/i).length).toBe(3);
-      expect(driver.statusBadges(/do uzupełnienia/i).length).toBe(1);
+      expect(
+        driver.statusBadges(PRODUCT_FIELDS_MESSAGES.statusFilled).length,
+      ).toBe(3);
+      expect(
+        driver.statusBadges(PRODUCT_FIELDS_MESSAGES.statusMissing).length,
+      ).toBe(1);
     });
   });
 
@@ -377,7 +423,7 @@ describe("CombinedProductReviewForm - New Flow", () => {
     const driver = createCombinedReviewDriver();
 
     expect(
-      screen.getByText(/twoje dane zostały przywrócone po zalogowaniu/i),
+      screen.getByText(COMBINED_FORM_MESSAGES.draftRestored),
     ).toBeInTheDocument();
 
     const nameInput = driver.nameInput() as HTMLInputElement;
@@ -402,4 +448,3 @@ describe("CombinedProductReviewForm - New Flow", () => {
     expect(getReviewDraft()).toBeNull();
   });
 });
-

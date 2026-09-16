@@ -4,6 +4,9 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import Credentials from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/lib/db/prisma";
+import { AUTH_ERRORS } from "@/lib/auth/constants";
+
+export { AUTH_ERRORS };
 
 declare module "next-auth" {
   interface Session {
@@ -37,7 +40,7 @@ export const authOptions = {
         if (!user) return null;
 
         if (!user.password) {
-          throw new Error("OAuthAccountOnly");
+          throw new Error(AUTH_ERRORS.oauthAccountOnly);
         }
 
         const isValid = await bcrypt.compare(

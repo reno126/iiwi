@@ -3,6 +3,10 @@
 import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 
+export const SIGN_OUT_MESSAGES = {
+  button: "Wyloguj się",
+} as const;
+
 interface SignOutProps {
   className?: string;
 }
@@ -15,7 +19,7 @@ export function SignOut({ className }: SignOutProps) {
       className={className}
       onClick={() => signOut({ callbackUrl: "/login" })}
     >
-      Wyloguj się
+      {SIGN_OUT_MESSAGES.button}
     </Button>
   );
 }

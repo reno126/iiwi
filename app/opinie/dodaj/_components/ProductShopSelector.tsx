@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useCallback } from "react";
 import { useFormContext } from "react-hook-form";
-import { Store, Trash2, Check, RefreshCw, CircleAlert } from "lucide-react";
+import { Trash2, Check, RefreshCw, CircleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ComboboxResponsive } from "@/components/ui/combobox-responsive";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -11,6 +11,15 @@ import type { ProductCreateInput } from "@/schemas/product";
 import type { MatchedShopResult } from "@/lib/shops/findShopByUrl";
 import { ShopLogo } from "@/components/shops/ShopLogo";
 import { cn } from "cn";
+
+export const SHOP_SELECTOR_MESSAGES = {
+  helperText: "Jeśli nie znasz sklepu lub nie ma go na liście pozostaw pole puste.",
+  selectedShop: "Wybrany sklep",
+  selectFromList: "Wybierz z listy",
+  change: "Zmień",
+  deleteShopAriaLabel: "Usuń sklep",
+  deleteButton: "Usuń",
+} as const;
 
 interface ProductShopSelectorProps {
   selectedShop: MatchedShopResult | null;
@@ -123,7 +132,7 @@ export function ProductShopSelector({
               <span className="font-medium text-sm truncate">
                 {selectedShop.name || "Nieznany sklep"}
               </span>
-              <span className="text-xs text-muted-foreground">Wybrany sklep</span>
+              <span className="text-xs text-muted-foreground">{SHOP_SELECTOR_MESSAGES.selectedShop}</span>
             </div>
           </div>
 
@@ -146,7 +155,7 @@ export function ProductShopSelector({
               renderTrigger={() => (
                 <span className="flex items-center gap-1.5 text-xs font-normal">
                   <RefreshCw className="size-3" />
-                  Zmień
+                  {SHOP_SELECTOR_MESSAGES.change}
                 </span>
               )}
               triggerClassName="h-8 px-2.5 text-xs"
@@ -167,12 +176,12 @@ export function ProductShopSelector({
               type="button"
               variant="outline"
               size="sm"
-              aria-label="Usuń sklep"
+              aria-label={SHOP_SELECTOR_MESSAGES.deleteShopAriaLabel}
               disabled={disabled}
               onClick={handleClearShop}
                 className="sm:w-auto text-muted-foreground hover:text-destructive hover:border-destructive/40"
             >
-              <Trash2 className="size-3.5 mr-1" /> Usuń
+              <Trash2 className="size-3.5 mr-1" /> {SHOP_SELECTOR_MESSAGES.deleteButton}
             </Button>
           </div>
         </div>
@@ -195,24 +204,13 @@ export function ProductShopSelector({
               if (open) loadShopsIfNeeded();
             }}
             renderTrigger={() => (
-              <span className="text-xs font-medium">Wybierz z listy</span>
+              <span className="text-xs font-medium">{SHOP_SELECTOR_MESSAGES.selectFromList}</span>
             )}
             triggerClassName="h-10 sm:h-8 w-full sm:w-auto px-3 text-xs shrink-0 font-medium"
             renderItem={(item, isSelected) => (
               <div className="flex w-full items-center justify-between gap-2 py-1">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  {item.logo ? (
-                    <div className="flex size-6 shrink-0 items-center justify-center rounded border bg-white p-0.5">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={item.logo}
-                        alt={item.name || ""}
-                        className="max-h-full max-w-full object-contain"
-                      />
-                    </div>
-                  ) : (
-                    <Store className="size-4 text-muted-foreground shrink-0" />
-                  )}
+                  <ShopLogo logo={item.logo} name={item.name} size="sm" />
                   <span className="truncate">{item.name || "Sklep"}</span>
                 </div>
                 {isSelected && (
@@ -225,7 +223,7 @@ export function ProductShopSelector({
       )}
 
       <p className="text-xs text-muted-foreground mt-1">
-        Jeśli nie znasz sklepu lub nie ma go na liście pozostaw pole puste.
+        {SHOP_SELECTOR_MESSAGES.helperText}
       </p>
     </Field>
   );

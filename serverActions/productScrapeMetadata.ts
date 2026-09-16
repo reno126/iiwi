@@ -64,6 +64,13 @@ function buildScrapedFieldsList(
   return fields;
 }
 
+export const PRODUCT_SCRAPE_MESSAGES = {
+  defaultSecurityError:
+    "Podany adres URL jest niedozwolony ze względów bezpieczeństwa.",
+  scrapeFailedError:
+    "Nie udało się automatycznie pobrać danych z podanego linku. Możesz uzupełnić dane ręcznie.",
+} as const;
+
 export const productScrapeMetadata = createSafeActionClient({
   defaultValidationErrorsShape: "flattened",
 })
@@ -74,8 +81,7 @@ export const productScrapeMetadata = createSafeActionClient({
     const safetyCheck = validateUrlSafety(productUrl);
     if (!safetyCheck.isValid) {
       returnServerError(
-        safetyCheck.error ??
-          "Podany adres URL jest niedozwolony ze względów bezpieczeństwa.",
+        safetyCheck.error ?? PRODUCT_SCRAPE_MESSAGES.defaultSecurityError,
       );
     }
 
@@ -206,7 +212,5 @@ export const productScrapeMetadata = createSafeActionClient({
     }
 
     console.warn(`[Scraper] Scrape fully failed for: ${productUrl}`);
-    returnServerError(
-      "Nie udało się automatycznie pobrać danych z podanego linku. Możesz uzupełnić dane ręcznie.",
-    );
+    returnServerError(PRODUCT_SCRAPE_MESSAGES.scrapeFailedError);
   });

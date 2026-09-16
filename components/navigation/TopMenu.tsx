@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { DesktopNav, MenuItem, type NavItem } from "./DesktopNav";
 import { MobileNavDrawer } from "./MobileNavDrawer";
 
-const menuConfig: NavItem[] = [
+export const TOP_MENU_ITEMS: NavItem[] = [
   { title: "Strona główna", href: "/" },
   { title: "Produkty", href: "/produkty" },
   { title: "Panel", href: "/dashboard" },
@@ -23,11 +23,11 @@ export function TopMenu() {
 
   return (
     <nav aria-label="Główna nawigacja">
-      <DesktopNav items={menuConfig} user={user} />
+      <DesktopNav items={TOP_MENU_ITEMS} user={user} />
       <MobileNavDrawer
         isOpen={isOpen}
         onOpenChange={setIsOpen}
-        items={menuConfig}
+        items={TOP_MENU_ITEMS}
         user={user}
         userName={userName}
         userImage={userImage}

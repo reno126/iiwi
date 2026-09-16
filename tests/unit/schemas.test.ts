@@ -3,8 +3,8 @@ import { registerSchema, REGISTER_ERRORS } from "@/schemas/register";
 import { loginSchema, LOGIN_ERRORS } from "@/schemas/login";
 import { productCreateSchema, PRODUCT_ERRORS } from "@/schemas/product";
 import { reviewCreateSchema, REVIEW_ERRORS } from "@/schemas/review";
-import { productScrapeSchema } from "@/schemas/productScrape";
-import { shopSchema, shopCreateSchema } from "@/schemas/shop";
+import { productScrapeSchema, PRODUCT_SCRAPE_ERRORS } from "@/schemas/productScrape";
+import { shopSchema, shopCreateSchema, SHOP_ERRORS } from "@/schemas/shop";
 
 describe("schemas/register", () => {
   it("validates correct registration data", () => {
@@ -316,6 +316,10 @@ describe("schemas/productScrape", () => {
     };
     const result = productScrapeSchema.safeParse(invalid);
     expect(result.success).toBe(false);
+    if (!result.success) {
+      const urlError = result.error.format().productUrl?._errors;
+      expect(urlError).toContain(PRODUCT_SCRAPE_ERRORS.noWhitespace);
+    }
   });
 
   it("fails when productUrl is not a URL", () => {
@@ -324,6 +328,10 @@ describe("schemas/productScrape", () => {
     };
     const result = productScrapeSchema.safeParse(invalid);
     expect(result.success).toBe(false);
+    if (!result.success) {
+      const urlError = result.error.format().productUrl?._errors;
+      expect(urlError).toContain(PRODUCT_SCRAPE_ERRORS.invalidUrl);
+    }
   });
 
   it("fails when protocol is not http or https", () => {
@@ -332,6 +340,10 @@ describe("schemas/productScrape", () => {
     };
     const result = productScrapeSchema.safeParse(invalid);
     expect(result.success).toBe(false);
+    if (!result.success) {
+      const urlError = result.error.format().productUrl?._errors;
+      expect(urlError).toContain(PRODUCT_SCRAPE_ERRORS.invalidProtocol);
+    }
   });
 });
 
@@ -363,6 +375,10 @@ describe("schemas/shop", () => {
     };
     const result = shopSchema.safeParse(invalid);
     expect(result.success).toBe(false);
+    if (!result.success) {
+      const nameError = result.error.format().name?._errors;
+      expect(nameError).toContain(SHOP_ERRORS.nameMinLength);
+    }
   });
 
   it("fails when shop name exceeds 24 characters", () => {
@@ -372,6 +388,10 @@ describe("schemas/shop", () => {
     };
     const result = shopSchema.safeParse(invalid);
     expect(result.success).toBe(false);
+    if (!result.success) {
+      const nameError = result.error.format().name?._errors;
+      expect(nameError).toContain(SHOP_ERRORS.nameMaxLength);
+    }
   });
 
   it("validates shopCreateSchema correctly", () => {
@@ -389,11 +409,14 @@ describe("schemas/shop", () => {
       }).success
     ).toBe(true);
 
-    expect(
-      shopCreateSchema.safeParse({
-        name: "A",
-      }).success
-    ).toBe(false);
+    const invalidResult = shopCreateSchema.safeParse({
+      name: "A",
+    });
+    expect(invalidResult.success).toBe(false);
+    if (!invalidResult.success) {
+      const nameError = invalidResult.error.format().name?._errors;
+      expect(nameError).toContain(SHOP_ERRORS.nameMinLength);
+    }
   });
 });
 

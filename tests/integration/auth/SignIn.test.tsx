@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { SignIn } from "@/app/login/_components/SignIn";
+import { SignIn, SIGN_IN_MESSAGES } from "@/app/login/_components/SignIn";
 import { LOGIN_ERRORS } from "@/schemas/login";
+import { AUTH_ERRORS, AUTH_ERROR_MESSAGES } from "@/lib/auth/constants";
 import { signIn } from "next-auth/react";
 import {
   saveReviewDraft,
@@ -32,13 +33,13 @@ function createSignInDriver() {
   const user = userEvent.setup();
   return {
     user,
-    heading: () => screen.getByRole("heading", { name: /zaloguj się/i }),
-    emailInput: () => screen.getByRole("textbox", { name: /adres e-mail/i }),
-    passwordInput: () => screen.getByLabelText(/hasło/i),
-    submitButton: () => screen.getByRole("button", { name: /^zaloguj się$/i }),
+    heading: () => screen.getByRole("heading", { name: new RegExp(SIGN_IN_MESSAGES.title, "i") }),
+    emailInput: () => screen.getByRole("textbox", { name: new RegExp(SIGN_IN_MESSAGES.emailLabel, "i") }),
+    passwordInput: () => screen.getByLabelText(new RegExp(SIGN_IN_MESSAGES.passwordLabel, "i")),
+    submitButton: () => screen.getByRole("button", { name: new RegExp(`^${SIGN_IN_MESSAGES.submitButton}$`, "i") }),
     googleButton: () =>
-      screen.getByRole("button", { name: /zaloguj się przez google/i }),
-    registerLink: () => screen.getByRole("link", { name: /zarejestruj się/i }),
+      screen.getByRole("button", { name: new RegExp(SIGN_IN_MESSAGES.googleButton, "i") }),
+    registerLink: () => screen.getByRole("link", { name: new RegExp(SIGN_IN_MESSAGES.registerLink, "i") }),
     alert: () => screen.getByRole("alert"),
     async fillForm(data: { email?: string; password?: string }) {
       if (data.email) await user.type(this.emailInput(), data.email);
@@ -120,7 +121,7 @@ describe("app/login/_components/SignIn", () => {
 
   it("displays dedicated alert when account was registered via Google (OAuthAccountOnly)", async () => {
     vi.mocked(signIn).mockResolvedValueOnce({
-      error: "OAuthAccountOnly",
+      error: AUTH_ERRORS.oauthAccountOnly,
       status: 401,
       ok: false,
       url: null,
@@ -139,16 +140,14 @@ describe("app/login/_components/SignIn", () => {
     await waitFor(() => {
       expect(driver.alert()).toBeInTheDocument();
       expect(
-        screen.getByText(
-          "To konto zostało utworzone przez Google. Zaloguj się za pomocą przycisku Google poniżej.",
-        ),
+        screen.getByText(AUTH_ERROR_MESSAGES.oauthAccountOnly),
       ).toBeInTheDocument();
     });
   });
 
   it("displays generic credentials error alert on wrong password", async () => {
     vi.mocked(signIn).mockResolvedValueOnce({
-      error: "CredentialsSignin",
+      error: AUTH_ERRORS.credentialsSignin,
       status: 401,
       ok: false,
       url: null,
@@ -167,22 +166,20 @@ describe("app/login/_components/SignIn", () => {
     await waitFor(() => {
       expect(driver.alert()).toBeInTheDocument();
       expect(
-        screen.getByText("Nieprawidłowy adres e-mail lub hasło."),
+        screen.getByText(AUTH_ERROR_MESSAGES.credentialsSignin),
       ).toBeInTheDocument();
     });
   });
 
   it("displays alert when URL search param contains error", () => {
-    mockSearchParams = new URLSearchParams("error=OAuthAccountOnly");
+    mockSearchParams = new URLSearchParams(`error=${AUTH_ERRORS.oauthAccountOnly}`);
 
     render(<SignIn />);
     const driver = createSignInDriver();
 
     expect(driver.alert()).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "To konto zostało utworzone przez Google. Zaloguj się za pomocą przycisku Google poniżej.",
-      ),
+      screen.getByText(AUTH_ERROR_MESSAGES.oauthAccountOnly),
     ).toBeInTheDocument();
   });
 

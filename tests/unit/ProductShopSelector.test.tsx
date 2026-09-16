@@ -2,7 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useForm, FormProvider } from "react-hook-form";
-import { ProductShopSelector } from "@/app/opinie/dodaj/_components/ProductShopSelector";
+import {
+  ProductShopSelector,
+  SHOP_SELECTOR_MESSAGES,
+} from "@/app/opinie/dodaj/_components/ProductShopSelector";
 import { shopsGet } from "@/serverActions/shopsGet";
 import type { ProductCreateInput } from "@/schemas/product";
 import type { MatchedShopResult } from "@/lib/shops/findShopByUrl";
@@ -52,12 +55,10 @@ describe("app/opinie/dodaj/_components/ProductShopSelector", () => {
     render(<SelectorWrapper selectedShop={null} onSelectShop={onSelectShop} />);
 
     expect(
-      screen.getByText(
-        /Jeśli nie znasz sklepu lub nie ma go na liście pozostaw pole puste/i
-      )
+      screen.getByText(SHOP_SELECTOR_MESSAGES.helperText)
     ).toBeInTheDocument();
     expect(screen.getByRole("combobox")).toBeInTheDocument();
-    expect(screen.getByText("Wybierz z listy")).toBeInTheDocument();
+    expect(screen.getByText(SHOP_SELECTOR_MESSAGES.selectFromList)).toBeInTheDocument();
   });
 
   it("renders shop card with logo and name when selectedShop is provided", () => {
@@ -75,15 +76,15 @@ describe("app/opinie/dodaj/_components/ProductShopSelector", () => {
     );
 
     expect(screen.getByText("Media Expert")).toBeInTheDocument();
-    expect(screen.getByText("Wybrany sklep")).toBeInTheDocument();
+    expect(screen.getByText(SHOP_SELECTOR_MESSAGES.selectedShop)).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "Media Expert" })).toHaveAttribute(
       "src",
       "https://example.com/me.png"
     );
     expect(
-      screen.getByRole("button", { name: /Usuń sklep/i })
+      screen.getByRole("button", { name: SHOP_SELECTOR_MESSAGES.deleteShopAriaLabel })
     ).toBeInTheDocument();
-    expect(screen.getByText("Zmień")).toBeInTheDocument();
+    expect(screen.getByText(SHOP_SELECTOR_MESSAGES.change)).toBeInTheDocument();
   });
 
   it("clears shop when delete button is clicked", async () => {
@@ -102,7 +103,7 @@ describe("app/opinie/dodaj/_components/ProductShopSelector", () => {
       />
     );
 
-    const deleteBtn = screen.getByRole("button", { name: /Usuń sklep/i });
+    const deleteBtn = screen.getByRole("button", { name: SHOP_SELECTOR_MESSAGES.deleteShopAriaLabel });
     await user.click(deleteBtn);
 
     expect(onSelectShop).toHaveBeenCalledWith(null);

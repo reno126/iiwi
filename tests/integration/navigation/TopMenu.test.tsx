@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { TopMenu } from "@/components/navigation/TopMenu";
+import { TopMenu, TOP_MENU_ITEMS } from "@/components/navigation/TopMenu";
+import { NAV_AUTH_MESSAGES } from "@/components/navigation/DesktopNav";
+import { SIGN_OUT_MESSAGES } from "@/components/auth/SignOut";
 import { useSession } from "next-auth/react";
 
 vi.mock("next-auth/react", () => ({
@@ -22,16 +24,11 @@ describe("components/navigation/TopMenu", () => {
 
     render(<TopMenu />);
 
-    expect(
-      screen.getByRole("link", { name: /strona główna/i }),
-    ).toHaveAttribute("href", "/");
-    expect(screen.getByRole("link", { name: /panel/i })).toHaveAttribute(
-      "href",
-      "/dashboard",
-    );
-    expect(
-      screen.getByRole("link", { name: /dodaj opinię/i }),
-    ).toHaveAttribute("href", "/opinie/dodaj");
+    TOP_MENU_ITEMS.forEach((item) => {
+      expect(
+        screen.getByRole("link", { name: new RegExp(`^${item.title}$`, "i") }),
+      ).toHaveAttribute("href", item.href);
+    });
   });
 
   it("renders login and register links when user is unauthenticated", () => {
@@ -43,23 +40,23 @@ describe("components/navigation/TopMenu", () => {
 
     render(<TopMenu />);
 
-    expect(screen.getByRole("link", { name: /zaloguj się/i })).toHaveAttribute(
-      "href",
-      "/login",
-    );
     expect(
-      screen.getByRole("link", { name: /zarejestruj się/i }),
+      screen.getByRole("link", { name: new RegExp(NAV_AUTH_MESSAGES.loginLink, "i") }),
+    ).toHaveAttribute("href", "/login");
+    expect(
+      screen.getByRole("link", { name: new RegExp(NAV_AUTH_MESSAGES.registerLink, "i") }),
     ).toHaveAttribute("href", "/register");
-    expect(screen.queryByText(/zalogowano jako:/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(new RegExp(NAV_AUTH_MESSAGES.loggedInAs, "i"))).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: /wyloguj się/i }),
+      screen.queryByRole("button", { name: new RegExp(SIGN_OUT_MESSAGES.button, "i") }),
     ).not.toBeInTheDocument();
   });
 
   it("renders user email and SignOut button when user is authenticated", () => {
+    const userEmail = "jan.kowalski@example.com";
     vi.mocked(useSession).mockReturnValue({
       data: {
-        user: { email: "jan.kowalski@example.com", name: "Jan" },
+        user: { email: userEmail, name: "Jan" },
         expires: "9999-12-31",
       },
       status: "authenticated",
@@ -68,17 +65,17 @@ describe("components/navigation/TopMenu", () => {
 
     render(<TopMenu />);
 
-    expect(screen.getByText(/zalogowano jako:/i)).toBeInTheDocument();
-    expect(screen.getByText("jan.kowalski@example.com")).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(NAV_AUTH_MESSAGES.loggedInAs, "i"))).toBeInTheDocument();
+    expect(screen.getByText(userEmail)).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /wyloguj się/i }),
+      screen.getByRole("button", { name: new RegExp(SIGN_OUT_MESSAGES.button, "i") }),
     ).toBeInTheDocument();
 
     expect(
-      screen.queryByRole("link", { name: /zaloguj się/i }),
+      screen.queryByRole("link", { name: new RegExp(NAV_AUTH_MESSAGES.loginLink, "i") }),
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: /zarejestruj się/i }),
+      screen.queryByRole("link", { name: new RegExp(NAV_AUTH_MESSAGES.registerLink, "i") }),
     ).not.toBeInTheDocument();
   });
 });

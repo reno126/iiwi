@@ -21,6 +21,22 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
+export const REGISTER_MESSAGES = {
+  title: "Utwórz konto",
+  description: "Wprowadź swoje dane, aby utworzyć nowe konto",
+  footerPrompt: "Masz już konto?",
+  loginLink: "Zaloguj się",
+  nameLabel: "Imię",
+  namePlaceholder: "Jan Kowalski",
+  emailLabel: "Adres e-mail",
+  emailPlaceholder: "twoj@email.com",
+  passwordLabel: "Hasło",
+  passwordPlaceholder: "••••••••",
+  submitButton: "Zarejestruj się",
+  submittingButton: "Tworzenie konta...",
+  defaultError: "Wystąpił błąd podczas rejestracji",
+} as const;
+
 interface RegisterProps {
   className?: string;
 }
@@ -65,7 +81,7 @@ export function Register({ className }: RegisterProps) {
     if (!response.ok) {
       const resData = await response.json().catch(() => ({}));
       setError("root", {
-        message: resData.error || "Wystąpił błąd podczas rejestracji",
+        message: resData.error || REGISTER_MESSAGES.defaultError,
       });
       return;
     }
@@ -90,17 +106,17 @@ export function Register({ className }: RegisterProps) {
 
   return (
     <AuthCard
-      title="Utwórz konto"
-      description="Wprowadź swoje dane, aby utworzyć nowe konto"
+      title={REGISTER_MESSAGES.title}
+      description={REGISTER_MESSAGES.description}
       className={className}
       footer={
         <p className="text-center text-sm text-muted-foreground">
-          Masz już konto?{" "}
+          {REGISTER_MESSAGES.footerPrompt}{" "}
           <Link
             href={loginHref}
             className="font-medium text-foreground underline underline-offset-4 hover:text-primary"
           >
-            Zaloguj się
+            {REGISTER_MESSAGES.loginLink}
           </Link>
         </p>
       }
@@ -116,12 +132,12 @@ export function Register({ className }: RegisterProps) {
         <FieldGroup>
           <Field data-invalid={!!errors.name}>
             <FieldLabel htmlFor="name">
-              Imię<span className="text-destructive">*</span>
+              {REGISTER_MESSAGES.nameLabel}<span className="text-destructive">*</span>
             </FieldLabel>
             <Input
               id="name"
               sizeVariant="touch"
-              placeholder="Jan Kowalski"
+              placeholder={REGISTER_MESSAGES.namePlaceholder}
               autoComplete="name"
               aria-invalid={!!errors.name}
               disabled={isSubmitting}
@@ -132,13 +148,13 @@ export function Register({ className }: RegisterProps) {
 
           <Field data-invalid={!!errors.email}>
             <FieldLabel htmlFor="email">
-              Adres e-mail <span className="text-destructive">*</span>
+              {REGISTER_MESSAGES.emailLabel} <span className="text-destructive">*</span>
             </FieldLabel>
             <Input
               id="email"
               type="email"
               sizeVariant="touch"
-              placeholder="twoj@email.com"
+              placeholder={REGISTER_MESSAGES.emailPlaceholder}
               autoComplete="email"
               aria-invalid={!!errors.email}
               disabled={isSubmitting}
@@ -149,13 +165,13 @@ export function Register({ className }: RegisterProps) {
 
           <Field data-invalid={!!errors.password}>
             <FieldLabel htmlFor="password">
-              Hasło <span className="text-destructive">*</span>
+              {REGISTER_MESSAGES.passwordLabel} <span className="text-destructive">*</span>
             </FieldLabel>
             <Input
               id="password"
               type="password"
               sizeVariant="touch"
-              placeholder="••••••••"
+              placeholder={REGISTER_MESSAGES.passwordPlaceholder}
               autoComplete="new-password"
               aria-invalid={!!errors.password}
               disabled={isSubmitting}
@@ -167,7 +183,7 @@ export function Register({ className }: RegisterProps) {
 
         <Button type="submit" size="touch" disabled={isSubmitting} className="w-full">
           {isSubmitting && <Spinner className="mr-2" />}
-          {isSubmitting ? "Tworzenie konta..." : "Zarejestruj się"}
+          {isSubmitting ? REGISTER_MESSAGES.submittingButton : REGISTER_MESSAGES.submitButton}
         </Button>
       </form>
     </AuthCard>

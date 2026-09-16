@@ -36,6 +36,21 @@ import {
 } from "./ScrapeNoticeBanner";
 import type { MatchedShopResult } from "@/lib/shops/findShopByUrl";
 
+export const COMBINED_FORM_MESSAGES = {
+  urlPromptTitle: "Masz link do oferty produktu?",
+  manualTitle: "Tryb ręczny",
+  scrapedTitle: "Zweryfikuj pobrane dane",
+  draftRestored:
+    "Twoje dane zostały przywrócone po zalogowaniu. Sprawdź je i dodaj opinię.",
+  defaultScrapeError:
+    "Nie udało się automatycznie pobrać danych z podanego linku.",
+  unexpectedScrapeError:
+    "Wystąpił nieoczekiwany błąd podczas pobierania danych.",
+  backLabel: "Zmień sposób wprowadzania",
+  cancelLabel: "Anuluj",
+  submitLabel: "Dodaj produkt i opinię",
+} as const;
+
 interface CombinedProductReviewFormProps {
   onCancel: () => void;
   onSuccess: (productId: string) => void;
@@ -160,7 +175,7 @@ export function CombinedProductReviewForm({
           res?.serverError ||
           res?.validationErrors?.fieldErrors?.productUrl?.[0] ||
           res?.validationErrors?.formErrors?.[0] ||
-          "Nie udało się automatycznie pobrać danych z podanego linku.";
+          COMBINED_FORM_MESSAGES.defaultScrapeError;
 
         setPhase({
           type: "ACTIVE_FORM",
@@ -174,7 +189,7 @@ export function CombinedProductReviewForm({
           scrapeError:
             err instanceof Error
               ? err.message
-              : "Wystąpił nieoczekiwany błąd podczas pobierania danych.",
+              : COMBINED_FORM_MESSAGES.unexpectedScrapeError,
         });
       } finally {
         clearTimeout(timer);
@@ -274,12 +289,11 @@ export function CombinedProductReviewForm({
     <Card className="border-none shadow-none ring-0 md:border md:shadow-xs bg-transparent md:bg-card overflow-visible">
       <CardHeader className="px-0 md:px-6">
         <CardTitle className="text-xl">
-          {" "}
           {phase.type === "URL_PROMPT"
-            ? "Masz link do oferty produktu?"
+            ? COMBINED_FORM_MESSAGES.urlPromptTitle
             : phase.mode === "manual"
-              ? "Tryb ręczny"
-              : "Zweryfikuj pobrane dane"}
+              ? COMBINED_FORM_MESSAGES.manualTitle
+              : COMBINED_FORM_MESSAGES.scrapedTitle}
         </CardTitle>
         <CardDescription></CardDescription>
       </CardHeader>
@@ -303,7 +317,7 @@ export function CombinedProductReviewForm({
                 <Alert variant="info">
                   <CheckCircle2 className="size-4" />
                   <AlertDescription>
-                    Twoje dane zostały przywrócone po zalogowaniu. Sprawdź je i dodaj opinię.
+                    {COMBINED_FORM_MESSAGES.draftRestored}
                   </AlertDescription>
                 </Alert>
               )}
@@ -341,10 +355,10 @@ export function CombinedProductReviewForm({
                   clearReviewDraft();
                   setPhase({ type: "URL_PROMPT" });
                 }}
-                backLabel="Zmień sposób wprowadzania"
+                backLabel={COMBINED_FORM_MESSAGES.backLabel}
                 onCancel={handleCancel}
-                cancelLabel="Anuluj"
-                submitLabel="Dodaj produkt i opinię"
+                cancelLabel={COMBINED_FORM_MESSAGES.cancelLabel}
+                submitLabel={COMBINED_FORM_MESSAGES.submitLabel}
                 isSubmitting={isSubmitting}
               />
             </form>

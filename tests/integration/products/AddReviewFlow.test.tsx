@@ -1,6 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { AddReviewFlow } from "@/app/opinie/dodaj/_components/AddReviewFlow";
+import {
+  AddReviewFlow,
+  ADD_REVIEW_FLOW_MESSAGES,
+} from "@/app/opinie/dodaj/_components/AddReviewFlow";
+import { COMBINED_FORM_MESSAGES } from "@/app/opinie/dodaj/_components/CombinedProductReviewForm";
+import { REVIEW_FORM_MESSAGES } from "@/components/reviews/ReviewForm";
 import {
   saveReviewDraft,
   clearReviewDraft,
@@ -38,12 +43,12 @@ describe("AddReviewFlow - Rehydration", () => {
   it("renders SEARCHING mode by default when no draft exists", () => {
     render(<AddReviewFlow />);
     expect(
-      screen.getByText(
-        /wybierz produkt z bazy lub dodaj nowy, aby podzielić się swoją opinią/i,
-      ),
+      screen.getByText(ADD_REVIEW_FLOW_MESSAGES.searchingDescription),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /dodaj nowy produkt/i }),
+      screen.getByRole("button", {
+        name: ADD_REVIEW_FLOW_MESSAGES.addNewProductButton,
+      }),
     ).toBeInTheDocument();
   });
 
@@ -60,12 +65,10 @@ describe("AddReviewFlow - Rehydration", () => {
     render(<AddReviewFlow />);
 
     expect(
-      screen.queryByText(
-        /wybierz produkt z bazy lub dodaj nowy, aby podzielić się swoją opinią/i,
-      ),
+      screen.queryByText(ADD_REVIEW_FLOW_MESSAGES.searchingDescription),
     ).not.toBeInTheDocument();
     expect(
-      screen.getByText(/twoje dane zostały przywrócone po zalogowaniu/i),
+      screen.getByText(COMBINED_FORM_MESSAGES.draftRestored),
     ).toBeInTheDocument();
   });
 
@@ -97,12 +100,14 @@ describe("AddReviewFlow - Rehydration", () => {
 
     render(<AddReviewFlow />);
 
-    expect(screen.getByText(/existing laptop/i)).toBeInTheDocument();
+    expect(screen.getByText("Existing Laptop")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: /napisz swoją opinię/i }),
+      screen.getByRole("heading", {
+        name: ADD_REVIEW_FLOW_MESSAGES.formHeading,
+      }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/twoja opinia została przywrócona po zalogowaniu/i),
+      screen.getByText(REVIEW_FORM_MESSAGES.draftRestored),
     ).toBeInTheDocument();
   });
 });

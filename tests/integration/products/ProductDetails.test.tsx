@@ -1,10 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ProductDetails } from "@/app/produkty/[id]/_components/ProductDetails";
+import {
+  ProductDetails,
+  PRODUCT_DETAILS_MESSAGES,
+} from "@/app/produkty/[id]/_components/ProductDetails";
 import type { ProductWithReviews } from "@/serverActions/productGetById";
 import { reviewCreate } from "@/serverActions/reviewCreate";
 import { REVIEW_ERRORS } from "@/schemas/review";
+import { REVIEW_FORM_MESSAGES } from "@/components/reviews/ReviewForm";
+import { REVIEW_FIELDS_MESSAGES } from "@/components/reviews/ReviewFields";
+import { RATING_INPUT_MESSAGES } from "@/components/reviews/RatingInput";
 import { useRouter } from "next/navigation";
 import {
   saveReviewDraft,
@@ -101,24 +107,27 @@ function createProductDetailsDriver() {
   const user = userEvent.setup();
   return {
     user,
-    heading: (name: RegExp | string) => screen.getByRole("heading", { name }),
-    queryHeading: (name: RegExp | string) =>
+    heading: (name: string | ((name: string) => boolean)) =>
+      screen.getByRole("heading", { name }),
+    queryHeading: (name: string | ((name: string) => boolean)) =>
       screen.queryByRole("heading", { name }),
     addReviewButtons: () =>
       screen.getAllByRole("button", {
-        name: /napisz opinię dla tego produktu/i,
+        name: PRODUCT_DETAILS_MESSAGES.addReviewButton,
       }),
-    cancelButton: () => screen.getByRole("button", { name: /anuluj/i }),
+    cancelButton: () =>
+      screen.getByRole("button", { name: REVIEW_FORM_MESSAGES.cancelButton }),
     publishButton: () =>
-      screen.getByRole("button", { name: /opublikuj opinię/i }),
+      screen.getByRole("button", { name: REVIEW_FORM_MESSAGES.submitButton }),
     ratingRadio: (rating: number) =>
       screen.getByRole("radio", {
-        name: new RegExp(`${rating} z 5 gwiazdek`, "i"),
+        name: RATING_INPUT_MESSAGES.starAriaLabel(rating),
       }),
-    descriptionInput: () => screen.getByLabelText(/treść recenzji/i),
+    descriptionInput: () =>
+      screen.getByLabelText(REVIEW_FIELDS_MESSAGES.descriptionLabel),
     firstReviewButton: () =>
       screen.getByRole("button", {
-        name: /bądź pierwszą osobą, która doda recenzję/i,
+        name: PRODUCT_DETAILS_MESSAGES.firstReviewButton,
       }),
   };
 }
@@ -142,13 +151,13 @@ describe("app/produkty/[id]/_components/ProductDetails", () => {
     render(<ProductDetails product={mockProduct} />);
     const driver = createProductDetailsDriver();
 
-    expect(
-      driver.heading(/super słuchawki/i),
-    ).toBeInTheDocument();
+    expect(driver.heading(mockProduct.name)).toBeInTheDocument();
     expect(screen.getAllByText("SKU-999")[0]).toBeInTheDocument();
 
     expect(
-      driver.heading(/opinie użytkowników/i),
+      driver.heading((name) =>
+        name.startsWith(PRODUCT_DETAILS_MESSAGES.reviewsHeading),
+      ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -160,7 +169,7 @@ describe("app/produkty/[id]/_components/ProductDetails", () => {
     ).toBeInTheDocument();
 
     expect(
-      driver.queryHeading(/napisz swoją opinię/i),
+      driver.queryHeading(PRODUCT_DETAILS_MESSAGES.formHeading),
     ).not.toBeInTheDocument();
 
     const addReviewBtns = driver.addReviewButtons();
@@ -177,13 +186,15 @@ describe("app/produkty/[id]/_components/ProductDetails", () => {
     await driver.user.click(topAddReviewBtn);
 
     expect(
-      driver.heading(/napisz swoją opinię/i),
+      driver.heading(PRODUCT_DETAILS_MESSAGES.formHeading),
     ).toBeInTheDocument();
     expect(driver.publishButton()).toBeInTheDocument();
     expect(driver.cancelButton()).toBeInTheDocument();
 
     expect(
-      driver.queryHeading(/opinie użytkowników/i),
+      driver.queryHeading((name) =>
+        name.startsWith(PRODUCT_DETAILS_MESSAGES.reviewsHeading),
+      ),
     ).not.toBeInTheDocument();
     expect(
       screen.queryByText(
@@ -205,16 +216,18 @@ describe("app/produkty/[id]/_components/ProductDetails", () => {
     const [topAddReviewBtn] = driver.addReviewButtons();
     await driver.user.click(topAddReviewBtn);
     expect(
-      driver.heading(/napisz swoją opinię/i),
+      driver.heading(PRODUCT_DETAILS_MESSAGES.formHeading),
     ).toBeInTheDocument();
 
     await driver.user.click(driver.cancelButton());
 
     expect(
-      driver.queryHeading(/napisz swoją opinię/i),
+      driver.queryHeading(PRODUCT_DETAILS_MESSAGES.formHeading),
     ).not.toBeInTheDocument();
     expect(
-      driver.heading(/opinie użytkowników/i),
+      driver.heading((name) =>
+        name.startsWith(PRODUCT_DETAILS_MESSAGES.reviewsHeading),
+      ),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -267,10 +280,12 @@ describe("app/produkty/[id]/_components/ProductDetails", () => {
     await waitFor(() => {
       expect(mockRefresh).toHaveBeenCalledTimes(1);
       expect(
-        driver.queryHeading(/napisz swoją opinię/i),
+        driver.queryHeading(PRODUCT_DETAILS_MESSAGES.formHeading),
       ).not.toBeInTheDocument();
       expect(
-        driver.heading(/opinie użytkowników/i),
+        driver.heading((name) =>
+          name.startsWith(PRODUCT_DETAILS_MESSAGES.reviewsHeading),
+        ),
       ).toBeInTheDocument();
     });
   });
@@ -284,10 +299,12 @@ describe("app/produkty/[id]/_components/ProductDetails", () => {
     await driver.user.click(addReviewBtns[1]);
 
     expect(
-      driver.heading(/napisz swoją opinię/i),
+      driver.heading(PRODUCT_DETAILS_MESSAGES.formHeading),
     ).toBeInTheDocument();
     expect(
-      driver.queryHeading(/opinie użytkowników/i),
+      driver.queryHeading((name) =>
+        name.startsWith(PRODUCT_DETAILS_MESSAGES.reviewsHeading),
+      ),
     ).not.toBeInTheDocument();
   });
 
@@ -296,21 +313,21 @@ describe("app/produkty/[id]/_components/ProductDetails", () => {
     const driver = createProductDetailsDriver();
 
     expect(
-      screen.getByText(/brak opinii dla tego produktu/i),
+      screen.getByText(PRODUCT_DETAILS_MESSAGES.emptyTitle),
     ).toBeInTheDocument();
 
     await driver.user.click(driver.firstReviewButton());
 
     expect(
-      driver.heading(/napisz swoją opinię/i),
+      driver.heading(PRODUCT_DETAILS_MESSAGES.formHeading),
     ).toBeInTheDocument();
     expect(
-      screen.queryByText(/brak opinii dla tego produktu/i),
+      screen.queryByText(PRODUCT_DETAILS_MESSAGES.emptyTitle),
     ).not.toBeInTheDocument();
 
     await driver.user.click(driver.cancelButton());
     expect(
-      screen.getByText(/brak opinii dla tego produktu/i),
+      screen.getByText(PRODUCT_DETAILS_MESSAGES.emptyTitle),
     ).toBeInTheDocument();
   });
 
@@ -352,10 +369,10 @@ describe("app/produkty/[id]/_components/ProductDetails", () => {
     const driver = createProductDetailsDriver();
 
     expect(
-      driver.heading(/napisz swoją opinię/i),
+      driver.heading(PRODUCT_DETAILS_MESSAGES.formHeading),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/twoja opinia została przywrócona po zalogowaniu/i),
+      screen.getByText(REVIEW_FORM_MESSAGES.draftRestored),
     ).toBeInTheDocument();
     expect(
       screen.getByDisplayValue("Zapamiętana wersja robocza opinii"),

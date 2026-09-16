@@ -6,6 +6,14 @@ export const REGISTER_ERRORS = {
   passwordMinLength: "Hasło musi mieć co najmniej 6 znaków",
 } as const;
 
+export const REGISTER_API_MESSAGES = {
+  invalidData: "Nieprawidłowe dane",
+  emailTaken: "Ten adres e-mail jest już zajęty. Zaloguj się na swoje konto.",
+  oauthAccountLinked: (providers: string) =>
+    `Konto z tym adresem e-mail już istnieje i jest połączone z ${providers}. Zaloguj się przez ${providers}.`,
+  userCreated: "Użytkownik został utworzony",
+} as const;
+
 export const registerSchema = z.object({
   name: z.string().min(2, {
     message: REGISTER_ERRORS.nameMinLength,

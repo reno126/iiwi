@@ -12,6 +12,7 @@ vi.mock("@/lib/db/prisma", () => ({
 import { prisma } from "@/lib/db/prisma";
 import bcrypt from "bcryptjs";
 import { POST } from "@/app/api/register/route";
+import { REGISTER_API_MESSAGES } from "@/schemas/register";
 
 interface MockAccount {
   id: string;
@@ -62,7 +63,7 @@ describe("app/api/register POST route handler", () => {
     expect(res.status).toBe(400);
 
     const json = await res.json();
-    expect(json).toEqual({ error: "Nieprawidłowe dane" });
+    expect(json).toEqual({ error: REGISTER_API_MESSAGES.invalidData });
     expect(prisma.user.findUnique).not.toHaveBeenCalled();
     expect(prisma.user.create).not.toHaveBeenCalled();
   });
@@ -109,7 +110,7 @@ describe("app/api/register POST route handler", () => {
     expect(res.status).toBe(409);
 
     const json = await res.json();
-    expect(json.error).toContain("jest połączone z Google. Zaloguj się przez Google.");
+    expect(json.error).toBe(REGISTER_API_MESSAGES.oauthAccountLinked("Google"));
     expect(prisma.user.create).not.toHaveBeenCalled();
   });
 
@@ -140,9 +141,7 @@ describe("app/api/register POST route handler", () => {
     expect(res.status).toBe(409);
 
     const json = await res.json();
-    expect(json.error).toBe(
-      "Ten adres e-mail jest już zajęty. Zaloguj się na swoje konto.",
-    );
+    expect(json.error).toBe(REGISTER_API_MESSAGES.emailTaken);
     expect(prisma.user.create).not.toHaveBeenCalled();
   });
 
@@ -175,7 +174,7 @@ describe("app/api/register POST route handler", () => {
     expect(res.status).toBe(201);
 
     const json = await res.json();
-    expect(json).toEqual({ success: "Użytkownik został utworzony" });
+    expect(json).toEqual({ success: REGISTER_API_MESSAGES.userCreated });
 
     expect(hashSpy).toHaveBeenCalledWith("tajneHaslo123", 12);
 

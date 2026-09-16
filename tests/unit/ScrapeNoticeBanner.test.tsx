@@ -1,6 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { ScrapeNoticeBanner } from "@/app/opinie/dodaj/_components/ScrapeNoticeBanner";
+import {
+  ScrapeNoticeBanner,
+  SCRAPE_BANNER_MESSAGES,
+} from "@/app/opinie/dodaj/_components/ScrapeNoticeBanner";
 
 describe("ScrapeNoticeBanner", () => {
   it("renders Case 1 (all data scraped): static success banner", () => {
@@ -12,12 +15,10 @@ describe("ScrapeNoticeBanner", () => {
     );
 
     const alert = screen.getByRole("alert");
-    expect(alert).toHaveTextContent(/pobrano wszystkie potrzebne dane produktu/i);
-    expect(alert).toHaveTextContent(
-      /poniższe dane możesz sprawdzić i dowolnie edytować przed dodaniem opinii/i
-    );
-    expect(alert).not.toHaveTextContent(/nie udało się pobrać danych/i);
-    expect(alert).not.toHaveTextContent(/udało się pobrać część danych/i);
+    expect(alert).toHaveTextContent(SCRAPE_BANNER_MESSAGES.success.title);
+    expect(alert).toHaveTextContent(SCRAPE_BANNER_MESSAGES.success.description);
+    expect(alert).not.toHaveTextContent(SCRAPE_BANNER_MESSAGES.failed.title);
+    expect(alert).not.toHaveTextContent(SCRAPE_BANNER_MESSAGES.partial.title);
   });
 
   it("renders Case 1 when name, imageUrl, and shop are scraped", () => {
@@ -29,10 +30,8 @@ describe("ScrapeNoticeBanner", () => {
     );
 
     const alert = screen.getByRole("alert");
-    expect(alert).toHaveTextContent(/udało się pobrać część danych/i);
-    expect(alert).toHaveTextContent(
-      /uzupełnij brakujące dane i dodaj swoją opinię/i
-    );
+    expect(alert).toHaveTextContent(SCRAPE_BANNER_MESSAGES.partial.title);
+    expect(alert).toHaveTextContent(SCRAPE_BANNER_MESSAGES.partial.description);
   });
 
   it("renders Case 2 (no data scraped - scraped_failed mode): error banner", () => {
@@ -44,10 +43,8 @@ describe("ScrapeNoticeBanner", () => {
     );
 
     const alert = screen.getByRole("alert");
-    expect(alert).toHaveTextContent(/nie udało się pobrać danych/i);
-    expect(alert).toHaveTextContent(
-      /uzupełnij brakujące dane i dodaj swoją opinię/i
-    );
+    expect(alert).toHaveTextContent(SCRAPE_BANNER_MESSAGES.failed.title);
+    expect(alert).toHaveTextContent(SCRAPE_BANNER_MESSAGES.failed.description);
   });
 
   it("renders Case 2 (no data scraped - empty scrapedFields): error banner", () => {
@@ -59,10 +56,8 @@ describe("ScrapeNoticeBanner", () => {
     );
 
     const alert = screen.getByRole("alert");
-    expect(alert).toHaveTextContent(/nie udało się pobrać danych/i);
-    expect(alert).toHaveTextContent(
-      /uzupełnij brakujące dane i dodaj swoją opinię/i
-    );
+    expect(alert).toHaveTextContent(SCRAPE_BANNER_MESSAGES.failed.title);
+    expect(alert).toHaveTextContent(SCRAPE_BANNER_MESSAGES.failed.description);
   });
 
   it("renders Case 3 (partial data - only name scraped): warning banner", () => {
@@ -74,10 +69,8 @@ describe("ScrapeNoticeBanner", () => {
     );
 
     const alert = screen.getByRole("alert");
-    expect(alert).toHaveTextContent(/udało się pobrać część danych/i);
-    expect(alert).toHaveTextContent(
-      /uzupełnij brakujące dane i dodaj swoją opinię/i
-    );
+    expect(alert).toHaveTextContent(SCRAPE_BANNER_MESSAGES.partial.title);
+    expect(alert).toHaveTextContent(SCRAPE_BANNER_MESSAGES.partial.description);
   });
 
   it("renders Case 3 (partial data - only imageUrl scraped): warning banner", () => {
@@ -89,10 +82,8 @@ describe("ScrapeNoticeBanner", () => {
     );
 
     const alert = screen.getByRole("alert");
-    expect(alert).toHaveTextContent(/udało się pobrać część danych/i);
-    expect(alert).toHaveTextContent(
-      /uzupełnij brakujące dane i dodaj swoją opinię/i
-    );
+    expect(alert).toHaveTextContent(SCRAPE_BANNER_MESSAGES.partial.title);
+    expect(alert).toHaveTextContent(SCRAPE_BANNER_MESSAGES.partial.description);
   });
 
   it("renders Case 3 (partial data - name and shop scraped, but no image): warning banner", () => {
@@ -104,9 +95,7 @@ describe("ScrapeNoticeBanner", () => {
     );
 
     const alert = screen.getByRole("alert");
-    expect(alert).toHaveTextContent(/udało się pobrać część danych/i);
-    expect(alert).toHaveTextContent(
-      /uzupełnij brakujące dane i dodaj swoją opinię/i
-    );
+    expect(alert).toHaveTextContent(SCRAPE_BANNER_MESSAGES.partial.title);
+    expect(alert).toHaveTextContent(SCRAPE_BANNER_MESSAGES.partial.description);
   });
 });

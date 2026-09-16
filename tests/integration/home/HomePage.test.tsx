@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, act } from "@testing-library/react";
-import HomePage from "@/app/page";
+import HomePage, { HOME_MESSAGES } from "@/app/page";
 import * as recentReviewsGetModule from "@/serverActions/recentReviewsGet";
 import * as shopsGetModule from "@/serverActions/shopsGet";
 
@@ -68,17 +68,17 @@ describe("HomePage", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: /tylko tutaj znajdziesz prawdziwe, całkowicie niezależne opinie o produktach/i,
+        name: new RegExp(HOME_MESSAGES.heroHeading, "i"),
       }),
     ).toBeInTheDocument();
 
     const viewAllLink = screen.getByRole("link", {
-      name: /zobacz wszystkie opinie/i,
+      name: new RegExp(HOME_MESSAGES.viewAllReviewsLink, "i"),
     });
     expect(viewAllLink).toHaveAttribute("href", "/produkty");
 
     const addReviewLinks = screen.getAllByRole("link", {
-      name: /dodaj opinię/i,
+      name: new RegExp(HOME_MESSAGES.addReviewLink, "i"),
     });
     expect(addReviewLinks.length).toBeGreaterThanOrEqual(2);
     addReviewLinks.forEach((link) => {
@@ -86,7 +86,7 @@ describe("HomePage", () => {
     });
 
     expect(
-      screen.getByRole("heading", { name: /ostatnio dodane opinie/i }),
+      screen.getByRole("heading", { name: new RegExp(HOME_MESSAGES.recentReviewsHeading, "i") }),
     ).toBeInTheDocument();
     expect(await screen.findByText(/testowy produkt 1/i)).toBeInTheDocument();
     expect(await screen.findByText(/testowy produkt 2/i)).toBeInTheDocument();
@@ -99,10 +99,10 @@ describe("HomePage", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: /opinie z dowolnych sklepów stacjonarnych i internetowych/i,
+        name: new RegExp(HOME_MESSAGES.shopsHeading, "i"),
       }),
     ).toBeInTheDocument();
-    expect(await screen.findByText(/popularne sklepy/i)).toBeInTheDocument();
+    expect(await screen.findByText(new RegExp(HOME_MESSAGES.popularShopsSubheading, "i"))).toBeInTheDocument();
 
     expect((await screen.findAllByText(/media expert/i)).length).toBeGreaterThanOrEqual(1);
     expect((await screen.findAllByText(/allegro/i)).length).toBeGreaterThanOrEqual(1);

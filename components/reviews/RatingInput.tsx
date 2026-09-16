@@ -4,6 +4,11 @@ import { useState } from "react";
 import { Star } from "lucide-react";
 import { cn } from "cn";
 
+export const RATING_INPUT_MESSAGES = {
+  radiogroupAriaLabel: "Ocena w gwiazdkach",
+  starAriaLabel: (star: number) => `${star} z 5 gwiazdek`,
+} as const;
+
 interface RatingInputProps {
   value?: number;
   onChange?: (value: number) => void;
@@ -23,7 +28,7 @@ export function RatingInput({
       <div
         className="flex items-center gap-1"
         role="radiogroup"
-        aria-label="Ocena w gwiazdkach"
+        aria-label={RATING_INPUT_MESSAGES.radiogroupAriaLabel}
       >
         {[1, 2, 3, 4, 5].map((star) => {
           const isFilled = activeRating > 0 && star <= activeRating;
@@ -33,7 +38,7 @@ export function RatingInput({
               type="button"
               role="radio"
               aria-checked={star === value}
-              aria-label={`${star} z 5 gwiazdek`}
+              aria-label={RATING_INPUT_MESSAGES.starAriaLabel(star)}
               disabled={disabled}
               onClick={() => onChange?.(star)}
               onMouseEnter={() => setHovered(star)}

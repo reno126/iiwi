@@ -30,6 +30,12 @@ export function MenuItem({ title, href, onClick, className }: MenuItemProps) {
   );
 }
 
+export const NAV_AUTH_MESSAGES = {
+  loggedInAs: "zalogowano jako:",
+  loginLink: "Zaloguj się",
+  registerLink: "Zarejestruj się",
+} as const;
+
 interface DesktopNavProps {
   items: NavItem[];
   user?: string | null;
@@ -45,7 +51,7 @@ export function DesktopNav({ items, user }: DesktopNavProps) {
       ))}
       {user && (
         <li className="text-xs text-gray-500 max-w-50 truncate">
-          zalogowano jako:{" "}
+          {NAV_AUTH_MESSAGES.loggedInAs}{" "}
           <span className="font-semibold text-gray-700">{user}</span>
         </li>
       )}
@@ -61,7 +67,7 @@ export function DesktopNav({ items, user }: DesktopNavProps) {
               href="/login"
               className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
             >
-              Zaloguj się
+              {NAV_AUTH_MESSAGES.loginLink}
             </Link>
           </li>
           <li>
@@ -69,7 +75,7 @@ export function DesktopNav({ items, user }: DesktopNavProps) {
               href="/register"
               className={cn(buttonVariants({ size: "sm" }))}
             >
-              Zarejestruj się
+              {NAV_AUTH_MESSAGES.registerLink}
             </Link>
           </li>
         </>

@@ -10,7 +10,11 @@ vi.mock("@/lib/shops/findShopByUrl", () => ({
 
 import { auth } from "@/lib/auth/helper";
 import { findShopByUrl } from "@/lib/shops/findShopByUrl";
-import { productScrapeMetadata } from "@/serverActions/productScrapeMetadata";
+import { SSRF_ERRORS } from "@/lib/scraper/ssrfProtection";
+import {
+  productScrapeMetadata,
+  PRODUCT_SCRAPE_MESSAGES,
+} from "@/serverActions/productScrapeMetadata";
 
 describe("serverActions/productScrapeMetadata", () => {
   const originalEnv = process.env;
@@ -30,8 +34,7 @@ describe("serverActions/productScrapeMetadata", () => {
     });
 
     expect(result?.data).toBeUndefined();
-    expect(result?.serverError).toBeDefined();
-    expect(result?.serverError).toContain("prywatny lub zastrzeżony adres IP");
+    expect(result?.serverError).toBe(SSRF_ERRORS.privateOrReservedIPv4);
   });
 
   it("successfully extracts metadata in Tier 1 when direct fetch returns 200", async () => {
@@ -213,7 +216,6 @@ describe("serverActions/productScrapeMetadata", () => {
     });
 
     expect(result?.data).toBeUndefined();
-    expect(result?.serverError).toBeDefined();
-    expect(result?.serverError).toContain("Nie udało się automatycznie pobrać danych");
+    expect(result?.serverError).toBe(PRODUCT_SCRAPE_MESSAGES.scrapeFailedError);
   });
 });

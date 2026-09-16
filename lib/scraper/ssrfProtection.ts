@@ -144,6 +144,17 @@ function stripIpv6Brackets(hostname: string): string {
   return hostname;
 }
 
+export const SSRF_ERRORS = {
+  invalidUrl: "Nieprawidłowy format adresu URL.",
+  invalidProtocol: "Niedozwolony protokół. Dozwolone są wyłącznie http:// oraz https://",
+  missingHostname: "Brak nazwy hosta w podanym adresie URL.",
+  internalOrMetadata: "Podany adres wskazuje na sieć wewnętrzną, lokalną lub metadane chmurowe.",
+  privateOrReservedIPv4: "Podany adres URL wskazuje na prywatny lub zastrzeżony adres IP.",
+  privateOrReservedIPv6: "Podany adres URL wskazuje na prywatny lub zastrzeżony adres IPv6.",
+  missingTopLevelDomain: "Podana nazwa domeny jest nieprawidłowa (wymagana domena najwyższego poziomu).",
+  invalidHostnameFormat: "Nieprawidłowy format nazwy hosta.",
+} as const;
+
 export function validateUrlSafety(inputUrl: string): UrlSafetyResult {
   let parsed: URL;
   try {
@@ -151,7 +162,7 @@ export function validateUrlSafety(inputUrl: string): UrlSafetyResult {
   } catch {
     return {
       isValid: false,
-      error: "Nieprawidłowy format adresu URL.",
+      error: SSRF_ERRORS.invalidUrl,
     };
   }
 
@@ -159,7 +170,7 @@ export function validateUrlSafety(inputUrl: string): UrlSafetyResult {
   if (!isHttpOrHttps) {
     return {
       isValid: false,
-      error: "Niedozwolony protokół. Dozwolone są wyłącznie http:// oraz https://",
+      error: SSRF_ERRORS.invalidProtocol,
     };
   }
 
@@ -167,7 +178,7 @@ export function validateUrlSafety(inputUrl: string): UrlSafetyResult {
   if (!rawHost) {
     return {
       isValid: false,
-      error: "Brak nazwy hosta w podanym adresie URL.",
+      error: SSRF_ERRORS.missingHostname,
     };
   }
 
@@ -176,21 +187,21 @@ export function validateUrlSafety(inputUrl: string): UrlSafetyResult {
   if (isForbiddenDomainOrLocalSuffix(cleanHost)) {
     return {
       isValid: false,
-      error: "Podany adres wskazuje na sieć wewnętrzną, lokalną lub metadane chmurowe.",
+      error: SSRF_ERRORS.internalOrMetadata,
     };
   }
 
   if (isPrivateOrReservedIPv4(cleanHost)) {
     return {
       isValid: false,
-      error: "Podany adres URL wskazuje na prywatny lub zastrzeżony adres IP.",
+      error: SSRF_ERRORS.privateOrReservedIPv4,
     };
   }
 
   if (cleanHost.includes(":") && isPrivateOrReservedIPv6(cleanHost)) {
     return {
       isValid: false,
-      error: "Podany adres URL wskazuje na prywatny lub zastrzeżony adres IPv6.",
+      error: SSRF_ERRORS.privateOrReservedIPv6,
     };
   }
 
@@ -198,7 +209,7 @@ export function validateUrlSafety(inputUrl: string): UrlSafetyResult {
   if (lacksDomainSeparator) {
     return {
       isValid: false,
-      error: "Podana nazwa domeny jest nieprawidłowa (wymagana domena najwyższego poziomu).",
+      error: SSRF_ERRORS.missingTopLevelDomain,
     };
   }
 
@@ -206,7 +217,7 @@ export function validateUrlSafety(inputUrl: string): UrlSafetyResult {
   if (hasLeadingOrTrailingDot) {
     return {
       isValid: false,
-      error: "Nieprawidłowy format nazwy hosta.",
+      error: SSRF_ERRORS.invalidHostnameFormat,
     };
   }
 

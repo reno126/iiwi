@@ -7,6 +7,17 @@ import { Spinner } from "@/components/ui/spinner";
 import { ScrapeDelayNotice } from "./ScrapeDelayNotice";
 import { Sparkles, ArrowLeft } from "lucide-react";
 
+export const URL_PROMPT_MESSAGES = {
+  subtitle: "wklej go poniżej, to pójdzie szybko!",
+  placeholder: "https://sklep.pl/produkt...",
+  urlInputAriaLabel: "Link do oferty produktu",
+  scrapeButton: "Pobierz info",
+  noLinkQuestion: "Nie masz linku do oferty?",
+  manualButton: "Dodaj produkt ręcznie",
+  manualHint: "wymagamy tylko nazwy, no i opinii",
+  backButton: "Wróć do wyszukiwania",
+} as const;
+
 interface UrlPromptStepProps {
   onScrape: (url: string) => void;
   onManualSelect: () => void;
@@ -37,7 +48,7 @@ export function UrlPromptStep({
     <div className="space-y-6">
       <div className="">
         <p className="text-sm text-muted-foreground">
-          wklej go poniżej, to pójdzie szybko!
+          {URL_PROMPT_MESSAGES.subtitle}
         </p>
       </div>
 
@@ -47,8 +58,8 @@ export function UrlPromptStep({
             type="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://sklep.pl/produkt..."
-            aria-label="Link do oferty produktu"
+            placeholder={URL_PROMPT_MESSAGES.placeholder}
+            aria-label={URL_PROMPT_MESSAGES.urlInputAriaLabel}
             autoFocus
             disabled={isPending}
             className="h-11 flex-1 text-base sm:text-sm"
@@ -63,7 +74,7 @@ export function UrlPromptStep({
             ) : (
               <Sparkles className="size-4" />
             )}
-            Pobierz info
+            {URL_PROMPT_MESSAGES.scrapeButton}
           </Button>
         </div>
 
@@ -75,7 +86,7 @@ export function UrlPromptStep({
 
       <div className="border-t pt-6 text-center space-y-2">
         <span className="block text-sm font-medium text-foreground">
-          Nie masz linku do oferty?
+          {URL_PROMPT_MESSAGES.noLinkQuestion}
         </span>
         <Button
           type="button"
@@ -84,10 +95,10 @@ export function UrlPromptStep({
           disabled={isPending}
           className="mx-auto"
         >
-          Dodaj produkt ręcznie
+          {URL_PROMPT_MESSAGES.manualButton}
         </Button>
         <span className="block text-xs text-muted-foreground">
-          wymagamy tylko nazwy, no i opinii
+          {URL_PROMPT_MESSAGES.manualHint}
         </span>
       </div>
 
@@ -102,7 +113,7 @@ export function UrlPromptStep({
             className="text-xs text-muted-foreground hover:text-foreground gap-1.5"
           >
             <ArrowLeft className="size-3.5" />
-            Wróć do wyszukiwania
+            {URL_PROMPT_MESSAGES.backButton}
           </Button>
         </div>
       )}

@@ -16,7 +16,7 @@ vi.mock("bcryptjs", () => ({
 
 import { prisma } from "@/lib/db/prisma";
 import bcrypt from "bcryptjs";
-import { authOptions } from "@/lib/auth/authOptions";
+import { authOptions, AUTH_ERRORS } from "@/lib/auth/authOptions";
 
 describe("lib/auth/authOptions", () => {
   beforeEach(() => {
@@ -76,7 +76,7 @@ describe("lib/auth/authOptions", () => {
           email: "google@example.com",
           password: "password123",
         }),
-      ).rejects.toThrow("OAuthAccountOnly");
+      ).rejects.toThrow(AUTH_ERRORS.oauthAccountOnly);
     });
 
     it("returns null if password comparison fails", async () => {

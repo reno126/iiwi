@@ -2,7 +2,11 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useForm, FormProvider } from "react-hook-form";
-import { ProductFields } from "@/app/opinie/dodaj/_components/ProductFields";
+import {
+  ProductFields,
+  PRODUCT_FIELDS_MESSAGES,
+} from "@/app/opinie/dodaj/_components/ProductFields";
+import { SHOP_SELECTOR_MESSAGES } from "@/app/opinie/dodaj/_components/ProductShopSelector";
 import { productScrapeMetadata } from "@/serverActions/productScrapeMetadata";
 import type { ProductCreateInput } from "@/schemas/product";
 
@@ -47,17 +51,25 @@ function createProductFieldsDriver() {
   const user = userEvent.setup();
   return {
     user,
-    nameInput: () => screen.getByLabelText(/nazwa produktu/i),
-    productUrlInput: () => screen.getByLabelText(/adres url do produktu/i),
-    queryProductUrlInput: () => screen.queryByLabelText(/adres url do produktu/i),
-    imageUrlInput: () => screen.getByLabelText(/adres url zdjęcia/i),
-    queryImageUrlInput: () => screen.queryByLabelText(/adres url zdjęcia/i),
-    codeInput: () => screen.getByLabelText(/kod produktu/i),
+    nameInput: () => screen.getByLabelText(PRODUCT_FIELDS_MESSAGES.nameLabel),
+    productUrlInput: () =>
+      screen.getByLabelText(PRODUCT_FIELDS_MESSAGES.productUrlLabel),
+    queryProductUrlInput: () =>
+      screen.queryByLabelText(PRODUCT_FIELDS_MESSAGES.productUrlLabel),
+    imageUrlInput: () =>
+      screen.getByLabelText(PRODUCT_FIELDS_MESSAGES.imageUrlLabel),
+    queryImageUrlInput: () =>
+      screen.queryByLabelText(PRODUCT_FIELDS_MESSAGES.imageUrlLabel),
+    codeInput: () => screen.getByLabelText(PRODUCT_FIELDS_MESSAGES.codeLabel),
     scrapeButton: () =>
-      screen.getByRole("button", { name: /wyciągnij zdjęcie produktu/i }),
+      screen.getByRole("button", {
+        name: PRODUCT_FIELDS_MESSAGES.scrapeButton,
+      }),
     deleteImageButton: () =>
-      screen.getByRole("button", { name: /usuń/i }),
-    statusBadges: (label: RegExp | string) => screen.getAllByText(label),
+      screen.getByRole("button", {
+        name: PRODUCT_FIELDS_MESSAGES.deleteImageButton,
+      }),
+    statusBadges: (label: string) => screen.getAllByText(label),
   };
 }
 
@@ -111,7 +123,9 @@ describe("app/opinie/dodaj/_components/ProductFields", () => {
     });
 
     expect(driver.queryImageUrlInput()).not.toBeInTheDocument();
-    expect(screen.getByText(/podgląd zdjęcia produktu/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(PRODUCT_FIELDS_MESSAGES.imagePreviewAlt),
+    ).toBeInTheDocument();
     expect(driver.deleteImageButton()).toBeInTheDocument();
   });
 
@@ -143,7 +157,9 @@ describe("app/opinie/dodaj/_components/ProductFields", () => {
     const codeInput = driver.codeInput() as HTMLInputElement;
 
     await waitFor(() => {
-      expect(screen.getByText(/podgląd zdjęcia produktu/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(PRODUCT_FIELDS_MESSAGES.imagePreviewAlt),
+      ).toBeInTheDocument();
     });
 
     expect(nameInput.value).toBe("Istniejąca Nazwa Wpisana Ręcznie");
@@ -161,18 +177,23 @@ describe("app/opinie/dodaj/_components/ProductFields", () => {
     const driver = createProductFieldsDriver();
 
     expect(driver.queryImageUrlInput()).not.toBeInTheDocument();
-    expect(screen.getByText(/podgląd zdjęcia produktu/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(PRODUCT_FIELDS_MESSAGES.imagePreviewAlt),
+    ).toBeInTheDocument();
 
     await driver.user.click(driver.deleteImageButton());
 
     const imageUrlInput = driver.imageUrlInput() as HTMLInputElement;
     expect(imageUrlInput.value).toBe("");
-    expect(screen.queryByText(/podgląd zdjęcia produktu/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(PRODUCT_FIELDS_MESSAGES.imagePreviewAlt),
+    ).not.toBeInTheDocument();
   });
 
   it("displays non-blocking error message when scraper fails", async () => {
+    const scraperErrorMessage = "Nie udało się pobrać zdjęcia z podanej strony.";
     vi.mocked(productScrapeMetadata).mockResolvedValueOnce({
-      serverError: "Nie udało się pobrać zdjęcia z podanej strony.",
+      serverError: scraperErrorMessage,
     });
 
     render(
@@ -187,9 +208,7 @@ describe("app/opinie/dodaj/_components/ProductFields", () => {
     await driver.user.click(driver.scrapeButton());
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/nie udało się pobrać zdjęcia z podanej strony/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(scraperErrorMessage)).toBeInTheDocument();
     });
 
     expect(driver.productUrlInput()).not.toBeInvalid();
@@ -222,8 +241,10 @@ describe("app/opinie/dodaj/_components/ProductFields", () => {
     await driver.user.click(driver.scrapeButton());
 
     await waitFor(() => {
-      expect(screen.getByText(/media expert/i)).toBeInTheDocument();
-      expect(screen.getByText(/wybrany sklep/i)).toBeInTheDocument();
+      expect(screen.getByText("Media Expert")).toBeInTheDocument();
+      expect(
+        screen.getByText(SHOP_SELECTOR_MESSAGES.selectedShop),
+      ).toBeInTheDocument();
     });
   });
 
@@ -247,8 +268,12 @@ describe("app/opinie/dodaj/_components/ProductFields", () => {
     );
     const driver = createProductFieldsDriver();
 
-    expect(driver.statusBadges(/uzupełnione/i).length).toBeGreaterThanOrEqual(1);
-    expect(driver.statusBadges(/do uzupełnienia/i).length).toBeGreaterThanOrEqual(2);
+    expect(
+      driver.statusBadges(PRODUCT_FIELDS_MESSAGES.statusFilled).length,
+    ).toBeGreaterThanOrEqual(1);
+    expect(
+      driver.statusBadges(PRODUCT_FIELDS_MESSAGES.statusMissing).length,
+    ).toBeGreaterThanOrEqual(2);
   });
 
   it("reactively updates field status when user fills missing data and clears existing data", async () => {
@@ -263,21 +288,33 @@ describe("app/opinie/dodaj/_components/ProductFields", () => {
     );
     const driver = createProductFieldsDriver();
 
-    expect(driver.statusBadges(/do uzupełnienia/i).length).toBe(3);
-    expect(driver.statusBadges(/uzupełnione/i).length).toBe(1);
+    expect(
+      driver.statusBadges(PRODUCT_FIELDS_MESSAGES.statusMissing).length,
+    ).toBe(3);
+    expect(
+      driver.statusBadges(PRODUCT_FIELDS_MESSAGES.statusFilled).length,
+    ).toBe(1);
 
     await driver.user.type(driver.codeInput(), "12345678");
 
     await waitFor(() => {
-      expect(driver.statusBadges(/uzupełnione/i).length).toBe(2);
-      expect(driver.statusBadges(/do uzupełnienia/i).length).toBe(2);
+      expect(
+        driver.statusBadges(PRODUCT_FIELDS_MESSAGES.statusFilled).length,
+      ).toBe(2);
+      expect(
+        driver.statusBadges(PRODUCT_FIELDS_MESSAGES.statusMissing).length,
+      ).toBe(2);
     });
 
     await driver.user.clear(driver.nameInput());
 
     await waitFor(() => {
-      expect(driver.statusBadges(/uzupełnione/i).length).toBe(1);
-      expect(driver.statusBadges(/do uzupełnienia/i).length).toBe(3);
+      expect(
+        driver.statusBadges(PRODUCT_FIELDS_MESSAGES.statusFilled).length,
+      ).toBe(1);
+      expect(
+        driver.statusBadges(PRODUCT_FIELDS_MESSAGES.statusMissing).length,
+      ).toBe(3);
     });
   });
 
@@ -295,8 +332,12 @@ describe("app/opinie/dodaj/_components/ProductFields", () => {
     render(<FormWrapper />);
     const driver = createProductFieldsDriver();
 
-    expect(screen.queryByText(/uzupełnione/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/do uzupełnienia/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(PRODUCT_FIELDS_MESSAGES.statusFilled),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(PRODUCT_FIELDS_MESSAGES.statusMissing),
+    ).not.toBeInTheDocument();
 
     await driver.user.type(driver.productUrlInput(), "https://example.com/item");
     await driver.user.click(driver.scrapeButton());
@@ -304,8 +345,12 @@ describe("app/opinie/dodaj/_components/ProductFields", () => {
     const nameInput = driver.nameInput() as HTMLInputElement;
     await waitFor(() => {
       expect(nameInput.value).toBe("Produkt ze scrapera");
-      expect(driver.statusBadges(/uzupełnione/i).length).toBe(2);
-      expect(driver.statusBadges(/do uzupełnienia/i).length).toBe(2);
+      expect(
+        driver.statusBadges(PRODUCT_FIELDS_MESSAGES.statusFilled).length,
+      ).toBe(2);
+      expect(
+        driver.statusBadges(PRODUCT_FIELDS_MESSAGES.statusMissing).length,
+      ).toBe(2);
     });
   });
 });

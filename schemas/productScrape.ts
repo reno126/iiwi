@@ -1,10 +1,16 @@
 import { z } from "zod";
 
+export const PRODUCT_SCRAPE_ERRORS = {
+  invalidUrl: "Podaj prawidłowy adres URL produktu",
+  noWhitespace: "Adres URL nie może zawierać spacji",
+  invalidProtocol: "Dozwolone są wyłącznie protokoły http:// oraz https://",
+} as const;
+
 export const productScrapeSchema = z.object({
   productUrl: z
-    .url({ message: "Podaj prawidłowy adres URL produktu" })
+    .url({ message: PRODUCT_SCRAPE_ERRORS.invalidUrl })
     .refine((val) => !/\s/.test(val), {
-      message: "Adres URL nie może zawierać spacji",
+      message: PRODUCT_SCRAPE_ERRORS.noWhitespace,
     })
     .refine(
       (val) => {
@@ -16,7 +22,7 @@ export const productScrapeSchema = z.object({
         }
       },
       {
-        message: "Dozwolone są wyłącznie protokoły http:// oraz https://",
+        message: PRODUCT_SCRAPE_ERRORS.invalidProtocol,
       }
     ),
 });

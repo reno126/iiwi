@@ -14,6 +14,15 @@ export const metadata: Metadata = {
     "Tylko tutaj znajdziesz prawdziwe, całkowicie niezależne opinie o produktach.",
 };
 
+export const HOME_MESSAGES = {
+  heroHeading: "Tylko tutaj znajdziesz prawdziwe, całkowicie niezależne opinie o produktach",
+  viewAllReviewsLink: "Zobacz wszystkie opinie",
+  addReviewLink: "Dodaj opinię",
+  recentReviewsHeading: "Ostatnio dodane opinie",
+  shopsHeading: "Opinie z dowolnych sklepów stacjonarnych i internetowych",
+  popularShopsSubheading: "Popularne sklepy",
+} as const;
+
 export const revalidate = 60;
 
 export default function HomePage() {
@@ -41,7 +50,7 @@ export default function HomePage() {
             "w-full sm:w-auto font-semibold shadow-xs text-center",
           )}
         >
-          Zobacz wszystkie opinie
+          {HOME_MESSAGES.viewAllReviewsLink}
         </Link>
         <Link
           href="/opinie/dodaj"
@@ -50,14 +59,14 @@ export default function HomePage() {
             "w-full sm:w-auto font-semibold shadow-xs text-center",
           )}
         >
-          Dodaj opinię
+          {HOME_MESSAGES.addReviewLink}
         </Link>
       </section>
 
       <section className="w-full space-y-6">
         <div className="text-center sm:text-left">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-            Ostatnio dodane opinie
+            {HOME_MESSAGES.recentReviewsHeading}
           </h2>
         </div>
         <Suspense fallback={<RecentReviewsSkeleton />}>
@@ -68,10 +77,10 @@ export default function HomePage() {
       <section className="w-full space-y-6">
         <div className="space-y-1 text-center sm:text-left">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-            Opinie z dowolnych sklepów stacjonarnych i internetowych
+            {HOME_MESSAGES.shopsHeading}
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground font-medium">
-            Popularne sklepy
+            {HOME_MESSAGES.popularShopsSubheading}
           </p>
         </div>
         <Suspense fallback={<ShopsSkeleton />}>
@@ -87,7 +96,7 @@ export default function HomePage() {
             "w-full sm:w-auto font-semibold px-8 shadow-xs text-center",
           )}
         >
-          Dodaj opinię
+          {HOME_MESSAGES.addReviewLink}
         </Link>
       </section>
     </div>

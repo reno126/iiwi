@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Register } from "@/app/register/_components/Register";
-import { REGISTER_ERRORS } from "@/schemas/register";
+import { Register, REGISTER_MESSAGES } from "@/app/register/_components/Register";
+import { REGISTER_ERRORS, REGISTER_API_MESSAGES } from "@/schemas/register";
+import { AUTH_ERRORS } from "@/lib/auth/constants";
 import { server } from "@/tests/mocks/server";
 import { http, HttpResponse, delay } from "msw";
 import { signIn } from "next-auth/react";
@@ -34,12 +35,13 @@ function createRegisterDriver() {
   const user = userEvent.setup();
   return {
     user,
-    heading: () => screen.getByRole("heading", { name: /utwórz konto/i }),
-    nameInput: () => screen.getByRole("textbox", { name: /imię/i }),
-    emailInput: () => screen.getByRole("textbox", { name: /adres e-mail/i }),
-    passwordInput: () => screen.getByLabelText(/hasło/i),
-    submitButton: () => screen.getByRole("button", { name: /zarejestruj się/i }),
-    loginLink: () => screen.getByRole("link", { name: /zaloguj się/i }),
+    heading: () => screen.getByRole("heading", { name: new RegExp(REGISTER_MESSAGES.title, "i") }),
+    nameInput: () => screen.getByRole("textbox", { name: new RegExp(REGISTER_MESSAGES.nameLabel, "i") }),
+    emailInput: () => screen.getByRole("textbox", { name: new RegExp(REGISTER_MESSAGES.emailLabel, "i") }),
+    passwordInput: () => screen.getByLabelText(new RegExp(REGISTER_MESSAGES.passwordLabel, "i")),
+    submitButton: () => screen.getByRole("button", { name: new RegExp(`^${REGISTER_MESSAGES.submitButton}$`, "i") }),
+    submittingButton: () => screen.getByRole("button", { name: new RegExp(REGISTER_MESSAGES.submittingButton, "i") }),
+    loginLink: () => screen.getByRole("link", { name: new RegExp(REGISTER_MESSAGES.loginLink, "i") }),
     alerts: () => screen.getAllByRole("alert"),
     async fillForm(data: { name?: string; email?: string; password?: string }) {
       if (data.name) await user.type(this.nameInput(), data.name);
@@ -117,9 +119,7 @@ describe("app/register/_components/Register", () => {
 
     await driver.submit();
 
-    expect(
-      screen.getByRole("button", { name: /tworzenie konta/i }),
-    ).toBeDisabled();
+    expect(driver.submittingButton()).toBeDisabled();
 
     await waitFor(() => {
       expect(signIn).toHaveBeenCalledWith("credentials", {
@@ -147,9 +147,7 @@ describe("app/register/_components/Register", () => {
     await waitFor(() => {
       expect(screen.getByRole("alert")).toBeInTheDocument();
       expect(
-        screen.getByText(
-          "Ten adres e-mail jest już zajęty. Zaloguj się na swoje konto.",
-        ),
+        screen.getByText(REGISTER_API_MESSAGES.emailTaken),
       ).toBeInTheDocument();
     });
 
@@ -189,7 +187,7 @@ describe("app/register/_components/Register", () => {
 
   it("redirects to /login if registration succeeds but auto-login fails", async () => {
     vi.mocked(signIn).mockResolvedValueOnce({
-      error: "CredentialsSignin",
+      error: AUTH_ERRORS.credentialsSignin,
       status: 401,
       ok: false,
       url: null,

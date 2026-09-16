@@ -19,6 +19,12 @@ import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CircleAlert, CheckCircle2 } from "lucide-react";
 
+export const REVIEW_FORM_MESSAGES = {
+  draftRestored: "Twoja opinia została przywrócona po zalogowaniu.",
+  cancelButton: "Anuluj",
+  submitButton: "Opublikuj opinię",
+} as const;
+
 interface ReviewFormProps {
   productId: string;
   product?: Product;
@@ -171,7 +177,7 @@ export function ReviewForm({
           <Alert variant="info" className="mb-4">
             <CheckCircle2 className="size-4" />
             <AlertDescription>
-              Twoja opinia została przywrócona po zalogowaniu.
+              {REVIEW_FORM_MESSAGES.draftRestored}
             </AlertDescription>
           </Alert>
         )}
@@ -194,7 +200,7 @@ export function ReviewForm({
               disabled={isSubmitting}
               className="w-1/3 sm:w-auto h-11 sm:h-9"
             >
-              Anuluj
+              {REVIEW_FORM_MESSAGES.cancelButton}
             </Button>
           )}
           <Button
@@ -203,7 +209,7 @@ export function ReviewForm({
             className="flex-1 sm:flex-initial h-11 sm:h-9 font-semibold"
           >
             {isSubmitting && <Spinner className="mr-2 size-4" />}
-            Opublikuj opinię
+            {REVIEW_FORM_MESSAGES.submitButton}
           </Button>
         </div>
       </form>

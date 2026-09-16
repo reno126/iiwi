@@ -10,6 +10,7 @@ import { FaGoogle } from "react-icons/fa";
 import { CircleAlert } from "lucide-react";
 
 import { loginSchema, type LoginInput } from "@/schemas/login";
+import { AUTH_ERRORS, AUTH_ERROR_MESSAGES } from "@/lib/auth/constants";
 import { getReviewDraftReturnUrl } from "@/lib/storage/reviewDraftStorage";
 import { AuthCard } from "@/components/auth/AuthCard";
 import {
@@ -23,6 +24,22 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
+
+export const SIGN_IN_MESSAGES = {
+  title: "Zaloguj się",
+  description: "Wprowadź swoje dane, aby uzyskać dostęp do konta",
+  footerPrompt: "Nie masz jeszcze konta?",
+  registerLink: "Zarejestruj się",
+  emailLabel: "Adres e-mail",
+  emailPlaceholder: "twoj@email.com",
+  passwordLabel: "Hasło",
+  passwordPlaceholder: "••••••••",
+  submitButton: "Zaloguj się",
+  submittingButton: "Logowanie...",
+  orContinueWith: "Lub kontynuuj przez",
+  googleButton: "Zaloguj się przez Google",
+  googlePending: "Przekierowywanie...",
+} as const;
 
 interface SignInProps {
   className?: string;
@@ -56,20 +73,20 @@ export function SignIn({ className }: SignInProps) {
 
   const getErrorMessage = (errorCode: string | null) => {
     switch (errorCode) {
-      case "OAuthAccountNotLinked":
-        return "To konto e-mail zostało wcześniej zarejestrowane za pomocą hasła. Zaloguj się hasłem.";
-      case "OAuthAccountOnly":
-        return "To konto zostało utworzone przez Google. Zaloguj się za pomocą przycisku Google poniżej.";
-      case "OAuthSignin":
-      case "OAuthCallback":
-      case "OAuthCreateAccount":
-        return "Wystąpił problem podczas logowania przez Google. Spróbuj ponownie.";
-      case "CredentialsSignin":
-        return "Nieprawidłowy adres e-mail lub hasło.";
-      case "SessionRequired":
-        return "Zaloguj się, aby uzyskać dostęp do tej strony.";
+      case AUTH_ERRORS.oauthAccountNotLinked:
+        return AUTH_ERROR_MESSAGES.oauthAccountNotLinked;
+      case AUTH_ERRORS.oauthAccountOnly:
+        return AUTH_ERROR_MESSAGES.oauthAccountOnly;
+      case AUTH_ERRORS.oauthSignin:
+      case AUTH_ERRORS.oauthCallback:
+      case AUTH_ERRORS.oauthCreateAccount:
+        return AUTH_ERROR_MESSAGES.oauthGeneralError;
+      case AUTH_ERRORS.credentialsSignin:
+        return AUTH_ERROR_MESSAGES.credentialsSignin;
+      case AUTH_ERRORS.sessionRequired:
+        return AUTH_ERROR_MESSAGES.sessionRequired;
       default:
-        return errorCode ? "Wystąpił błąd podczas logowania. Spróbuj ponownie." : "";
+        return errorCode ? AUTH_ERROR_MESSAGES.defaultError : "";
     }
   };
 
@@ -86,14 +103,13 @@ export function SignIn({ className }: SignInProps) {
     });
 
     if (result?.error) {
-      if (result.error === "OAuthAccountOnly") {
+      if (result.error === AUTH_ERRORS.oauthAccountOnly) {
         setError("root", {
-          message:
-            "To konto zostało utworzone przez Google. Zaloguj się za pomocą przycisku Google poniżej.",
+          message: AUTH_ERROR_MESSAGES.oauthAccountOnly,
         });
       } else {
         setError("root", {
-          message: "Nieprawidłowy adres e-mail lub hasło.",
+          message: AUTH_ERROR_MESSAGES.credentialsSignin,
         });
       }
     } else {
@@ -119,17 +135,17 @@ export function SignIn({ className }: SignInProps) {
 
   return (
     <AuthCard
-      title="Zaloguj się"
-      description="Wprowadź swoje dane, aby uzyskać dostęp do konta"
+      title={SIGN_IN_MESSAGES.title}
+      description={SIGN_IN_MESSAGES.description}
       className={className}
       footer={
         <p className="text-center text-sm text-muted-foreground">
-          Nie masz jeszcze konta?{" "}
+          {SIGN_IN_MESSAGES.footerPrompt}{" "}
           <Link
             href={registerHref}
             className="font-medium text-foreground underline underline-offset-4 hover:text-primary"
           >
-            Zarejestruj się
+            {SIGN_IN_MESSAGES.registerLink}
           </Link>
         </p>
       }
@@ -144,13 +160,13 @@ export function SignIn({ className }: SignInProps) {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <FieldGroup>
           <Field data-invalid={!!errors.email}>
-            <FieldLabel htmlFor="email">Adres e-mail</FieldLabel>
+            <FieldLabel htmlFor="email">{SIGN_IN_MESSAGES.emailLabel}</FieldLabel>
             <Input
               id="email"
               type="email"
               sizeVariant="touch"
               autoComplete="email"
-              placeholder="twoj@email.com"
+              placeholder={SIGN_IN_MESSAGES.emailPlaceholder}
               aria-invalid={!!errors.email}
               disabled={isSubmitting || isGooglePending}
               {...register("email")}
@@ -159,13 +175,13 @@ export function SignIn({ className }: SignInProps) {
           </Field>
 
           <Field data-invalid={!!errors.password}>
-            <FieldLabel htmlFor="password">Hasło</FieldLabel>
+            <FieldLabel htmlFor="password">{SIGN_IN_MESSAGES.passwordLabel}</FieldLabel>
             <Input
               id="password"
               type="password"
               sizeVariant="touch"
               autoComplete="current-password"
-              placeholder="••••••••"
+              placeholder={SIGN_IN_MESSAGES.passwordPlaceholder}
               aria-invalid={!!errors.password}
               disabled={isSubmitting || isGooglePending}
               {...register("password")}
@@ -181,14 +197,14 @@ export function SignIn({ className }: SignInProps) {
           disabled={isSubmitting || isGooglePending}
         >
           {isSubmitting && <Spinner className="mr-2" />}
-          {isSubmitting ? "Logowanie..." : "Zaloguj się"}
+          {isSubmitting ? SIGN_IN_MESSAGES.submittingButton : SIGN_IN_MESSAGES.submitButton}
         </Button>
       </form>
 
       <div className="relative my-4 flex items-center justify-center">
         <Separator className="w-full" />
         <span className="absolute bg-card px-2 text-xs text-muted-foreground uppercase">
-          Lub kontynuuj przez
+          {SIGN_IN_MESSAGES.orContinueWith}
         </span>
       </div>
 
@@ -205,7 +221,7 @@ export function SignIn({ className }: SignInProps) {
         ) : (
           <FaGoogle className="mr-2 text-red-500" />
         )}
-        {isGooglePending ? "Przekierowywanie..." : "Zaloguj się przez Google"}
+        {isGooglePending ? SIGN_IN_MESSAGES.googlePending : SIGN_IN_MESSAGES.googleButton}
       </Button>
     </AuthCard>
   );
