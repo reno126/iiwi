@@ -1,16 +1,15 @@
 "use client";
 
 import { useState, useTransition, useCallback } from "react";
-import { useFormContext } from "react-hook-form";
-import { Trash2, Check, RefreshCw, CircleAlert } from "lucide-react";
+import { useFormContext, useWatch } from "react-hook-form";
+import { Trash2, Check, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ComboboxResponsive } from "@/components/ui/combobox-responsive";
-import { Field, FieldLabel } from "@/components/ui/field";
+import { FormFieldCard } from "@/components/ui/form-field-card";
 import { shopsGet, type ShopItem } from "@/serverActions/shopsGet";
 import type { ProductCreateInput } from "@/schemas/product";
 import type { MatchedShopResult } from "@/lib/shops/findShopByUrl";
 import { ShopLogo } from "@/components/shops/ShopLogo";
-import { cn } from "cn";
 
 export const SHOP_SELECTOR_MESSAGES = {
   helperText: "Jeśli nie znasz sklepu lub nie ma go na liście pozostaw pole puste.",
@@ -34,8 +33,8 @@ export function ProductShopSelector({
   disabled = false,
   showFieldStatus = false,
 }: ProductShopSelectorProps) {
-  const { setValue, watch } = useFormContext<ProductCreateInput>();
-  const shopId = watch("shopId");
+  const { setValue, control } = useFormContext<ProductCreateInput>();
+  const shopId = useWatch({ control, name: "shopId" });
   const isShopFilled = Boolean(selectedShop || (shopId && shopId.trim().length > 0));
 
   const [shopsList, setShopsList] = useState<ShopItem[] | null>(null);
@@ -75,51 +74,13 @@ export function ProductShopSelector({
   };
 
   return (
-    <Field
-      className={cn(
-        "rounded-xl p-3.5 sm:p-4 shadow-2xs transition-all",
-        showFieldStatus && isShopFilled
-          ? "border-2 border-emerald-500 bg-emerald-50/50 dark:border-emerald-600 dark:bg-emerald-950/20"
-          : showFieldStatus
-            ? "border-2 border-gray-300 bg-gray-50/80 dark:border-gray-700 dark:bg-gray-900/30"
-            : "border border-border/80 bg-white focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/10"
-      )}
+    <FormFieldCard
+      label="Sklep"
+      isFilled={isShopFilled}
+      showStatus={showFieldStatus}
+      filledBadgeText="Uzupełnione"
+      missingBadgeText="Do uzupełnienia"
     >
-      <div className="flex items-center justify-between gap-2 mb-2">
-        <FieldLabel
-          className={cn(
-            "text-sm font-medium",
-            showFieldStatus && isShopFilled
-              ? "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-600 text-white font-semibold shadow-xs"
-              : showFieldStatus
-                ? "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-600 text-white font-semibold shadow-xs"
-                : "text-foreground"
-          )}
-        >
-          {showFieldStatus && (
-            isShopFilled ? (
-              <Check className="size-3.5 sm:size-4 stroke-[2.5]" />
-            ) : (
-              <CircleAlert className="size-3.5 sm:size-4" />
-            )
-          )}
-          <span>Sklep</span>
-        </FieldLabel>
-
-        {showFieldStatus && (
-          <span
-            className={cn(
-              "inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-full shrink-0",
-              isShopFilled
-                ? "text-emerald-700 bg-emerald-100/90 dark:text-emerald-300 dark:bg-emerald-900/40"
-                : "text-gray-600 bg-gray-200/90 dark:text-gray-300 dark:bg-gray-800/60"
-            )}
-          >
-            {isShopFilled ? "Uzupełnione" : "Do uzupełnienia"}
-          </span>
-        )}
-      </div>
-
       {selectedShop ? (
         <div className="flex flex-col md:flex-row items-center justify-between gap-3 p-3 rounded-lg border bg-white dark:bg-card text-card-foreground shadow-2xs">
           <div className="flex items-center gap-3 min-w-0">
@@ -179,7 +140,7 @@ export function ProductShopSelector({
               aria-label={SHOP_SELECTOR_MESSAGES.deleteShopAriaLabel}
               disabled={disabled}
               onClick={handleClearShop}
-                className="sm:w-auto text-muted-foreground hover:text-destructive hover:border-destructive/40"
+              className="sm:w-auto text-muted-foreground hover:text-destructive hover:border-destructive/40"
             >
               <Trash2 className="size-3.5 mr-1" /> {SHOP_SELECTOR_MESSAGES.deleteButton}
             </Button>
@@ -187,7 +148,6 @@ export function ProductShopSelector({
         </div>
       ) : (
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 rounded-lg border border-dashed text-sm text-muted-foreground bg-white dark:bg-card">
-
           <ComboboxResponsive<ShopItem>
             items={shopsList || []}
             value={shopId || ""}
@@ -225,6 +185,6 @@ export function ProductShopSelector({
       <p className="text-xs text-muted-foreground mt-1">
         {SHOP_SELECTOR_MESSAGES.helperText}
       </p>
-    </Field>
+    </FormFieldCard>
   );
 }
