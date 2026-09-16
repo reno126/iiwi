@@ -157,3 +157,48 @@ The codebase strictly follows a **Zero Comments Policy**:
 
 2. **Semantic Design Tokens:**
    - Always use semantic color classes (`bg-background`, `text-foreground`, `text-muted-foreground`, `border-border`, `text-primary`) to ensure dark/light theme consistency.
+
+---
+
+## 9. Core Web Vitals (CWV) & Loading Performance
+
+1. **LCP (< 2.5s) — Prioritize Critical Above-the-Fold Assets:**
+   - Mark hero images with `priority` (`next/image`) and preload primary web fonts using `next/font`.
+   - Never lazy-load the largest visible element above the fold.
+   - Stream slow database queries using React `<Suspense>` boundaries to avoid blocking the initial document paint.
+
+2. **CLS (< 0.1) — Zero Layout Shifts:**
+   - Always reserve layout dimensions: define explicit `width`/`height` or CSS `aspect-ratio` on all images, embeds, and dynamic widgets.
+   - Provide skeleton loaders that strictly match the final rendered container height (`min-h-*`).
+   - Never inject banners, toasts, or dynamic content above existing visible text without user interaction.
+
+3. **INP (< 200ms) — Responsive Main Thread:**
+   - Defer non-urgent state updates using React 19 `startTransition` or `useTransition`.
+   - Debounce search and high-frequency inputs (150–300ms).
+   - Offload heavy transformations and keep click/tap handlers synchronous and lightweight.
+
+4. **FCP (< 1.8s) & Bundle Hygiene:**
+   - Avoid barrel-file imports; import utilities and icons directly from subpaths.
+   - Dynamically import heavy, non-critical modals and client components (`next/dynamic`).
+   - Load analytics, tag managers, and non-essential scripts post-hydration (`after()` or `strategy="afterInteractive"`).
+
+---
+
+## 10. Mobile-First Ergonomics & Form Field Islands
+
+1. **Grouped "Field Islands" for Mobile Ergonomics:**
+   - Organize related form fields into distinct, self-contained visual "islands" (card-like containers with `bg-card`, rounded corners, and subtle borders).
+   - Divide complex forms into logical islands (e.g. Contact Island, Rating Island, Review Body Island) rather than a continuous wall of inputs.
+   - On mobile screens (`< md`), expand islands to full container width (`w-full`) with comfortable internal spacing (`p-4` or `p-5`).
+
+2. **Thumb-Zone & Touch Targets (>= 48px):**
+   - Place primary action buttons (Submit, Next, Save) within the natural bottom thumb zone; use sticky bottom bars on mobile where appropriate.
+   - Ensure all interactive elements (buttons, checkboxes, select triggers) have a minimum tap target of `48x48px` (`size-12` or `min-h-12`).
+
+3. **iOS Zoom Prevention & Input Ergonomics:**
+   - Always set mobile input font size to at least `16px` (`text-base md:text-sm`) to prevent iOS Safari from automatically zooming into the page on focus.
+   - Specify appropriate `inputmode` (`numeric`, `email`, `tel`, `url`) and valid `autoComplete` attributes to summon the correct mobile keyboard.
+
+4. **Virtual Keyboard & Viewport Stability:**
+   - Avoid fixed-position footers that overlap focused inputs when the virtual keyboard expands.
+   - Render error messages directly within the field island without causing unexpected viewport jumping.
