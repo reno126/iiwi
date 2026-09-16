@@ -216,7 +216,7 @@ function FieldError({
 
   return (
     <div
-      role="alert"
+      role={content ? "alert" : undefined}
       data-slot="field-error"
       className={cn(
         "text-sm font-normal text-destructive leading-tight",

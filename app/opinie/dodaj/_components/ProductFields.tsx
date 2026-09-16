@@ -241,6 +241,7 @@ export function ProductFields({
             id="product-name"
             rows={1}
             placeholder="np. Logitech MX Master 3S"
+            aria-invalid={!!errors.name}
             className="min-h-11 py-2.5 text-base sm:text-sm resize-none overflow-hidden bg-white dark:bg-card"
             {...register("name")}
           />
@@ -259,6 +260,7 @@ export function ProductFields({
                 id="product-url"
                 type="url"
                 inputMode="url"
+                aria-invalid={!!errors.productUrl}
                 placeholder="https://example.com/produkt"
                 className="h-11 text-base sm:text-sm flex-1"
                 {...register("productUrl", {
@@ -454,6 +456,7 @@ export function ProductFields({
               id="product-image"
               type="url"
               inputMode="url"
+              aria-invalid={!!errors.imageUrl}
               className="h-11 text-base sm:text-sm bg-white dark:bg-card"
               placeholder="https://example.com/zdjecie.jpg"
               {...register("imageUrl")}
@@ -512,6 +515,7 @@ export function ProductFields({
           <Input
             id="product-code"
             inputMode="numeric"
+            aria-invalid={!!errors.code}
             className="h-11 text-base sm:text-sm bg-white dark:bg-card"
             placeholder="np. 5099206103734"
             {...register("code")}

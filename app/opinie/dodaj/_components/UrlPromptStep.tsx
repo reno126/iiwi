@@ -5,13 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { ScrapeDelayNotice } from "./ScrapeDelayNotice";
-import {
-  Sparkles,
-  ArrowLeft,
-  SmilePlus,
-  FaceGrinningIcon,
-  ScanFaceIcon,
-} from "lucide-react";
+import { Sparkles, ArrowLeft } from "lucide-react";
 
 interface UrlPromptStepProps {
   onScrape: (url: string) => void;
@@ -54,6 +48,7 @@ export function UrlPromptStep({
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://sklep.pl/produkt..."
+            aria-label="Link do oferty produktu"
             autoFocus
             disabled={isPending}
             className="h-11 flex-1 text-base sm:text-sm"

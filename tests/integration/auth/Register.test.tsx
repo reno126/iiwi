@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Register } from "@/app/register/_components/Register";
+import { REGISTER_ERRORS } from "@/schemas/register";
 import { server } from "@/tests/mocks/server";
 import { http, HttpResponse, delay } from "msw";
 import { signIn } from "next-auth/react";
@@ -29,6 +30,28 @@ vi.mock("next-auth/react", () => ({
   signIn: vi.fn(),
 }));
 
+function createRegisterDriver() {
+  const user = userEvent.setup();
+  return {
+    user,
+    heading: () => screen.getByRole("heading", { name: /utwórz konto/i }),
+    nameInput: () => screen.getByRole("textbox", { name: /imię/i }),
+    emailInput: () => screen.getByRole("textbox", { name: /adres e-mail/i }),
+    passwordInput: () => screen.getByLabelText(/hasło/i),
+    submitButton: () => screen.getByRole("button", { name: /zarejestruj się/i }),
+    loginLink: () => screen.getByRole("link", { name: /zaloguj się/i }),
+    alerts: () => screen.getAllByRole("alert"),
+    async fillForm(data: { name?: string; email?: string; password?: string }) {
+      if (data.name) await user.type(this.nameInput(), data.name);
+      if (data.email) await user.type(this.emailInput(), data.email);
+      if (data.password) await user.type(this.passwordInput(), data.password);
+    },
+    async submit() {
+      await user.click(this.submitButton());
+    },
+  };
+}
+
 describe("app/register/_components/Register", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -37,41 +60,39 @@ describe("app/register/_components/Register", () => {
 
   it("renders registration form fields and submit button", () => {
     render(<Register />);
+    const driver = createRegisterDriver();
 
-    expect(
-      screen.getByText("Utwórz konto", { selector: "[data-slot='card-title']" }),
-    ).toBeInTheDocument();
-    expect(screen.getByLabelText(/Imię/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Adres e-mail/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Hasło/i)).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Zarejestruj się" }),
-    ).toBeInTheDocument();
+    expect(driver.heading()).toBeInTheDocument();
+    expect(driver.nameInput()).toBeInTheDocument();
+    expect(driver.emailInput()).toBeInTheDocument();
+    expect(driver.passwordInput()).toBeInTheDocument();
+    expect(driver.submitButton()).toBeInTheDocument();
   });
 
   it("validates form fields and displays errors on empty submission", async () => {
-    const user = userEvent.setup();
     render(<Register />);
+    const driver = createRegisterDriver();
 
-    const submitBtn = screen.getByRole("button", { name: "Zarejestruj się" });
-    await user.click(submitBtn);
+    await driver.submit();
 
     await waitFor(() => {
+      expect(driver.nameInput()).toBeInvalid();
+      expect(driver.emailInput()).toBeInvalid();
+      expect(driver.passwordInput()).toBeInvalid();
       expect(
-        screen.getByText("Imię musi mieć co najmniej 2 znaki"),
+        screen.getByText(REGISTER_ERRORS.nameMinLength),
       ).toBeInTheDocument();
       expect(
-        screen.getByText("Podaj prawidłowy adres e-mail"),
+        screen.getByText(REGISTER_ERRORS.invalidEmail),
       ).toBeInTheDocument();
       expect(
-        screen.getByText("Hasło musi mieć co najmniej 6 znaków"),
+        screen.getByText(REGISTER_ERRORS.passwordMinLength),
       ).toBeInTheDocument();
     });
+    expect(signIn).not.toHaveBeenCalled();
   });
 
   it("disables submit button and shows loading state during network submission", async () => {
-    const user = userEvent.setup();
-
     server.use(
       http.post("*/api/register", async () => {
         await delay(150);
@@ -86,19 +107,20 @@ describe("app/register/_components/Register", () => {
     });
 
     render(<Register />);
+    const driver = createRegisterDriver();
 
-    await user.type(screen.getByLabelText(/Imię/i), "Anna Nowak");
-    await user.type(screen.getByLabelText(/Adres e-mail/i), "anna@example.com");
-    await user.type(screen.getByLabelText(/Hasło/i), "tajnehaslo123");
+    await driver.fillForm({
+      name: "Anna Nowak",
+      email: "anna@example.com",
+      password: "tajnehaslo123",
+    });
 
-    const submitBtn = screen.getByRole("button", { name: "Zarejestruj się" });
-    await user.click(submitBtn);
+    await driver.submit();
 
-    // During in-flight request, button should be disabled and show loading text
-    expect(submitBtn).toBeDisabled();
-    expect(screen.getByText("Tworzenie konta...")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /tworzenie konta/i }),
+    ).toBeDisabled();
 
-    // After request finishes, auto-login happens and redirects to dashboard
     await waitFor(() => {
       expect(signIn).toHaveBeenCalledWith("credentials", {
         email: "anna@example.com",
@@ -111,17 +133,19 @@ describe("app/register/_components/Register", () => {
   });
 
   it("displays alert with error message when API responds with 409 conflict", async () => {
-    const user = userEvent.setup();
     render(<Register />);
+    const driver = createRegisterDriver();
 
-    await user.type(screen.getByLabelText(/Imię/i), "Krzysztof Kowal");
-    await user.type(screen.getByLabelText(/Adres e-mail/i), "zajety@test.pl");
-    await user.type(screen.getByLabelText(/Hasło/i), "bezpiecznehaslo1");
+    await driver.fillForm({
+      name: "Krzysztof Kowal",
+      email: "zajety@test.pl",
+      password: "bezpiecznehaslo1",
+    });
 
-    const submitBtn = screen.getByRole("button", { name: "Zarejestruj się" });
-    await user.click(submitBtn);
+    await driver.submit();
 
     await waitFor(() => {
+      expect(screen.getByRole("alert")).toBeInTheDocument();
       expect(
         screen.getByText(
           "Ten adres e-mail jest już zajęty. Zaloguj się na swoje konto.",
@@ -134,7 +158,6 @@ describe("app/register/_components/Register", () => {
 
   it("automatically logs in and redirects to custom callbackUrl on successful registration", async () => {
     mockSearchParams = new URLSearchParams("callbackUrl=/opinie/dodaj");
-    const user = userEvent.setup();
     vi.mocked(signIn).mockResolvedValueOnce({
       error: null,
       status: 200,
@@ -143,13 +166,15 @@ describe("app/register/_components/Register", () => {
     });
 
     render(<Register />);
+    const driver = createRegisterDriver();
 
-    await user.type(screen.getByLabelText(/Imię/i), "Piotr Zieliński");
-    await user.type(screen.getByLabelText(/Adres e-mail/i), "piotr@example.com");
-    await user.type(screen.getByLabelText(/Hasło/i), "silnehaslo999");
+    await driver.fillForm({
+      name: "Piotr Zieliński",
+      email: "piotr@example.com",
+      password: "silnehaslo999",
+    });
 
-    const submitBtn = screen.getByRole("button", { name: "Zarejestruj się" });
-    await user.click(submitBtn);
+    await driver.submit();
 
     await waitFor(() => {
       expect(signIn).toHaveBeenCalledWith("credentials", {
@@ -163,7 +188,6 @@ describe("app/register/_components/Register", () => {
   });
 
   it("redirects to /login if registration succeeds but auto-login fails", async () => {
-    const user = userEvent.setup();
     vi.mocked(signIn).mockResolvedValueOnce({
       error: "CredentialsSignin",
       status: 401,
@@ -172,13 +196,15 @@ describe("app/register/_components/Register", () => {
     });
 
     render(<Register />);
+    const driver = createRegisterDriver();
 
-    await user.type(screen.getByLabelText(/Imię/i), "Jan Testowy");
-    await user.type(screen.getByLabelText(/Adres e-mail/i), "jan@example.com");
-    await user.type(screen.getByLabelText(/Hasło/i), "tajnehaslo123");
+    await driver.fillForm({
+      name: "Jan Testowy",
+      email: "jan@example.com",
+      password: "tajnehaslo123",
+    });
 
-    const submitBtn = screen.getByRole("button", { name: "Zarejestruj się" });
-    await user.click(submitBtn);
+    await driver.submit();
 
     await waitFor(() => {
       expect(signIn).toHaveBeenCalledWith("credentials", {
@@ -202,7 +228,6 @@ describe("app/register/_components/Register", () => {
       },
     });
 
-    const user = userEvent.setup();
     vi.mocked(signIn).mockResolvedValueOnce({
       error: null,
       status: 200,
@@ -211,13 +236,15 @@ describe("app/register/_components/Register", () => {
     });
 
     render(<Register />);
+    const driver = createRegisterDriver();
 
-    await user.type(screen.getByLabelText(/Imię/i), "Tomasz Test");
-    await user.type(screen.getByLabelText(/Adres e-mail/i), "tomasz@example.com");
-    await user.type(screen.getByLabelText(/Hasło/i), "bezpieczne123");
+    await driver.fillForm({
+      name: "Tomasz Test",
+      email: "tomasz@example.com",
+      password: "bezpieczne123",
+    });
 
-    const submitBtn = screen.getByRole("button", { name: "Zarejestruj się" });
-    await user.click(submitBtn);
+    await driver.submit();
 
     await waitFor(() => {
       expect(signIn).toHaveBeenCalledWith("credentials", {
@@ -235,9 +262,9 @@ describe("app/register/_components/Register", () => {
   it("preserves callbackUrl in login link when callbackUrl is in searchParams", () => {
     mockSearchParams = new URLSearchParams("callbackUrl=/opinie/dodaj");
     render(<Register />);
+    const driver = createRegisterDriver();
 
-    const loginLink = screen.getByRole("link", { name: "Zaloguj się" });
-    expect(loginLink).toHaveAttribute(
+    expect(driver.loginLink()).toHaveAttribute(
       "href",
       "/login?callbackUrl=%2Fopinie%2Fdodaj",
     );

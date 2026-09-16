@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Mock auth helper before importing server action
 vi.mock("@/lib/auth/helper", () => ({
   auth: vi.fn(),
 }));
@@ -20,7 +19,6 @@ const { mockTx } = vi.hoisted(() => {
   };
 });
 
-// Mock prisma db
 vi.mock("@/lib/db/prisma", () => ({
   prisma: {
     ...mockTx,
@@ -58,9 +56,9 @@ describe("serverActions/productWithReviewCreate", () => {
     });
 
     const result = await productWithReviewCreate({
-      name: "AB", // Too short (< 3)
-      rate: 6, // Exceeds max (5)
-      description: "ok", // Too short (< 3)
+      name: "AB",
+      rate: 6,
+      description: "ok",
     });
 
     expect(result?.validationErrors).toBeDefined();

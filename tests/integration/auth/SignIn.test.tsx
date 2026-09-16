@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SignIn } from "@/app/login/_components/SignIn";
+import { LOGIN_ERRORS } from "@/schemas/login";
 import { signIn } from "next-auth/react";
 import {
   saveReviewDraft,
@@ -27,6 +28,31 @@ vi.mock("next-auth/react", () => ({
   signIn: vi.fn(),
 }));
 
+function createSignInDriver() {
+  const user = userEvent.setup();
+  return {
+    user,
+    heading: () => screen.getByRole("heading", { name: /zaloguj się/i }),
+    emailInput: () => screen.getByRole("textbox", { name: /adres e-mail/i }),
+    passwordInput: () => screen.getByLabelText(/hasło/i),
+    submitButton: () => screen.getByRole("button", { name: /^zaloguj się$/i }),
+    googleButton: () =>
+      screen.getByRole("button", { name: /zaloguj się przez google/i }),
+    registerLink: () => screen.getByRole("link", { name: /zarejestruj się/i }),
+    alert: () => screen.getByRole("alert"),
+    async fillForm(data: { email?: string; password?: string }) {
+      if (data.email) await user.type(this.emailInput(), data.email);
+      if (data.password) await user.type(this.passwordInput(), data.password);
+    },
+    async submit() {
+      await user.click(this.submitButton());
+    },
+    async clickGoogle() {
+      await user.click(this.googleButton());
+    },
+  };
+}
+
 describe("app/login/_components/SignIn", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -35,39 +61,36 @@ describe("app/login/_components/SignIn", () => {
 
   it("renders the sign-in form correctly", () => {
     render(<SignIn />);
+    const driver = createSignInDriver();
 
-    expect(
-      screen.getByText("Zaloguj się", { selector: "[data-slot='card-title']" }),
-    ).toBeInTheDocument();
-    expect(screen.getByLabelText(/Adres e-mail/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Hasło/i)).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Zaloguj się" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Zaloguj się przez Google" }),
-    ).toBeInTheDocument();
+    expect(driver.heading()).toBeInTheDocument();
+    expect(driver.emailInput()).toBeInTheDocument();
+    expect(driver.passwordInput()).toBeInTheDocument();
+    expect(driver.submitButton()).toBeInTheDocument();
+    expect(driver.googleButton()).toBeInTheDocument();
   });
 
   it("displays validation errors when submitting empty form", async () => {
-    const user = userEvent.setup();
     render(<SignIn />);
+    const driver = createSignInDriver();
 
-    const submitBtn = screen.getByRole("button", { name: "Zaloguj się" });
-    await user.click(submitBtn);
+    await driver.submit();
 
     await waitFor(() => {
+      expect(driver.emailInput()).toBeInvalid();
+      expect(driver.passwordInput()).toBeInvalid();
       expect(
-        screen.getByText("Podaj prawidłowy adres e-mail"),
+        screen.getByText(LOGIN_ERRORS.invalidEmail),
       ).toBeInTheDocument();
-      expect(screen.getByText("Wprowadź hasło")).toBeInTheDocument();
+      expect(
+        screen.getByText(LOGIN_ERRORS.passwordRequired),
+      ).toBeInTheDocument();
     });
 
     expect(signIn).not.toHaveBeenCalled();
   });
 
   it("submits valid credentials and redirects to dashboard", async () => {
-    const user = userEvent.setup();
     vi.mocked(signIn).mockResolvedValueOnce({
       error: null,
       status: 200,
@@ -76,15 +99,14 @@ describe("app/login/_components/SignIn", () => {
     });
 
     render(<SignIn />);
+    const driver = createSignInDriver();
 
-    await user.type(
-      screen.getByLabelText(/Adres e-mail/i),
-      "test@example.com",
-    );
-    await user.type(screen.getByLabelText(/Hasło/i), "password123");
+    await driver.fillForm({
+      email: "test@example.com",
+      password: "password123",
+    });
 
-    const submitBtn = screen.getByRole("button", { name: "Zaloguj się" });
-    await user.click(submitBtn);
+    await driver.submit();
 
     await waitFor(() => {
       expect(signIn).toHaveBeenCalledWith("credentials", {
@@ -97,7 +119,6 @@ describe("app/login/_components/SignIn", () => {
   });
 
   it("displays dedicated alert when account was registered via Google (OAuthAccountOnly)", async () => {
-    const user = userEvent.setup();
     vi.mocked(signIn).mockResolvedValueOnce({
       error: "OAuthAccountOnly",
       status: 401,
@@ -106,16 +127,17 @@ describe("app/login/_components/SignIn", () => {
     });
 
     render(<SignIn />);
+    const driver = createSignInDriver();
 
-    await user.type(
-      screen.getByLabelText(/Adres e-mail/i),
-      "google.user@example.com",
-    );
-    await user.type(screen.getByLabelText(/Hasło/i), "password123");
+    await driver.fillForm({
+      email: "google.user@example.com",
+      password: "password123",
+    });
 
-    await user.click(screen.getByRole("button", { name: "Zaloguj się" }));
+    await driver.submit();
 
     await waitFor(() => {
+      expect(driver.alert()).toBeInTheDocument();
       expect(
         screen.getByText(
           "To konto zostało utworzone przez Google. Zaloguj się za pomocą przycisku Google poniżej.",
@@ -125,7 +147,6 @@ describe("app/login/_components/SignIn", () => {
   });
 
   it("displays generic credentials error alert on wrong password", async () => {
-    const user = userEvent.setup();
     vi.mocked(signIn).mockResolvedValueOnce({
       error: "CredentialsSignin",
       status: 401,
@@ -134,16 +155,17 @@ describe("app/login/_components/SignIn", () => {
     });
 
     render(<SignIn />);
+    const driver = createSignInDriver();
 
-    await user.type(
-      screen.getByLabelText(/Adres e-mail/i),
-      "user@example.com",
-    );
-    await user.type(screen.getByLabelText(/Hasło/i), "wrongpassword");
+    await driver.fillForm({
+      email: "user@example.com",
+      password: "wrongpassword",
+    });
 
-    await user.click(screen.getByRole("button", { name: "Zaloguj się" }));
+    await driver.submit();
 
     await waitFor(() => {
+      expect(driver.alert()).toBeInTheDocument();
       expect(
         screen.getByText("Nieprawidłowy adres e-mail lub hasło."),
       ).toBeInTheDocument();
@@ -154,7 +176,9 @@ describe("app/login/_components/SignIn", () => {
     mockSearchParams = new URLSearchParams("error=OAuthAccountOnly");
 
     render(<SignIn />);
+    const driver = createSignInDriver();
 
+    expect(driver.alert()).toBeInTheDocument();
     expect(
       screen.getByText(
         "To konto zostało utworzone przez Google. Zaloguj się za pomocą przycisku Google poniżej.",
@@ -163,13 +187,10 @@ describe("app/login/_components/SignIn", () => {
   });
 
   it("triggers Google OAuth flow when clicking Google button", async () => {
-    const user = userEvent.setup();
     render(<SignIn />);
+    const driver = createSignInDriver();
 
-    const googleBtn = screen.getByRole("button", {
-      name: "Zaloguj się przez Google",
-    });
-    await user.click(googleBtn);
+    await driver.clickGoogle();
 
     await waitFor(() => {
       expect(signIn).toHaveBeenCalledWith("google", {
@@ -190,7 +211,6 @@ describe("app/login/_components/SignIn", () => {
       },
     });
 
-    const user = userEvent.setup();
     vi.mocked(signIn).mockResolvedValueOnce({
       error: null,
       status: 200,
@@ -199,11 +219,14 @@ describe("app/login/_components/SignIn", () => {
     });
 
     render(<SignIn />);
+    const driver = createSignInDriver();
 
-    await user.type(screen.getByLabelText(/Adres e-mail/i), "test@example.com");
-    await user.type(screen.getByLabelText(/Hasło/i), "password123");
+    await driver.fillForm({
+      email: "test@example.com",
+      password: "password123",
+    });
 
-    await user.click(screen.getByRole("button", { name: "Zaloguj się" }));
+    await driver.submit();
 
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith("/opinie/dodaj?step=2");
@@ -225,13 +248,10 @@ describe("app/login/_components/SignIn", () => {
       },
     });
 
-    const user = userEvent.setup();
     render(<SignIn />);
+    const driver = createSignInDriver();
 
-    const googleBtn = screen.getByRole("button", {
-      name: "Zaloguj się przez Google",
-    });
-    await user.click(googleBtn);
+    await driver.clickGoogle();
 
     await waitFor(() => {
       expect(signIn).toHaveBeenCalledWith("google", {
@@ -245,9 +265,9 @@ describe("app/login/_components/SignIn", () => {
   it("preserves callbackUrl in register link when callbackUrl is in searchParams", () => {
     mockSearchParams = new URLSearchParams("callbackUrl=/opinie/dodaj");
     render(<SignIn />);
+    const driver = createSignInDriver();
 
-    const registerLink = screen.getByRole("link", { name: "Zarejestruj się" });
-    expect(registerLink).toHaveAttribute(
+    expect(driver.registerLink()).toHaveAttribute(
       "href",
       "/register?callbackUrl=%2Fopinie%2Fdodaj",
     );

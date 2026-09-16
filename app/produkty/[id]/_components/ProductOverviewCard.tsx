@@ -1,7 +1,6 @@
 import {
   Calendar,
   ExternalLink,
-  Star,
   User,
   MessageSquare,
   PlusCircle,

@@ -66,48 +66,45 @@ describe("HomePage", () => {
       render(<HomePage />);
     });
 
-    // 1. Big hero text
     expect(
       screen.getByRole("heading", {
-        name: /Tylko tutaj znajdziesz prawdziwe, całkowicie niezależne opinie o produktach/i,
+        name: /tylko tutaj znajdziesz prawdziwe, całkowicie niezależne opinie o produktach/i,
       }),
     ).toBeInTheDocument();
 
-    // 2. Section without title with 2 buttons: "Zobacz wszystkie opinie" and "Dodaj opinię"
-    const viewAllLink = screen.getByRole("link", { name: "Zobacz wszystkie opinie" });
+    const viewAllLink = screen.getByRole("link", {
+      name: /zobacz wszystkie opinie/i,
+    });
     expect(viewAllLink).toHaveAttribute("href", "/produkty");
 
-    const addReviewLinks = screen.getAllByRole("link", { name: "Dodaj opinię" });
-    // There are two "Dodaj opinię" buttons (one in section 2, one in section 5)
+    const addReviewLinks = screen.getAllByRole("link", {
+      name: /dodaj opinię/i,
+    });
     expect(addReviewLinks.length).toBeGreaterThanOrEqual(2);
     addReviewLinks.forEach((link) => {
       expect(link).toHaveAttribute("href", "/opinie/dodaj");
     });
 
-    // 3. Banner with 3 static, latest reviews: title "Ostatnio dodane opinie"
     expect(
-      screen.getByRole("heading", { name: "Ostatnio dodane opinie" }),
+      screen.getByRole("heading", { name: /ostatnio dodane opinie/i }),
     ).toBeInTheDocument();
-    expect(await screen.findByText("Testowy Produkt 1")).toBeInTheDocument();
-    expect(await screen.findByText("Testowy Produkt 2")).toBeInTheDocument();
+    expect(await screen.findByText(/testowy produkt 1/i)).toBeInTheDocument();
+    expect(await screen.findByText(/testowy produkt 2/i)).toBeInTheDocument();
     expect(
-      await screen.findByText("“Doskonały produkt, bardzo polecam!”"),
+      await screen.findByText(/doskonały produkt, bardzo polecam!/i),
     ).toBeInTheDocument();
-    expect(await screen.findByText("Jan Tester")).toBeInTheDocument();
+    expect(await screen.findByText(/jan tester/i)).toBeInTheDocument();
 
-    // Verify recentReviewsGet was called with limit 3
     expect(recentReviewsGetModule.recentReviewsGet).toHaveBeenCalledWith(3);
 
-    // 4. Shop tiles: title "Opinie z dowolnych sklepów stacjonarnych i internetowych", subtitle "Popularne sklepy"
     expect(
       screen.getByRole("heading", {
-        name: "Opinie z dowolnych sklepów stacjonarnych i internetowych",
+        name: /opinie z dowolnych sklepów stacjonarnych i internetowych/i,
       }),
     ).toBeInTheDocument();
-    expect(await screen.findByText("Popularne sklepy")).toBeInTheDocument();
+    expect(await screen.findByText(/popularne sklepy/i)).toBeInTheDocument();
 
-    // Verify shop names and logos are rendered
-    expect((await screen.findAllByText("Media Expert")).length).toBeGreaterThanOrEqual(1);
-    expect((await screen.findAllByText("Allegro")).length).toBeGreaterThanOrEqual(1);
+    expect((await screen.findAllByText(/media expert/i)).length).toBeGreaterThanOrEqual(1);
+    expect((await screen.findAllByText(/allegro/i)).length).toBeGreaterThanOrEqual(1);
   });
 });

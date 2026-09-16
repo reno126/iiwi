@@ -12,7 +12,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { RatingInput } from "./RatingInput";
 import type { ReviewCreateInput } from "@/schemas/review";
-import { cn } from "cn";
 
 interface ReviewFieldsProps {
   className?: string;

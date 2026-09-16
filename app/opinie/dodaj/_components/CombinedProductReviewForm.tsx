@@ -26,10 +26,8 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CircleAlert, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { CircleAlert, CheckCircle2 } from "lucide-react";
 import { StickyFormActionBar } from "./StickyFormActionBar";
 import { UrlPromptStep } from "./UrlPromptStep";
 import {
@@ -288,7 +286,6 @@ export function CombinedProductReviewForm({
 
       <CardContent className="px-0 md:px-6">
         {phase.type === "URL_PROMPT" ? (
-          /* STAN 1: Ekran początkowy (3 elementy + opcja manualna) */
           <UrlPromptStep
             onScrape={handleScrape}
             onManualSelect={handleManualSelect}
@@ -297,7 +294,6 @@ export function CombinedProductReviewForm({
             isTier2NoticeVisible={isTier2NoticeVisible}
           />
         ) : (
-          /* STAN 2: Aktywny formularz (ścieżka automatyczna lub manualna) */
           <FormProvider {...methods}>
             <form
               onSubmit={handleSubmit(onSubmit)}

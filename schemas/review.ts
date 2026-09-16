@@ -1,17 +1,27 @@
 import { z } from "zod";
 
+export const REVIEW_ERRORS = {
+  productIdRequired: "Identyfikator produktu jest wymagany",
+  rateRequired: "Ocena jest wymagana",
+  rateMin: "Ocena musi wynosić co najmniej 1",
+  rateMax: "Ocena nie może przekraczać 5",
+  descriptionRequired: "Treść recenzji jest wymagana",
+  descriptionMinLength: "Treść recenzji musi mieć co najmniej 3 znaki",
+  descriptionMaxLength: "Treść recenzji nie może przekraczać 5000 znaków",
+} as const;
+
 export const reviewCreateSchema = z.object({
   productId: z
-    .string({ message: "Identyfikator produktu jest wymagany" })
-    .min(1, { message: "Identyfikator produktu jest wymagany" }),
+    .string({ message: REVIEW_ERRORS.productIdRequired })
+    .min(1, { message: REVIEW_ERRORS.productIdRequired }),
   rate: z
-    .number({ message: "Ocena jest wymagana" })
-    .min(1, { message: "Ocena musi wynosić co najmniej 1" })
-    .max(5, { message: "Ocena nie może przekraczać 5" }),
+    .number({ message: REVIEW_ERRORS.rateRequired })
+    .min(1, { message: REVIEW_ERRORS.rateMin })
+    .max(5, { message: REVIEW_ERRORS.rateMax }),
   description: z
-    .string({ message: "Treść recenzji jest wymagana" })
-    .min(3, { message: "Treść recenzji musi mieć co najmniej 3 znaki" })
-    .max(5000, { message: "Treść recenzji nie może przekraczać 5000 znaków" }),
+    .string({ message: REVIEW_ERRORS.descriptionRequired })
+    .min(3, { message: REVIEW_ERRORS.descriptionMinLength })
+    .max(5000, { message: REVIEW_ERRORS.descriptionMaxLength }),
 });
 
 export type ReviewCreateInput = z.infer<typeof reviewCreateSchema>;

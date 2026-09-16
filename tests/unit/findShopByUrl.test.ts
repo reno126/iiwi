@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Mock prisma db
 vi.mock("@/lib/db/prisma", () => ({
   prisma: {
     shop: {
@@ -70,7 +69,6 @@ describe("findShopByUrl", () => {
   });
 
   it("performs tie-breaking and selects the shop with the highest-priority match", async () => {
-    // E.g., two shops match: shop-generic has ["action"], shop-specific has ["action.com"]
     const shopGeneric = {
       id: "shop-generic",
       name: "Action General",
@@ -88,16 +86,13 @@ describe("findShopByUrl", () => {
       updatedAt: new Date(),
     };
 
-    // DB returns in arbitrary order
     vi.mocked(prisma.shop.findMany).mockResolvedValueOnce([
       shopGeneric,
       shopSpecific,
     ]);
 
-    // Candidates: ["action.com", "action"]
     const result = await findShopByUrl("https://www.action.com/pl-pl/p/123");
 
-    // shopSpecific matches "action.com" (rank 0), shopGeneric matches "action" (rank 1)
     expect(result).toEqual({
       id: "shop-specific",
       name: "Action Official",

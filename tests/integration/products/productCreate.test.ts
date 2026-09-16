@@ -1,11 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Mock auth helper before importing server action
 vi.mock("@/lib/auth/helper", () => ({
   auth: vi.fn(),
 }));
 
-// Mock prisma db
 vi.mock("@/lib/db/prisma", () => ({
   prisma: {
     product: {
@@ -42,7 +40,7 @@ describe("serverActions/productCreate", () => {
     });
 
     const result = await productCreate({
-      name: "AB", // Less than 3 characters
+      name: "AB",
     });
 
     expect(result?.validationErrors).toBeDefined();

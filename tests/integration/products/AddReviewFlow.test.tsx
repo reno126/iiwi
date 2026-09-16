@@ -7,7 +7,6 @@ import {
 } from "@/lib/storage/reviewDraftStorage";
 import type { Product } from "@/prisma/generated/client";
 
-// Mocks
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: vi.fn(),
@@ -39,10 +38,12 @@ describe("AddReviewFlow - Rehydration", () => {
   it("renders SEARCHING mode by default when no draft exists", () => {
     render(<AddReviewFlow />);
     expect(
-      screen.getByText("Wybierz produkt z bazy lub dodaj nowy, aby podzielić się swoją opinią.")
+      screen.getByText(
+        /wybierz produkt z bazy lub dodaj nowy, aby podzielić się swoją opinią/i,
+      ),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /Dodaj nowy produkt/i })
+      screen.getByRole("button", { name: /dodaj nowy produkt/i }),
     ).toBeInTheDocument();
   });
 
@@ -58,12 +59,13 @@ describe("AddReviewFlow - Rehydration", () => {
 
     render(<AddReviewFlow />);
 
-    // Instead of SEARCHING mode, it should show CombinedProductReviewForm
     expect(
-      screen.queryByText("Wybierz produkt z bazy lub dodaj nowy, aby podzielić się swoją opinią.")
+      screen.queryByText(
+        /wybierz produkt z bazy lub dodaj nowy, aby podzielić się swoją opinią/i,
+      ),
     ).not.toBeInTheDocument();
     expect(
-      screen.getByText(/Twoje dane zostały przywrócone po zalogowaniu/i),
+      screen.getByText(/twoje dane zostały przywrócone po zalogowaniu/i),
     ).toBeInTheDocument();
   });
 
@@ -95,11 +97,12 @@ describe("AddReviewFlow - Rehydration", () => {
 
     render(<AddReviewFlow />);
 
-    // Should display selected product card and review form
-    expect(screen.getByText("Existing Laptop")).toBeInTheDocument();
-    expect(screen.getByText("Napisz swoją opinię")).toBeInTheDocument();
+    expect(screen.getByText(/existing laptop/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/Twoja opinia została przywrócona po zalogowaniu/i)
+      screen.getByRole("heading", { name: /napisz swoją opinię/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/twoja opinia została przywrócona po zalogowaniu/i),
     ).toBeInTheDocument();
   });
 });

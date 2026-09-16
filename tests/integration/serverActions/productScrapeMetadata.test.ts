@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Mock auth helper before importing server action
 vi.mock("@/lib/auth/helper", () => ({
   auth: vi.fn(),
 }));
@@ -19,7 +18,6 @@ describe("serverActions/productScrapeMetadata", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.env = { ...originalEnv, ZENROWS_API_KEY: "test-zenrows-key" };
-    // Domyślnie symulujemy zalogowanego użytkownika
     vi.mocked(auth).mockResolvedValue({
       user: { id: "user-test-1", email: "tester@example.com" },
       expires: "9999-12-31",
@@ -70,7 +68,6 @@ describe("serverActions/productScrapeMetadata", () => {
       scrapedFields: ["name", "imageUrl", "code"],
     });
 
-    // Upewnijmy się, że Tier 2 (ZenRows) nie był wywołany
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     expect(fetchSpy.mock.calls[0][0]).toBe("https://shop.pl/p/12345/headphones");
   });
@@ -91,11 +88,9 @@ describe("serverActions/productScrapeMetadata", () => {
 
     const fetchSpy = vi
       .spyOn(globalThis, "fetch")
-      // 1. Pierwsze wywołanie: Tier 1 (403 Forbidden - Cloudflare Turnstile)
       .mockResolvedValueOnce(
         new Response("Forbidden: Cloudflare Challenge", { status: 403 })
       )
-      // 2. Drugie wywołanie: Tier 2 (ZenRows API 200 OK)
       .mockResolvedValueOnce(
         new Response(tier2Html, {
           status: 200,
@@ -116,7 +111,6 @@ describe("serverActions/productScrapeMetadata", () => {
       scrapedFields: ["name", "imageUrl", "code"],
     });
 
-    // Powinny być dokładnie 2 zapytania: Tier 1 i fallback Tier 2
     expect(fetchSpy).toHaveBeenCalledTimes(2);
     const zenrowsCallUrl = String(fetchSpy.mock.calls[1][0]);
     expect(zenrowsCallUrl).toContain("api.zenrows.com");
@@ -180,14 +174,12 @@ describe("serverActions/productScrapeMetadata", () => {
     `;
 
     vi.spyOn(globalThis, "fetch")
-      // Tier 1 direct fetch: zwraca HTML bez zdjęcia
       .mockResolvedValueOnce(
         new Response(mockHtml, {
           status: 200,
           headers: { "Content-Type": "text/html" },
         })
       )
-      // Tier 2 ZenRows: też brak zdjęcia
       .mockResolvedValueOnce(
         new Response(mockHtml, {
           status: 200,

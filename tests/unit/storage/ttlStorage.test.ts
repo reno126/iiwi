@@ -31,16 +31,13 @@ describe("lib/storage/ttlStorage", () => {
     let mockedTime = 1000000;
     Date.now = vi.fn(() => mockedTime);
 
-    setItemWithTtl(key, data, 5000); // expires at 1005000
+    setItemWithTtl(key, data, 5000);
 
-    // Before expiration
     expect(getItemWithTtl(key)).toEqual(data);
 
-    // Advance time past expiration
     mockedTime = 1005001;
     expect(getItemWithTtl(key)).toBeNull();
 
-    // Verify localStorage key was removed
     expect(window.localStorage.getItem(key)).toBeNull();
 
     Date.now = originalNow;

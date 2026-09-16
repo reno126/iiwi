@@ -15,6 +15,34 @@ const mockProducts: TestProduct[] = [
   { id: "3", name: "Klawiatura mechaniczna Keychron", code: "KEY-03", price: 450 },
 ];
 
+function createAsyncSearchDriver() {
+  return {
+    input: () => screen.getByRole("combobox"),
+    queryInput: () => screen.queryByRole("combobox"),
+    listbox: () => screen.getByRole("listbox"),
+    queryListbox: () => screen.queryByRole("listbox"),
+    options: () => screen.getAllByRole("option"),
+    clearButton: () =>
+      screen.getByRole("button", { name: /wyczyść wyszukiwanie/i }),
+    queryClearButton: () =>
+      screen.queryByRole("button", { name: /wyczyść wyszukiwanie/i }),
+    loadingIndicator: () => screen.getByLabelText(/ładowanie wyników/i),
+    queryLoadingIndicator: () => screen.queryByLabelText(/ładowanie wyników/i),
+    type(val: string) {
+      fireEvent.change(this.input(), { target: { value: val } });
+    },
+    clear() {
+      fireEvent.click(this.clearButton());
+    },
+    pressArrowDown() {
+      fireEvent.keyDown(this.input(), { key: "ArrowDown" });
+    },
+    pressEnter() {
+      fireEvent.keyDown(this.input(), { key: "Enter" });
+    },
+  };
+}
+
 describe("app/opinie/dodaj/_components/AsyncSearch", () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -28,12 +56,10 @@ describe("app/opinie/dodaj/_components/AsyncSearch", () => {
   it("renders search input without any start/submit button", () => {
     const mockAction = vi.fn().mockResolvedValue([]);
     render(<AsyncSearch<TestProduct> searchAction={mockAction} />);
+    const driver = createAsyncSearchDriver();
 
-    const input = screen.getByRole("combobox");
-    expect(input).toBeInTheDocument();
-    expect(input).toHaveAttribute("placeholder", "Szukaj (min. 3 znaki)...");
-
-    // Must NOT have a search start button
+    expect(driver.input()).toBeInTheDocument();
+    expect(driver.input()).toHaveAttribute("placeholder", "Szukaj (min. 3 znaki)...");
     expect(screen.queryByRole("button", { name: /szukaj/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /search/i })).not.toBeInTheDocument();
   });
@@ -41,19 +67,16 @@ describe("app/opinie/dodaj/_components/AsyncSearch", () => {
   it("does not trigger search when query length is less than 3 characters", async () => {
     const mockAction = vi.fn().mockResolvedValue(mockProducts);
     render(<AsyncSearch<TestProduct> searchAction={mockAction} minChars={3} debounceMs={300} />);
+    const driver = createAsyncSearchDriver();
 
-    const input = screen.getByRole("combobox");
+    driver.type("Sł");
 
-    // Type 2 characters
-    fireEvent.change(input, { target: { value: "Sł" } });
-
-    // Fast-forward past debounce
     act(() => {
       vi.advanceTimersByTime(500);
     });
 
     expect(mockAction).not.toHaveBeenCalled();
-    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+    expect(driver.queryListbox()).not.toBeInTheDocument();
     expect(screen.getByText(/wpisz jeszcze co najmniej 1 znak/i)).toBeInTheDocument();
   });
 
@@ -67,15 +90,12 @@ describe("app/opinie/dodaj/_components/AsyncSearch", () => {
         getItemLabel={(item) => `${item.name} (${item.code})`}
       />
     );
+    const driver = createAsyncSearchDriver();
 
-    const input = screen.getByRole("combobox");
+    driver.type("Słu");
 
-    fireEvent.change(input, { target: { value: "Słu" } });
-
-    // Before debounce completes, searchAction should not be called yet
     expect(mockAction).not.toHaveBeenCalled();
 
-    // Advance debounce time
     await act(async () => {
       vi.advanceTimersByTime(300);
     });
@@ -83,11 +103,9 @@ describe("app/opinie/dodaj/_components/AsyncSearch", () => {
     expect(mockAction).toHaveBeenCalledTimes(1);
     expect(mockAction).toHaveBeenCalledWith("Słu");
 
-    // Results list should appear below input
-    const listbox = screen.getByRole("listbox");
-    expect(listbox).toBeInTheDocument();
+    expect(driver.listbox()).toBeInTheDocument();
 
-    const options = screen.getAllByRole("option");
+    const options = driver.options();
     expect(options).toHaveLength(3);
     expect(options[0]).toHaveTextContent("Słuchawki bezprzewodowe Sony (SONY-01)");
     expect(options[1]).toHaveTextContent("Słuchawki douszne JBL (JBL-02)");
@@ -96,16 +114,16 @@ describe("app/opinie/dodaj/_components/AsyncSearch", () => {
   it("handles next-safe-action response format ({ data: T[] })", async () => {
     const mockAction = vi.fn().mockResolvedValue({ data: mockProducts.slice(0, 1) });
     render(<AsyncSearch<TestProduct> searchAction={mockAction} minChars={3} debounceMs={200} />);
+    const driver = createAsyncSearchDriver();
 
-    const input = screen.getByRole("combobox");
-    fireEvent.change(input, { target: { value: "Sony" } });
+    driver.type("Sony");
 
     await act(async () => {
       vi.advanceTimersByTime(200);
     });
 
     expect(mockAction).toHaveBeenCalledWith("Sony");
-    const options = screen.getAllByRole("option");
+    const options = driver.options();
     expect(options).toHaveLength(1);
     expect(options[0]).toHaveTextContent("Słuchawki bezprzewodowe Sony");
   });
@@ -118,25 +136,21 @@ describe("app/opinie/dodaj/_components/AsyncSearch", () => {
     const mockAction = vi.fn().mockReturnValue(pendingPromise);
 
     render(<AsyncSearch<TestProduct> searchAction={mockAction} minChars={3} debounceMs={150} />);
+    const driver = createAsyncSearchDriver();
 
-    const input = screen.getByRole("combobox");
-    fireEvent.change(input, { target: { value: "Sony" } });
+    driver.type("Sony");
 
-    // Advance to fire the async action
     act(() => {
       vi.advanceTimersByTime(150);
     });
 
-    // Loading spinner should be visible
-    expect(screen.getByLabelText("Ładowanie wyników")).toBeInTheDocument();
+    expect(driver.loadingIndicator()).toBeInTheDocument();
 
-    // Resolve the promise
     await act(async () => {
       resolvePromise!(mockProducts.slice(0, 1));
     });
 
-    // Loading indicator is replaced with results
-    expect(screen.queryByLabelText("Ładowanie wyników")).not.toBeInTheDocument();
+    expect(driver.queryLoadingIndicator()).not.toBeInTheDocument();
     expect(screen.getByText("Słuchawki bezprzewodowe Sony")).toBeInTheDocument();
   });
 
@@ -150,9 +164,9 @@ describe("app/opinie/dodaj/_components/AsyncSearch", () => {
         emptyTitle="Brak produktów"
       />
     );
+    const driver = createAsyncSearchDriver();
 
-    const input = screen.getByRole("combobox");
-    fireEvent.change(input, { target: { value: "Nieistniejący" } });
+    driver.type("Nieistniejący");
 
     await act(async () => {
       vi.advanceTimersByTime(200);
@@ -160,7 +174,6 @@ describe("app/opinie/dodaj/_components/AsyncSearch", () => {
 
     expect(mockAction).toHaveBeenCalledWith("Nieistniejący");
 
-    // Zero result state should be rendered
     expect(screen.getByText("Brak produktów")).toBeInTheDocument();
     expect(
       screen.getByText(/nie znaleziono żadnych wyników dla frazy „Nieistniejący”/i)
@@ -170,36 +183,25 @@ describe("app/opinie/dodaj/_components/AsyncSearch", () => {
   it("displays clear button ('X') when query is non-empty and resets state when clicked", async () => {
     const mockAction = vi.fn().mockResolvedValue(mockProducts);
     render(<AsyncSearch<TestProduct> searchAction={mockAction} minChars={3} debounceMs={200} />);
+    const driver = createAsyncSearchDriver();
 
-    const input = screen.getByRole("combobox");
+    expect(driver.queryClearButton()).not.toBeInTheDocument();
 
-    // Clear button should not exist initially
-    expect(
-      screen.queryByRole("button", { name: "Wyczyść wyszukiwanie" })
-    ).not.toBeInTheDocument();
+    driver.type("Słuchawki");
 
-    // Enter query
-    fireEvent.change(input, { target: { value: "Słuchawki" } });
-
-    // Clear button should now be visible
-    const clearButton = screen.getByRole("button", { name: "Wyczyść wyszukiwanie" });
-    expect(clearButton).toBeInTheDocument();
+    expect(driver.clearButton()).toBeInTheDocument();
 
     await act(async () => {
       vi.advanceTimersByTime(200);
     });
 
-    expect(screen.getByRole("listbox")).toBeInTheDocument();
+    expect(driver.listbox()).toBeInTheDocument();
 
-    // Click clear button
-    fireEvent.click(clearButton);
+    driver.clear();
 
-    // Input must be cleared and results removed
-    expect(input).toHaveValue("");
-    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Wyczyść wyszukiwanie" })
-    ).not.toBeInTheDocument();
+    expect(driver.input()).toHaveValue("");
+    expect(driver.queryListbox()).not.toBeInTheDocument();
+    expect(driver.queryClearButton()).not.toBeInTheDocument();
   });
 
   it("invokes onResultSelect when a result item is clicked", async () => {
@@ -214,16 +216,16 @@ describe("app/opinie/dodaj/_components/AsyncSearch", () => {
         debounceMs={200}
       />
     );
+    const driver = createAsyncSearchDriver();
 
-    const input = screen.getByRole("combobox");
-    fireEvent.change(input, { target: { value: "Słuchawki" } });
+    driver.type("Słuchawki");
 
     await act(async () => {
       vi.advanceTimersByTime(200);
     });
 
-    const options = screen.getAllByRole("option");
-    fireEvent.click(options[1]); // Click JBL
+    const options = driver.options();
+    fireEvent.click(options[1]);
 
     expect(onSelect).toHaveBeenCalledTimes(1);
     expect(onSelect).toHaveBeenCalledWith(mockProducts[1]);
@@ -241,27 +243,24 @@ describe("app/opinie/dodaj/_components/AsyncSearch", () => {
         debounceMs={200}
       />
     );
+    const driver = createAsyncSearchDriver();
 
-    const input = screen.getByRole("combobox");
-    fireEvent.change(input, { target: { value: "Słuchawki" } });
+    driver.type("Słuchawki");
 
     await act(async () => {
       vi.advanceTimersByTime(200);
     });
 
-    const options = screen.getAllByRole("option");
+    const options = driver.options();
 
-    // Arrow down to first item
-    fireEvent.keyDown(input, { key: "ArrowDown" });
+    driver.pressArrowDown();
     expect(options[0]).toHaveAttribute("aria-selected", "true");
 
-    // Arrow down to second item
-    fireEvent.keyDown(input, { key: "ArrowDown" });
+    driver.pressArrowDown();
     expect(options[1]).toHaveAttribute("aria-selected", "true");
     expect(options[0]).toHaveAttribute("aria-selected", "false");
 
-    // Press Enter to select
-    fireEvent.keyDown(input, { key: "Enter" });
+    driver.pressEnter();
     expect(onSelect).toHaveBeenCalledWith(mockProducts[1]);
   });
 
@@ -283,9 +282,9 @@ describe("app/opinie/dodaj/_components/AsyncSearch", () => {
         )}
       />
     );
+    const driver = createAsyncSearchDriver();
 
-    const input = screen.getByRole("combobox");
-    fireEvent.change(input, { target: { value: "Sony" } });
+    driver.type("Sony");
 
     await act(async () => {
       vi.advanceTimersByTime(100);
@@ -310,9 +309,9 @@ describe("app/opinie/dodaj/_components/AsyncSearch", () => {
         debounceMs={150}
       />
     );
+    const driver = createAsyncSearchDriver();
 
-    const input = screen.getByRole("combobox");
-    fireEvent.change(input, { target: { value: "Owoce" } });
+    driver.type("Owoce");
 
     await act(async () => {
       vi.advanceTimersByTime(150);

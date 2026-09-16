@@ -1,14 +1,20 @@
 import z from "zod";
 
+export const REGISTER_ERRORS = {
+  nameMinLength: "Imię musi mieć co najmniej 2 znaki",
+  invalidEmail: "Podaj prawidłowy adres e-mail",
+  passwordMinLength: "Hasło musi mieć co najmniej 6 znaków",
+} as const;
+
 export const registerSchema = z.object({
   name: z.string().min(2, {
-    message: "Imię musi mieć co najmniej 2 znaki",
+    message: REGISTER_ERRORS.nameMinLength,
   }),
-  email: z.string().email({
-    message: "Podaj prawidłowy adres e-mail",
+  email: z.email({
+    message: REGISTER_ERRORS.invalidEmail,
   }),
   password: z.string().min(6, {
-    message: "Hasło musi mieć co najmniej 6 znaków",
+    message: REGISTER_ERRORS.passwordMinLength,
   }),
 });
 

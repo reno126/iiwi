@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Mock auth helper before importing server action
 vi.mock("@/lib/auth/helper", () => ({
   auth: vi.fn(),
 }));

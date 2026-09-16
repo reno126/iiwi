@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { registerSchema } from "@/schemas/register";
-import { loginSchema } from "@/schemas/login";
-import { productCreateSchema } from "@/schemas/product";
-import { reviewCreateSchema } from "@/schemas/review";
+import { registerSchema, REGISTER_ERRORS } from "@/schemas/register";
+import { loginSchema, LOGIN_ERRORS } from "@/schemas/login";
+import { productCreateSchema, PRODUCT_ERRORS } from "@/schemas/product";
+import { reviewCreateSchema, REVIEW_ERRORS } from "@/schemas/review";
 import { productScrapeSchema } from "@/schemas/productScrape";
 import { shopSchema, shopCreateSchema } from "@/schemas/shop";
 
@@ -32,7 +32,7 @@ describe("schemas/register", () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       const emailError = result.error.format().email?._errors;
-      expect(emailError).toContain("Podaj prawidłowy adres e-mail");
+      expect(emailError).toContain(REGISTER_ERRORS.invalidEmail);
     }
   });
 
@@ -47,7 +47,7 @@ describe("schemas/register", () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       const passwordError = result.error.format().password?._errors;
-      expect(passwordError).toContain("Hasło musi mieć co najmniej 6 znaków");
+      expect(passwordError).toContain(REGISTER_ERRORS.passwordMinLength);
     }
   });
 
@@ -62,7 +62,7 @@ describe("schemas/register", () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       const nameError = result.error.format().name?._errors;
-      expect(nameError).toContain("Imię musi mieć co najmniej 2 znaki");
+      expect(nameError).toContain(REGISTER_ERRORS.nameMinLength);
     }
   });
 });
@@ -91,7 +91,7 @@ describe("schemas/login", () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       const emailError = result.error.format().email?._errors;
-      expect(emailError).toContain("Podaj prawidłowy adres e-mail");
+      expect(emailError).toContain(LOGIN_ERRORS.invalidEmail);
     }
   });
 
@@ -105,7 +105,7 @@ describe("schemas/login", () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       const passwordError = result.error.format().password?._errors;
-      expect(passwordError).toContain("Wprowadź hasło");
+      expect(passwordError).toContain(LOGIN_ERRORS.passwordRequired);
     }
   });
 });
@@ -143,7 +143,7 @@ describe("schemas/product", () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       const nameError = result.error.format().name?._errors;
-      expect(nameError).toContain("Nazwa produktu musi mieć co najmniej 3 znaki");
+      expect(nameError).toContain(PRODUCT_ERRORS.nameMinLength);
     }
   });
 
@@ -156,7 +156,7 @@ describe("schemas/product", () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       const nameError = result.error.format().name?._errors;
-      expect(nameError).toContain("Nazwa produktu nie może przekraczać 100 znaków");
+      expect(nameError).toContain(PRODUCT_ERRORS.nameMaxLength);
     }
   });
 
@@ -169,7 +169,7 @@ describe("schemas/product", () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       const urlError = result.error.format().productUrl?._errors;
-      expect(urlError).toContain("Podaj prawidłowy adres URL produktu");
+      expect(urlError).toContain(PRODUCT_ERRORS.productUrlInvalid);
     }
   });
 
@@ -182,7 +182,7 @@ describe("schemas/product", () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       const urlError = result.error.format().productUrl?._errors;
-      expect(urlError).toContain("Adres URL nie może zawierać spacji");
+      expect(urlError).toContain(PRODUCT_ERRORS.productUrlNoSpaces);
     }
   });
 
@@ -195,12 +195,12 @@ describe("schemas/product", () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       const imgError = result.error.format().imageUrl?._errors;
-      expect(imgError).toContain("Adres URL nie może zawierać spacji");
+      expect(imgError).toContain(PRODUCT_ERRORS.imageUrlNoSpaces);
     }
   });
 
   it("fails when code exceeds 24 characters", () => {
-    const longCode = "1234567890123456789012345"; // 25 characters
+    const longCode = "1234567890123456789012345";
     const result = productCreateSchema.safeParse({
       name: "Smartfon X",
       code: longCode,
@@ -209,7 +209,7 @@ describe("schemas/product", () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       const codeError = result.error.format().code?._errors;
-      expect(codeError).toContain("Kod produktu nie może przekraczać 24 znaków");
+      expect(codeError).toContain(PRODUCT_ERRORS.codeMaxLength);
     }
   });
 });
@@ -239,7 +239,7 @@ describe("schemas/review", () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       const productIdError = result.error.format().productId?._errors;
-      expect(productIdError).toContain("Identyfikator produktu jest wymagany");
+      expect(productIdError).toContain(REVIEW_ERRORS.productIdRequired);
     }
   });
 
@@ -253,7 +253,7 @@ describe("schemas/review", () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       const rateError = result.error.format().rate?._errors;
-      expect(rateError).toContain("Ocena musi wynosić co najmniej 1");
+      expect(rateError).toContain(REVIEW_ERRORS.rateMin);
     }
   });
 
@@ -267,7 +267,7 @@ describe("schemas/review", () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       const rateError = result.error.format().rate?._errors;
-      expect(rateError).toContain("Ocena nie może przekraczać 5");
+      expect(rateError).toContain(REVIEW_ERRORS.rateMax);
     }
   });
 
@@ -281,7 +281,7 @@ describe("schemas/review", () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       const descError = result.error.format().description?._errors;
-      expect(descError).toContain("Treść recenzji musi mieć co najmniej 3 znaki");
+      expect(descError).toContain(REVIEW_ERRORS.descriptionMinLength);
     }
   });
 
@@ -296,7 +296,7 @@ describe("schemas/review", () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       const descError = result.error.format().description?._errors;
-      expect(descError).toContain("Treść recenzji nie może przekraczać 5000 znaków");
+      expect(descError).toContain(REVIEW_ERRORS.descriptionMaxLength);
     }
   });
 });

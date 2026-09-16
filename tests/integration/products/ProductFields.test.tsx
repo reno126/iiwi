@@ -6,7 +6,6 @@ import { ProductFields } from "@/app/opinie/dodaj/_components/ProductFields";
 import { productScrapeMetadata } from "@/serverActions/productScrapeMetadata";
 import type { ProductCreateInput } from "@/schemas/product";
 
-// Mock productScrapeMetadata server action
 vi.mock("@/serverActions/productScrapeMetadata", () => ({
   productScrapeMetadata: vi.fn(),
 }));
@@ -44,6 +43,24 @@ function FormWrapper({ defaultValues, hideProductUrl, showFieldStatus }: Wrapper
   );
 }
 
+function createProductFieldsDriver() {
+  const user = userEvent.setup();
+  return {
+    user,
+    nameInput: () => screen.getByLabelText(/nazwa produktu/i),
+    productUrlInput: () => screen.getByLabelText(/adres url do produktu/i),
+    queryProductUrlInput: () => screen.queryByLabelText(/adres url do produktu/i),
+    imageUrlInput: () => screen.getByLabelText(/adres url zdjęcia/i),
+    queryImageUrlInput: () => screen.queryByLabelText(/adres url zdjęcia/i),
+    codeInput: () => screen.getByLabelText(/kod produktu/i),
+    scrapeButton: () =>
+      screen.getByRole("button", { name: /wyciągnij zdjęcie produktu/i }),
+    deleteImageButton: () =>
+      screen.getByRole("button", { name: /usuń/i }),
+    statusBadges: (label: RegExp | string) => screen.getAllByText(label),
+  };
+}
+
 describe("app/opinie/dodaj/_components/ProductFields", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -51,20 +68,16 @@ describe("app/opinie/dodaj/_components/ProductFields", () => {
 
   it("renders product fields and disables scrape button when productUrl is empty", () => {
     render(<FormWrapper />);
+    const driver = createProductFieldsDriver();
 
-    expect(screen.getByLabelText(/Nazwa produktu/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Adres URL do produktu/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Adres URL zdjęcia/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Kod produktu/i)).toBeInTheDocument();
-
-    const scrapeBtn = screen.getByRole("button", {
-      name: /Wyciągnij zdjęcie produktu/i,
-    });
-    expect(scrapeBtn).toBeDisabled();
+    expect(driver.nameInput()).toBeInTheDocument();
+    expect(driver.productUrlInput()).toBeInTheDocument();
+    expect(driver.imageUrlInput()).toBeInTheDocument();
+    expect(driver.codeInput()).toBeInTheDocument();
+    expect(driver.scrapeButton()).toBeDisabled();
   });
 
   it("enables scrape button when productUrl is filled and fills fields on success", async () => {
-    const user = userEvent.setup();
     vi.mocked(productScrapeMetadata).mockResolvedValueOnce({
       data: {
         imageUrl: "https://example.com/scraped-image.jpg",
@@ -76,16 +89,12 @@ describe("app/opinie/dodaj/_components/ProductFields", () => {
     });
 
     render(<FormWrapper />);
+    const driver = createProductFieldsDriver();
 
-    const productUrlInput = screen.getByLabelText(/Adres URL do produktu/i);
-    const scrapeBtn = screen.getByRole("button", {
-      name: /Wyciągnij zdjęcie produktu/i,
-    });
+    await driver.user.type(driver.productUrlInput(), "https://example.com/item");
+    expect(driver.scrapeButton()).toBeEnabled();
 
-    await user.type(productUrlInput, "https://example.com/item");
-    expect(scrapeBtn).toBeEnabled();
-
-    await user.click(scrapeBtn);
+    await driver.user.click(driver.scrapeButton());
 
     await waitFor(() => {
       expect(productScrapeMetadata).toHaveBeenCalledWith({
@@ -93,23 +102,20 @@ describe("app/opinie/dodaj/_components/ProductFields", () => {
       });
     });
 
-    // Sprawdzamy czy pole name oraz code zostały uzupełnione, a pole URL zdjęcia zastąpione podglądem
-    const nameInput = screen.getByLabelText(/Nazwa produktu/i) as HTMLInputElement;
-    const codeInput = screen.getByLabelText(/Kod produktu/i) as HTMLInputElement;
+    const nameInput = driver.nameInput() as HTMLInputElement;
+    const codeInput = driver.codeInput() as HTMLInputElement;
 
     await waitFor(() => {
       expect(nameInput.value).toBe("Pobrana Nazwa Produktu");
       expect(codeInput.value).toBe("EAN-123456");
     });
 
-    // Pole input adresu URL zdjęcia powinno zostać usunięte na rzecz podglądu miniatury
-    expect(screen.queryByLabelText(/Adres URL zdjęcia/i)).not.toBeInTheDocument();
-    expect(screen.getByText("Podgląd zdjęcia produktu")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Usuń/i })).toBeInTheDocument();
+    expect(driver.queryImageUrlInput()).not.toBeInTheDocument();
+    expect(screen.getByText(/podgląd zdjęcia produktu/i)).toBeInTheDocument();
+    expect(driver.deleteImageButton()).toBeInTheDocument();
   });
 
   it("does not overwrite already filled name and code on successful scrape", async () => {
-    const user = userEvent.setup();
     vi.mocked(productScrapeMetadata).mockResolvedValueOnce({
       data: {
         imageUrl: "https://example.com/scraped-image.jpg",
@@ -127,52 +133,44 @@ describe("app/opinie/dodaj/_components/ProductFields", () => {
           code: "MANUAL-01",
           productUrl: "https://example.com/item",
         }}
-      />
+      />,
     );
+    const driver = createProductFieldsDriver();
 
-    const scrapeBtn = screen.getByRole("button", {
-      name: /Wyciągnij zdjęcie produktu/i,
-    });
-    await user.click(scrapeBtn);
+    await driver.user.click(driver.scrapeButton());
 
-    const nameInput = screen.getByLabelText(/Nazwa produktu/i) as HTMLInputElement;
-    const codeInput = screen.getByLabelText(/Kod produktu/i) as HTMLInputElement;
+    const nameInput = driver.nameInput() as HTMLInputElement;
+    const codeInput = driver.codeInput() as HTMLInputElement;
 
     await waitFor(() => {
-      expect(screen.getByText("Podgląd zdjęcia produktu")).toBeInTheDocument();
+      expect(screen.getByText(/podgląd zdjęcia produktu/i)).toBeInTheDocument();
     });
 
-    // Wartości nie powinny zostać nadpisane
     expect(nameInput.value).toBe("Istniejąca Nazwa Wpisana Ręcznie");
     expect(codeInput.value).toBe("MANUAL-01");
   });
 
   it("allows removing the image via the 'Usuń' button in the preview", async () => {
-    const user = userEvent.setup();
-
     render(
       <FormWrapper
         defaultValues={{
           imageUrl: "https://example.com/initial-image.jpg",
         }}
-      />
+      />,
     );
+    const driver = createProductFieldsDriver();
 
-    // Na starcie pole inputu jest ukryte, a widoczny jest wyłącznie podgląd
-    expect(screen.queryByLabelText(/Adres URL zdjęcia/i)).not.toBeInTheDocument();
-    expect(screen.getByText("Podgląd zdjęcia produktu")).toBeInTheDocument();
+    expect(driver.queryImageUrlInput()).not.toBeInTheDocument();
+    expect(screen.getByText(/podgląd zdjęcia produktu/i)).toBeInTheDocument();
 
-    const deleteBtn = screen.getByRole("button", { name: /Usuń/i });
-    await user.click(deleteBtn);
+    await driver.user.click(driver.deleteImageButton());
 
-    // Po usunięciu podgląd znika, a pojawia się pole input
-    const imageUrlInput = screen.getByLabelText(/Adres URL zdjęcia/i) as HTMLInputElement;
+    const imageUrlInput = driver.imageUrlInput() as HTMLInputElement;
     expect(imageUrlInput.value).toBe("");
-    expect(screen.queryByText("Podgląd zdjęcia produktu")).not.toBeInTheDocument();
+    expect(screen.queryByText(/podgląd zdjęcia produktu/i)).not.toBeInTheDocument();
   });
 
   it("displays non-blocking error message when scraper fails", async () => {
-    const user = userEvent.setup();
     vi.mocked(productScrapeMetadata).mockResolvedValueOnce({
       serverError: "Nie udało się pobrać zdjęcia z podanej strony.",
     });
@@ -182,27 +180,22 @@ describe("app/opinie/dodaj/_components/ProductFields", () => {
         defaultValues={{
           productUrl: "https://example.com/unsupported-shop",
         }}
-      />
+      />,
     );
+    const driver = createProductFieldsDriver();
 
-    const scrapeBtn = screen.getByRole("button", {
-      name: /Wyciągnij zdjęcie produktu/i,
-    });
-    await user.click(scrapeBtn);
+    await driver.user.click(driver.scrapeButton());
 
     await waitFor(() => {
       expect(
-        screen.getByText("Nie udało się pobrać zdjęcia z podanej strony.")
+        screen.getByText(/nie udało się pobrać zdjęcia z podanej strony/i),
       ).toBeInTheDocument();
     });
 
-    // Formularz nie rzuca błędu blokującego na pole productUrl
-    const productUrlInput = screen.getByLabelText(/Adres URL do produktu/i);
-    expect(productUrlInput).not.toHaveAttribute("aria-invalid", "true");
+    expect(driver.productUrlInput()).not.toBeInvalid();
   });
 
   it("auto-fills shop when scraper returns matched shop", async () => {
-    const user = userEvent.setup();
     vi.mocked(productScrapeMetadata).mockResolvedValueOnce({
       data: {
         imageUrl: "https://example.com/me-item.jpg",
@@ -222,25 +215,24 @@ describe("app/opinie/dodaj/_components/ProductFields", () => {
         defaultValues={{
           productUrl: "https://www.mediaexpert.pl/rowery/hulajnogi/kamikaze-k1",
         }}
-      />
+      />,
     );
+    const driver = createProductFieldsDriver();
 
-    const scrapeBtn = screen.getByRole("button", {
-      name: /Wyciągnij zdjęcie produktu/i,
-    });
-    await user.click(scrapeBtn);
+    await driver.user.click(driver.scrapeButton());
 
     await waitFor(() => {
-      expect(screen.getByText("Media Expert")).toBeInTheDocument();
-      expect(screen.getByText("Wybrany sklep")).toBeInTheDocument();
+      expect(screen.getByText(/media expert/i)).toBeInTheDocument();
+      expect(screen.getByText(/wybrany sklep/i)).toBeInTheDocument();
     });
   });
 
   it("hides productUrl field when hideProductUrl is true", () => {
     render(<FormWrapper hideProductUrl={true} />);
+    const driver = createProductFieldsDriver();
 
-    expect(screen.getByLabelText(/Nazwa produktu/i)).toBeInTheDocument();
-    expect(screen.queryByLabelText(/Adres URL do produktu/i)).not.toBeInTheDocument();
+    expect(driver.nameInput()).toBeInTheDocument();
+    expect(driver.queryProductUrlInput()).not.toBeInTheDocument();
   });
 
   it("marks filled fields as 'Uzupełnione' and empty fields as 'Do uzupełnienia' when showFieldStatus is true", () => {
@@ -251,21 +243,15 @@ describe("app/opinie/dodaj/_components/ProductFields", () => {
           name: "Myszka bezprzewodowa",
           code: "",
         }}
-      />
+      />,
     );
+    const driver = createProductFieldsDriver();
 
-    // Name has value -> Uzupełnione
-    const uzupelnioneBadges = screen.getAllByText("Uzupełnione");
-    expect(uzupelnioneBadges.length).toBeGreaterThanOrEqual(1);
-
-    // Code, shop, imageUrl are empty -> Do uzupełnienia
-    const doUzupelnieniaBadges = screen.getAllByText("Do uzupełnienia");
-    expect(doUzupelnieniaBadges.length).toBeGreaterThanOrEqual(2);
+    expect(driver.statusBadges(/uzupełnione/i).length).toBeGreaterThanOrEqual(1);
+    expect(driver.statusBadges(/do uzupełnienia/i).length).toBeGreaterThanOrEqual(2);
   });
 
   it("reactively updates field status when user fills missing data and clears existing data", async () => {
-    const user = userEvent.setup();
-
     render(
       <FormWrapper
         showFieldStatus={true}
@@ -273,35 +259,29 @@ describe("app/opinie/dodaj/_components/ProductFields", () => {
           name: "Testowy Produkt",
           code: "",
         }}
-      />
+      />,
     );
+    const driver = createProductFieldsDriver();
 
-    const codeInput = screen.getByLabelText(/Kod produktu/i);
-    const nameInput = screen.getByLabelText(/Nazwa produktu/i);
+    expect(driver.statusBadges(/do uzupełnienia/i).length).toBe(3);
+    expect(driver.statusBadges(/uzupełnione/i).length).toBe(1);
 
-    // Initially code is empty ("Do uzupełnienia")
-    expect(screen.getAllByText("Do uzupełnienia").length).toBe(3); // imageUrl, shop, code
-    expect(screen.getAllByText("Uzupełnione").length).toBe(1); // name
-
-    // User types code -> code becomes "Uzupełnione"
-    await user.type(codeInput, "12345678");
+    await driver.user.type(driver.codeInput(), "12345678");
 
     await waitFor(() => {
-      expect(screen.getAllByText("Uzupełnione").length).toBe(2); // name, code
-      expect(screen.getAllByText("Do uzupełnienia").length).toBe(2); // imageUrl, shop
+      expect(driver.statusBadges(/uzupełnione/i).length).toBe(2);
+      expect(driver.statusBadges(/do uzupełnienia/i).length).toBe(2);
     });
 
-    // User clears name -> name becomes "Do uzupełnienia"
-    await user.clear(nameInput);
+    await driver.user.clear(driver.nameInput());
 
     await waitFor(() => {
-      expect(screen.getAllByText("Uzupełnione").length).toBe(1); // code
-      expect(screen.getAllByText("Do uzupełnienia").length).toBe(3); // name, imageUrl, shop
+      expect(driver.statusBadges(/uzupełnione/i).length).toBe(1);
+      expect(driver.statusBadges(/do uzupełnienia/i).length).toBe(3);
     });
   });
 
   it("activates field status marking after in-form scrape completes", async () => {
-    const user = userEvent.setup();
     vi.mocked(productScrapeMetadata).mockResolvedValueOnce({
       data: {
         imageUrl: "https://example.com/item.jpg",
@@ -313,25 +293,19 @@ describe("app/opinie/dodaj/_components/ProductFields", () => {
     });
 
     render(<FormWrapper />);
+    const driver = createProductFieldsDriver();
 
-    // Before scraping, no status badges exist
-    expect(screen.queryByText("Uzupełnione")).not.toBeInTheDocument();
-    expect(screen.queryByText("Do uzupełnienia")).not.toBeInTheDocument();
+    expect(screen.queryByText(/uzupełnione/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/do uzupełnienia/i)).not.toBeInTheDocument();
 
-    const productUrlInput = screen.getByLabelText(/Adres URL do produktu/i);
-    const scrapeBtn = screen.getByRole("button", {
-      name: /Wyciągnij zdjęcie produktu/i,
-    });
+    await driver.user.type(driver.productUrlInput(), "https://example.com/item");
+    await driver.user.click(driver.scrapeButton());
 
-    await user.type(productUrlInput, "https://example.com/item");
-    await user.click(scrapeBtn);
-
-    // After scraping, status markers are activated
-    const nameInput = screen.getByLabelText(/Nazwa produktu/i) as HTMLInputElement;
+    const nameInput = driver.nameInput() as HTMLInputElement;
     await waitFor(() => {
       expect(nameInput.value).toBe("Produkt ze scrapera");
-      expect(screen.getAllByText("Uzupełnione").length).toBe(2); // name, imageUrl
-      expect(screen.getAllByText("Do uzupełnienia").length).toBe(2); // code, shop
+      expect(driver.statusBadges(/uzupełnione/i).length).toBe(2);
+      expect(driver.statusBadges(/do uzupełnienia/i).length).toBe(2);
     });
   });
 });

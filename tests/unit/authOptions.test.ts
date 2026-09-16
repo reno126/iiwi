@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Mock prisma and bcrypt before importing authOptions
 vi.mock("@/lib/db/prisma", () => ({
   prisma: {
     user: {

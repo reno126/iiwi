@@ -9,9 +9,9 @@ test.describe("Authentication and Route Protection Flows", () => {
     await page.goto("/dashboard");
 
     await expect(page).toHaveURL(/\/login\?callbackUrl=%2Fdashboard/);
-    await expect(page.locator("[data-slot='card-title']")).toContainText(
-      "Zaloguj się",
-    );
+    await expect(
+      page.getByRole("heading", { name: /zaloguj się/i }),
+    ).toBeVisible();
   });
 
   test("redirects unauthenticated user from /products/new to /login with callbackUrl", async ({
@@ -20,9 +20,9 @@ test.describe("Authentication and Route Protection Flows", () => {
     await page.goto("/products/new");
 
     await expect(page).toHaveURL(/\/login\?callbackUrl=%2Fproducts%2Fnew/);
-    await expect(page.locator("[data-slot='card-title']")).toContainText(
-      "Zaloguj się",
-    );
+    await expect(
+      page.getByRole("heading", { name: /zaloguj się/i }),
+    ).toBeVisible();
   });
 
   test("shows client-side validation errors on /register when submitting empty form", async ({
@@ -30,17 +30,20 @@ test.describe("Authentication and Route Protection Flows", () => {
   }) => {
     await page.goto("/register");
 
-    await page.getByRole("button", { name: "Zarejestruj się" }).click();
+    await page.getByRole("button", { name: /zarejestruj się/i }).click();
 
-    await expect(
-      page.getByText("Imię musi mieć co najmniej 2 znaki"),
-    ).toBeVisible();
-    await expect(
-      page.getByText("Podaj prawidłowy adres e-mail"),
-    ).toBeVisible();
-    await expect(
-      page.getByText("Hasło musi mieć co najmniej 6 znaków"),
-    ).toBeVisible();
+    await expect(page.getByLabel(/Imię/i)).toHaveAttribute(
+      "aria-invalid",
+      "true",
+    );
+    await expect(page.getByLabel(/Adres e-mail/i)).toHaveAttribute(
+      "aria-invalid",
+      "true",
+    );
+    await expect(page.getByLabel(/Hasło/i)).toHaveAttribute(
+      "aria-invalid",
+      "true",
+    );
   });
 
   test("completes registration flow and automatically logs in to dashboard", async ({
@@ -55,12 +58,12 @@ test.describe("Authentication and Route Protection Flows", () => {
       await page.getByLabel(/Adres e-mail/i).fill(uniqueEmail);
       await page.getByLabel(/Hasło/i).fill("bezpieczneHaslo123");
 
-      await page.getByRole("button", { name: "Zarejestruj się" }).click();
+      await page.getByRole("button", { name: /zarejestruj się/i }).click();
 
       await expect(page).toHaveURL(/\/dashboard/);
-      await expect(page.locator("[data-slot='card-title']")).toContainText(
-        "Panel główny",
-      );
+      await expect(
+        page.getByRole("heading", { name: /panel główny/i }),
+      ).toBeVisible();
     } finally {
       await prisma.user.deleteMany({
         where: { email: uniqueEmail },
@@ -86,8 +89,9 @@ test.describe("Authentication and Route Protection Flows", () => {
       await page.getByLabel(/Imię/i).fill(`${E2E_TEST_PREFIX} Drugi Użytkownik`);
       await page.getByLabel(/Adres e-mail/i).fill(duplicateEmail);
       await page.getByLabel(/Hasło/i).fill("inneHaslo12345");
-      await page.getByRole("button", { name: "Zarejestruj się" }).click();
+      await page.getByRole("button", { name: /zarejestruj się/i }).click();
 
+      await expect(page.getByRole("alert")).toBeVisible();
       await expect(
         page.getByText(
           "Ten adres e-mail jest już zajęty. Zaloguj się na swoje konto.",
@@ -105,11 +109,17 @@ test.describe("Authentication and Route Protection Flows", () => {
   }) => {
     await page.goto("/login");
 
-    await page.getByRole("button", { name: "Zaloguj się", exact: true }).click();
+    await page
+      .getByRole("button", { name: /^zaloguj się$/i })
+      .click();
 
-    await expect(
-      page.getByText("Podaj prawidłowy adres e-mail"),
-    ).toBeVisible();
-    await expect(page.getByText("Wprowadź hasło")).toBeVisible();
+    await expect(page.getByLabel(/Adres e-mail/i)).toHaveAttribute(
+      "aria-invalid",
+      "true",
+    );
+    await expect(page.getByLabel(/Hasło/i)).toHaveAttribute(
+      "aria-invalid",
+      "true",
+    );
   });
 });

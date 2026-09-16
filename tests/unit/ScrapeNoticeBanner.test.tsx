@@ -11,22 +11,13 @@ describe("ScrapeNoticeBanner", () => {
       />
     );
 
-    expect(
-      screen.getByText("Pobrano wszystkie potrzebne dane produktu")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "Poniższe dane możesz sprawdzić i dowolnie edytować przed dodaniem opinii."
-      )
-    ).toBeInTheDocument();
-
-    // Verify error and warning banners are not shown
-    expect(
-      screen.queryByText("Nie udało się pobrać danych")
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByText("Udało się pobrać część danych")
-    ).not.toBeInTheDocument();
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveTextContent(/pobrano wszystkie potrzebne dane produktu/i);
+    expect(alert).toHaveTextContent(
+      /poniższe dane możesz sprawdzić i dowolnie edytować przed dodaniem opinii/i
+    );
+    expect(alert).not.toHaveTextContent(/nie udało się pobrać danych/i);
+    expect(alert).not.toHaveTextContent(/udało się pobrać część danych/i);
   });
 
   it("renders Case 1 when name, imageUrl, and shop are scraped", () => {
@@ -37,14 +28,11 @@ describe("ScrapeNoticeBanner", () => {
       />
     );
 
-    expect(
-      screen.getByText("Uzupełnij brakujące dane i dodaj swoją opinię")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "Udało się pobrać część danych"
-      )
-    ).toBeInTheDocument();
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveTextContent(/udało się pobrać część danych/i);
+    expect(alert).toHaveTextContent(
+      /uzupełnij brakujące dane i dodaj swoją opinię/i
+    );
   });
 
   it("renders Case 2 (no data scraped - scraped_failed mode): error banner", () => {
@@ -55,12 +43,11 @@ describe("ScrapeNoticeBanner", () => {
       />
     );
 
-    expect(
-      screen.getByText("Nie udało się pobrać danych")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("Uzupełnij brakujące dane i dodaj swoją opinię")
-    ).toBeInTheDocument();
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveTextContent(/nie udało się pobrać danych/i);
+    expect(alert).toHaveTextContent(
+      /uzupełnij brakujące dane i dodaj swoją opinię/i
+    );
   });
 
   it("renders Case 2 (no data scraped - empty scrapedFields): error banner", () => {
@@ -71,12 +58,11 @@ describe("ScrapeNoticeBanner", () => {
       />
     );
 
-    expect(
-      screen.getByText("Nie udało się pobrać danych")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("Uzupełnij brakujące dane i dodaj swoją opinię")
-    ).toBeInTheDocument();
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveTextContent(/nie udało się pobrać danych/i);
+    expect(alert).toHaveTextContent(
+      /uzupełnij brakujące dane i dodaj swoją opinię/i
+    );
   });
 
   it("renders Case 3 (partial data - only name scraped): warning banner", () => {
@@ -87,12 +73,11 @@ describe("ScrapeNoticeBanner", () => {
       />
     );
 
-    expect(
-      screen.getByText("Udało się pobrać część danych")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("Uzupełnij brakujące dane i dodaj swoją opinię")
-    ).toBeInTheDocument();
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveTextContent(/udało się pobrać część danych/i);
+    expect(alert).toHaveTextContent(
+      /uzupełnij brakujące dane i dodaj swoją opinię/i
+    );
   });
 
   it("renders Case 3 (partial data - only imageUrl scraped): warning banner", () => {
@@ -103,12 +88,11 @@ describe("ScrapeNoticeBanner", () => {
       />
     );
 
-    expect(
-      screen.getByText("Udało się pobrać część danych")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("Uzupełnij brakujące dane i dodaj swoją opinię")
-    ).toBeInTheDocument();
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveTextContent(/udało się pobrać część danych/i);
+    expect(alert).toHaveTextContent(
+      /uzupełnij brakujące dane i dodaj swoją opinię/i
+    );
   });
 
   it("renders Case 3 (partial data - name and shop scraped, but no image): warning banner", () => {
@@ -119,11 +103,10 @@ describe("ScrapeNoticeBanner", () => {
       />
     );
 
-    expect(
-      screen.getByText("Udało się pobrać część danych")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("Uzupełnij brakujące dane i dodaj swoją opinię")
-    ).toBeInTheDocument();
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveTextContent(/udało się pobrać część danych/i);
+    expect(alert).toHaveTextContent(
+      /uzupełnij brakujące dane i dodaj swoją opinię/i
+    );
   });
 });

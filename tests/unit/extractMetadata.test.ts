@@ -23,7 +23,7 @@ describe("lib/scraper/extractMetadata", () => {
     expect(result).not.toBeNull();
     expect(result?.imageUrl).toBe("https://cdn.sklep.pl/img/charger.jpg");
     expect(result?.name).toBe("Ładowarka Sieciowa USB-C 20W");
-    expect(result?.code).toBe("3222380"); // wyciągnięte z URL
+    expect(result?.code).toBe("3222380");
   });
 
   it("extracts image, clean name and code from JSON-LD Schema.org", () => {

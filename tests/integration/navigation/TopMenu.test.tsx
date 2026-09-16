@@ -22,18 +22,16 @@ describe("components/navigation/TopMenu", () => {
 
     render(<TopMenu />);
 
-    expect(screen.getByRole("link", { name: "Strona główna" })).toHaveAttribute(
-      "href",
-      "/",
-    );
-    expect(screen.getByRole("link", { name: "Panel" })).toHaveAttribute(
+    expect(
+      screen.getByRole("link", { name: /strona główna/i }),
+    ).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: /panel/i })).toHaveAttribute(
       "href",
       "/dashboard",
     );
-    expect(screen.getByRole("link", { name: "Dodaj opinię" })).toHaveAttribute(
-      "href",
-      "/opinie/dodaj",
-    );
+    expect(
+      screen.getByRole("link", { name: /dodaj opinię/i }),
+    ).toHaveAttribute("href", "/opinie/dodaj");
   });
 
   it("renders login and register links when user is unauthenticated", () => {
@@ -45,17 +43,16 @@ describe("components/navigation/TopMenu", () => {
 
     render(<TopMenu />);
 
-    expect(screen.getByRole("link", { name: "Zaloguj się" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /zaloguj się/i })).toHaveAttribute(
       "href",
       "/login",
     );
-    expect(screen.getByRole("link", { name: "Zarejestruj się" })).toHaveAttribute(
-      "href",
-      "/register",
-    );
+    expect(
+      screen.getByRole("link", { name: /zarejestruj się/i }),
+    ).toHaveAttribute("href", "/register");
     expect(screen.queryByText(/zalogowano jako:/i)).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Wyloguj się" }),
+      screen.queryByRole("button", { name: /wyloguj się/i }),
     ).not.toBeInTheDocument();
   });
 
@@ -74,15 +71,14 @@ describe("components/navigation/TopMenu", () => {
     expect(screen.getByText(/zalogowano jako:/i)).toBeInTheDocument();
     expect(screen.getByText("jan.kowalski@example.com")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Wyloguj się" }),
+      screen.getByRole("button", { name: /wyloguj się/i }),
     ).toBeInTheDocument();
 
-    // Login and register links should be hidden when authenticated
     expect(
-      screen.queryByRole("link", { name: "Zaloguj się" }),
+      screen.queryByRole("link", { name: /zaloguj się/i }),
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: "Zarejestruj się" }),
+      screen.queryByRole("link", { name: /zarejestruj się/i }),
     ).not.toBeInTheDocument();
   });
 });

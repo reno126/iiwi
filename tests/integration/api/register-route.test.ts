@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Mock prisma before importing route
 vi.mock("@/lib/db/prisma", () => ({
   prisma: {
     user: {
@@ -48,9 +47,9 @@ describe("app/api/register POST route handler", () => {
 
   it("returns 400 when body fails register validation schema", async () => {
     const invalidBody = {
-      name: "J", // too short
+      name: "J",
       email: "not-an-email",
-      password: "123", // too short
+      password: "123",
     };
 
     const req = new Request("http://localhost:3000/api/register", {
@@ -73,7 +72,7 @@ describe("app/api/register POST route handler", () => {
       id: "oauth-user-1",
       name: "Google User",
       email: "google@example.com",
-      password: null, // OAuth account has no password
+      password: null,
       accounts: [
         {
           id: "acc-1",
@@ -178,10 +177,8 @@ describe("app/api/register POST route handler", () => {
     const json = await res.json();
     expect(json).toEqual({ success: "Użytkownik został utworzony" });
 
-    // Verify bcrypt hashing with cost factor 12
     expect(hashSpy).toHaveBeenCalledWith("tajneHaslo123", 12);
 
-    // Verify database record creation
     expect(prisma.user.create).toHaveBeenCalledWith({
       data: {
         name: "Nowy Użytkownik",
