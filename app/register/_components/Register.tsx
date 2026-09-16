@@ -8,7 +8,7 @@ import { signIn } from "next-auth/react";
 import { CircleAlert } from "lucide-react";
 
 import { registerSchema, type RegisterInput } from "@/schemas/register";
-import { getReviewDraftReturnUrl } from "@/lib/storage/reviewDraftStorage";
+import { resolveAuthRedirectUrl } from "@/lib/auth/resolveAuthRedirectUrl";
 import { AuthCard } from "@/components/auth/AuthCard";
 import {
   Field,
@@ -93,10 +93,7 @@ export function Register({ className }: RegisterProps) {
     });
 
     if (result?.ok) {
-      const targetUrl =
-        callbackUrl && callbackUrl !== "/dashboard"
-          ? callbackUrl
-          : getReviewDraftReturnUrl("/dashboard");
+      const targetUrl = resolveAuthRedirectUrl(callbackUrl);
       router.push(targetUrl);
       router.refresh();
     } else {
@@ -114,76 +111,76 @@ export function Register({ className }: RegisterProps) {
           {REGISTER_MESSAGES.footerPrompt}{" "}
           <Link
             href={loginHref}
-            className="font-medium text-foreground underline underline-offset-4 hover:text-primary"
+            className="font-medium text-primary underline-offset-4 hover:underline"
           >
             {REGISTER_MESSAGES.loginLink}
           </Link>
         </p>
       }
     >
-      {errors.root?.message && (
-        <Alert variant="destructive">
-          <CircleAlert className="size-4" />
-          <AlertDescription>{errors.root.message}</AlertDescription>
-        </Alert>
-      )}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {errors.root?.message && (
+          <Alert variant="destructive">
+            <CircleAlert className="size-4" />
+            <AlertDescription>{errors.root.message}</AlertDescription>
+          </Alert>
+        )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <FieldGroup>
           <Field data-invalid={!!errors.name}>
-            <FieldLabel htmlFor="name">
-              {REGISTER_MESSAGES.nameLabel}<span className="text-destructive">*</span>
-            </FieldLabel>
+            <FieldLabel htmlFor="name">{REGISTER_MESSAGES.nameLabel}</FieldLabel>
             <Input
               id="name"
-              sizeVariant="touch"
+              type="text"
               placeholder={REGISTER_MESSAGES.namePlaceholder}
               autoComplete="name"
-              aria-invalid={!!errors.name}
               disabled={isSubmitting}
+              aria-invalid={!!errors.name}
               {...register("name")}
             />
-            <FieldError reserveSpace>{errors.name?.message}</FieldError>
+            <FieldError>{errors.name?.message}</FieldError>
           </Field>
 
           <Field data-invalid={!!errors.email}>
-            <FieldLabel htmlFor="email">
-              {REGISTER_MESSAGES.emailLabel} <span className="text-destructive">*</span>
-            </FieldLabel>
+            <FieldLabel htmlFor="email">{REGISTER_MESSAGES.emailLabel}</FieldLabel>
             <Input
               id="email"
               type="email"
-              sizeVariant="touch"
               placeholder={REGISTER_MESSAGES.emailPlaceholder}
               autoComplete="email"
-              aria-invalid={!!errors.email}
               disabled={isSubmitting}
+              aria-invalid={!!errors.email}
               {...register("email")}
             />
-            <FieldError reserveSpace>{errors.email?.message}</FieldError>
+            <FieldError>{errors.email?.message}</FieldError>
           </Field>
 
           <Field data-invalid={!!errors.password}>
             <FieldLabel htmlFor="password">
-              {REGISTER_MESSAGES.passwordLabel} <span className="text-destructive">*</span>
+              {REGISTER_MESSAGES.passwordLabel}
             </FieldLabel>
             <Input
               id="password"
               type="password"
-              sizeVariant="touch"
               placeholder={REGISTER_MESSAGES.passwordPlaceholder}
               autoComplete="new-password"
-              aria-invalid={!!errors.password}
               disabled={isSubmitting}
+              aria-invalid={!!errors.password}
               {...register("password")}
             />
-            <FieldError reserveSpace>{errors.password?.message}</FieldError>
+            <FieldError>{errors.password?.message}</FieldError>
           </Field>
         </FieldGroup>
 
-        <Button type="submit" size="touch" disabled={isSubmitting} className="w-full">
-          {isSubmitting && <Spinner className="mr-2" />}
-          {isSubmitting ? REGISTER_MESSAGES.submittingButton : REGISTER_MESSAGES.submitButton}
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Spinner className="mr-2 size-4" />
+              {REGISTER_MESSAGES.submittingButton}
+            </>
+          ) : (
+            REGISTER_MESSAGES.submitButton
+          )}
         </Button>
       </form>
     </AuthCard>

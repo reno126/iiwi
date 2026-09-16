@@ -5,8 +5,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { reviewCreateSchema, type ReviewCreateInput } from "@/schemas/review";
 import { reviewCreate } from "@/serverActions/reviewCreate";
-import { UNAUTHORIZED_ERROR_MESSAGE } from "@/lib/constants/authErrors";
-import { useEnsureAuthenticated } from "@/lib/auth/useEnsureAuthenticated";
+import { useAuthGatedSubmit } from "@/lib/auth/useAuthGatedSubmit";
 import {
   saveReviewDraft,
   getReviewDraft,
@@ -42,8 +41,6 @@ export function ReviewForm({
   className,
   autoFocus = false,
 }: ReviewFormProps) {
-  const { ensureAuthenticated } = useEnsureAuthenticated();
-
   const [draft] = useState(() => {
     const d = getReviewDraft();
     return d?.type === "REVIEW_EXISTING_PRODUCT" && d.productId === productId
@@ -80,101 +77,42 @@ export function ReviewForm({
     focusDescriptionFieldIfRequested();
   }, [autoFocus, setFocus]);
 
+  const saveCurrentDraft = (data: ReviewCreateInput) => {
+    saveReviewDraft({
+      type: "REVIEW_EXISTING_PRODUCT",
+      returnUrl:
+        typeof window !== "undefined"
+          ? window.location.pathname + window.location.search
+          : productId
+            ? `/produkty/${productId}`
+            : "/opinie/dodaj",
+      productId,
+      product,
+      formData: data,
+    });
+  };
+
+  const { handleSubmitAction } = useAuthGatedSubmit({
+    setError,
+    clearErrors,
+    onSaveDraft: saveCurrentDraft,
+    action: reviewCreate,
+    onSuccess: (data) => onSuccess?.(data.productId),
+  });
+
   const handleCancel = () => {
     clearReviewDraft();
     onCancel?.();
   };
 
-  const onSubmit = async (data: ReviewCreateInput) => {
-    clearErrors("root");
-
-    const isAuthenticated = await ensureAuthenticated({
-      onUnauthenticated: () => {
-        saveReviewDraft({
-          type: "REVIEW_EXISTING_PRODUCT",
-          returnUrl:
-            typeof window !== "undefined"
-              ? window.location.pathname + window.location.search
-              : productId
-                ? `/produkty/${productId}`
-                : "/opinie/dodaj",
-          productId,
-          product,
-          formData: data,
-        });
-      },
-    });
-
-    if (!isAuthenticated) {
-      return;
-    }
-
-    const res = await reviewCreate(data);
-
-    if (res?.serverError === UNAUTHORIZED_ERROR_MESSAGE) {
-      const isStillAuth = await ensureAuthenticated({
-        onUnauthenticated: () => {
-          saveReviewDraft({
-            type: "REVIEW_EXISTING_PRODUCT",
-            returnUrl:
-              typeof window !== "undefined"
-                ? window.location.pathname + window.location.search
-                : productId
-                  ? `/produkty/${productId}`
-                  : "/opinie/dodaj",
-            productId,
-            product,
-            formData: data,
-          });
-        },
-      });
-      if (!isStillAuth) return;
-
-      const retryRes = await reviewCreate(data);
-      if (retryRes?.data) {
-        clearReviewDraft();
-        onSuccess?.(productId);
-        return;
-      }
-      if (retryRes?.serverError) {
-        setError("root", { message: retryRes.serverError });
-        return;
-      }
-    }
-
-    if (res?.serverError) {
-      setError("root", { message: res.serverError });
-      return;
-    }
-
-    if (res?.validationErrors) {
-      const { fieldErrors, formErrors } = res.validationErrors;
-      if (fieldErrors) {
-        for (const [field, messages] of Object.entries(fieldErrors)) {
-          if (messages?.[0]) {
-            setError(field as keyof ReviewCreateInput, {
-              message: messages[0],
-            });
-          }
-        }
-      }
-      if (formErrors?.[0]) {
-        setError("root", { message: formErrors[0] });
-      }
-      return;
-    }
-
-    if (res?.data) {
-      clearReviewDraft();
-      onSuccess?.(productId);
-    }
-  };
-
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)} className={className}>
+      <form
+        onSubmit={handleSubmit(handleSubmitAction)}
+        className={className ?? "space-y-4"}
+      >
         {isDraftRestored && (
-          <Alert variant="info" className="mb-4">
+          <Alert variant="info">
             <CheckCircle2 className="size-4" />
             <AlertDescription>
               {REVIEW_FORM_MESSAGES.draftRestored}
@@ -183,37 +121,38 @@ export function ReviewForm({
         )}
 
         {errors.root?.message && (
-          <Alert variant="destructive" className="mb-4">
+          <Alert variant="destructive">
             <CircleAlert className="size-4" />
             <AlertDescription>{errors.root.message}</AlertDescription>
           </Alert>
         )}
 
-        <ReviewFields autoFocusDescription={autoFocus} />
+        <ReviewFields />
 
-        <div className="flex items-center justify-end gap-2 sm:gap-3 mt-6">
+        <div className="flex items-center justify-end gap-3 pt-2">
           {onCancel && (
             <Button
               type="button"
               variant="outline"
               onClick={handleCancel}
               disabled={isSubmitting}
-              className="w-1/3 sm:w-auto h-11 sm:h-9"
             >
               {REVIEW_FORM_MESSAGES.cancelButton}
             </Button>
           )}
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="flex-1 sm:flex-initial h-11 sm:h-9 font-semibold"
-          >
-            {isSubmitting && <Spinner className="mr-2 size-4" />}
-            {REVIEW_FORM_MESSAGES.submitButton}
+
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Spinner className="mr-2 size-4" />
+                {REVIEW_FORM_MESSAGES.submitButton}
+              </>
+            ) : (
+              REVIEW_FORM_MESSAGES.submitButton
+            )}
           </Button>
         </div>
       </form>
     </FormProvider>
   );
 }
-

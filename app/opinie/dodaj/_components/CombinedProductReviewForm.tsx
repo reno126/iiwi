@@ -9,15 +9,12 @@ import {
 } from "@/schemas/productWithReview";
 import { productWithReviewCreate } from "@/serverActions/productWithReviewCreate";
 import { productScrapeMetadata } from "@/serverActions/productScrapeMetadata";
-import { UNAUTHORIZED_ERROR_MESSAGE } from "@/lib/constants/authErrors";
-import { useEnsureAuthenticated } from "@/lib/auth/useEnsureAuthenticated";
+import { useAuthGatedSubmit } from "@/lib/auth/useAuthGatedSubmit";
 import {
   saveReviewDraft,
   getReviewDraft,
   clearReviewDraft,
 } from "@/lib/storage/reviewDraftStorage";
-import { ProductFields } from "./ProductFields";
-import { ReviewFields } from "@/components/reviews/ReviewFields";
 import {
   Card,
   CardContent,
@@ -25,15 +22,11 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CircleAlert, CheckCircle2 } from "lucide-react";
-import { StickyFormActionBar } from "./StickyFormActionBar";
 import { UrlPromptStep } from "./UrlPromptStep";
 import {
-  ScrapeNoticeBanner,
-  type ScrapedFieldType,
-} from "./ScrapeNoticeBanner";
+  ActiveCombinedForm,
+  type ActiveFormPhase,
+} from "./ActiveCombinedForm";
 import type { MatchedShopResult } from "@/lib/shops/findShopByUrl";
 
 export const COMBINED_FORM_MESSAGES = {
@@ -58,19 +51,12 @@ interface CombinedProductReviewFormProps {
 
 type FormPhase =
   | { type: "URL_PROMPT" }
-  | {
-      type: "ACTIVE_FORM";
-      mode: "scraped_success" | "scraped_failed" | "manual";
-      scrapedFields?: ScrapedFieldType[];
-      scrapeError?: string | null;
-    };
+  | ActiveFormPhase;
 
 export function CombinedProductReviewForm({
   onCancel,
   onSuccess,
 }: CombinedProductReviewFormProps) {
-  const { ensureAuthenticated } = useEnsureAuthenticated();
-
   const [draft] = useState(() => {
     const d = getReviewDraft();
     return d?.type === "NEW_PRODUCT_AND_REVIEW" ? d : null;
@@ -108,13 +94,35 @@ export function CombinedProductReviewForm({
     },
   });
 
-  const {
-    handleSubmit,
-    setValue,
+  const { handleSubmit, setValue, setError, clearErrors } = methods;
+
+  const saveCurrentFormDraft = (formData: ProductWithReviewCreateInput) => {
+    saveReviewDraft({
+      type: "NEW_PRODUCT_AND_REVIEW",
+      returnUrl:
+        typeof window !== "undefined"
+          ? window.location.pathname + window.location.search
+          : "/opinie/dodaj",
+      formData,
+      phase:
+        phase.type === "ACTIVE_FORM"
+          ? {
+              mode: phase.mode,
+              scrapedFields: phase.scrapedFields,
+              scrapeError: phase.scrapeError,
+            }
+          : undefined,
+      detectedShop,
+    });
+  };
+
+  const { handleSubmitAction } = useAuthGatedSubmit({
     setError,
     clearErrors,
-    formState: { errors, isSubmitting },
-  } = methods;
+    onSaveDraft: saveCurrentFormDraft,
+    action: productWithReviewCreate,
+    onSuccess: (data) => onSuccess(data.product.id),
+  });
 
   const handleCancel = () => {
     clearReviewDraft();
@@ -206,85 +214,6 @@ export function CombinedProductReviewForm({
     });
   };
 
-  const saveCurrentFormDraft = (formData: ProductWithReviewCreateInput) => {
-    saveReviewDraft({
-      type: "NEW_PRODUCT_AND_REVIEW",
-      returnUrl:
-        typeof window !== "undefined"
-          ? window.location.pathname + window.location.search
-          : "/opinie/dodaj",
-      formData,
-      phase:
-        phase.type === "ACTIVE_FORM"
-          ? {
-              mode: phase.mode,
-              scrapedFields: phase.scrapedFields,
-              scrapeError: phase.scrapeError,
-            }
-          : undefined,
-      detectedShop,
-    });
-  };
-
-  const onSubmit = async (data: ProductWithReviewCreateInput) => {
-    clearErrors("root");
-
-    const isAuthenticated = await ensureAuthenticated({
-      onUnauthenticated: () => saveCurrentFormDraft(data),
-    });
-
-    if (!isAuthenticated) {
-      return;
-    }
-
-    const res = await productWithReviewCreate(data);
-
-    if (res?.serverError === UNAUTHORIZED_ERROR_MESSAGE) {
-      const isStillAuth = await ensureAuthenticated({
-        onUnauthenticated: () => saveCurrentFormDraft(data),
-      });
-      if (!isStillAuth) return;
-
-      const retryRes = await productWithReviewCreate(data);
-      if (retryRes?.data) {
-        clearReviewDraft();
-        onSuccess(retryRes.data.product.id);
-        return;
-      }
-      if (retryRes?.serverError) {
-        setError("root", { message: retryRes.serverError });
-        return;
-      }
-    }
-
-    if (res?.serverError) {
-      setError("root", { message: res.serverError });
-      return;
-    }
-
-    if (res?.validationErrors) {
-      const { fieldErrors, formErrors } = res.validationErrors;
-      if (fieldErrors) {
-        for (const [field, messages] of Object.entries(fieldErrors)) {
-          if (messages?.[0]) {
-            setError(field as keyof ProductWithReviewCreateInput, {
-              message: messages[0],
-            });
-          }
-        }
-      }
-      if (formErrors?.[0]) {
-        setError("root", { message: formErrors[0] });
-      }
-      return;
-    }
-
-    if (res?.data) {
-      clearReviewDraft();
-      onSuccess(res.data.product.id);
-    }
-  };
-
   return (
     <Card className="border-none shadow-none ring-0 md:border md:shadow-xs bg-transparent md:bg-card overflow-visible">
       <CardHeader className="px-0 md:px-6">
@@ -309,59 +238,17 @@ export function CombinedProductReviewForm({
           />
         ) : (
           <FormProvider {...methods}>
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className="space-y-4 md:space-y-6 pb-0"
-            >
-              {isDraftRestored && (
-                <Alert variant="info">
-                  <CheckCircle2 className="size-4" />
-                  <AlertDescription>
-                    {COMBINED_FORM_MESSAGES.draftRestored}
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              {errors.root?.message && (
-                <Alert variant="destructive">
-                  <CircleAlert className="size-4" />
-                  <AlertDescription>{errors.root.message}</AlertDescription>
-                </Alert>
-              )}
-
-              {phase.mode !== "manual" && (
-                <ScrapeNoticeBanner
-                  mode={phase.mode}
-                  scrapedFields={phase.scrapedFields}
-                  errorMessage={phase.scrapeError}
-                />
-              )}
-
-              <ProductFields
-                hideProductUrl={
-                  phase.mode === "manual" || phase.mode === "scraped_success"
-                }
-                initialShop={detectedShop}
-                legend=""
-                showFieldStatus={phase.mode !== "manual"}
-              />
-
-              <Separator className="my-2" />
-
-              <ReviewFields />
-
-              <StickyFormActionBar
-                onBack={() => {
-                  clearReviewDraft();
-                  setPhase({ type: "URL_PROMPT" });
-                }}
-                backLabel={COMBINED_FORM_MESSAGES.backLabel}
-                onCancel={handleCancel}
-                cancelLabel={COMBINED_FORM_MESSAGES.cancelLabel}
-                submitLabel={COMBINED_FORM_MESSAGES.submitLabel}
-                isSubmitting={isSubmitting}
-              />
-            </form>
+            <ActiveCombinedForm
+              phase={phase}
+              detectedShop={detectedShop}
+              isDraftRestored={isDraftRestored}
+              onSubmit={handleSubmit(handleSubmitAction)}
+              onBack={() => {
+                clearReviewDraft();
+                setPhase({ type: "URL_PROMPT" });
+              }}
+              onCancel={handleCancel}
+            />
           </FormProvider>
         )}
       </CardContent>

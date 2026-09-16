@@ -3,23 +3,14 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, MessageSquare, PlusCircle } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import type { ProductWithReviews } from "@/serverActions/productGetById";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
-import {
-  Empty,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-  EmptyDescription,
-  EmptyContent,
-} from "@/components/ui/empty";
+import { buttonVariants } from "@/components/ui/button";
 import { ReviewForm } from "@/components/reviews/ReviewForm";
 import { StarRating } from "@/components/reviews/StarRating";
 import { ProductOverviewCard } from "./ProductOverviewCard";
-import { ProductReviewItem } from "./ProductReviewItem";
+import { ProductReviewsSection } from "./ProductReviewsSection";
 import { getReviewDraft } from "@/lib/storage/reviewDraftStorage";
 import { cn } from "cn";
 
@@ -43,14 +34,11 @@ export interface ProductDetailsProps {
 export function ProductDetails({ product }: ProductDetailsProps) {
   const router = useRouter();
   const [isReviewFormOpen, setIsReviewFormOpen] = useState(() => {
-    function checkInitialReviewFormOpenState(): boolean {
-      const draft = getReviewDraft();
-      return Boolean(
-        draft?.type === "REVIEW_EXISTING_PRODUCT" &&
-          draft.productId === product.id,
-      );
-    }
-    return checkInitialReviewFormOpenState();
+    const draft = getReviewDraft();
+    return Boolean(
+      draft?.type === "REVIEW_EXISTING_PRODUCT" &&
+        draft.productId === product.id,
+    );
   });
 
   useEffect(() => {
@@ -128,62 +116,11 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           </Card>
         </section>
       ) : (
-        <section aria-labelledby="reviews-heading" className="space-y-4">
-          <div className="border-b border-border pb-3">
-            <h2
-              id="reviews-heading"
-              className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2"
-            >
-              {PRODUCT_DETAILS_MESSAGES.reviewsHeading}
-              <Badge variant="outline" className="text-xs">
-                {product.reviews.length}
-              </Badge>
-            </h2>
-          </div>
-
-          {product.reviews.length === 0 ? (
-            <Empty className="border p-8 text-center">
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <MessageSquare className="size-6" />
-                </EmptyMedia>
-                <EmptyTitle>{PRODUCT_DETAILS_MESSAGES.emptyTitle}</EmptyTitle>
-                <EmptyDescription>
-                  {PRODUCT_DETAILS_MESSAGES.emptyDescription}
-                </EmptyDescription>
-              </EmptyHeader>
-              <EmptyContent>
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => setIsReviewFormOpen(true)}
-                >
-                  {PRODUCT_DETAILS_MESSAGES.firstReviewButton}
-                </Button>
-              </EmptyContent>
-            </Empty>
-          ) : (
-            <div className="space-y-6">
-              <div className="flex flex-col gap-4">
-                {product.reviews.map((review) => (
-                  <ProductReviewItem key={review.id} review={review} />
-                ))}
-              </div>
-
-              <div className="pt-2">
-                <Button
-                  type="button"
-                  onClick={() => setIsReviewFormOpen(true)}
-                  disabled={isReviewFormOpen}
-                  className="gap-1.5"
-                >
-                  <PlusCircle className="size-4" />
-                  {PRODUCT_DETAILS_MESSAGES.addReviewButton}
-                </Button>
-              </div>
-            </div>
-          )}
-        </section>
+        <ProductReviewsSection
+          reviews={product.reviews}
+          onOpenReviewForm={() => setIsReviewFormOpen(true)}
+          isReviewFormOpen={isReviewFormOpen}
+        />
       )}
     </div>
   );

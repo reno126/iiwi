@@ -1,18 +1,18 @@
 "use client";
 
-import { useTransition } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FaGoogle } from "react-icons/fa";
 import { CircleAlert } from "lucide-react";
 
 import { loginSchema, type LoginInput } from "@/schemas/login";
 import { AUTH_ERRORS, AUTH_ERROR_MESSAGES } from "@/lib/auth/constants";
-import { getReviewDraftReturnUrl } from "@/lib/storage/reviewDraftStorage";
+import { getAuthErrorMessage } from "@/lib/auth/getAuthErrorMessage";
+import { resolveAuthRedirectUrl } from "@/lib/auth/resolveAuthRedirectUrl";
 import { AuthCard } from "@/components/auth/AuthCard";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import {
   Field,
   FieldError,
@@ -49,7 +49,6 @@ export function SignIn({ className }: SignInProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
-  const [isGooglePending, startGoogleTransition] = useTransition();
 
   const registerHref =
     callbackUrl && callbackUrl !== "/dashboard"
@@ -71,26 +70,7 @@ export function SignIn({ className }: SignInProps) {
     },
   });
 
-  const getErrorMessage = (errorCode: string | null) => {
-    switch (errorCode) {
-      case AUTH_ERRORS.oauthAccountNotLinked:
-        return AUTH_ERROR_MESSAGES.oauthAccountNotLinked;
-      case AUTH_ERRORS.oauthAccountOnly:
-        return AUTH_ERROR_MESSAGES.oauthAccountOnly;
-      case AUTH_ERRORS.oauthSignin:
-      case AUTH_ERRORS.oauthCallback:
-      case AUTH_ERRORS.oauthCreateAccount:
-        return AUTH_ERROR_MESSAGES.oauthGeneralError;
-      case AUTH_ERRORS.credentialsSignin:
-        return AUTH_ERROR_MESSAGES.credentialsSignin;
-      case AUTH_ERRORS.sessionRequired:
-        return AUTH_ERROR_MESSAGES.sessionRequired;
-      default:
-        return errorCode ? AUTH_ERROR_MESSAGES.defaultError : "";
-    }
-  };
-
-  const urlError = getErrorMessage(searchParams.get("error"));
+  const urlError = getAuthErrorMessage(searchParams.get("error"));
   const displayedError = errors.root?.message || urlError;
 
   const onSubmit = async (data: LoginInput) => {
@@ -103,35 +83,23 @@ export function SignIn({ className }: SignInProps) {
     });
 
     if (result?.error) {
-      if (result.error === AUTH_ERRORS.oauthAccountOnly) {
-        setError("root", {
-          message: AUTH_ERROR_MESSAGES.oauthAccountOnly,
-        });
-      } else {
-        setError("root", {
-          message: AUTH_ERROR_MESSAGES.credentialsSignin,
-        });
-      }
-    } else {
-      const targetUrl =
-        callbackUrl && callbackUrl !== "/dashboard"
-          ? callbackUrl
-          : getReviewDraftReturnUrl("/dashboard");
+      setError("root", {
+        message:
+          result.error === AUTH_ERRORS.oauthAccountOnly
+            ? AUTH_ERROR_MESSAGES.oauthAccountOnly
+            : AUTH_ERROR_MESSAGES.credentialsSignin,
+      });
+      return;
+    }
+
+    if (result?.ok) {
+      const targetUrl = resolveAuthRedirectUrl(callbackUrl);
       router.push(targetUrl);
       router.refresh();
     }
   };
 
-  const handleGoogleSignIn = () => {
-    const targetUrl =
-      callbackUrl && callbackUrl !== "/dashboard"
-        ? callbackUrl
-        : getReviewDraftReturnUrl("/dashboard");
-
-    startGoogleTransition(async () => {
-      await signIn("google", { callbackUrl: targetUrl });
-    });
-  };
+  const googleCallbackUrl = resolveAuthRedirectUrl(callbackUrl);
 
   return (
     <AuthCard
@@ -143,88 +111,82 @@ export function SignIn({ className }: SignInProps) {
           {SIGN_IN_MESSAGES.footerPrompt}{" "}
           <Link
             href={registerHref}
-            className="font-medium text-foreground underline underline-offset-4 hover:text-primary"
+            className="font-medium text-primary underline-offset-4 hover:underline"
           >
             {SIGN_IN_MESSAGES.registerLink}
           </Link>
         </p>
       }
     >
-      {displayedError && (
-        <Alert variant="destructive">
-          <CircleAlert className="size-4" />
-          <AlertDescription>{displayedError}</AlertDescription>
-        </Alert>
-      )}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {displayedError && (
+          <Alert variant="destructive">
+            <CircleAlert className="size-4" />
+            <AlertDescription>{displayedError}</AlertDescription>
+          </Alert>
+        )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <FieldGroup>
           <Field data-invalid={!!errors.email}>
             <FieldLabel htmlFor="email">{SIGN_IN_MESSAGES.emailLabel}</FieldLabel>
             <Input
               id="email"
               type="email"
-              sizeVariant="touch"
-              autoComplete="email"
               placeholder={SIGN_IN_MESSAGES.emailPlaceholder}
+              autoComplete="email"
+              disabled={isSubmitting}
               aria-invalid={!!errors.email}
-              disabled={isSubmitting || isGooglePending}
               {...register("email")}
             />
-            <FieldError reserveSpace>{errors.email?.message}</FieldError>
+            <FieldError>{errors.email?.message}</FieldError>
           </Field>
 
           <Field data-invalid={!!errors.password}>
-            <FieldLabel htmlFor="password">{SIGN_IN_MESSAGES.passwordLabel}</FieldLabel>
+            <FieldLabel htmlFor="password">
+              {SIGN_IN_MESSAGES.passwordLabel}
+            </FieldLabel>
             <Input
               id="password"
               type="password"
-              sizeVariant="touch"
-              autoComplete="current-password"
               placeholder={SIGN_IN_MESSAGES.passwordPlaceholder}
+              autoComplete="current-password"
+              disabled={isSubmitting}
               aria-invalid={!!errors.password}
-              disabled={isSubmitting || isGooglePending}
               {...register("password")}
             />
-            <FieldError reserveSpace>{errors.password?.message}</FieldError>
+            <FieldError>{errors.password?.message}</FieldError>
           </Field>
         </FieldGroup>
 
-        <Button
-          type="submit"
-          size="touch"
-          className="w-full"
-          disabled={isSubmitting || isGooglePending}
-        >
-          {isSubmitting && <Spinner className="mr-2" />}
-          {isSubmitting ? SIGN_IN_MESSAGES.submittingButton : SIGN_IN_MESSAGES.submitButton}
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Spinner className="mr-2 size-4" />
+              {SIGN_IN_MESSAGES.submittingButton}
+            </>
+          ) : (
+            SIGN_IN_MESSAGES.submitButton
+          )}
         </Button>
       </form>
 
-      <div className="relative my-4 flex items-center justify-center">
-        <Separator className="w-full" />
-        <span className="absolute bg-card px-2 text-xs text-muted-foreground uppercase">
-          {SIGN_IN_MESSAGES.orContinueWith}
-        </span>
+      <div className="relative my-4">
+        <div className="absolute inset-0 flex items-center">
+          <Separator />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-card px-2 text-muted-foreground">
+            {SIGN_IN_MESSAGES.orContinueWith}
+          </span>
+        </div>
       </div>
 
-      <Button
-        type="button"
-        variant="outline"
-        size="touch"
-        className="w-full"
-        onClick={handleGoogleSignIn}
-        disabled={isSubmitting || isGooglePending}
-      >
-        {isGooglePending ? (
-          <Spinner className="mr-2" />
-        ) : (
-          <FaGoogle className="mr-2 text-red-500" />
-        )}
-        {isGooglePending ? SIGN_IN_MESSAGES.googlePending : SIGN_IN_MESSAGES.googleButton}
-      </Button>
+      <GoogleSignInButton
+        callbackUrl={googleCallbackUrl}
+        disabled={isSubmitting}
+        buttonText={SIGN_IN_MESSAGES.googleButton}
+        pendingText={SIGN_IN_MESSAGES.googlePending}
+      />
     </AuthCard>
   );
 }
-
-export default SignIn;

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
+import { generatePaginationPages } from "@/lib/pagination";
 import { cn } from "cn";
 
 interface ProductsPaginationProps {
@@ -16,38 +17,7 @@ export function ProductsPagination({
     return null;
   }
 
-  const getPageNumbers = () => {
-    const pages: (number | "ellipsis")[] = [];
-    const maxVisible = 5;
-
-    if (totalPages <= maxVisible + 2) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      pages.push(1);
-      const start = Math.max(2, currentPage - 1);
-      const end = Math.min(totalPages - 1, currentPage + 1);
-
-      if (start > 2) {
-        pages.push("ellipsis");
-      }
-
-      for (let i = start; i <= end; i++) {
-        pages.push(i);
-      }
-
-      if (end < totalPages - 1) {
-        pages.push("ellipsis");
-      }
-
-      pages.push(totalPages);
-    }
-
-    return pages;
-  };
-
-  const pages = getPageNumbers();
+  const pages = generatePaginationPages(currentPage, totalPages);
   const hasPrevious = currentPage > 1;
   const hasNext = currentPage < totalPages;
 
@@ -100,15 +70,15 @@ export function ProductsPagination({
             <Link
               key={p}
               href={`/produkty?page=${p}`}
-              aria-current={isCurrent ? "page" : undefined}
               className={cn(
                 buttonVariants({
-                  variant: isCurrent ? "default" : "ghost",
+                  variant: isCurrent ? "default" : "outline",
                   size: "sm",
                 }),
-                "size-8 p-0 font-medium",
-                isCurrent && "pointer-events-none font-semibold",
+                "h-8 w-8 p-0 font-medium",
+                isCurrent && "pointer-events-none",
               )}
+              aria-current={isCurrent ? "page" : undefined}
             >
               {p}
             </Link>
