@@ -1,6 +1,6 @@
 import { memo } from "react";
 import Link from "next/link";
-import { SignOut } from "../auth/SignOut";
+import { UserAccountMenu } from "./UserAccountMenu";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "cn";
 
@@ -32,19 +32,22 @@ export function MenuItem({ title, href, onClick, className }: MenuItemProps) {
 }
 
 export const NAV_AUTH_MESSAGES = {
-  loggedInAs: "zalogowano jako:",
   loginLink: "Zaloguj się",
   registerLink: "Zarejestruj się",
 } as const;
 
-interface DesktopNavProps {
+export interface DesktopNavProps {
   items: NavItem[];
   user?: string | null;
+  userName?: string | null;
+  userImage?: string | null;
 }
 
 const MemoizedDesktopNav = memo(function MemoizedDesktopNav({
   items,
   user,
+  userName,
+  userImage,
 }: DesktopNavProps) {
   return (
     <ul className="hidden md:flex items-center space-x-6">
@@ -53,18 +56,16 @@ const MemoizedDesktopNav = memo(function MemoizedDesktopNav({
           <MenuItem title={item.title} href={item.href} />
         </li>
       ))}
-      {user && (
-        <li className="text-xs text-gray-500 max-w-50 truncate">
-          {NAV_AUTH_MESSAGES.loggedInAs}{" "}
-          <span className="font-semibold text-gray-700">{user}</span>
-        </li>
-      )}
-      {user && (
+      {user ? (
         <li>
-          <SignOut />
+          <UserAccountMenu
+            user={user}
+            userName={userName}
+            userImage={userImage}
+            align="end"
+          />
         </li>
-      )}
-      {!user && (
+      ) : (
         <>
           <li>
             <Link
@@ -88,6 +89,18 @@ const MemoizedDesktopNav = memo(function MemoizedDesktopNav({
   );
 });
 
-export function DesktopNav({ items, user }: DesktopNavProps) {
-  return <MemoizedDesktopNav items={items} user={user} />;
+export function DesktopNav({
+  items,
+  user,
+  userName,
+  userImage,
+}: DesktopNavProps) {
+  return (
+    <MemoizedDesktopNav
+      items={items}
+      user={user}
+      userName={userName}
+      userImage={userImage}
+    />
+  );
 }
