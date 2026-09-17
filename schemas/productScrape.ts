@@ -6,6 +6,13 @@ export const PRODUCT_SCRAPE_ERRORS = {
   invalidProtocol: "Dozwolone są wyłącznie protokoły http:// oraz https://",
 } as const;
 
+export const PRODUCT_SCRAPE_MESSAGES = {
+  defaultSecurityError:
+    "Podany adres URL jest niedozwolony ze względów bezpieczeństwa.",
+  scrapeFailedError:
+    "Nie udało się automatycznie pobrać danych z podanego linku. Możesz uzupełnić dane ręcznie.",
+} as const;
+
 export const productScrapeSchema = z.object({
   productUrl: z
     .url({ message: PRODUCT_SCRAPE_ERRORS.invalidUrl })

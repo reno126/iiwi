@@ -1,6 +1,9 @@
 "use server";
 
-import { productScrapeSchema } from "@/schemas/productScrape";
+import {
+  productScrapeSchema,
+  PRODUCT_SCRAPE_MESSAGES,
+} from "@/schemas/productScrape";
 import { validateUrlSafety } from "@/lib/scraper/ssrfProtection";
 import { extractProductMetadata } from "@/lib/scraper/extractMetadata";
 import { fetchWithZenRows } from "@/lib/scraper/zenrowsClient";
@@ -64,12 +67,6 @@ function buildScrapedFieldsList(
   return fields;
 }
 
-export const PRODUCT_SCRAPE_MESSAGES = {
-  defaultSecurityError:
-    "Podany adres URL jest niedozwolony ze względów bezpieczeństwa.",
-  scrapeFailedError:
-    "Nie udało się automatycznie pobrać danych z podanego linku. Możesz uzupełnić dane ręcznie.",
-} as const;
 
 export const productScrapeMetadata = createSafeActionClient({
   defaultValidationErrorsShape: "flattened",

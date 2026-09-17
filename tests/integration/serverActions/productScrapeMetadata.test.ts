@@ -11,10 +11,8 @@ vi.mock("@/lib/shops/findShopByUrl", () => ({
 import { auth } from "@/lib/auth/helper";
 import { findShopByUrl } from "@/lib/shops/findShopByUrl";
 import { SSRF_ERRORS } from "@/lib/scraper/ssrfProtection";
-import {
-  productScrapeMetadata,
-  PRODUCT_SCRAPE_MESSAGES,
-} from "@/serverActions/productScrapeMetadata";
+import { productScrapeMetadata } from "@/serverActions/productScrapeMetadata";
+import { PRODUCT_SCRAPE_MESSAGES } from "@/schemas/productScrape";
 
 describe("serverActions/productScrapeMetadata", () => {
   const originalEnv = process.env;
