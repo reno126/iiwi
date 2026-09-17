@@ -63,9 +63,13 @@ Most modern product reviews are hosted directly on vendor or marketplace platfor
 - **Zero iOS Safari Auto-Zoom:** Input text sizes configured to prevent unwanted automatic viewport zooming.
 - **Optimized CWV Metrics:** Zero layout shifts (CLS < 0.1), pre-sized skeleton loaders, and sub-2.5s LCP through critical image prioritization and font preloading.
 
+### 6. Next.js Caching & On-Demand Revalidation
+- **Incremental Static Regeneration (ISR):** Core catalog and product detail routes (`/`, `/produkty`, `/produkty/[id]`) implement route-segment caching (`export const revalidate = 60`) to serve lightning-fast, cached responses while reducing database overhead.
+- **Targeted Cache Invalidation:** Server Actions (`productWithReviewCreate`, `reviewCreate`) invoke granular on-demand cache purges via `revalidatePath("/produkty")`, `revalidatePath("/produkty/[id]")`, and `updateTag("products-count")`, ensuring instant data synchronization when new reviews or products are posted.
+
 ---
 
-## 🛠️ Tech Stack & Architecture
+## 🛠️ Tech Stack
 
 | Layer | Technology | Key Capabilities & Highlights |
 | :--- | :--- | :--- |
@@ -79,11 +83,6 @@ Most modern product reviews are hosted directly on vendor or marketplace platfor
 | **Authentication** | **NextAuth v4** | Google OAuth provider, Credentials provider with `bcryptjs`, Prisma adapter |
 | **Database & ORM** | **PostgreSQL + Prisma 7** | Relational data model with `@prisma/adapter-pg` driver adapter |
 | **Web Scraping** | **Cheerio + ZenRows** | Schema.org JSON-LD parsing, OpenGraph extraction, SSRF security guards |
-
-### Architecture Principles
-- **Clean Architecture & Separation of Concerns (SoC):** Components exceeding 100 lines are decomposed into custom hooks and atomic presentation blocks.
-- **Self-Descriptive Code (Zero Comments Policy):** Source code communicates intent entirely through expressive naming and clean domain models rather than code comments.
-- **Type Safety Hierarchy:** Strictly eliminates arbitrary `as Type` assertions in favor of type inference, `satisfies`, Zod schema parsing, and user-defined type guards (`val is T`).
 
 ---
 
@@ -170,6 +169,18 @@ pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the application.
+
+---
+
+## 🤖 AI Agents & Architecture Guidelines (`AGENTS.md`)
+
+This repository strictly enforces coding standards and architectural principles defined in [`AGENTS.md`](./AGENTS.md), which serves as the single source of truth for AI coding assistants and human developers alike:
+- **Zero Comments Policy:** Code must be 100% self-descriptive through expressive naming and clean abstractions without inline code comments.
+- **Component Decomposition (> 100 Lines Rule):** Large components are modularized into custom hooks and atomic presentation blocks.
+- **Form & Draft Persistence:** Standardized `useAuthGatedSubmit` + TTL local storage patterns for resilient, auth-safe form submissions.
+- **Accessible Contract Testing:** Feature-driven testing focusing on user-observable behavior and accessible semantic roles (`getByRole`).
+- **Zero-Assertion TypeScript Safety:** Strict hierarchy avoiding `as Type` and `!` assertions in favor of type narrowing, `satisfies`, and Zod validation.
+- **Mobile-First Ergonomics & CWV:** Enforcement of minimum $48\text{px}$ touch targets, grouped "field islands", and Core Web Vitals performance thresholds.
 
 ---
 
