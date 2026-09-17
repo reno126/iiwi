@@ -1,7 +1,7 @@
-# TrueReview (`iiwi`)
+# TrueReview (`iiwi`) - *Working name
 
-> **Prawdziwe, całkowicie niezależne opinie o produktach.**  
-> A community-driven, 100% independent product review platform built with Next.js 16, React 19, and Tailwind CSS v4.
+**Prawdziwe, całkowicie niezależne opinie o produktach.**  
+100% independent product review platform for Polish customers. Built with Next.js 16, React 19, and Tailwind CSS v4.
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-iiwi.vercel.app-0070f3?style=for-the-badge&logo=vercel)](https://iiwi.vercel.app)
 [![Next.js](https://img.shields.io/badge/Next.js-16.3-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
@@ -19,7 +19,7 @@
 ## 🌐 Live Instance
 
 Explore the working application preview at:  
-👉 **[https://iiwi.vercel.app](https://iiwi.vercel.app)**
+👉 **[https://iiwi.vercel.app](https://iiwi.vercel.app)** (for now, Polish GUI only)
 
 ---
 
