@@ -109,10 +109,10 @@ describe("components/navigation/TopMenu", () => {
     });
     await user.click(avatarTriggers[0]);
 
-    expect(screen.getByText(userEmail)).toBeInTheDocument();
+    expect(await screen.findByText(userEmail)).toBeInTheDocument();
     expect(screen.getByText("Jan")).toBeInTheDocument();
 
-    const signOutItem = screen.getByRole("menuitem", {
+    const signOutItem = await screen.findByRole("menuitem", {
       name: new RegExp(USER_ACCOUNT_MESSAGES.signOutAction, "i"),
     });
     await user.click(signOutItem);

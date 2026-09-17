@@ -118,7 +118,7 @@ export function Register({ className }: RegisterProps) {
         </p>
       }
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {errors.root?.message && (
           <Alert variant="destructive">
             <CircleAlert className="size-4" />

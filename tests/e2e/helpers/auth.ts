@@ -1,8 +1,12 @@
-import { BrowserContext } from "@playwright/test";
+import { BrowserContext, Page } from "@playwright/test";
 import { encode } from "next-auth/jwt";
 import { prisma } from "@/lib/db/prisma";
 
 export const E2E_TEST_PREFIX = "__test__";
+
+export async function waitForHydration(page: Page): Promise<void> {
+  await page.waitForSelector('body[data-hydrated="true"]');
+}
 
 export interface TestUser {
   id: string;

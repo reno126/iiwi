@@ -59,10 +59,10 @@ describe("components/navigation/UserAccountMenu", () => {
     });
     await user.click(trigger);
 
-    expect(screen.getByText(testName)).toBeInTheDocument();
+    expect(await screen.findByText(testName)).toBeInTheDocument();
     expect(screen.getByText(testEmail)).toBeInTheDocument();
 
-    const dashboardItem = screen.getByRole("menuitem", {
+    const dashboardItem = await screen.findByRole("menuitem", {
       name: new RegExp(USER_ACCOUNT_MESSAGES.dashboardLink, "i"),
     });
     expect(dashboardItem).toHaveAttribute("href", "/dashboard");
@@ -88,7 +88,7 @@ describe("components/navigation/UserAccountMenu", () => {
     });
     await user.click(trigger);
 
-    const signOutItem = screen.getByRole("menuitem", {
+    const signOutItem = await screen.findByRole("menuitem", {
       name: new RegExp(USER_ACCOUNT_MESSAGES.signOutAction, "i"),
     });
     await user.click(signOutItem);

@@ -42,16 +42,11 @@ export function UserAccountMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        render={
-          <button
-            type="button"
-            className={cn(
-              "relative flex size-9 items-center justify-center rounded-full ring-2 ring-transparent transition-all hover:ring-primary/20 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary cursor-pointer",
-              className,
-            )}
-            aria-label={USER_ACCOUNT_MESSAGES.userMenuAriaLabel}
-          />
-        }
+        className={cn(
+          "relative flex size-9 items-center justify-center rounded-full ring-2 ring-transparent transition-all hover:ring-primary/20 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary cursor-pointer",
+          className,
+        )}
+        aria-label={USER_ACCOUNT_MESSAGES.userMenuAriaLabel}
       >
         <Avatar size="default" className="size-9">
           {userImage && (

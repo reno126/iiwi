@@ -3,6 +3,7 @@ import {
   createAuthenticatedSession,
   deleteTestUser,
   E2E_TEST_PREFIX,
+  waitForHydration,
   type TestUser,
 } from "./helpers/auth";
 
@@ -25,6 +26,7 @@ test.describe("Product Creation Flow (End-to-End)", () => {
     const timestamp = Date.now();
 
     await page.goto("/opinie/dodaj");
+    await waitForHydration(page);
     await expect(page).toHaveURL(/\/opinie\/dodaj/);
 
     await page.getByRole("button", { name: /dodaj nowy produkt/i }).click();
@@ -61,6 +63,7 @@ test.describe("Product Creation Flow (End-to-End)", () => {
     page,
   }) => {
     await page.goto("/opinie/dodaj");
+    await waitForHydration(page);
     await page.getByRole("button", { name: /dodaj nowy produkt/i }).click();
 
     await page.getByRole("button", { name: /dodaj produkt ręcznie/i }).click();

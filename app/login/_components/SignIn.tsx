@@ -118,7 +118,7 @@ export function SignIn({ className }: SignInProps) {
         </p>
       }
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {displayedError && (
           <Alert variant="destructive">
             <CircleAlert className="size-4" />
