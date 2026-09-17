@@ -12,16 +12,13 @@ export async function proxy(req: NextRequest) {
   const isAuth = !!token;
   const isAuthPage =
     pathname.startsWith("/login") || pathname.startsWith("/register");
-  const isProtectedPage =
-    pathname.startsWith("/dashboard") ||
-    pathname.startsWith("/settings") ||
-    pathname.startsWith("/products");
+  const isProtectedPage = pathname.startsWith("/dashboard");
 
   // 1. Redirect unauthenticated users to /login
   if (isProtectedPage && !isAuth) {
     const callbackUrl = encodeURIComponent(pathname);
     return NextResponse.redirect(
-      new URL(`/login?callbackUrl=${callbackUrl}`, req.url)
+      new URL(`/login?callbackUrl=${callbackUrl}`, req.url),
     );
   }
 
