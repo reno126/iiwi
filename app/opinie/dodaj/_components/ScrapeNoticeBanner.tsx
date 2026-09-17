@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { CheckCircle2, CircleAlert, AlertTriangle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -29,7 +30,7 @@ interface ScrapeNoticeBannerProps {
   errorMessage?: string | null;
 }
 
-export function ScrapeNoticeBanner({
+const MemoizedScrapeNoticeBanner = memo(function MemoizedScrapeNoticeBanner({
   mode,
   scrapedFields = [],
 }: ScrapeNoticeBannerProps) {
@@ -75,4 +76,8 @@ export function ScrapeNoticeBanner({
       </AlertDescription>
     </Alert>
   );
+});
+
+export function ScrapeNoticeBanner(props: ScrapeNoticeBannerProps) {
+  return <MemoizedScrapeNoticeBanner {...props} />;
 }

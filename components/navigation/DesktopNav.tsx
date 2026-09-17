@@ -1,3 +1,4 @@
+import { memo } from "react";
 import Link from "next/link";
 import { SignOut } from "../auth/SignOut";
 import { buttonVariants } from "@/components/ui/button";
@@ -41,7 +42,10 @@ interface DesktopNavProps {
   user?: string | null;
 }
 
-export function DesktopNav({ items, user }: DesktopNavProps) {
+const MemoizedDesktopNav = memo(function MemoizedDesktopNav({
+  items,
+  user,
+}: DesktopNavProps) {
   return (
     <ul className="hidden md:flex items-center space-x-6">
       {items.map((item) => (
@@ -82,4 +86,8 @@ export function DesktopNav({ items, user }: DesktopNavProps) {
       )}
     </ul>
   );
+});
+
+export function DesktopNav({ items, user }: DesktopNavProps) {
+  return <MemoizedDesktopNav items={items} user={user} />;
 }

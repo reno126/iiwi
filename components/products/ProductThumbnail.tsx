@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Package } from "lucide-react";
 import { cn } from "cn";
 
@@ -11,7 +12,15 @@ interface ProductThumbnailProps {
   loading?: "eager" | "lazy";
 }
 
-export function ProductThumbnail({
+const sizeClasses = {
+  xs: "size-8",
+  sm: "size-12",
+  md: "size-16",
+  lg: "size-24",
+  xl: "size-32",
+};
+
+const MemoizedProductThumbnail = memo(function MemoizedProductThumbnail({
   src,
   alt,
   size = "md",
@@ -20,14 +29,6 @@ export function ProductThumbnail({
   priority = false,
   loading,
 }: ProductThumbnailProps) {
-  const sizeClasses = {
-    xs: "size-8",
-    sm: "size-12",
-    md: "size-16",
-    lg: "size-24",
-    xl: "size-32",
-  };
-
   const imageLoading = priority ? "eager" : loading || "lazy";
 
   return (
@@ -56,4 +57,8 @@ export function ProductThumbnail({
       )}
     </div>
   );
+});
+
+export function ProductThumbnail(props: ProductThumbnailProps) {
+  return <MemoizedProductThumbnail {...props} />;
 }

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { MessageSquare, PlusCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,7 @@ interface ProductReviewsSectionProps {
   isReviewFormOpen: boolean;
 }
 
-export function ProductReviewsSection({
+const MemoizedProductReviewsSection = memo(function MemoizedProductReviewsSection({
   reviews,
   onOpenReviewForm,
   isReviewFormOpen,
@@ -81,5 +82,19 @@ export function ProductReviewsSection({
         </div>
       )}
     </section>
+  );
+});
+
+export function ProductReviewsSection({
+  reviews,
+  onOpenReviewForm,
+  isReviewFormOpen,
+}: ProductReviewsSectionProps) {
+  return (
+    <MemoizedProductReviewsSection
+      reviews={reviews}
+      onOpenReviewForm={onOpenReviewForm}
+      isReviewFormOpen={isReviewFormOpen}
+    />
   );
 }

@@ -1,4 +1,5 @@
 import * as React from "react";
+import { memo } from "react";
 import { SearchX } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -15,7 +16,7 @@ interface SearchEmptyStateProps {
   customEmptyState?: React.ReactNode;
 }
 
-export function SearchEmptyState({
+const MemoizedSearchEmptyState = memo(function MemoizedSearchEmptyState({
   emptyTitle,
   emptyDescription,
   customEmptyState,
@@ -45,4 +46,8 @@ export function SearchEmptyState({
       </CardContent>
     </Card>
   );
+});
+
+export function SearchEmptyState(props: SearchEmptyStateProps) {
+  return <MemoizedSearchEmptyState {...props} />;
 }

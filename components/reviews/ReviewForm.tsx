@@ -52,7 +52,7 @@ export function ReviewForm({
 
   const methods = useForm<ReviewCreateInput>({
     resolver: zodResolver(reviewCreateSchema),
-    mode: "onChange",
+    mode: "onTouched",
     defaultValues: draft?.formData ?? {
       productId,
       description: "",

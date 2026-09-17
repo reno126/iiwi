@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
@@ -59,14 +59,18 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     scrollToReviewFormIfDraftExists();
   }, [product.id]);
 
-  const handleReviewSuccess = () => {
+  const handleOpenReviewForm = useCallback(() => {
+    setIsReviewFormOpen(true);
+  }, []);
+
+  const handleReviewSuccess = useCallback(() => {
     setIsReviewFormOpen(false);
     router.refresh();
-  };
+  }, [router]);
 
-  const handleCancelReview = () => {
+  const handleCancelReview = useCallback(() => {
     setIsReviewFormOpen(false);
-  };
+  }, []);
 
   return (
     <div className="mx-auto max-w-4xl space-y-8 py-4">
@@ -85,7 +89,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
       <ProductOverviewCard
         product={product}
-        onAddReview={() => setIsReviewFormOpen(true)}
+        onAddReview={handleOpenReviewForm}
         isReviewFormOpen={isReviewFormOpen}
       />
 
@@ -118,7 +122,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       ) : (
         <ProductReviewsSection
           reviews={product.reviews}
-          onOpenReviewForm={() => setIsReviewFormOpen(true)}
+          onOpenReviewForm={handleOpenReviewForm}
           isReviewFormOpen={isReviewFormOpen}
         />
       )}

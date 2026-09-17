@@ -1,4 +1,13 @@
-import { useState, useDeferredValue, useEffect, useRef, useTransition } from "react";
+import {
+  useState,
+  useDeferredValue,
+  useEffect,
+  useRef,
+  useTransition,
+  useCallback,
+} from "react";
+
+const EMPTY_RESULTS: never[] = [];
 
 export interface UseAsyncSearchOptions<T> {
   searchAction: (
@@ -41,7 +50,7 @@ export function useAsyncSearch<T>({
   const trimmedDeferred = deferredQuery.trim();
   const hasMinChars = trimmedDeferred.length >= minChars;
 
-  const results = hasMinChars ? rawResults : [];
+  const results = hasMinChars ? rawResults : EMPTY_RESULTS;
   const hasSearched = hasMinChars ? rawHasSearched : false;
 
   useEffect(() => {
@@ -80,7 +89,7 @@ export function useAsyncSearch<T>({
                 ? err.message
                 : defaultErrorMessage,
             );
-            setRawResults([]);
+            setRawResults(EMPTY_RESULTS);
             setRawHasSearched(true);
             setLastSearchedQuery(trimmedDeferred);
           }
@@ -95,26 +104,29 @@ export function useAsyncSearch<T>({
     return executeDebouncedSearch();
   }, [trimmedDeferred, hasMinChars, debounceMs, searchAction, defaultErrorMessage]);
 
-  const setQueryValue = (nextVal: string) => {
-    if (!isControlled) {
-      setInternalQuery(nextVal);
-    }
-    onQueryChange?.(nextVal);
-  };
+  const setQueryValue = useCallback(
+    (nextVal: string) => {
+      if (!isControlled) {
+        setInternalQuery(nextVal);
+      }
+      onQueryChange?.(nextVal);
+    },
+    [isControlled, onQueryChange],
+  );
 
-  const clearSearch = () => {
+  const clearSearch = useCallback(() => {
     setQueryValue("");
-    setRawResults([]);
+    setRawResults(EMPTY_RESULTS);
     setRawHasSearched(false);
     setLastSearchedQuery("");
     setError(null);
-  };
+  }, [setQueryValue]);
 
-  const resetResults = () => {
-    setRawResults([]);
+  const resetResults = useCallback(() => {
+    setRawResults(EMPTY_RESULTS);
     setRawHasSearched(false);
     setError(null);
-  };
+  }, []);
 
   return {
     query,

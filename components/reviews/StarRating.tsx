@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Star } from "lucide-react";
 import { cn } from "cn";
 
@@ -10,7 +11,13 @@ interface StarRatingProps {
   className?: string;
 }
 
-export function StarRating({
+const starSizes = {
+  sm: "size-4",
+  md: "size-5",
+  lg: "size-6",
+};
+
+const MemoizedStarRating = memo(function MemoizedStarRating({
   rating,
   rate,
   maxStars = 5,
@@ -19,11 +26,6 @@ export function StarRating({
   className,
 }: StarRatingProps) {
   const currentRate = rating ?? rate ?? 0;
-  const starSizes = {
-    sm: "size-4",
-    md: "size-5",
-    lg: "size-6",
-  };
 
   return (
     <div className={cn("inline-flex items-center gap-1", className)}>
@@ -59,4 +61,8 @@ export function StarRating({
       )}
     </div>
   );
+});
+
+export function StarRating(props: StarRatingProps) {
+  return <MemoizedStarRating {...props} />;
 }

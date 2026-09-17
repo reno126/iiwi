@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useState, useRef, useId } from "react";
+import { useState, useRef, useId, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { cn } from "cn";
 import { useAsyncSearch } from "./useAsyncSearch";
@@ -104,43 +104,52 @@ export function AsyncSearch<T>({
   const inputRef = useRef<HTMLInputElement>(null);
   const listboxId = useId();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setQueryValue(e.target.value);
-  };
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setQueryValue(e.target.value);
+    },
+    [setQueryValue],
+  );
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     clearSearch();
     setHighlightedIndex(-1);
     inputRef.current?.focus();
-  };
+  }, [clearSearch]);
 
-  const handleSelect = (item: T) => {
-    onResultSelect?.(item);
-    if (clearOnSelect) {
-      clearSearch();
-      setHighlightedIndex(-1);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (results.length === 0) return;
-
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setHighlightedIndex((prev) => (prev < results.length - 1 ? prev + 1 : 0));
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : results.length - 1));
-    } else if (e.key === "Enter") {
-      if (highlightedIndex >= 0 && highlightedIndex < results.length) {
-        e.preventDefault();
-        handleSelect(results[highlightedIndex]);
+  const handleSelect = useCallback(
+    (item: T) => {
+      onResultSelect?.(item);
+      if (clearOnSelect) {
+        clearSearch();
+        setHighlightedIndex(-1);
       }
-    } else if (e.key === "Escape") {
-      e.preventDefault();
-      setHighlightedIndex(-1);
-    }
-  };
+    },
+    [onResultSelect, clearOnSelect, clearSearch],
+  );
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (results.length === 0) return;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setHighlightedIndex((prev) => (prev < results.length - 1 ? prev + 1 : 0));
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : results.length - 1));
+      } else if (e.key === "Enter") {
+        if (highlightedIndex >= 0 && highlightedIndex < results.length) {
+          e.preventDefault();
+          handleSelect(results[highlightedIndex]);
+        }
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        setHighlightedIndex(-1);
+      }
+    },
+    [results, highlightedIndex, handleSelect],
+  );
 
   const showDropdown = resultsPlacement === "dropdown";
   const hasResultsToShow =

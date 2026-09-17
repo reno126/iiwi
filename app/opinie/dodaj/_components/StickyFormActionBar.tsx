@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { ArrowLeft } from "lucide-react";
@@ -13,7 +14,7 @@ interface StickyFormActionBarProps {
   className?: string;
 }
 
-export function StickyFormActionBar({
+const MemoizedStickyFormActionBar = memo(function MemoizedStickyFormActionBar({
   onBack,
   backLabel = "Wróć",
   onCancel,
@@ -69,4 +70,8 @@ export function StickyFormActionBar({
       </div>
     </div>
   );
+});
+
+export function StickyFormActionBar(props: StickyFormActionBarProps) {
+  return <MemoizedStickyFormActionBar {...props} />;
 }

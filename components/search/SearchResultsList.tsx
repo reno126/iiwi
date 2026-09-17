@@ -1,4 +1,5 @@
 import * as React from "react";
+import { memo } from "react";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "cn";
@@ -40,7 +41,7 @@ function defaultItemLabel<T>(item: T): string {
   return String(item);
 }
 
-export function SearchResultsList<T>({
+function SearchResultsListInternal<T>({
   results,
   listboxId,
   resultsAriaLabel,
@@ -50,31 +51,25 @@ export function SearchResultsList<T>({
   getKey,
   getItemLabel,
   renderItem,
-  isLoading = false,
   className,
 }: SearchResultsListProps<T>) {
   return (
     <Card
       className={cn(
-        "border shadow-xs overflow-hidden",
-        isLoading && "opacity-75 transition-opacity",
+        "p-1 shadow-md border overflow-hidden max-h-72",
+        className,
       )}
-      data-slot="search-results"
     >
-      <ScrollArea className={cn("max-h-72", className)}>
+      <ScrollArea className="max-h-70 overflow-y-auto">
         <div
           id={listboxId}
           role="listbox"
           aria-label={resultsAriaLabel}
-          className="p-1 space-y-0.5"
+          className="flex flex-col gap-0.5 p-1"
         >
           {results.map((item, index) => {
+            const key = getKey ? getKey(item, index) : index;
             const isHighlighted = highlightedIndex === index;
-            const key = getKey
-              ? getKey(item, index)
-              : ((item as Record<string, unknown>)?.id ??
-                (item as Record<string, unknown>)?.key ??
-                index);
 
             return (
               <div
@@ -108,4 +103,12 @@ export function SearchResultsList<T>({
       </ScrollArea>
     </Card>
   );
+}
+
+const MemoizedSearchResultsList = memo(
+  SearchResultsListInternal,
+) as <T>(props: SearchResultsListProps<T>) => React.ReactNode;
+
+export function SearchResultsList<T>(props: SearchResultsListProps<T>) {
+  return <MemoizedSearchResultsList {...props} />;
 }

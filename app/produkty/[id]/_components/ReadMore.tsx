@@ -47,17 +47,37 @@ export function ReadMore({
   const clampClass = lineClampMap[maxLines] ?? "line-clamp-5";
 
   useEffect(() => {
-    const checkOverflow = () => {
+    function checkOverflow() {
       if (clampedRef.current) {
         const hasOverflow =
           clampedRef.current.scrollHeight > clampedRef.current.clientHeight + 1;
         setIsClamped(hasOverflow);
       }
-    };
+    }
 
     checkOverflow();
-    window.addEventListener("resize", checkOverflow);
-    return () => window.removeEventListener("resize", checkOverflow);
+
+    const targetElement = clampedRef.current;
+    if (!targetElement) {
+      return;
+    }
+
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", checkOverflow);
+      return () => {
+        window.removeEventListener("resize", checkOverflow);
+      };
+    }
+
+    const observer = new ResizeObserver(() => {
+      checkOverflow();
+    });
+
+    observer.observe(targetElement);
+
+    return () => {
+      observer.disconnect();
+    };
   }, [content, maxLines]);
 
   if (!content && !children) {

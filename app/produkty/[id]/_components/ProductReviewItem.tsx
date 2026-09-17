@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { StarRating } from "@/components/reviews/StarRating";
@@ -22,7 +23,9 @@ interface ProductReviewItemProps {
   review: ReviewItemData;
 }
 
-export function ProductReviewItem({ review }: ProductReviewItemProps) {
+const MemoizedProductReviewItem = memo(function MemoizedProductReviewItem({
+  review,
+}: ProductReviewItemProps) {
   const reviewerName =
     review.user.name ||
     review.user.email.split("@")[0] ||
@@ -58,4 +61,8 @@ export function ProductReviewItem({ review }: ProductReviewItemProps) {
       </CardContent>
     </Card>
   );
+});
+
+export function ProductReviewItem({ review }: ProductReviewItemProps) {
+  return <MemoizedProductReviewItem review={review} />;
 }

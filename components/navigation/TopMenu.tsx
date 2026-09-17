@@ -1,9 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
 import { DesktopNav, MenuItem, type NavItem } from "./DesktopNav";
-import { MobileNavDrawer } from "./MobileNavDrawer";
+
+const MobileNavDrawer = dynamic(
+  () => import("./MobileNavDrawer").then((mod) => mod.MobileNavDrawer),
+  { ssr: true },
+);
 
 export const TOP_MENU_ITEMS: NavItem[] = [
   { title: "Strona główna", href: "/" },
@@ -21,12 +26,16 @@ export function TopMenu() {
   const userImage = session?.user?.image;
   const [isOpen, setIsOpen] = useState(false);
 
+  const handleOpenChange = useCallback((open: boolean) => {
+    setIsOpen(open);
+  }, []);
+
   return (
     <nav aria-label="Główna nawigacja">
       <DesktopNav items={TOP_MENU_ITEMS} user={user} />
       <MobileNavDrawer
         isOpen={isOpen}
-        onOpenChange={setIsOpen}
+        onOpenChange={handleOpenChange}
         items={TOP_MENU_ITEMS}
         user={user}
         userName={userName}

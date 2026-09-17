@@ -1,3 +1,4 @@
+import { memo } from "react";
 import {
   Calendar,
   ExternalLink,
@@ -23,7 +24,7 @@ interface ProductOverviewCardProps {
   isReviewFormOpen: boolean;
 }
 
-export function ProductOverviewCard({
+const MemoizedProductOverviewCard = memo(function MemoizedProductOverviewCard({
   product,
   onAddReview,
   isReviewFormOpen,
@@ -151,5 +152,19 @@ export function ProductOverviewCard({
         </div>
       </CardContent>
     </Card>
+  );
+});
+
+export function ProductOverviewCard({
+  product,
+  onAddReview,
+  isReviewFormOpen,
+}: ProductOverviewCardProps) {
+  return (
+    <MemoizedProductOverviewCard
+      product={product}
+      onAddReview={onAddReview}
+      isReviewFormOpen={isReviewFormOpen}
+    />
   );
 }

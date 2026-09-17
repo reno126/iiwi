@@ -1,4 +1,5 @@
 import * as React from "react";
+import { memo } from "react";
 import { Search as SearchIcon, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -22,7 +23,7 @@ interface SearchInputBarProps {
   clearAriaLabel: string;
 }
 
-export function SearchInputBar({
+const MemoizedSearchInputBar = memo(function MemoizedSearchInputBar({
   inputRef,
   query,
   onInputChange,
@@ -59,18 +60,20 @@ export function SearchInputBar({
         disabled={disabled}
         autoFocus={autoFocus}
         className={cn(
-          "pl-9",
-          isLoading || query.length > 0 ? "pr-16" : "pr-3",
+          "pl-9 pr-16 h-10 text-sm shadow-2xs transition-shadow focus-visible:ring-1",
           className,
         )}
       />
 
-      <div className="absolute right-2 flex items-center gap-1">
+      <div className="absolute right-2.5 flex items-center gap-1.5">
         {isLoading && (
-          <Spinner
-            className="size-4 text-muted-foreground animate-spin"
+          <span
+            className="flex items-center text-muted-foreground"
+            role="status"
             aria-label={loadingAriaLabel}
-          />
+          >
+            <Spinner className="size-4" />
+          </span>
         )}
 
         {query.length > 0 && (
@@ -89,4 +92,8 @@ export function SearchInputBar({
       </div>
     </div>
   );
+});
+
+export function SearchInputBar(props: SearchInputBarProps) {
+  return <MemoizedSearchInputBar {...props} />;
 }

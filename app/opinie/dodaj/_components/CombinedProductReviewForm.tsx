@@ -83,7 +83,7 @@ export function CombinedProductReviewForm({
 
   const methods = useForm<ProductWithReviewCreateInput>({
     resolver: zodResolver(productWithReviewCreateSchema),
-    mode: "onChange",
+    mode: "onTouched",
     defaultValues: draft?.formData ?? {
       name: "",
       productUrl: "",
