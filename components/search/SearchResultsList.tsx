@@ -22,6 +22,10 @@ interface SearchResultsListProps<T> {
   className?: string;
 }
 
+function isRecordObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
 function defaultItemLabel<T>(item: T): string {
   if (item === null || item === undefined) return "";
   if (
@@ -31,12 +35,11 @@ function defaultItemLabel<T>(item: T): string {
   ) {
     return String(item);
   }
-  if (typeof item === "object") {
-    const record = item as Record<string, unknown>;
-    if (typeof record.name === "string") return record.name;
-    if (typeof record.title === "string") return record.title;
-    if (typeof record.label === "string") return record.label;
-    if (typeof record.description === "string") return record.description;
+  if (isRecordObject(item)) {
+    if (typeof item.name === "string") return item.name;
+    if (typeof item.title === "string") return item.title;
+    if (typeof item.label === "string") return item.label;
+    if (typeof item.description === "string") return item.description;
   }
   return String(item);
 }
@@ -105,9 +108,8 @@ function SearchResultsListInternal<T>({
   );
 }
 
-const MemoizedSearchResultsList = memo(
-  SearchResultsListInternal,
-) as <T>(props: SearchResultsListProps<T>) => React.ReactNode;
+const genericMemo: <ComponentType>(component: ComponentType) => ComponentType = memo;
+const MemoizedSearchResultsList = genericMemo(SearchResultsListInternal);
 
 export function SearchResultsList<T>(props: SearchResultsListProps<T>) {
   return <MemoizedSearchResultsList {...props} />;

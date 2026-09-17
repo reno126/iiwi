@@ -70,7 +70,9 @@ describe("lib/storage/ttlStorage", () => {
 
     setItemWithTtl(key, "value");
 
-    const raw = JSON.parse(window.localStorage.getItem(key)!);
+    const rawJson = window.localStorage.getItem(key);
+    expect(rawJson).not.toBeNull();
+    const raw = JSON.parse(rawJson ?? "{}");
     expect(raw.expiresAt).toBe(mockedTime + DEFAULT_TTL_MS);
 
     Date.now = originalNow;

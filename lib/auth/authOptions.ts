@@ -23,8 +23,8 @@ export const authOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
       allowDangerousEmailAccountLinking: true,
     }),
     Credentials({
@@ -33,8 +33,20 @@ export const authOptions = {
         password: { type: "password" },
       },
       async authorize(credentials) {
+        const email = credentials?.email;
+        const password = credentials?.password;
+
+        if (
+          !email ||
+          !password ||
+          typeof email !== "string" ||
+          typeof password !== "string"
+        ) {
+          return null;
+        }
+
         const user = await prisma.user.findUnique({
-          where: { email: credentials?.email as string },
+          where: { email },
         });
 
         if (!user) return null;
@@ -43,10 +55,7 @@ export const authOptions = {
           throw new Error(AUTH_ERRORS.oauthAccountOnly);
         }
 
-        const isValid = await bcrypt.compare(
-          credentials?.password as string,
-          user.password,
-        );
+        const isValid = await bcrypt.compare(password, user.password);
 
         if (!isValid) return null;
 

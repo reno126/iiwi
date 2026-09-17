@@ -70,11 +70,17 @@ export function useAsyncSearch<T>({
               return;
             }
 
-            const items: T[] = Array.isArray(response)
-              ? response
-              : Array.isArray((response as { data?: T[] | null })?.data)
-                ? (((response as { data?: T[] | null }).data as T[]) ?? [])
-                : [];
+            let items: T[] = [];
+            if (Array.isArray(response)) {
+              items = response;
+            } else if (
+              response &&
+              typeof response === "object" &&
+              "data" in response &&
+              Array.isArray(response.data)
+            ) {
+              items = response.data;
+            }
 
             setRawResults(items);
             setRawHasSearched(true);

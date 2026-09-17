@@ -94,9 +94,11 @@ function isProductJsonLdType(type: unknown): boolean {
   return false;
 }
 
-function findProductInJsonLd(node: unknown): Record<string, unknown> | null {
-  if (!node || typeof node !== "object") return null;
+function isRecordObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
+function findProductInJsonLd(node: unknown): Record<string, unknown> | null {
   if (Array.isArray(node)) {
     for (const item of node) {
       const found = findProductInJsonLd(item);
@@ -105,14 +107,16 @@ function findProductInJsonLd(node: unknown): Record<string, unknown> | null {
     return null;
   }
 
-  const obj = node as Record<string, unknown>;
-
-  if (isProductJsonLdType(obj["@type"])) {
-    return obj;
+  if (!isRecordObject(node)) {
+    return null;
   }
 
-  if (Array.isArray(obj["@graph"])) {
-    for (const item of obj["@graph"]) {
+  if (isProductJsonLdType(node["@type"])) {
+    return node;
+  }
+
+  if (Array.isArray(node["@graph"])) {
+    for (const item of node["@graph"]) {
       const found = findProductInJsonLd(item);
       if (found) return found;
     }
@@ -136,13 +140,17 @@ function extractImageUrlFromJsonLdNode(
     const first = img[0];
     if (typeof first === "string") {
       candidate = first;
-    } else if (typeof first === "object" && first !== null) {
-      const obj = first as Record<string, unknown>;
-      candidate = (obj.url || obj.contentUrl) as string;
+    } else if (isRecordObject(first)) {
+      const rawUrl = first.url ?? first.contentUrl;
+      if (typeof rawUrl === "string") {
+        candidate = rawUrl;
+      }
     }
-  } else if (typeof img === "object" && img !== null) {
-    const obj = img as Record<string, unknown>;
-    candidate = (obj.url || obj.contentUrl) as string;
+  } else if (isRecordObject(img)) {
+    const rawUrl = img.url ?? img.contentUrl;
+    if (typeof rawUrl === "string") {
+      candidate = rawUrl;
+    }
   }
 
   if (candidate) {
@@ -168,8 +176,11 @@ function extractProductCodeFromJsonLdNode(productNode: Record<string, unknown>):
   ];
 
   for (const cand of codeCandidates) {
-    if (cand !== undefined && cand !== null && String(cand).trim()) {
-      return cleanProductCode(cand as string | number);
+    if (typeof cand === "string" || typeof cand === "number") {
+      const cleaned = cleanProductCode(cand);
+      if (cleaned) {
+        return cleaned;
+      }
     }
   }
 
