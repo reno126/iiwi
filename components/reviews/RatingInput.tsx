@@ -24,7 +24,7 @@ export function RatingInput({
   const activeRating = hovered ?? (value ?? 0);
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex flex-col sm:flex-row items-center gap-3">
       <div
         className="flex items-center gap-1"
         role="radiogroup"
@@ -59,7 +59,7 @@ export function RatingInput({
       </div>
 
       {typeof value === "number" && value >= 1 && (
-        <span className="text-sm sm:text-base font-semibold text-foreground">
+        <span className="text-sm sm:text-base font-semibold text-foreground whitespace-nowrap">
           {value} / 5
         </span>
       )}
