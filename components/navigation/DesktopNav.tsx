@@ -69,7 +69,7 @@ const MemoizedDesktopNav = memo(function MemoizedDesktopNav({
           <li>
             <Link
               href="/login"
-              className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+              className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
             >
               {NAV_AUTH_MESSAGES.loginLink}
             </Link>
