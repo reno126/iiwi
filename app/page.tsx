@@ -7,12 +7,14 @@ import { RecentReviewsSection } from "./_components/RecentReviewsSection";
 import { RecentReviewsSkeleton } from "./_components/RecentReviewsSkeleton";
 import { ShopsSection } from "./_components/ShopsSection";
 import { ShopsSkeleton } from "./_components/ShopsSkeleton";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: "Prawdziwe, niezależne opinie o produktach",
   description:
     "Tylko tutaj znajdziesz prawdziwe, całkowicie niezależne opinie o produktach.",
-};
+  path: "/",
+});
 
 export const HOME_MESSAGES = {
   heroHeading: "Tylko tutaj znajdziesz prawdziwe, całkowicie niezależne opinie o produktach",

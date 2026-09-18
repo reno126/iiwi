@@ -8,6 +8,8 @@ import { TopMenu } from "@/components/navigation/TopMenu";
 import { BrandLogo } from "@/components/BrandLogo";
 import { Inter } from "next/font/google";
 import { cn } from "cn";
+import { buildWebSiteSchema } from "@/lib/seo/schemaMarkup";
+import { buildRootMetadata } from "@/lib/seo/metadata";
 
 const inter = Inter({ subsets: ["latin", "latin-ext"], variable: "--font-sans" });
 
@@ -17,10 +19,7 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
-export const metadata: Metadata = {
-  title: "TrueReview :: Czy warto?",
-  description: "Realne opinie. Lepsze wybory.",
-};
+export const metadata: Metadata = buildRootMetadata();
 
 interface RootLayoutProps {
   children: React.ReactNode;
@@ -28,10 +27,15 @@ interface RootLayoutProps {
 
 export default async function RootLayout({ children }: RootLayoutProps) {
   const session = await getServerSession(authOptions);
+  const webSiteJsonLd = buildWebSiteSchema();
 
   return (
     <html lang="pl" className={cn("h-full antialiased", "font-sans", inter.variable)}>
       <body className="min-h-full flex flex-col bg-gray-50 text-gray-900 overflow-x-clip">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
+        />
         <ClientSessionProvider session={session}>
           <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-xs">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
@@ -54,4 +58,3 @@ export default async function RootLayout({ children }: RootLayoutProps) {
     </html>
   );
 }
-

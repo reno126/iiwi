@@ -9,11 +9,14 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getCachedProductCount } from "@/lib/db/cachedCounters";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "Panel | TrueReview",
-  description: "Panel główny aplikacji",
-};
+export const metadata: Metadata = buildPageMetadata({
+  title: "Panel",
+  description: "Panel główny aplikacji TrueReview.",
+  path: "/dashboard",
+  noIndex: true,
+});
 
 async function DashboardStats() {
   const productCount = await getCachedProductCount();

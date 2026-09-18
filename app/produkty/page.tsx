@@ -6,12 +6,14 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "cn";
 import { ProductsListSection } from "./_components/ProductsListSection";
 import { ProductsListSkeleton } from "./_components/ProductsListSkeleton";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "Produkty | TrueReview",
+export const metadata: Metadata = buildPageMetadata({
+  title: "Produkty",
   description:
     "Przeglądaj wszystkie produkty i rzetelne opinie użytkowników w serwisie TrueReview.",
-};
+  path: "/produkty",
+});
 
 export const revalidate = 60;
 

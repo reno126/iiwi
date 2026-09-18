@@ -37,6 +37,13 @@ describe("serverActions/productGetById", () => {
             email: true,
           },
         },
+        shop: {
+          select: {
+            id: true,
+            name: true,
+            logo: true,
+          },
+        },
         reviews: {
           orderBy: { createdAt: "desc" },
           include: {

@@ -5,11 +5,14 @@ import { authOptions } from "@/lib/auth/authOptions";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "Utwórz konto | TrueReview",
-  description: "Zarejestruj nowe konto w serwisie TrueReview",
-};
+export const metadata: Metadata = buildPageMetadata({
+  title: "Utwórz konto",
+  description: "Zarejestruj nowe konto w serwisie TrueReview.",
+  path: "/register",
+  noIndex: true,
+});
 
 export async function RegisterPage() {
   const session = await getServerSession(authOptions);

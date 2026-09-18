@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { AddReviewFlow } from "./_components/AddReviewFlow";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "Dodaj opinię | TrueReview",
-  description: "Dodaj swoją opinię na temat produktu",
-};
+export const metadata: Metadata = buildPageMetadata({
+  title: "Dodaj opinię",
+  description: "Dodaj swoją opinię na temat produktu w serwisie TrueReview.",
+  path: "/opinie/dodaj",
+});
 
 export function NewReviewPage() {
   return (

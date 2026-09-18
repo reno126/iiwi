@@ -18,6 +18,11 @@ export type ProductWithReviews = {
     name: string | null;
     email: string;
   };
+  shop?: {
+    id: string;
+    name: string | null;
+    logo: string | null;
+  } | null;
   reviews: {
     id: string;
     description: string;
@@ -56,6 +61,13 @@ export const productGetById = cache(async function productGetById(
           id: true,
           name: true,
           email: true,
+        },
+      },
+      shop: {
+        select: {
+          id: true,
+          name: true,
+          logo: true,
         },
       },
       reviews: {

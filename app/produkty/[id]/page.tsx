@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { productGetById } from "@/serverActions/productGetById";
 import { ProductDetails } from "./_components/ProductDetails";
 import { ProductDetailsSkeleton } from "./_components/ProductDetailsSkeleton";
+import { buildProductDetailSchema } from "@/lib/seo/schemaMarkup";
+import { buildProductMetadata } from "@/lib/seo/metadata";
 
 export const revalidate = 60;
 
@@ -16,18 +18,7 @@ export async function generateMetadata({
 }: ProductPageProps): Promise<Metadata> {
   const { id } = await params;
   const product = await productGetById(id);
-
-  if (!product) {
-    return {
-      title: "Produkt nie znaleziony | TrueReview",
-      description: "Szukany produkt nie istnieje w bazie danych TrueReview.",
-    };
-  }
-
-  return {
-    title: `${product.name} - Opinie | TrueReview`,
-    description: `Sprawdź recenzje i opinie o produkcie ${product.name} w serwisie TrueReview.`,
-  };
+  return buildProductMetadata(product);
 }
 
 interface ProductDetailsSectionProps {
@@ -41,7 +32,17 @@ async function ProductDetailsSection({ id }: ProductDetailsSectionProps) {
     notFound();
   }
 
-  return <ProductDetails product={product} />;
+  const jsonLd = buildProductDetailSchema(product);
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <ProductDetails product={product} />
+    </>
+  );
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
