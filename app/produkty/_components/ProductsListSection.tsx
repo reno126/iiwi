@@ -11,7 +11,7 @@ export async function ProductsListSection({
 }: ProductsListSectionProps) {
   const { products, totalPages, currentPage } = await productsGet({
     page,
-    pageSize: 20,
+    pageSize: 10,
   });
 
   return (

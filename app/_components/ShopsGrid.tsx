@@ -19,7 +19,7 @@ export function ShopsGrid({ shops }: ShopsGridProps) {
       {shops.map((shop) => (
         <div
           key={shop.id}
-          className="flex flex-col items-center justify-center p-4 rounded-xl border bg-white shadow-2xs hover:border-primary/50 hover:shadow-xs transition-all text-center gap-2.5 h-28 sm:h-32"
+          className="flex flex-col items-center justify-center p-4 rounded-xl border bg-white shadow-2xs transition-all text-center gap-2.5 h-28 sm:h-32"
         >
           <div className="h-12 w-full flex items-center justify-center p-1">
             <ShopLogo
