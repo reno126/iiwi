@@ -1,0 +1,16 @@
+export const DASHBOARD_MESSAGES = {
+  pageTitle: "Panel",
+  pageDescription: "Panel główny aplikacji TrueReview.",
+  greetingPrefix: "Witaj,",
+  defaultUserName: "Użytkowniku",
+  emailLabel: "E-mail:",
+  accountCreatedLabel: "Konto od:",
+  statsHeading: "Twoje statystyki:",
+  emptyProductsMessage: "Nie oceniłeś jeszcze żadnego produktu.",
+  userRatingsLabel: "Twoje oceny:",
+  shopsHeading: "Oceniałeś sklepy",
+  emptyShopsMessage: "Brak ocenionych sklepów.",
+  fallbackShopName: "Inne sklepy",
+  addReviewButton: "Dodaj nową opinię",
+  signOutButton: "Wyloguj się",
+} as const;

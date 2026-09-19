@@ -1,44 +1,101 @@
 import { describe, it, expect } from "vitest";
-import { formatReviewCount, formatPolishDate } from "@/lib/formatters";
+import {
+  formatReviewCount,
+  formatPolishDate,
+  formatRatedProductsCount,
+  REVIEW_COUNT_SUFFIXES,
+  RATED_PRODUCTS_MESSAGES,
+} from "@/lib/formatters";
 
 describe("lib/formatters", () => {
   describe("formatReviewCount", () => {
     it("formats singular 1 as '1 opinia'", () => {
-      expect(formatReviewCount(1)).toBe("1 opinia");
+      expect(formatReviewCount(1)).toBe(`1 ${REVIEW_COUNT_SUFFIXES.singular}`);
     });
 
     it("formats numbers ending in 2, 3, 4 (excluding teens) as 'opinie'", () => {
-      expect(formatReviewCount(2)).toBe("2 opinie");
-      expect(formatReviewCount(3)).toBe("3 opinie");
-      expect(formatReviewCount(4)).toBe("4 opinie");
-      expect(formatReviewCount(22)).toBe("22 opinie");
-      expect(formatReviewCount(23)).toBe("23 opinie");
-      expect(formatReviewCount(24)).toBe("24 opinie");
-      expect(formatReviewCount(102)).toBe("102 opinie");
-      expect(formatReviewCount(104)).toBe("104 opinie");
+      expect(formatReviewCount(2)).toBe(`2 ${REVIEW_COUNT_SUFFIXES.few}`);
+      expect(formatReviewCount(3)).toBe(`3 ${REVIEW_COUNT_SUFFIXES.few}`);
+      expect(formatReviewCount(4)).toBe(`4 ${REVIEW_COUNT_SUFFIXES.few}`);
+      expect(formatReviewCount(22)).toBe(`22 ${REVIEW_COUNT_SUFFIXES.few}`);
+      expect(formatReviewCount(23)).toBe(`23 ${REVIEW_COUNT_SUFFIXES.few}`);
+      expect(formatReviewCount(24)).toBe(`24 ${REVIEW_COUNT_SUFFIXES.few}`);
+      expect(formatReviewCount(102)).toBe(`102 ${REVIEW_COUNT_SUFFIXES.few}`);
+      expect(formatReviewCount(104)).toBe(`104 ${REVIEW_COUNT_SUFFIXES.few}`);
     });
 
     it("formats 0 and numbers ending in 5-9 or 0 as 'opinii'", () => {
-      expect(formatReviewCount(0)).toBe("0 opinii");
-      expect(formatReviewCount(5)).toBe("5 opinii");
-      expect(formatReviewCount(6)).toBe("6 opinii");
-      expect(formatReviewCount(9)).toBe("9 opinii");
-      expect(formatReviewCount(10)).toBe("10 opinii");
-      expect(formatReviewCount(20)).toBe("20 opinii");
-      expect(formatReviewCount(25)).toBe("25 opinii");
-      expect(formatReviewCount(100)).toBe("100 opinii");
-      expect(formatReviewCount(105)).toBe("105 opinii");
+      expect(formatReviewCount(0)).toBe(`0 ${REVIEW_COUNT_SUFFIXES.many}`);
+      expect(formatReviewCount(5)).toBe(`5 ${REVIEW_COUNT_SUFFIXES.many}`);
+      expect(formatReviewCount(6)).toBe(`6 ${REVIEW_COUNT_SUFFIXES.many}`);
+      expect(formatReviewCount(9)).toBe(`9 ${REVIEW_COUNT_SUFFIXES.many}`);
+      expect(formatReviewCount(10)).toBe(`10 ${REVIEW_COUNT_SUFFIXES.many}`);
+      expect(formatReviewCount(20)).toBe(`20 ${REVIEW_COUNT_SUFFIXES.many}`);
+      expect(formatReviewCount(25)).toBe(`25 ${REVIEW_COUNT_SUFFIXES.many}`);
+      expect(formatReviewCount(100)).toBe(`100 ${REVIEW_COUNT_SUFFIXES.many}`);
+      expect(formatReviewCount(105)).toBe(`105 ${REVIEW_COUNT_SUFFIXES.many}`);
     });
 
     it("formats teens (11 to 19) as 'opinii'", () => {
-      expect(formatReviewCount(11)).toBe("11 opinii");
-      expect(formatReviewCount(12)).toBe("12 opinii");
-      expect(formatReviewCount(13)).toBe("13 opinii");
-      expect(formatReviewCount(14)).toBe("14 opinii");
-      expect(formatReviewCount(15)).toBe("15 opinii");
-      expect(formatReviewCount(19)).toBe("19 opinii");
-      expect(formatReviewCount(112)).toBe("112 opinii");
-      expect(formatReviewCount(114)).toBe("114 opinii");
+      expect(formatReviewCount(11)).toBe(`11 ${REVIEW_COUNT_SUFFIXES.many}`);
+      expect(formatReviewCount(12)).toBe(`12 ${REVIEW_COUNT_SUFFIXES.many}`);
+      expect(formatReviewCount(13)).toBe(`13 ${REVIEW_COUNT_SUFFIXES.many}`);
+      expect(formatReviewCount(14)).toBe(`14 ${REVIEW_COUNT_SUFFIXES.many}`);
+      expect(formatReviewCount(15)).toBe(`15 ${REVIEW_COUNT_SUFFIXES.many}`);
+      expect(formatReviewCount(19)).toBe(`19 ${REVIEW_COUNT_SUFFIXES.many}`);
+      expect(formatReviewCount(112)).toBe(`112 ${REVIEW_COUNT_SUFFIXES.many}`);
+      expect(formatReviewCount(114)).toBe(`114 ${REVIEW_COUNT_SUFFIXES.many}`);
+    });
+  });
+
+  describe("formatRatedProductsCount", () => {
+    it("formats 0 as empty status message", () => {
+      expect(formatRatedProductsCount(0)).toBe(RATED_PRODUCTS_MESSAGES.empty);
+    });
+
+    it("formats singular 1 as 'Jak dotąd oceniłeś 1 produkt'", () => {
+      expect(formatRatedProductsCount(1)).toBe(
+        RATED_PRODUCTS_MESSAGES.singular,
+      );
+    });
+
+    it("formats 2, 3, 4 and non-teen numbers ending in 2, 3, 4 as 'produkty'", () => {
+      expect(formatRatedProductsCount(2)).toBe(
+        `${RATED_PRODUCTS_MESSAGES.fewPrefix} 2 ${RATED_PRODUCTS_MESSAGES.fewSuffix}`,
+      );
+      expect(formatRatedProductsCount(3)).toBe(
+        `${RATED_PRODUCTS_MESSAGES.fewPrefix} 3 ${RATED_PRODUCTS_MESSAGES.fewSuffix}`,
+      );
+      expect(formatRatedProductsCount(4)).toBe(
+        `${RATED_PRODUCTS_MESSAGES.fewPrefix} 4 ${RATED_PRODUCTS_MESSAGES.fewSuffix}`,
+      );
+      expect(formatRatedProductsCount(22)).toBe(
+        `${RATED_PRODUCTS_MESSAGES.fewPrefix} 22 ${RATED_PRODUCTS_MESSAGES.fewSuffix}`,
+      );
+      expect(formatRatedProductsCount(104)).toBe(
+        `${RATED_PRODUCTS_MESSAGES.fewPrefix} 104 ${RATED_PRODUCTS_MESSAGES.fewSuffix}`,
+      );
+    });
+
+    it("formats teens and numbers ending in 5-9 or 0 as 'produktów'", () => {
+      expect(formatRatedProductsCount(5)).toBe(
+        `${RATED_PRODUCTS_MESSAGES.manyPrefix} 5 ${RATED_PRODUCTS_MESSAGES.manySuffix}`,
+      );
+      expect(formatRatedProductsCount(11)).toBe(
+        `${RATED_PRODUCTS_MESSAGES.manyPrefix} 11 ${RATED_PRODUCTS_MESSAGES.manySuffix}`,
+      );
+      expect(formatRatedProductsCount(12)).toBe(
+        `${RATED_PRODUCTS_MESSAGES.manyPrefix} 12 ${RATED_PRODUCTS_MESSAGES.manySuffix}`,
+      );
+      expect(formatRatedProductsCount(14)).toBe(
+        `${RATED_PRODUCTS_MESSAGES.manyPrefix} 14 ${RATED_PRODUCTS_MESSAGES.manySuffix}`,
+      );
+      expect(formatRatedProductsCount(20)).toBe(
+        `${RATED_PRODUCTS_MESSAGES.manyPrefix} 20 ${RATED_PRODUCTS_MESSAGES.manySuffix}`,
+      );
+      expect(formatRatedProductsCount(100)).toBe(
+        `${RATED_PRODUCTS_MESSAGES.manyPrefix} 100 ${RATED_PRODUCTS_MESSAGES.manySuffix}`,
+      );
     });
   });
 

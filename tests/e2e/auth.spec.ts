@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { prisma } from "@/lib/db/prisma";
 import { E2E_TEST_PREFIX, waitForHydration } from "./helpers/auth";
+import { DASHBOARD_MESSAGES } from "@/app/dashboard/constants";
 
 test.describe("Authentication and Route Protection Flows", () => {
   test("redirects unauthenticated user from /dashboard to /login with callbackUrl", async ({
@@ -53,7 +54,9 @@ test.describe("Authentication and Route Protection Flows", () => {
 
       await expect(page).toHaveURL(/\/dashboard/);
       await expect(
-        page.getByRole("heading", { name: /panel główny/i }),
+        page.getByRole("heading", {
+          name: new RegExp(DASHBOARD_MESSAGES.greetingPrefix, "i"),
+        }),
       ).toBeVisible();
     } finally {
       await prisma.user.deleteMany({
