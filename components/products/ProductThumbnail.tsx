@@ -34,7 +34,7 @@ const MemoizedProductThumbnail = memo(function MemoizedProductThumbnail({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-lg bg-muted flex items-center justify-center shrink-0",
+        "relative flex shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted",
         sizeClasses[size],
         aspectRatio === "square" ? "aspect-square" : "aspect-video",
         className,

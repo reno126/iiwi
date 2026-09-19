@@ -69,7 +69,9 @@ describe("lib/storage/reviewDraftStorage", () => {
     });
 
     it("returns custom fallbackUrl when provided and no draft exists", () => {
-      expect(getReviewDraftReturnUrl("/custom-fallback")).toBe("/custom-fallback");
+      expect(getReviewDraftReturnUrl("/custom-fallback")).toBe(
+        "/custom-fallback",
+      );
     });
 
     it("returns draft.returnUrl when explicitly specified", () => {

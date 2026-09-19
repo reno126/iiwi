@@ -15,13 +15,17 @@ describe("components/ui/form-field-card", () => {
     render(
       <FormFieldCard label={TEST_MESSAGES.label}>
         <input id="sample-input" />
-      </FormFieldCard>
+      </FormFieldCard>,
     );
 
     expect(screen.getByText(TEST_MESSAGES.label)).toBeInTheDocument();
     expect(screen.getByRole("textbox")).toBeInTheDocument();
-    expect(screen.queryByText(TEST_MESSAGES.statusFilled)).not.toBeInTheDocument();
-    expect(screen.queryByText(TEST_MESSAGES.statusMissing)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(TEST_MESSAGES.statusFilled),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(TEST_MESSAGES.statusMissing),
+    ).not.toBeInTheDocument();
   });
 
   it("renders status badge as filled when showStatus is true and isFilled is true", () => {
@@ -32,11 +36,13 @@ describe("components/ui/form-field-card", () => {
         isFilled={true}
       >
         <input id="sample-input" />
-      </FormFieldCard>
+      </FormFieldCard>,
     );
 
     expect(screen.getByText(TEST_MESSAGES.statusFilled)).toBeInTheDocument();
-    expect(screen.queryByText(TEST_MESSAGES.statusMissing)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(TEST_MESSAGES.statusMissing),
+    ).not.toBeInTheDocument();
   });
 
   it("renders status badge as missing when showStatus is true and isFilled is false", () => {
@@ -47,11 +53,13 @@ describe("components/ui/form-field-card", () => {
         isFilled={false}
       >
         <input id="sample-input" />
-      </FormFieldCard>
+      </FormFieldCard>,
     );
 
     expect(screen.getByText(TEST_MESSAGES.statusMissing)).toBeInTheDocument();
-    expect(screen.queryByText(TEST_MESSAGES.statusFilled)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(TEST_MESSAGES.statusFilled),
+    ).not.toBeInTheDocument();
   });
 
   it("renders error message when error prop is provided", () => {
@@ -61,22 +69,23 @@ describe("components/ui/form-field-card", () => {
         error={TEST_MESSAGES.errorMessage}
       >
         <input id="sample-input" />
-      </FormFieldCard>
+      </FormFieldCard>,
     );
 
-    expect(screen.getByRole("alert")).toHaveTextContent(TEST_MESSAGES.errorMessage);
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      TEST_MESSAGES.errorMessage,
+    );
   });
 
   it("renders reserved space container when reserveSpace is true without error", () => {
     const { container } = render(
-      <FormFieldCard
-        label={TEST_MESSAGES.label}
-        reserveSpace={true}
-      >
+      <FormFieldCard label={TEST_MESSAGES.label} reserveSpace={true}>
         <input id="sample-input" />
-      </FormFieldCard>
+      </FormFieldCard>,
     );
 
-    expect(container.querySelector("[data-slot='field-error']")).toBeInTheDocument();
+    expect(
+      container.querySelector("[data-slot='field-error']"),
+    ).toBeInTheDocument();
   });
 });

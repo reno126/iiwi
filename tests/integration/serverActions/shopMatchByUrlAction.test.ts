@@ -53,7 +53,7 @@ describe("serverActions/shopMatchByUrlAction", () => {
 
     expect(result?.data).toEqual(mockShop);
     expect(findShopByUrl).toHaveBeenCalledWith(
-      "https://www.mediaexpert.pl/agd/pralki/123"
+      "https://www.mediaexpert.pl/agd/pralki/123",
     );
   });
 

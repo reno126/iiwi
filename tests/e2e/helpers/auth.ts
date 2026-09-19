@@ -68,8 +68,7 @@ export async function deleteTestUser(userId: string): Promise<void> {
     await prisma.user.delete({
       where: { id: userId },
     });
-  } catch {
-  }
+  } catch {}
 }
 
 export async function cleanAllTestRecords(): Promise<{

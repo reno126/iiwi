@@ -1,7 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Register, REGISTER_MESSAGES } from "@/app/register/_components/Register";
+import {
+  Register,
+  REGISTER_MESSAGES,
+} from "@/app/register/_components/Register";
 import { REGISTER_ERRORS, REGISTER_API_MESSAGES } from "@/schemas/register";
 import { AUTH_ERRORS } from "@/lib/auth/constants";
 import { server } from "@/tests/mocks/server";
@@ -35,13 +38,32 @@ function createRegisterDriver() {
   const user = userEvent.setup();
   return {
     user,
-    heading: () => screen.getByRole("heading", { name: new RegExp(REGISTER_MESSAGES.title, "i") }),
-    nameInput: () => screen.getByRole("textbox", { name: new RegExp(REGISTER_MESSAGES.nameLabel, "i") }),
-    emailInput: () => screen.getByRole("textbox", { name: new RegExp(REGISTER_MESSAGES.emailLabel, "i") }),
-    passwordInput: () => screen.getByLabelText(new RegExp(REGISTER_MESSAGES.passwordLabel, "i")),
-    submitButton: () => screen.getByRole("button", { name: new RegExp(`^${REGISTER_MESSAGES.submitButton}$`, "i") }),
-    submittingButton: () => screen.getByRole("button", { name: new RegExp(REGISTER_MESSAGES.submittingButton, "i") }),
-    loginLink: () => screen.getByRole("link", { name: new RegExp(REGISTER_MESSAGES.loginLink, "i") }),
+    heading: () =>
+      screen.getByRole("heading", {
+        name: new RegExp(REGISTER_MESSAGES.title, "i"),
+      }),
+    nameInput: () =>
+      screen.getByRole("textbox", {
+        name: new RegExp(REGISTER_MESSAGES.nameLabel, "i"),
+      }),
+    emailInput: () =>
+      screen.getByRole("textbox", {
+        name: new RegExp(REGISTER_MESSAGES.emailLabel, "i"),
+      }),
+    passwordInput: () =>
+      screen.getByLabelText(new RegExp(REGISTER_MESSAGES.passwordLabel, "i")),
+    submitButton: () =>
+      screen.getByRole("button", {
+        name: new RegExp(`^${REGISTER_MESSAGES.submitButton}$`, "i"),
+      }),
+    submittingButton: () =>
+      screen.getByRole("button", {
+        name: new RegExp(REGISTER_MESSAGES.submittingButton, "i"),
+      }),
+    loginLink: () =>
+      screen.getByRole("link", {
+        name: new RegExp(REGISTER_MESSAGES.loginLink, "i"),
+      }),
     alerts: () => screen.getAllByRole("alert"),
     async fillForm(data: { name?: string; email?: string; password?: string }) {
       if (data.name) await user.type(this.nameInput(), data.name);

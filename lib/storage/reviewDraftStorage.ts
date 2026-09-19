@@ -37,7 +37,7 @@ export type ReviewDraft = NewProductReviewDraft | ExistingProductReviewDraft;
 
 export function saveReviewDraft(
   draft: ReviewDraft,
-  ttlMs: number = DEFAULT_TTL_MS
+  ttlMs: number = DEFAULT_TTL_MS,
 ): boolean {
   return setItemWithTtl<ReviewDraft>(REVIEW_DRAFT_STORAGE_KEY, draft, ttlMs);
 }
@@ -62,4 +62,3 @@ export function getReviewDraftReturnUrl(fallbackUrl = "/dashboard"): string {
 export function clearReviewDraft(): void {
   removeItemWithTtl(REVIEW_DRAFT_STORAGE_KEY);
 }
-

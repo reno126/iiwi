@@ -34,8 +34,7 @@ async function main() {
   );
 }
 
-main()
-  .catch((err) => {
-    console.error("Cleanup failed:", err);
-    process.exit(1);
-  });
+main().catch((err) => {
+  console.error("Cleanup failed:", err);
+  process.exit(1);
+});

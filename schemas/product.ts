@@ -36,10 +36,7 @@ export const productCreateSchema = z.object({
     .max(24, { message: PRODUCT_ERRORS.codeMaxLength })
     .optional()
     .or(z.literal("")),
-  shopId: z
-    .string()
-    .optional()
-    .or(z.literal("")),
+  shopId: z.string().optional().or(z.literal("")),
 });
 
 export type ProductCreateInput = z.infer<typeof productCreateSchema>;
@@ -54,6 +51,4 @@ export const reconstructRatingsSchema = z.object({
   productId: z.string().optional(),
 });
 
-export type ReconstructRatingsInput = z.infer<
-  typeof reconstructRatingsSchema
->;
+export type ReconstructRatingsInput = z.infer<typeof reconstructRatingsSchema>;

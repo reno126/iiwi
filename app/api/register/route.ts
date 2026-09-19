@@ -8,7 +8,10 @@ export async function POST(req: Request) {
   const validated = registerSchema.safeParse(body);
 
   if (!validated.success) {
-    return NextResponse.json({ error: REGISTER_API_MESSAGES.invalidData }, { status: 400 });
+    return NextResponse.json(
+      { error: REGISTER_API_MESSAGES.invalidData },
+      { status: 400 },
+    );
   }
 
   const { email, password, name } = validated.data;
@@ -47,5 +50,8 @@ export async function POST(req: Request) {
     },
   });
 
-  return NextResponse.json({ success: REGISTER_API_MESSAGES.userCreated }, { status: 201 });
+  return NextResponse.json(
+    { success: REGISTER_API_MESSAGES.userCreated },
+    { status: 201 },
+  );
 }

@@ -26,10 +26,7 @@ const MemoizedSearchEmptyState = memo(function MemoizedSearchEmptyState({
   }
 
   return (
-    <Card
-      className="border border-dashed shadow-xs"
-      data-slot="search-empty"
-    >
+    <Card className="border border-dashed shadow-xs" data-slot="search-empty">
       <CardContent className="p-6">
         <Empty>
           <EmptyMedia variant="icon">

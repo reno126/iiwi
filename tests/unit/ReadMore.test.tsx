@@ -33,10 +33,18 @@ describe("app/produkty/[id]/_components/ReadMore", () => {
 
   afterEach(() => {
     if (originalScrollHeight) {
-      Object.defineProperty(HTMLElement.prototype, "scrollHeight", originalScrollHeight);
+      Object.defineProperty(
+        HTMLElement.prototype,
+        "scrollHeight",
+        originalScrollHeight,
+      );
     }
     if (originalClientHeight) {
-      Object.defineProperty(HTMLElement.prototype, "clientHeight", originalClientHeight);
+      Object.defineProperty(
+        HTMLElement.prototype,
+        "clientHeight",
+        originalClientHeight,
+      );
     }
   });
   it("renders null when both text and children are missing or empty", () => {
@@ -45,10 +53,14 @@ describe("app/produkty/[id]/_components/ReadMore", () => {
   });
 
   it("renders short text without any expand/collapse button", () => {
-    render(<ReadMore text="To jest krótki opis produktu, który nie wymaga zwijania." />);
+    render(
+      <ReadMore text="To jest krótki opis produktu, który nie wymaga zwijania." />,
+    );
 
     expect(
-      screen.getByText("To jest krótki opis produktu, który nie wymaga zwijania."),
+      screen.getByText(
+        "To jest krótki opis produktu, który nie wymaga zwijania.",
+      ),
     ).toBeInTheDocument();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
@@ -56,21 +68,27 @@ describe("app/produkty/[id]/_components/ReadMore", () => {
   it("renders children when text prop is not provided", () => {
     render(<ReadMore>Opis przekazany przez children</ReadMore>);
 
-    expect(screen.getByText("Opis przekazany przez children")).toBeInTheDocument();
+    expect(
+      screen.getByText("Opis przekazany przez children"),
+    ).toBeInTheDocument();
   });
 
   it("displays 'Czytaj więcej' button when text exceeds 250 characters", () => {
     const longText = "A".repeat(260);
     render(<ReadMore text={longText} />);
 
-    expect(screen.getByRole("button", { name: /czytaj więcej/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /czytaj więcej/i }),
+    ).toBeInTheDocument();
   });
 
   it("displays 'Czytaj więcej' button when text contains more lines than maxLines", () => {
     const multilineText = "Linia 1\nLinia 2\nLinia 3\nLinia 4";
     render(<ReadMore text={multilineText} maxLines={2} />);
 
-    expect(screen.getByRole("button", { name: /czytaj więcej/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /czytaj więcej/i }),
+    ).toBeInTheDocument();
   });
 
   it("toggles expanded and collapsed states when clicking trigger button", async () => {
@@ -89,7 +107,9 @@ describe("app/produkty/[id]/_components/ReadMore", () => {
 
     await user.click(lessButton);
 
-    expect(screen.getByRole("button", { name: /czytaj więcej/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /czytaj więcej/i }),
+    ).toBeInTheDocument();
   });
 
   it("supports custom moreLabel and lessLabel props", async () => {
@@ -104,12 +124,16 @@ describe("app/produkty/[id]/_components/ReadMore", () => {
       />,
     );
 
-    const customMoreBtn = screen.getByRole("button", { name: /pokaż pełną treść/i });
+    const customMoreBtn = screen.getByRole("button", {
+      name: /pokaż pełną treść/i,
+    });
     expect(customMoreBtn).toBeInTheDocument();
 
     await user.click(customMoreBtn);
 
-    const customLessBtn = screen.getByRole("button", { name: /ukryj szczegóły/i });
+    const customLessBtn = screen.getByRole("button", {
+      name: /ukryj szczegóły/i,
+    });
     expect(customLessBtn).toBeInTheDocument();
   });
 

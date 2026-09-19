@@ -1,5 +1,5 @@
 allowBuilds:
-  '@prisma/engines': true
+  "@prisma/engines": true
   esbuild: true
   msw: true
   prisma: true
@@ -8,9 +8,9 @@ minimumReleaseAgeExclude:
   - deepmerge-ts@8.0.0
   - mysql2@3.22.0 || 3.23.1
   - vitest@4.1.11
-  - '@vitest/mocker@4.1.11'
+  - "@vitest/mocker@4.1.11"
 overrides:
-  '@vitest/mocker@>=2.1.0 <4.1.11': ^4.1.11
+  "@vitest/mocker@>=2.1.0 <4.1.11": ^4.1.11
   deepmerge-ts@<8.0.0: ^8.0.0
   mysql2@<3.22.0: ^3.22.0
   mysql2@<=3.23.0: ^3.23.1

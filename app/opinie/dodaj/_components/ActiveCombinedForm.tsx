@@ -44,7 +44,7 @@ export function ActiveCombinedForm({
   } = useFormContext<ProductWithReviewCreateInput>();
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4 md:space-y-6 pb-0">
+    <form onSubmit={onSubmit} className="space-y-4 pb-0 md:space-y-6">
       {isDraftRestored && (
         <Alert variant="info">
           <CheckCircle2 className="size-4" />

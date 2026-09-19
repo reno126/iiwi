@@ -34,15 +34,16 @@ const MemoizedScrapeNoticeBanner = memo(function MemoizedScrapeNoticeBanner({
   mode,
   scrapedFields = [],
 }: ScrapeNoticeBannerProps) {
-  const isScrapeFailed = mode === "scraped_failed" || scrapedFields.length === 0;
+  const isScrapeFailed =
+    mode === "scraped_failed" || scrapedFields.length === 0;
   if (isScrapeFailed) {
     return (
       <Alert variant="destructive">
         <CircleAlert className="size-4" />
-        <AlertTitle className="font-semibold text-sm">
+        <AlertTitle className="text-sm font-semibold">
           {SCRAPE_BANNER_MESSAGES.failed.title}
         </AlertTitle>
-        <AlertDescription className="text-xs sm:text-sm leading-relaxed mt-0.5">
+        <AlertDescription className="mt-0.5 text-xs leading-relaxed sm:text-sm">
           {SCRAPE_BANNER_MESSAGES.failed.description}
         </AlertDescription>
       </Alert>
@@ -55,10 +56,10 @@ const MemoizedScrapeNoticeBanner = memo(function MemoizedScrapeNoticeBanner({
     return (
       <Alert variant="success">
         <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />
-        <AlertTitle className="font-semibold text-sm">
+        <AlertTitle className="text-sm font-semibold">
           {SCRAPE_BANNER_MESSAGES.success.title}
         </AlertTitle>
-        <AlertDescription className="text-xs sm:text-sm mt-0.5">
+        <AlertDescription className="mt-0.5 text-xs sm:text-sm">
           {SCRAPE_BANNER_MESSAGES.success.description}
         </AlertDescription>
       </Alert>
@@ -68,10 +69,10 @@ const MemoizedScrapeNoticeBanner = memo(function MemoizedScrapeNoticeBanner({
   return (
     <Alert variant="warning">
       <AlertTriangle className="size-4 text-amber-600 dark:text-amber-400" />
-      <AlertTitle className="font-semibold text-sm">
+      <AlertTitle className="text-sm font-semibold">
         {SCRAPE_BANNER_MESSAGES.partial.title}
       </AlertTitle>
-      <AlertDescription className="text-xs sm:text-sm mt-0.5">
+      <AlertDescription className="mt-0.5 text-xs sm:text-sm">
         {SCRAPE_BANNER_MESSAGES.partial.description}
       </AlertDescription>
     </Alert>

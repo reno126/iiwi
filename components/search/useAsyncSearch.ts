@@ -90,11 +90,7 @@ export function useAsyncSearch<T>({
             if (requestId !== latestRequestIdRef.current) {
               return;
             }
-            setError(
-              err instanceof Error
-                ? err.message
-                : defaultErrorMessage,
-            );
+            setError(err instanceof Error ? err.message : defaultErrorMessage);
             setRawResults(EMPTY_RESULTS);
             setRawHasSearched(true);
             setLastSearchedQuery(trimmedDeferred);
@@ -108,7 +104,13 @@ export function useAsyncSearch<T>({
     }
 
     return executeDebouncedSearch();
-  }, [trimmedDeferred, hasMinChars, debounceMs, searchAction, defaultErrorMessage]);
+  }, [
+    trimmedDeferred,
+    hasMinChars,
+    debounceMs,
+    searchAction,
+    defaultErrorMessage,
+  ]);
 
   const setQueryValue = useCallback(
     (nextVal: string) => {

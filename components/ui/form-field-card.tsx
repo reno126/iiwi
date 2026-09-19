@@ -38,19 +38,19 @@ export function FormFieldCard({
     <Field
       data-invalid={isInvalid}
       className={cn(
-        "rounded-xl p-3.5 sm:p-4 shadow-2xs transition-all",
+        "rounded-xl p-3.5 shadow-2xs transition-all sm:p-4",
         showStatus && isFilled
           ? "border-2 border-emerald-500 bg-emerald-50/50 dark:border-emerald-600 dark:bg-emerald-950/20"
           : showStatus
             ? "border-2 border-gray-300 bg-gray-50/80 dark:border-gray-700 dark:bg-gray-900/30"
             : "border border-border/80 bg-white focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/10",
-        className
+        className,
       )}
     >
       <div
         className={cn(
           "flex items-center justify-between gap-2",
-          showStatus && "mb-2"
+          showStatus && "mb-2",
         )}
       >
         <FieldLabel
@@ -58,19 +58,18 @@ export function FormFieldCard({
           className={cn(
             "text-sm font-medium",
             showStatus && isFilled
-              ? "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-600 text-white font-semibold shadow-xs"
+              ? "inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-2.5 py-1 font-semibold text-white shadow-xs"
               : showStatus
-                ? "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-600 text-white font-semibold shadow-xs"
-                : "text-foreground"
+                ? "inline-flex items-center gap-1.5 rounded-md bg-gray-600 px-2.5 py-1 font-semibold text-white shadow-xs"
+                : "text-foreground",
           )}
         >
-          {showStatus && (
-            isFilled ? (
-              <Check className="size-3.5 sm:size-4 stroke-[2.5]" />
+          {showStatus &&
+            (isFilled ? (
+              <Check className="size-3.5 stroke-[2.5] sm:size-4" />
             ) : (
               <CircleAlert className="size-3.5 sm:size-4" />
-            )
-          )}
+            ))}
           <span>{label}</span>
         </FieldLabel>
 

@@ -53,8 +53,13 @@ describe("app/produkty (Products Catalog)", () => {
 
     render(pageJsx);
 
-    expect(screen.getByRole("heading", { level: 1, name: /produkty/i })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /dodaj opinię/i })).toHaveAttribute("href", "/opinie/dodaj");
+    expect(
+      screen.getByRole("heading", { level: 1, name: /produkty/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /dodaj opinię/i })).toHaveAttribute(
+      "href",
+      "/opinie/dodaj",
+    );
   });
 
   it("renders product cards with names, badges, review count, and links to details", async () => {
@@ -74,13 +79,17 @@ describe("app/produkty (Products Catalog)", () => {
     expect(screen.getByText("12 opinii")).toBeInTheDocument();
     expect(screen.getByText("Media Expert")).toBeInTheDocument();
 
-    expect(screen.getByText("Myszka Logitech MX Master 3S")).toBeInTheDocument();
+    expect(
+      screen.getByText("Myszka Logitech MX Master 3S"),
+    ).toBeInTheDocument();
     expect(screen.getByText("0 opinii")).toBeInTheDocument();
 
     const sonyLink = screen.getByText("Słuchawki Sony WH-1000XM5").closest("a");
     expect(sonyLink).toHaveAttribute("href", "/produkty/prod-1");
 
-    const logitechLink = screen.getByText("Myszka Logitech MX Master 3S").closest("a");
+    const logitechLink = screen
+      .getByText("Myszka Logitech MX Master 3S")
+      .closest("a");
     expect(logitechLink).toHaveAttribute("href", "/produkty/prod-2");
   });
 
@@ -97,22 +106,25 @@ describe("app/produkty (Products Catalog)", () => {
     render(sectionJsx);
 
     expect(screen.getByText("Brak produktów")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /dodaj produkt i opinię/i })).toHaveAttribute(
-      "href",
-      "/opinie/dodaj",
-    );
+    expect(
+      screen.getByRole("link", { name: /dodaj produkt i opinię/i }),
+    ).toHaveAttribute("href", "/opinie/dodaj");
   });
 
   describe("ProductsPagination", () => {
     it("renders nothing when totalPages is 1 or less", () => {
-      const { container } = render(<ProductsPagination currentPage={1} totalPages={1} />);
+      const { container } = render(
+        <ProductsPagination currentPage={1} totalPages={1} />,
+      );
       expect(container.firstChild).toBeNull();
     });
 
     it("renders pagination controls for page 1 of 3 with disabled previous button", () => {
       render(<ProductsPagination currentPage={1} totalPages={3} />);
 
-      const nav = screen.getByRole("navigation", { name: /nawigacja stronami/i });
+      const nav = screen.getByRole("navigation", {
+        name: /nawigacja stronami/i,
+      });
       expect(nav).toBeInTheDocument();
 
       const page1Btn = screen.getByRole("link", { name: "1" });
@@ -124,7 +136,9 @@ describe("app/produkty (Products Catalog)", () => {
       const nextLink = screen.getByLabelText(/przejdź do następnej strony/i);
       expect(nextLink).toHaveAttribute("href", "/produkty?page=2");
 
-      expect(screen.queryByLabelText(/przejdź do poprzedniej strony/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByLabelText(/przejdź do poprzedniej strony/i),
+      ).not.toBeInTheDocument();
     });
 
     it("renders pagination controls for middle page (2 of 3) with active previous and next links", () => {
@@ -149,7 +163,9 @@ describe("app/produkty (Products Catalog)", () => {
       const page3Btn = screen.getByRole("link", { name: "3" });
       expect(page3Btn).toHaveAttribute("aria-current", "page");
 
-      expect(screen.queryByLabelText(/przejdź do następnej strony/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByLabelText(/przejdź do następnej strony/i),
+      ).not.toBeInTheDocument();
     });
   });
 });

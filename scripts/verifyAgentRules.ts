@@ -62,18 +62,14 @@ function collectSourceFiles(dir: string): string[] {
   return results;
 }
 
-function checkZeroComments(
-  filePath: string,
-  sourceFile: ts.SourceFile,
-): void {
+function checkZeroComments(filePath: string, sourceFile: ts.SourceFile): void {
   const fullText = sourceFile.getFullText();
   const reportedPositions = new Set<number>();
 
   function inspectNode(node: ts.Node) {
     const leading =
       ts.getLeadingCommentRanges(fullText, node.getFullStart()) || [];
-    const trailing =
-      ts.getTrailingCommentRanges(fullText, node.getEnd()) || [];
+    const trailing = ts.getTrailingCommentRanges(fullText, node.getEnd()) || [];
 
     for (const range of [...leading, ...trailing]) {
       if (!reportedPositions.has(range.pos)) {
@@ -244,10 +240,7 @@ function checkMagicLiteralsInTests(filePath: string, content: string): void {
     if (!isTestAssertionLine(line)) continue;
 
     for (const knownError of KNOWN_ERROR_MESSAGES) {
-      if (
-        line.includes(`"${knownError}`) ||
-        line.includes(`'${knownError}`)
-      ) {
+      if (line.includes(`"${knownError}`) || line.includes(`'${knownError}`)) {
         VIOLATIONS.push({
           file: filePath,
           line: i + 1,

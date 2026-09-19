@@ -11,7 +11,7 @@ describe("ScrapeNoticeBanner", () => {
       <ScrapeNoticeBanner
         mode="scraped_success"
         scrapedFields={["name", "imageUrl", "code", "shop"]}
-      />
+      />,
     );
 
     const alert = screen.getByRole("alert");
@@ -26,7 +26,7 @@ describe("ScrapeNoticeBanner", () => {
       <ScrapeNoticeBanner
         mode="scraped_success"
         scrapedFields={["name", "imageUrl", "shop"]}
-      />
+      />,
     );
 
     const alert = screen.getByRole("alert");
@@ -36,10 +36,7 @@ describe("ScrapeNoticeBanner", () => {
 
   it("renders Case 2 (no data scraped - scraped_failed mode): error banner", () => {
     render(
-      <ScrapeNoticeBanner
-        mode="scraped_failed"
-        errorMessage="Błąd serwera"
-      />
+      <ScrapeNoticeBanner mode="scraped_failed" errorMessage="Błąd serwera" />,
     );
 
     const alert = screen.getByRole("alert");
@@ -48,12 +45,7 @@ describe("ScrapeNoticeBanner", () => {
   });
 
   it("renders Case 2 (no data scraped - empty scrapedFields): error banner", () => {
-    render(
-      <ScrapeNoticeBanner
-        mode="scraped_success"
-        scrapedFields={[]}
-      />
-    );
+    render(<ScrapeNoticeBanner mode="scraped_success" scrapedFields={[]} />);
 
     const alert = screen.getByRole("alert");
     expect(alert).toHaveTextContent(SCRAPE_BANNER_MESSAGES.failed.title);
@@ -62,10 +54,7 @@ describe("ScrapeNoticeBanner", () => {
 
   it("renders Case 3 (partial data - only name scraped): warning banner", () => {
     render(
-      <ScrapeNoticeBanner
-        mode="scraped_success"
-        scrapedFields={["name"]}
-      />
+      <ScrapeNoticeBanner mode="scraped_success" scrapedFields={["name"]} />,
     );
 
     const alert = screen.getByRole("alert");
@@ -78,7 +67,7 @@ describe("ScrapeNoticeBanner", () => {
       <ScrapeNoticeBanner
         mode="scraped_success"
         scrapedFields={["imageUrl"]}
-      />
+      />,
     );
 
     const alert = screen.getByRole("alert");
@@ -91,7 +80,7 @@ describe("ScrapeNoticeBanner", () => {
       <ScrapeNoticeBanner
         mode="scraped_success"
         scrapedFields={["name", "shop"]}
-      />
+      />,
     );
 
     const alert = screen.getByRole("alert");

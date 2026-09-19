@@ -5,7 +5,12 @@ import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { UserAccountMenu } from "./UserAccountMenu";
-import { DesktopNav, MenuItem, NAV_AUTH_MESSAGES, type NavItem } from "./DesktopNav";
+import {
+  DesktopNav,
+  MenuItem,
+  NAV_AUTH_MESSAGES,
+  type NavItem,
+} from "./DesktopNav";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "cn";
 
@@ -40,7 +45,7 @@ export function TopMenu() {
         userName={userName}
         userImage={userImage}
       />
-      <div className="flex md:hidden items-center gap-2">
+      <div className="flex items-center gap-2 md:hidden">
         {user ? (
           <UserAccountMenu
             user={user}
@@ -53,7 +58,7 @@ export function TopMenu() {
             href="/login"
             className={cn(
               buttonVariants({ variant: "ghost", size: "sm" }),
-              "text-xs font-semibold px-2 text-gray-700 hover:text-blue-600",
+              "px-2 text-xs font-semibold text-gray-700 hover:text-blue-600",
             )}
           >
             {NAV_AUTH_MESSAGES.loginLink}

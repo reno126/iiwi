@@ -9,7 +9,10 @@ export const handlers = [
       password?: string;
     };
 
-    if (data.email === "zajety@test.pl" || data.email === "existing@example.com") {
+    if (
+      data.email === "zajety@test.pl" ||
+      data.email === "existing@example.com"
+    ) {
       return HttpResponse.json(
         { error: REGISTER_API_MESSAGES.emailTaken },
         { status: 409 },
@@ -25,7 +28,12 @@ export const handlers = [
       );
     }
 
-    if (!data.name || !data.email || !data.password || data.password.length < 6) {
+    if (
+      !data.name ||
+      !data.email ||
+      !data.password ||
+      data.password.length < 6
+    ) {
       return HttpResponse.json(
         { error: REGISTER_API_MESSAGES.invalidData },
         { status: 400 },

@@ -22,7 +22,9 @@ const { mockTx } = vi.hoisted(() => {
 vi.mock("@/lib/db/prisma", () => ({
   prisma: {
     ...mockTx,
-    $transaction: vi.fn(async (cb: (tx: typeof mockTx) => unknown) => cb(mockTx)),
+    $transaction: vi.fn(async (cb: (tx: typeof mockTx) => unknown) =>
+      cb(mockTx),
+    ),
   },
 }));
 

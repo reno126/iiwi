@@ -24,13 +24,19 @@ describe("lib/auth/authOptions", () => {
   });
 
   interface CredentialsProviderOptions {
-    authorize?: (
-      credentials: Record<string, string> | undefined,
-    ) => Promise<{ id: string; email: string; name?: string | null; image?: string | null } | null>;
+    authorize?: (credentials: Record<string, string> | undefined) => Promise<{
+      id: string;
+      email: string;
+      name?: string | null;
+      image?: string | null;
+    } | null>;
     options?: {
-      authorize?: (
-        credentials: Record<string, string> | undefined,
-      ) => Promise<{ id: string; email: string; name?: string | null; image?: string | null } | null>;
+      authorize?: (credentials: Record<string, string> | undefined) => Promise<{
+        id: string;
+        email: string;
+        name?: string | null;
+        image?: string | null;
+      } | null>;
     };
   }
 
@@ -41,7 +47,9 @@ describe("lib/auth/authOptions", () => {
 
     const authorize = provider?.options?.authorize ?? provider?.authorize;
     if (!authorize) {
-      throw new Error("Credentials authorize function not found in authOptions");
+      throw new Error(
+        "Credentials authorize function not found in authOptions",
+      );
     }
     return authorize;
   };
@@ -94,7 +102,10 @@ describe("lib/auth/authOptions", () => {
       });
 
       expect(result).toBeNull();
-      expect(bcrypt.compare).toHaveBeenCalledWith("wrongPassword", "hashedPassword");
+      expect(bcrypt.compare).toHaveBeenCalledWith(
+        "wrongPassword",
+        "hashedPassword",
+      );
     });
 
     it("returns user object if password comparison succeeds", async () => {
@@ -157,7 +168,9 @@ describe("lib/auth/authOptions", () => {
             email: "jan@example.com",
             emailVerified: null,
           },
-        } as Parameters<NonNullable<typeof authOptions.callbacks>["session"]>[0]);
+        } as Parameters<
+          NonNullable<typeof authOptions.callbacks>["session"]
+        >[0]);
 
         expect(session.user?.id).toBe("user-sub-id");
       }

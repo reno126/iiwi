@@ -20,16 +20,20 @@ describe("hooks/useIsMobile", () => {
         onchange: null,
         addListener: vi.fn(),
         removeListener: vi.fn(),
-        addEventListener: vi.fn((event: string, callback: (event: MediaQueryListEvent) => void) => {
-          if (event === "change") {
-            listeners.push(callback);
-          }
-        }),
-        removeEventListener: vi.fn((event: string, callback: (event: MediaQueryListEvent) => void) => {
-          if (event === "change") {
-            listeners = listeners.filter((l) => l !== callback);
-          }
-        }),
+        addEventListener: vi.fn(
+          (event: string, callback: (event: MediaQueryListEvent) => void) => {
+            if (event === "change") {
+              listeners.push(callback);
+            }
+          },
+        ),
+        removeEventListener: vi.fn(
+          (event: string, callback: (event: MediaQueryListEvent) => void) => {
+            if (event === "change") {
+              listeners = listeners.filter((l) => l !== callback);
+            }
+          },
+        ),
         dispatchEvent: vi.fn(),
       };
     });
@@ -80,7 +84,10 @@ describe("hooks/useIsMobile", () => {
     act(() => {
       matchesValue = false;
       for (const listener of listeners) {
-        listener({ matches: false, media: currentQuery } as MediaQueryListEvent);
+        listener({
+          matches: false,
+          media: currentQuery,
+        } as MediaQueryListEvent);
       }
     });
 

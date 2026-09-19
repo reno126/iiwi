@@ -3,7 +3,10 @@ import { registerSchema, REGISTER_ERRORS } from "@/schemas/register";
 import { loginSchema, LOGIN_ERRORS } from "@/schemas/login";
 import { productCreateSchema, PRODUCT_ERRORS } from "@/schemas/product";
 import { reviewCreateSchema, REVIEW_ERRORS } from "@/schemas/review";
-import { productScrapeSchema, PRODUCT_SCRAPE_ERRORS } from "@/schemas/productScrape";
+import {
+  productScrapeSchema,
+  PRODUCT_SCRAPE_ERRORS,
+} from "@/schemas/productScrape";
 import { shopSchema, shopCreateSchema, SHOP_ERRORS } from "@/schemas/shop";
 
 describe("schemas/register", () => {
@@ -399,14 +402,14 @@ describe("schemas/shop", () => {
       shopCreateSchema.safeParse({
         name: "Action",
         logo: "https://example.com/logo.svg",
-      }).success
+      }).success,
     ).toBe(true);
 
     expect(
       shopCreateSchema.safeParse({
         name: null,
         logo: null,
-      }).success
+      }).success,
     ).toBe(true);
 
     const invalidResult = shopCreateSchema.safeParse({
@@ -426,8 +429,12 @@ describe("schemas/product - shopId field", () => {
       name: "Testowy Produkt",
     };
 
-    expect(productCreateSchema.safeParse({ ...base, shopId: "shop-1" }).success).toBe(true);
-    expect(productCreateSchema.safeParse({ ...base, shopId: "" }).success).toBe(true);
+    expect(
+      productCreateSchema.safeParse({ ...base, shopId: "shop-1" }).success,
+    ).toBe(true);
+    expect(productCreateSchema.safeParse({ ...base, shopId: "" }).success).toBe(
+      true,
+    );
     expect(productCreateSchema.safeParse({ ...base }).success).toBe(true);
   });
 });

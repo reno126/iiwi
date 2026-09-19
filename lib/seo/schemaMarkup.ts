@@ -164,7 +164,9 @@ export function buildProductsCatalogSchema(
   };
 }
 
-export function buildWebSiteSchema(baseUrl = getBaseUrl()): WithContext<WebSite> {
+export function buildWebSiteSchema(
+  baseUrl = getBaseUrl(),
+): WithContext<WebSite> {
   const potentialAction: WithActionConstraints<SearchAction> = {
     "@type": "SearchAction",
     target: `${baseUrl}/produkty?q={search_term_string}`,

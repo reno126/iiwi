@@ -55,10 +55,12 @@ describe("app/opinie/dodaj/_components/ProductShopSelector", () => {
     render(<SelectorWrapper selectedShop={null} onSelectShop={onSelectShop} />);
 
     expect(
-      screen.getByText(SHOP_SELECTOR_MESSAGES.helperText)
+      screen.getByText(SHOP_SELECTOR_MESSAGES.helperText),
     ).toBeInTheDocument();
     expect(screen.getByRole("combobox")).toBeInTheDocument();
-    expect(screen.getByText(SHOP_SELECTOR_MESSAGES.selectFromList)).toBeInTheDocument();
+    expect(
+      screen.getByText(SHOP_SELECTOR_MESSAGES.selectFromList),
+    ).toBeInTheDocument();
   });
 
   it("renders shop card with logo and name when selectedShop is provided", () => {
@@ -72,17 +74,21 @@ describe("app/opinie/dodaj/_components/ProductShopSelector", () => {
         }}
         onSelectShop={onSelectShop}
         defaultShopId="shop-me"
-      />
+      />,
     );
 
     expect(screen.getByText("Media Expert")).toBeInTheDocument();
-    expect(screen.getByText(SHOP_SELECTOR_MESSAGES.selectedShop)).toBeInTheDocument();
+    expect(
+      screen.getByText(SHOP_SELECTOR_MESSAGES.selectedShop),
+    ).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "Media Expert" })).toHaveAttribute(
       "src",
-      "https://example.com/me.png"
+      "https://example.com/me.png",
     );
     expect(
-      screen.getByRole("button", { name: SHOP_SELECTOR_MESSAGES.deleteShopAriaLabel })
+      screen.getByRole("button", {
+        name: SHOP_SELECTOR_MESSAGES.deleteShopAriaLabel,
+      }),
     ).toBeInTheDocument();
     expect(screen.getByText(SHOP_SELECTOR_MESSAGES.change)).toBeInTheDocument();
   });
@@ -100,10 +106,12 @@ describe("app/opinie/dodaj/_components/ProductShopSelector", () => {
         }}
         onSelectShop={onSelectShop}
         defaultShopId="shop-me"
-      />
+      />,
     );
 
-    const deleteBtn = screen.getByRole("button", { name: SHOP_SELECTOR_MESSAGES.deleteShopAriaLabel });
+    const deleteBtn = screen.getByRole("button", {
+      name: SHOP_SELECTOR_MESSAGES.deleteShopAriaLabel,
+    });
     await user.click(deleteBtn);
 
     expect(onSelectShop).toHaveBeenCalledWith(null);
@@ -114,7 +122,12 @@ describe("app/opinie/dodaj/_components/ProductShopSelector", () => {
     const onSelectShop = vi.fn();
 
     vi.mocked(shopsGet).mockResolvedValueOnce([
-      { id: "shop-1", name: "Biedronka", logo: null, matcherKeys: ["biedronka.pl"] },
+      {
+        id: "shop-1",
+        name: "Biedronka",
+        logo: null,
+        matcherKeys: ["biedronka.pl"],
+      },
       { id: "shop-2", name: "Lidl", logo: null, matcherKeys: ["lidl.pl"] },
     ]);
 

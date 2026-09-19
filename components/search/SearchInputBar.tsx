@@ -40,9 +40,9 @@ const MemoizedSearchInputBar = memo(function MemoizedSearchInputBar({
   clearAriaLabel,
 }: SearchInputBarProps) {
   return (
-    <div className="relative flex items-center w-full">
+    <div className="relative flex w-full items-center">
       <SearchIcon
-        className="absolute left-3 size-4 text-muted-foreground pointer-events-none"
+        className="pointer-events-none absolute left-3 size-4 text-muted-foreground"
         aria-hidden="true"
       />
 
@@ -60,7 +60,7 @@ const MemoizedSearchInputBar = memo(function MemoizedSearchInputBar({
         disabled={disabled}
         autoFocus={autoFocus}
         className={cn(
-          "pl-9 pr-16 h-10 text-sm shadow-2xs transition-shadow focus-visible:ring-1",
+          "h-10 pr-16 pl-9 text-sm shadow-2xs transition-shadow focus-visible:ring-1",
           className,
         )}
       />
@@ -84,7 +84,7 @@ const MemoizedSearchInputBar = memo(function MemoizedSearchInputBar({
             onClick={onClear}
             disabled={disabled}
             aria-label={clearAriaLabel}
-            className="text-muted-foreground hover:text-foreground size-6 p-0 rounded-full"
+            className="size-6 rounded-full p-0 text-muted-foreground hover:text-foreground"
           >
             <X className="size-3.5" aria-hidden="true" />
           </Button>

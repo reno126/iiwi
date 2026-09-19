@@ -30,7 +30,7 @@ export const productScrapeSchema = z.object({
       },
       {
         message: PRODUCT_SCRAPE_ERRORS.invalidProtocol,
-      }
+      },
     ),
 });
 

@@ -17,7 +17,9 @@ describe("components/auth/SignOut", () => {
     const user = userEvent.setup();
     render(<SignOut />);
 
-    const logoutBtn = screen.getByRole("button", { name: SIGN_OUT_MESSAGES.button });
+    const logoutBtn = screen.getByRole("button", {
+      name: SIGN_OUT_MESSAGES.button,
+    });
     await user.click(logoutBtn);
 
     expect(signOut).toHaveBeenCalledWith({ callbackUrl: "/login" });
@@ -26,7 +28,9 @@ describe("components/auth/SignOut", () => {
   it("passes custom className to the button", () => {
     render(<SignOut className="custom-test-class" />);
 
-    const logoutBtn = screen.getByRole("button", { name: SIGN_OUT_MESSAGES.button });
+    const logoutBtn = screen.getByRole("button", {
+      name: SIGN_OUT_MESSAGES.button,
+    });
     expect(logoutBtn).toHaveClass("custom-test-class");
   });
 });

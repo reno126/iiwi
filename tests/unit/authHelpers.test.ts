@@ -43,11 +43,15 @@ describe("lib/auth/resolveAuthRedirectUrl", () => {
   });
 
   it("returns custom callbackUrl when valid and not dashboard", () => {
-    expect(resolveAuthRedirectUrl("/produkty/prod-123")).toBe("/produkty/prod-123");
+    expect(resolveAuthRedirectUrl("/produkty/prod-123")).toBe(
+      "/produkty/prod-123",
+    );
   });
 
   it("falls back to review draft return url when callbackUrl is missing or /dashboard", () => {
-    vi.spyOn(reviewDraftStorage, "getReviewDraftReturnUrl").mockReturnValue("/opinie/dodaj");
+    vi.spyOn(reviewDraftStorage, "getReviewDraftReturnUrl").mockReturnValue(
+      "/opinie/dodaj",
+    );
 
     expect(resolveAuthRedirectUrl(null)).toBe("/opinie/dodaj");
     expect(resolveAuthRedirectUrl("/dashboard")).toBe("/opinie/dodaj");

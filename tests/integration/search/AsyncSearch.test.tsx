@@ -13,9 +13,19 @@ interface TestProduct {
 }
 
 const mockProducts: TestProduct[] = [
-  { id: "1", name: "Słuchawki bezprzewodowe Sony", code: "SONY-01", price: 799 },
+  {
+    id: "1",
+    name: "Słuchawki bezprzewodowe Sony",
+    code: "SONY-01",
+    price: 799,
+  },
   { id: "2", name: "Słuchawki douszne JBL", code: "JBL-02", price: 299 },
-  { id: "3", name: "Klawiatura mechaniczna Keychron", code: "KEY-03", price: 450 },
+  {
+    id: "3",
+    name: "Klawiatura mechaniczna Keychron",
+    code: "KEY-03",
+    price: 450,
+  },
 ];
 
 function createAsyncSearchDriver() {
@@ -192,7 +202,9 @@ describe("app/opinie/dodaj/_components/AsyncSearch", () => {
     });
 
     expect(driver.queryLoadingIndicator()).not.toBeInTheDocument();
-    expect(screen.getByText("Słuchawki bezprzewodowe Sony")).toBeInTheDocument();
+    expect(
+      screen.getByText("Słuchawki bezprzewodowe Sony"),
+    ).toBeInTheDocument();
   });
 
   it("displays zero result state when query returns no items", async () => {

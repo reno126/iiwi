@@ -12,7 +12,8 @@ import type { MatchedShopResult } from "@/lib/shops/findShopByUrl";
 import { ShopLogo } from "@/components/shops/ShopLogo";
 
 export const SHOP_SELECTOR_MESSAGES = {
-  helperText: "Jeśli nie znasz sklepu lub nie ma go na liście pozostaw pole puste.",
+  helperText:
+    "Jeśli nie znasz sklepu lub nie ma go na liście pozostaw pole puste.",
   selectedShop: "Wybrany sklep",
   selectFromList: "Wybierz z listy",
   change: "Zmień",
@@ -35,7 +36,9 @@ export function ProductShopSelector({
 }: ProductShopSelectorProps) {
   const { setValue, control } = useFormContext<ProductCreateInput>();
   const shopId = useWatch({ control, name: "shopId" });
-  const isShopFilled = Boolean(selectedShop || (shopId && shopId.trim().length > 0));
+  const isShopFilled = Boolean(
+    selectedShop || (shopId && shopId.trim().length > 0),
+  );
 
   const [shopsList, setShopsList] = useState<ShopItem[] | null>(null);
   const [isLoadingShops, startTransition] = useTransition();
@@ -82,22 +85,24 @@ export function ProductShopSelector({
       missingBadgeText="Do uzupełnienia"
     >
       {selectedShop ? (
-        <div className="flex flex-col md:flex-row items-center justify-between gap-3 p-3 rounded-lg border bg-white dark:bg-card text-card-foreground shadow-2xs">
-          <div className="flex items-center gap-3 min-w-0">
+        <div className="flex flex-col items-center justify-between gap-3 rounded-lg border bg-white p-3 text-card-foreground shadow-2xs md:flex-row dark:bg-card">
+          <div className="flex min-w-0 items-center gap-3">
             <ShopLogo
               logo={selectedShop.logo}
               name={selectedShop.name}
               size="lg"
             />
-            <div className="flex flex-col min-w-0">
-              <span className="font-medium text-sm truncate">
+            <div className="flex min-w-0 flex-col">
+              <span className="truncate text-sm font-medium">
                 {selectedShop.name || "Nieznany sklep"}
               </span>
-              <span className="text-xs text-muted-foreground">{SHOP_SELECTOR_MESSAGES.selectedShop}</span>
+              <span className="text-xs text-muted-foreground">
+                {SHOP_SELECTOR_MESSAGES.selectedShop}
+              </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex shrink-0 items-center gap-2">
             <ComboboxResponsive<ShopItem>
               items={shopsList || []}
               value={shopId || ""}
@@ -122,12 +127,12 @@ export function ProductShopSelector({
               triggerClassName="h-8 px-2.5 text-xs"
               renderItem={(item, isSelected) => (
                 <div className="flex w-full items-center justify-between gap-2 py-1">
-                  <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex min-w-0 items-center gap-2.5">
                     <ShopLogo logo={item.logo} name={item.name} size="sm" />
                     <span className="truncate">{item.name || "Sklep"}</span>
                   </div>
                   {isSelected && (
-                    <Check className="size-4 text-primary shrink-0" />
+                    <Check className="size-4 shrink-0 text-primary" />
                   )}
                 </div>
               )}
@@ -140,14 +145,15 @@ export function ProductShopSelector({
               aria-label={SHOP_SELECTOR_MESSAGES.deleteShopAriaLabel}
               disabled={disabled}
               onClick={handleClearShop}
-              className="sm:w-auto text-muted-foreground hover:text-destructive hover:border-destructive/40"
+              className="text-muted-foreground hover:border-destructive/40 hover:text-destructive sm:w-auto"
             >
-              <Trash2 className="size-3.5 mr-1" /> {SHOP_SELECTOR_MESSAGES.deleteButton}
+              <Trash2 className="mr-1 size-3.5" />{" "}
+              {SHOP_SELECTOR_MESSAGES.deleteButton}
             </Button>
           </div>
         </div>
       ) : (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 rounded-lg border border-dashed text-sm text-muted-foreground bg-white dark:bg-card">
+        <div className="flex flex-col items-start justify-between gap-3 rounded-lg border border-dashed bg-white p-3 text-sm text-muted-foreground sm:flex-row sm:items-center dark:bg-card">
           <ComboboxResponsive<ShopItem>
             items={shopsList || []}
             value={shopId || ""}
@@ -164,17 +170,19 @@ export function ProductShopSelector({
               if (open) loadShopsIfNeeded();
             }}
             renderTrigger={() => (
-              <span className="text-xs font-medium">{SHOP_SELECTOR_MESSAGES.selectFromList}</span>
+              <span className="text-xs font-medium">
+                {SHOP_SELECTOR_MESSAGES.selectFromList}
+              </span>
             )}
             triggerClassName="h-10 sm:h-8 w-full sm:w-auto px-3 text-xs shrink-0 font-medium"
             renderItem={(item, isSelected) => (
               <div className="flex w-full items-center justify-between gap-2 py-1">
-                <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex min-w-0 items-center gap-2.5">
                   <ShopLogo logo={item.logo} name={item.name} size="sm" />
                   <span className="truncate">{item.name || "Sklep"}</span>
                 </div>
                 {isSelected && (
-                  <Check className="size-4 text-primary shrink-0" />
+                  <Check className="size-4 shrink-0 text-primary" />
                 )}
               </div>
             )}
@@ -182,7 +190,7 @@ export function ProductShopSelector({
         </div>
       )}
 
-      <p className="text-xs text-muted-foreground mt-1">
+      <p className="mt-1 text-xs text-muted-foreground">
         {SHOP_SELECTOR_MESSAGES.helperText}
       </p>
     </FormFieldCard>

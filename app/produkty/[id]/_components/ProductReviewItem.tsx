@@ -45,7 +45,7 @@ const MemoizedProductReviewItem = memo(function MemoizedProductReviewItem({
               <CardTitle className="text-sm font-semibold text-foreground">
                 {reviewerName}
               </CardTitle>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <p className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Calendar className="size-3" />
                 {formatPolishDate(review.createdAt)}
               </p>

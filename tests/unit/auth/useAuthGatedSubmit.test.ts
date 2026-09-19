@@ -47,10 +47,12 @@ describe("lib/auth/useAuthGatedSubmit", () => {
     );
 
   it("calls onSaveDraft and blocks action execution when user is unauthenticated", async () => {
-    ensureAuthenticatedMock.mockImplementationOnce(async ({ onUnauthenticated }) => {
-      onUnauthenticated();
-      return false;
-    });
+    ensureAuthenticatedMock.mockImplementationOnce(
+      async ({ onUnauthenticated }) => {
+        onUnauthenticated();
+        return false;
+      },
+    );
 
     const { result } = setupHook();
     const testData: TestFormValues = { name: "Test", rating: 5 };
@@ -86,12 +88,17 @@ describe("lib/auth/useAuthGatedSubmit", () => {
 
   it("sets root error when action returns a generic serverError", async () => {
     ensureAuthenticatedMock.mockResolvedValueOnce(true);
-    actionMock.mockResolvedValueOnce({ serverError: "Błąd serwera podczas zapisu" });
+    actionMock.mockResolvedValueOnce({
+      serverError: "Błąd serwera podczas zapisu",
+    });
 
     const { result } = setupHook();
 
     await act(async () => {
-      await result.current.handleSubmitAction({ name: "Error Item", rating: 1 });
+      await result.current.handleSubmitAction({
+        name: "Error Item",
+        rating: 1,
+      });
     });
 
     expect(setErrorMock).toHaveBeenCalledWith("root", {
@@ -133,7 +140,9 @@ describe("lib/auth/useAuthGatedSubmit", () => {
 
   it("handles 401 unauthorized: re-verifies session, retries action, and succeeds", async () => {
     ensureAuthenticatedMock.mockResolvedValueOnce(true);
-    actionMock.mockResolvedValueOnce({ serverError: UNAUTHORIZED_ERROR_MESSAGE });
+    actionMock.mockResolvedValueOnce({
+      serverError: UNAUTHORIZED_ERROR_MESSAGE,
+    });
 
     ensureAuthenticatedMock.mockResolvedValueOnce(true);
     actionMock.mockResolvedValueOnce({ data: { id: "item-retried" } });
@@ -152,12 +161,16 @@ describe("lib/auth/useAuthGatedSubmit", () => {
 
   it("handles 401 unauthorized: saves draft and aborts if session refresh fails", async () => {
     ensureAuthenticatedMock.mockResolvedValueOnce(true);
-    actionMock.mockResolvedValueOnce({ serverError: UNAUTHORIZED_ERROR_MESSAGE });
-
-    ensureAuthenticatedMock.mockImplementationOnce(async ({ onUnauthenticated }) => {
-      onUnauthenticated();
-      return false;
+    actionMock.mockResolvedValueOnce({
+      serverError: UNAUTHORIZED_ERROR_MESSAGE,
     });
+
+    ensureAuthenticatedMock.mockImplementationOnce(
+      async ({ onUnauthenticated }) => {
+        onUnauthenticated();
+        return false;
+      },
+    );
 
     const { result } = setupHook();
     const testData: TestFormValues = { name: "Aborted Retry", rating: 3 };
@@ -174,7 +187,9 @@ describe("lib/auth/useAuthGatedSubmit", () => {
 
   it("handles 401 unauthorized: sets root error when retried action fails with server error", async () => {
     ensureAuthenticatedMock.mockResolvedValueOnce(true);
-    actionMock.mockResolvedValueOnce({ serverError: UNAUTHORIZED_ERROR_MESSAGE });
+    actionMock.mockResolvedValueOnce({
+      serverError: UNAUTHORIZED_ERROR_MESSAGE,
+    });
 
     ensureAuthenticatedMock.mockResolvedValueOnce(true);
     actionMock.mockResolvedValueOnce({ serverError: "Ponowny błąd serwera" });

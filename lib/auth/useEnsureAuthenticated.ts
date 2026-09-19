@@ -25,7 +25,10 @@ export function useEnsureAuthenticated() {
           const refreshed = await update();
           return Boolean(refreshed?.user?.id);
         } catch (err) {
-          console.warn("[useEnsureAuthenticated] Błąd podczas próby odświeżenia sesji:", err);
+          console.warn(
+            "[useEnsureAuthenticated] Błąd podczas próby odświeżenia sesji:",
+            err,
+          );
           return false;
         }
       }
@@ -51,7 +54,7 @@ export function useEnsureAuthenticated() {
       router.push(`/login?callbackUrl=${encodeURIComponent(targetUrl)}`);
       return false;
     },
-    [session, update, router]
+    [session, update, router],
   );
 
   return {

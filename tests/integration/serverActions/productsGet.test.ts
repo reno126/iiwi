@@ -45,7 +45,9 @@ describe("serverActions/productsGet", () => {
   ];
 
   it("fetches first page with default page (1) and pageSize (20)", async () => {
-    vi.mocked(prisma.product.findMany).mockResolvedValueOnce(mockProductsList as never);
+    vi.mocked(prisma.product.findMany).mockResolvedValueOnce(
+      mockProductsList as never,
+    );
     vi.mocked(getCachedProductCount).mockResolvedValueOnce(45);
 
     const result = await productsGet();
@@ -82,7 +84,9 @@ describe("serverActions/productsGet", () => {
   });
 
   it("applies custom page and pageSize with correct skip and take offsets", async () => {
-    vi.mocked(prisma.product.findMany).mockResolvedValueOnce(mockProductsList as never);
+    vi.mocked(prisma.product.findMany).mockResolvedValueOnce(
+      mockProductsList as never,
+    );
     vi.mocked(getCachedProductCount).mockResolvedValueOnce(50);
 
     const result = await productsGet({ page: 3, pageSize: 15 });

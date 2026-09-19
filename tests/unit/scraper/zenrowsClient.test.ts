@@ -40,7 +40,8 @@ describe("lib/scraper/zenrowsClient", () => {
   it("calls ZenRows endpoint with default query parameters and returns html on success", async () => {
     process.env.ZENROWS_API_KEY = "test-zenrows-api-key";
 
-    const mockHtml = "<html><head><title>Produkt Testowy</title></head><body>Treść</body></html>";
+    const mockHtml =
+      "<html><head><title>Produkt Testowy</title></head><body>Treść</body></html>";
     const fetchMock = vi.fn().mockResolvedValueOnce({
       ok: true,
       status: 200,
@@ -126,7 +127,9 @@ describe("lib/scraper/zenrowsClient", () => {
     const fetchMock = vi.fn().mockRejectedValueOnce(abortError);
     globalThis.fetch = fetchMock;
 
-    const result = await fetchWithZenRows("https://timeout-shop.com", { timeoutMs: 100 });
+    const result = await fetchWithZenRows("https://timeout-shop.com", {
+      timeoutMs: 100,
+    });
 
     expect(result).toBeNull();
   });

@@ -40,7 +40,7 @@ export function ProductsList({ products }: ProductsListProps) {
   }
 
   return (
-    <div className="flex flex-col gap-4 w-full" data-slot="products-list">
+    <div className="flex w-full flex-col gap-4" data-slot="products-list">
       {products.map((product, index) => (
         <ProductListItemCard
           key={product.id}

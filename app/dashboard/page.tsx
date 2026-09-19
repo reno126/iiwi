@@ -35,7 +35,7 @@ async function DashboardContent() {
         createdAt={data.user.createdAt}
       />
 
-      <Card className="p-5 sm:p-6 shadow-xs space-y-6">
+      <Card className="space-y-6 p-5 shadow-xs sm:p-6">
         <UserProductStats
           totalReviewedProducts={data.totalReviewedProducts}
           reviewedProducts={data.reviewedProducts}

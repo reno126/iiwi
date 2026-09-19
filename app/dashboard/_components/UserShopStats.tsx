@@ -26,12 +26,12 @@ export function UserShopStats({ reviewedShops }: UserShopStatsProps) {
           {reviewedShops.map((item) => (
             <li
               key={item.shopName}
-              className="flex items-center justify-between text-sm border-b border-border/60 pb-2 last:border-b-0 last:pb-0"
+              className="flex items-center justify-between border-b border-border/60 pb-2 text-sm last:border-b-0 last:pb-0"
             >
-              <span className="font-medium text-foreground truncate">
+              <span className="truncate font-medium text-foreground">
                 {item.shopName}
               </span>
-              <span className="text-xs sm:text-sm font-medium text-muted-foreground shrink-0">
+              <span className="shrink-0 text-xs font-medium text-muted-foreground sm:text-sm">
                 {formatReviewCount(item.reviewCount)}
               </span>
             </li>

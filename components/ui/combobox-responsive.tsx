@@ -36,7 +36,10 @@ export interface ComboboxResponsiveProps<T> {
   filterFn?: (item: T, search: string) => boolean;
 
   renderItem: (item: T, isSelected: boolean) => React.ReactNode;
-  renderTrigger?: (selectedItem: T | undefined, isOpen: boolean) => React.ReactNode;
+  renderTrigger?: (
+    selectedItem: T | undefined,
+    isOpen: boolean,
+  ) => React.ReactNode;
 
   placeholder?: string;
   searchPlaceholder?: string;
@@ -93,7 +96,7 @@ export function ComboboxResponsive<T>({
       }
       setControlledOpen?.(nextOpen);
     },
-    [isControlled, setControlledOpen]
+    [isControlled, setControlledOpen],
   );
   const [search, setSearch] = React.useState("");
   const isMobile = useIsMobile();
@@ -113,7 +116,7 @@ export function ComboboxResponsive<T>({
       setOpen(false);
       setSearch("");
     },
-    [clearable, value, onValueChange, setOpen]
+    [clearable, value, onValueChange, setOpen],
   );
 
   const displayedItems = React.useMemo(() => {
@@ -128,12 +131,23 @@ export function ComboboxResponsive<T>({
     if (selectedItem) {
       return (
         <span className="truncate">
-          {getItemLabel ? getItemLabel(selectedItem) : getItemValue(selectedItem)}
+          {getItemLabel
+            ? getItemLabel(selectedItem)
+            : getItemValue(selectedItem)}
         </span>
       );
     }
-    return <span className="text-muted-foreground truncate">{placeholder}</span>;
-  }, [renderTrigger, selectedItem, open, getItemLabel, getItemValue, placeholder]);
+    return (
+      <span className="truncate text-muted-foreground">{placeholder}</span>
+    );
+  }, [
+    renderTrigger,
+    selectedItem,
+    open,
+    getItemLabel,
+    getItemValue,
+    placeholder,
+  ]);
 
   const commandListContent = (
     <Command
@@ -146,7 +160,12 @@ export function ComboboxResponsive<T>({
         onValueChange={setSearch}
         autoFocus
       />
-      <CommandList className={cn("max-h-72 overflow-y-auto", isMobile && "max-h-none flex-1")}>
+      <CommandList
+        className={cn(
+          "max-h-72 overflow-y-auto",
+          isMobile && "max-h-none flex-1",
+        )}
+      >
         {loading ? (
           <div className="flex items-center justify-center gap-2 p-6 text-sm text-muted-foreground">
             <Spinner className="size-4" />
@@ -195,7 +214,7 @@ export function ComboboxResponsive<T>({
                 disabled={disabled}
                 className={cn(
                   "flex h-9 w-full items-center justify-between gap-2 px-3 text-left font-normal",
-                  triggerClassName
+                  triggerClassName,
                 )}
               />
             }
@@ -209,7 +228,7 @@ export function ComboboxResponsive<T>({
             showCloseButton={true}
             className={cn(
               "fixed inset-0 top-0 left-0 z-50 flex h-full max-h-screen w-full max-w-full -translate-x-0 -translate-y-0 flex-col rounded-none border-0 p-0 shadow-none sm:rounded-none",
-              contentClassName
+              contentClassName,
             )}
           >
             <DialogHeader className="border-b px-4 py-3 text-left">
@@ -241,7 +260,7 @@ export function ComboboxResponsive<T>({
               disabled={disabled}
               className={cn(
                 "flex h-9 w-full items-center justify-between gap-2 px-3 text-left font-normal",
-                triggerClassName
+                triggerClassName,
               )}
             />
           }
@@ -254,7 +273,10 @@ export function ComboboxResponsive<T>({
         <PopoverContent
           align="start"
           sideOffset={4}
-          className={cn("w-(--trigger-width) min-w-[220px] p-0 shadow-md", contentClassName)}
+          className={cn(
+            "w-(--trigger-width) min-w-[220px] p-0 shadow-md",
+            contentClassName,
+          )}
         >
           {commandListContent}
         </PopoverContent>

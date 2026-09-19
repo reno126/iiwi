@@ -36,7 +36,7 @@ const INITIAL_SHOPS = [
     logo: "/images/shops/lidl.svg",
     matcherKeys: ["lidl.pl", "lidl"],
   },
-    {
+  {
     name: "Castorama",
     logo: "/images/shops/castorama.svg",
     matcherKeys: ["castorama.pl", "castorama"],

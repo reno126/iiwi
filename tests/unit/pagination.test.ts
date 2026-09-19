@@ -18,7 +18,15 @@ describe("lib/pagination", () => {
   });
 
   it("returns ellipsis on both sides when in the middle of large pagination", () => {
-    expect(generatePaginationPages(5, 10)).toEqual([1, "ellipsis", 4, 5, 6, "ellipsis", 10]);
+    expect(generatePaginationPages(5, 10)).toEqual([
+      1,
+      "ellipsis",
+      4,
+      5,
+      6,
+      "ellipsis",
+      10,
+    ]);
   });
 
   it("returns ellipsis at start when near the end of large pagination", () => {

@@ -16,10 +16,7 @@ interface FormWrapperProps {
   children?: React.ReactNode;
 }
 
-function ReviewFormWrapper({
-  defaultValues,
-  children,
-}: FormWrapperProps) {
+function ReviewFormWrapper({ defaultValues, children }: FormWrapperProps) {
   const methods = useForm<ReviewCreateInput>({
     defaultValues: {
       rate: 0,
@@ -41,9 +38,17 @@ describe("components/reviews/ReviewFields", () => {
     render(<ReviewFormWrapper />);
 
     expect(screen.getByText(REVIEW_FIELDS_MESSAGES.legend)).toBeInTheDocument();
-    expect(screen.getByText(REVIEW_FIELDS_MESSAGES.rateLabel)).toBeInTheDocument();
-    expect(screen.getByLabelText(REVIEW_FIELDS_MESSAGES.descriptionLabel)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(REVIEW_FIELDS_MESSAGES.descriptionPlaceholder)).toBeInTheDocument();
+    expect(
+      screen.getByText(REVIEW_FIELDS_MESSAGES.rateLabel),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByLabelText(REVIEW_FIELDS_MESSAGES.descriptionLabel),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText(
+        REVIEW_FIELDS_MESSAGES.descriptionPlaceholder,
+      ),
+    ).toBeInTheDocument();
   });
 
   it("updates rating value when clicking star radio button", async () => {
@@ -64,7 +69,9 @@ describe("components/reviews/ReviewFields", () => {
     const user = userEvent.setup();
     render(<ReviewFormWrapper />);
 
-    const textarea = screen.getByLabelText(REVIEW_FIELDS_MESSAGES.descriptionLabel);
+    const textarea = screen.getByLabelText(
+      REVIEW_FIELDS_MESSAGES.descriptionLabel,
+    );
     await user.type(textarea, "Bardzo dobry produkt");
 
     expect(textarea).toHaveValue("Bardzo dobry produkt");
@@ -74,14 +81,16 @@ describe("components/reviews/ReviewFields", () => {
     render(
       <ReviewFormWrapper>
         <ReviewRatingField />
-      </ReviewFormWrapper>
+      </ReviewFormWrapper>,
     );
 
-    expect(screen.getByText(REVIEW_FIELDS_MESSAGES.rateLabel)).toBeInTheDocument();
+    expect(
+      screen.getByText(REVIEW_FIELDS_MESSAGES.rateLabel),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("radio", {
         name: RATING_INPUT_MESSAGES.starAriaLabel(5),
-      })
+      }),
     ).toBeInTheDocument();
   });
 
@@ -89,9 +98,11 @@ describe("components/reviews/ReviewFields", () => {
     render(
       <ReviewFormWrapper>
         <ReviewDescriptionField />
-      </ReviewFormWrapper>
+      </ReviewFormWrapper>,
     );
 
-    expect(screen.getByLabelText(REVIEW_FIELDS_MESSAGES.descriptionLabel)).toBeInTheDocument();
+    expect(
+      screen.getByLabelText(REVIEW_FIELDS_MESSAGES.descriptionLabel),
+    ).toBeInTheDocument();
   });
 });

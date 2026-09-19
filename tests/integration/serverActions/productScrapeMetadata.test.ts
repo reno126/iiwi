@@ -53,7 +53,7 @@ describe("serverActions/productScrapeMetadata", () => {
       new Response(mockHtml, {
         status: 200,
         headers: { "Content-Type": "text/html" },
-      })
+      }),
     );
 
     const result = await productScrapeMetadata({
@@ -70,7 +70,9 @@ describe("serverActions/productScrapeMetadata", () => {
     });
 
     expect(fetchSpy).toHaveBeenCalledTimes(1);
-    expect(fetchSpy.mock.calls[0][0]).toBe("https://shop.pl/p/12345/headphones");
+    expect(fetchSpy.mock.calls[0][0]).toBe(
+      "https://shop.pl/p/12345/headphones",
+    );
   });
 
   it("falls back to Tier 2 (ZenRows) when Tier 1 is blocked by Cloudflare (403)", async () => {
@@ -90,17 +92,18 @@ describe("serverActions/productScrapeMetadata", () => {
     const fetchSpy = vi
       .spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(
-        new Response("Forbidden: Cloudflare Challenge", { status: 403 })
+        new Response("Forbidden: Cloudflare Challenge", { status: 403 }),
       )
       .mockResolvedValueOnce(
         new Response(tier2Html, {
           status: 200,
           headers: { "Content-Type": "text/html" },
-        })
+        }),
       );
 
     const result = await productScrapeMetadata({
-      productUrl: "https://www.action.com/pl-pl/p/3222380/ladowarka-scienna-usb-c-sologic/",
+      productUrl:
+        "https://www.action.com/pl-pl/p/3222380/ladowarka-scienna-usb-c-sologic/",
     });
 
     expect(result?.serverError).toBeUndefined();
@@ -137,7 +140,7 @@ describe("serverActions/productScrapeMetadata", () => {
       new Response(mockHtml, {
         status: 200,
         headers: { "Content-Type": "text/html" },
-      })
+      }),
     );
 
     const mockShop = {
@@ -179,13 +182,13 @@ describe("serverActions/productScrapeMetadata", () => {
         new Response(mockHtml, {
           status: 200,
           headers: { "Content-Type": "text/html" },
-        })
+        }),
       )
       .mockResolvedValueOnce(
         new Response(mockHtml, {
           status: 200,
           headers: { "Content-Type": "text/html" },
-        })
+        }),
       );
 
     const result = await productScrapeMetadata({
@@ -206,7 +209,9 @@ describe("serverActions/productScrapeMetadata", () => {
     vi.spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(new Response("Access Denied", { status: 403 }))
       .mockResolvedValueOnce(
-        new Response("<html><body><div>Pusto</div></body></html>", { status: 200 })
+        new Response("<html><body><div>Pusto</div></body></html>", {
+          status: 200,
+        }),
       );
 
     const result = await productScrapeMetadata({

@@ -6,7 +6,10 @@ export interface ScrapedProductMetadata {
   code?: string | null;
 }
 
-function normalizeUrl(rawUrl: string | undefined | null, baseUrl: string): string | null {
+function normalizeUrl(
+  rawUrl: string | undefined | null,
+  baseUrl: string,
+): string | null {
   if (!rawUrl || typeof rawUrl !== "string") return null;
 
   let cleaned = rawUrl.trim();
@@ -48,7 +51,9 @@ function isValidProductImage(url: string): boolean {
   const lower = url.toLowerCase();
 
   const isVectorOrDataUri =
-    lower.endsWith(".svg") || lower.includes(".svg?") || lower.startsWith("data:");
+    lower.endsWith(".svg") ||
+    lower.includes(".svg?") ||
+    lower.startsWith("data:");
   if (isVectorOrDataUri) {
     return false;
   }
@@ -72,7 +77,9 @@ function cleanProductName(name: string | undefined | null): string | null {
   return cleaned.slice(0, 100);
 }
 
-function cleanProductCode(code: string | number | undefined | null): string | null {
+function cleanProductCode(
+  code: string | number | undefined | null,
+): string | null {
   if (code === undefined || code === null) return null;
 
   const str = String(code).trim();
@@ -127,7 +134,7 @@ function findProductInJsonLd(node: unknown): Record<string, unknown> | null {
 
 function extractImageUrlFromJsonLdNode(
   productNode: Record<string, unknown>,
-  baseUrl: string
+  baseUrl: string,
 ): string | null {
   if (!productNode.image) return null;
 
@@ -163,7 +170,9 @@ function extractImageUrlFromJsonLdNode(
   return null;
 }
 
-function extractProductCodeFromJsonLdNode(productNode: Record<string, unknown>): string | null {
+function extractProductCodeFromJsonLdNode(
+  productNode: Record<string, unknown>,
+): string | null {
   const codeCandidates = [
     productNode.gtin13,
     productNode.gtin,
@@ -187,7 +196,10 @@ function extractProductCodeFromJsonLdNode(productNode: Record<string, unknown>):
   return null;
 }
 
-function extractFromJsonLd($: cheerio.CheerioAPI, baseUrl: string): JsonLdProductData {
+function extractFromJsonLd(
+  $: cheerio.CheerioAPI,
+  baseUrl: string,
+): JsonLdProductData {
   const result: JsonLdProductData = {};
 
   $('script[type="application/ld+json"]').each((_, element) => {
@@ -229,7 +241,9 @@ function extractCodeFromUrl(url: string): string | null {
       return cleanProductCode(pMatch[1]);
     }
 
-    const idMatch = pathname.match(/\/(?:id|kod|produkt)-([0-9A-Za-z_-]{3,24})(?:\/|$|\.html)/i);
+    const idMatch = pathname.match(
+      /\/(?:id|kod|produkt)-([0-9A-Za-z_-]{3,24})(?:\/|$|\.html)/i,
+    );
     if (idMatch?.[1]) {
       return cleanProductCode(idMatch[1]);
     }
@@ -257,7 +271,10 @@ function parseSrcset(srcsetValue: string | undefined | null): string[] {
   return candidates.reverse();
 }
 
-function extractElementImageCandidates($: cheerio.CheerioAPI, elem: Parameters<cheerio.CheerioAPI>[0]): string[] {
+function extractElementImageCandidates(
+  $: cheerio.CheerioAPI,
+  elem: Parameters<cheerio.CheerioAPI>[0],
+): string[] {
   const $el = $(elem);
   const candidates: (string | undefined)[] = [];
 
@@ -269,7 +286,9 @@ function extractElementImageCandidates($: cheerio.CheerioAPI, elem: Parameters<c
   const parentZoomBg = $el.closest("[data-zoom-bg]").attr("data-zoom-bg");
   if (parentZoomBg) candidates.push(parentZoomBg);
 
-  const parentZoomImg = $el.closest("[data-zoom-image]").attr("data-zoom-image");
+  const parentZoomImg = $el
+    .closest("[data-zoom-image]")
+    .attr("data-zoom-image");
   if (parentZoomImg) candidates.push(parentZoomImg);
 
   const dataSrcsetCandidates = parseSrcset($el.attr("data-srcset"));
@@ -294,10 +313,15 @@ function extractElementImageCandidates($: cheerio.CheerioAPI, elem: Parameters<c
     });
   }
 
-  return candidates.filter((c): c is string => Boolean(c && typeof c === "string" && c.trim().length > 0));
+  return candidates.filter((c): c is string =>
+    Boolean(c && typeof c === "string" && c.trim().length > 0),
+  );
 }
 
-function extractOpenGraphImageUrl($: cheerio.CheerioAPI, pageUrl: string): string | null {
+function extractOpenGraphImageUrl(
+  $: cheerio.CheerioAPI,
+  pageUrl: string,
+): string | null {
   const ogImage =
     $('meta[property="og:image:secure_url"]').attr("content") ||
     $('meta[property="og:image"]').attr("content") ||
@@ -314,7 +338,10 @@ function extractOpenGraphImageUrl($: cheerio.CheerioAPI, pageUrl: string): strin
   return null;
 }
 
-function extractMicrodataImageUrl($: cheerio.CheerioAPI, pageUrl: string): string | null {
+function extractMicrodataImageUrl(
+  $: cheerio.CheerioAPI,
+  pageUrl: string,
+): string | null {
   const itempropElems = $('[itemprop="image"]').toArray();
   for (const elem of itempropElems) {
     const candidates = extractElementImageCandidates($, elem);
@@ -328,24 +355,27 @@ function extractMicrodataImageUrl($: cheerio.CheerioAPI, pageUrl: string): strin
   return null;
 }
 
-function extractDomHeuristicImageUrl($: cheerio.CheerioAPI, pageUrl: string): string | null {
+function extractDomHeuristicImageUrl(
+  $: cheerio.CheerioAPI,
+  pageUrl: string,
+): string | null {
   const domSelectors = [
-    '[data-zoom-bg]',
-    '[data-zoom-image]',
+    "[data-zoom-bg]",
+    "[data-zoom-image]",
     '[data-testid*="product-image"] img',
-    '[data-gallery] img',
-    '.carousel-product img',
-    '.carousel-product [data-zoom-bg]',
-    '.product-image img',
-    '.product-gallery img',
-    '.product__media img',
-    '.product-media img',
-    '.pdp-image img, .pdp-main-image img',
-    '.product-detail img, .product-details img',
-    '.swiper-slide.carousel-product__item img',
-    'picture img',
-    'main picture img',
-    'article img',
+    "[data-gallery] img",
+    ".carousel-product img",
+    ".carousel-product [data-zoom-bg]",
+    ".product-image img",
+    ".product-gallery img",
+    ".product__media img",
+    ".product-media img",
+    ".pdp-image img, .pdp-main-image img",
+    ".product-detail img, .product-details img",
+    ".swiper-slide.carousel-product__item img",
+    "picture img",
+    "main picture img",
+    "article img",
   ];
 
   for (const selector of domSelectors) {
@@ -367,7 +397,7 @@ function extractDomHeuristicImageUrl($: cheerio.CheerioAPI, pageUrl: string): st
 function extractProductImageUrl(
   $: cheerio.CheerioAPI,
   pageUrl: string,
-  jsonLdData: JsonLdProductData
+  jsonLdData: JsonLdProductData,
 ): string | null {
   const openGraphImage = extractOpenGraphImageUrl($, pageUrl);
   if (openGraphImage) {
@@ -388,20 +418,28 @@ function extractProductImageUrl(
 
 function extractProductNameFromHeadings($: cheerio.CheerioAPI): string | null {
   const h1Text = $(
-    "main h1, article h1, h1, .product-name, .product-title, .pdp-title"
-  ).first().text();
+    "main h1, article h1, h1, .product-name, .product-title, .pdp-title",
+  )
+    .first()
+    .text();
   return cleanProductName(h1Text);
 }
 
 function extractProductNameFromMicrodata($: cheerio.CheerioAPI): string | null {
-  const productScopeName = $('[itemscope][itemtype*="Product"] [itemprop="name"]').first().text();
+  const productScopeName = $(
+    '[itemscope][itemtype*="Product"] [itemprop="name"]',
+  )
+    .first()
+    .text();
   if (productScopeName) {
     return cleanProductName(productScopeName);
   }
 
   const allItempropNames = $('[itemprop="name"]').toArray();
   if (allItempropNames.length > 0) {
-    const lastItempropName = $(allItempropNames[allItempropNames.length - 1]).text();
+    const lastItempropName = $(
+      allItempropNames[allItempropNames.length - 1],
+    ).text();
     return cleanProductName(lastItempropName);
   }
 
@@ -417,7 +455,7 @@ function extractProductNameFromMetaTags($: cheerio.CheerioAPI): string | null {
 
 function extractProductName(
   $: cheerio.CheerioAPI,
-  jsonLdData: JsonLdProductData
+  jsonLdData: JsonLdProductData,
 ): string | null {
   if (jsonLdData.name) {
     return jsonLdData.name;
@@ -444,29 +482,37 @@ function extractProductName(
 
 function extractProductCodeFromMicrodata($: cheerio.CheerioAPI): string | null {
   const itempropCode = $(
-    '[itemprop="gtin13"], [itemprop="gtin"], [itemprop="sku"], [itemprop="mpn"], [itemprop="productID"]'
+    '[itemprop="gtin13"], [itemprop="gtin"], [itemprop="sku"], [itemprop="mpn"], [itemprop="productID"]',
   ).first();
   const rawVal = itempropCode.attr("content") || itempropCode.text();
   return cleanProductCode(rawVal);
 }
 
-function extractProductCodeFromTableSpecification($: cheerio.CheerioAPI): string | null {
-  const labelPatterns = /EAN|Kod produktu|Symbol|Numer artykułu|SKU|Kod producenta/i;
+function extractProductCodeFromTableSpecification(
+  $: cheerio.CheerioAPI,
+): string | null {
+  const labelPatterns =
+    /EAN|Kod produktu|Symbol|Numer artykułu|SKU|Kod producenta/i;
   let detectedCode: string | null = null;
 
-  $("table tr, dl, .specifications tr, .product-attributes li, li").each((_, row) => {
-    if (detectedCode) return;
+  $("table tr, dl, .specifications tr, .product-attributes li, li").each(
+    (_, row) => {
+      if (detectedCode) return;
 
-    const rowText = $(row).text();
-    if (labelPatterns.test(rowText)) {
-      const valueEl = $(row).find("td:last-child, dd").first();
-      const valueText = valueEl.length > 0 ? valueEl.text() : rowText.replace(labelPatterns, "");
-      const cand = valueText.replace(/[:]/g, "").trim();
-      if (cand && cand.length <= 24 && /^[A-Za-z0-9_-]+$/.test(cand)) {
-        detectedCode = cleanProductCode(cand);
+      const rowText = $(row).text();
+      if (labelPatterns.test(rowText)) {
+        const valueEl = $(row).find("td:last-child, dd").first();
+        const valueText =
+          valueEl.length > 0
+            ? valueEl.text()
+            : rowText.replace(labelPatterns, "");
+        const cand = valueText.replace(/[:]/g, "").trim();
+        if (cand && cand.length <= 24 && /^[A-Za-z0-9_-]+$/.test(cand)) {
+          detectedCode = cleanProductCode(cand);
+        }
       }
-    }
-  });
+    },
+  );
 
   return detectedCode;
 }
@@ -474,7 +520,7 @@ function extractProductCodeFromTableSpecification($: cheerio.CheerioAPI): string
 function extractProductCode(
   $: cheerio.CheerioAPI,
   pageUrl: string,
-  jsonLdData: JsonLdProductData
+  jsonLdData: JsonLdProductData,
 ): string | null {
   if (jsonLdData.code) {
     return jsonLdData.code;
@@ -493,7 +539,10 @@ function extractProductCode(
   return extractCodeFromUrl(pageUrl);
 }
 
-export function extractProductMetadata(html: string, pageUrl: string): ScrapedProductMetadata | null {
+export function extractProductMetadata(
+  html: string,
+  pageUrl: string,
+): ScrapedProductMetadata | null {
   if (!html || !html.trim()) return null;
 
   const $ = cheerio.load(html);

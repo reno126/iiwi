@@ -22,7 +22,8 @@ export function useProductUrlScraper({
 
   const [internalPending, internalStartTransition] = useTransition();
   const isPending = externalIsPending ?? internalPending;
-  const effectiveStartTransition = externalStartTransition ?? internalStartTransition;
+  const effectiveStartTransition =
+    externalStartTransition ?? internalStartTransition;
 
   const [isTier2NoticeVisible, setIsTier2NoticeVisible] = useState(false);
   const [scrapeNotice, setScrapeNotice] = useState<{
@@ -72,7 +73,10 @@ export function useProductUrlScraper({
           const { imageUrl, name, code, shop } = res.data;
 
           if (imageUrl) {
-            setValue("imageUrl", imageUrl, { shouldValidate: true, shouldDirty: true });
+            setValue("imageUrl", imageUrl, {
+              shouldValidate: true,
+              shouldDirty: true,
+            });
           }
 
           const currentName = (getValues("name") || "").trim();
@@ -86,7 +90,10 @@ export function useProductUrlScraper({
           }
 
           if (shop) {
-            setValue("shopId", shop.id, { shouldValidate: true, shouldDirty: true });
+            setValue("shopId", shop.id, {
+              shouldValidate: true,
+              shouldDirty: true,
+            });
           }
 
           onScrapeSuccess?.(shop ?? null);

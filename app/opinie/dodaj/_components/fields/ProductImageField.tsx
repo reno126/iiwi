@@ -28,9 +28,13 @@ export function ProductImageField({
   } = useFormContext<ProductCreateInput>();
 
   const imageUrlValue = useWatch({ control, name: "imageUrl" });
-  const isImageFilled = Boolean(imageUrlValue && imageUrlValue.trim().length > 0);
+  const isImageFilled = Boolean(
+    imageUrlValue && imageUrlValue.trim().length > 0,
+  );
 
-  const [showPreviewOnly, setShowPreviewOnly] = useState<boolean>(() => Boolean(imageUrlValue?.trim()));
+  const [showPreviewOnly, setShowPreviewOnly] = useState<boolean>(() =>
+    Boolean(imageUrlValue?.trim()),
+  );
   const [prevImageUrlValue, setPrevImageUrlValue] = useState(imageUrlValue);
   const [imageLoadError, setImageLoadError] = useState(false);
 
@@ -68,8 +72,8 @@ export function ProductImageField({
       {isPreview ? (
         <>
           <input type="hidden" {...register("imageUrl")} />
-          <div className="flex flex-col sm:flex-row items-center gap-3 rounded-lg border bg-white dark:bg-card p-2.5 shadow-2xs">
-            <div className="relative size-24 shrink-0 overflow-hidden rounded-md border bg-background flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3 rounded-lg border bg-white p-2.5 shadow-2xs sm:flex-row dark:bg-card">
+            <div className="relative flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-background">
               {imageLoadError ? (
                 <ImageOff className="size-6 text-muted-foreground" />
               ) : (
@@ -82,13 +86,13 @@ export function ProductImageField({
                 />
               )}
             </div>
-            <div className="flex flex-1 flex-col gap-1 min-w-0 text-center sm:text-left">
-              <span className="text-xs font-medium text-foreground truncate">
+            <div className="flex min-w-0 flex-1 flex-col gap-1 text-center sm:text-left">
+              <span className="truncate text-xs font-medium text-foreground">
                 {imageLoadError
                   ? PRODUCT_FIELDS_MESSAGES.imageLoadError
                   : PRODUCT_FIELDS_MESSAGES.imagePreviewAlt}
               </span>
-              <span className="hidden sm:inline text-xs text-muted-foreground truncate">
+              <span className="hidden truncate text-xs text-muted-foreground sm:inline">
                 {imageUrlValue}
               </span>
             </div>
@@ -98,9 +102,9 @@ export function ProductImageField({
               size="sm"
               disabled={disabled}
               onClick={handleClearImage}
-              className="sm:w-auto shrink-0 text-muted-foreground hover:text-destructive hover:border-destructive/40"
+              className="shrink-0 text-muted-foreground hover:border-destructive/40 hover:text-destructive sm:w-auto"
             >
-              <Trash2 className="size-3.5 mr-1" />
+              <Trash2 className="mr-1 size-3.5" />
               {PRODUCT_FIELDS_MESSAGES.deleteImageButton}
             </Button>
           </div>
@@ -112,7 +116,7 @@ export function ProductImageField({
           inputMode="url"
           disabled={disabled}
           aria-invalid={!!errors.imageUrl}
-          className="h-11 text-base sm:text-sm bg-white dark:bg-card"
+          className="h-11 bg-white text-base sm:text-sm dark:bg-card"
           placeholder={PRODUCT_FIELDS_MESSAGES.imageUrlPlaceholder}
           {...register("imageUrl")}
         />

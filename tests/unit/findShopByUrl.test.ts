@@ -36,7 +36,7 @@ describe("findShopByUrl", () => {
     vi.mocked(prisma.shop.findMany).mockResolvedValueOnce([mockShop]);
 
     const result = await findShopByUrl(
-      "https://www.mediaexpert.pl/rowery/hulajnogi/kamikaze-k1"
+      "https://www.mediaexpert.pl/rowery/hulajnogi/kamikaze-k1",
     );
 
     expect(result).toEqual({

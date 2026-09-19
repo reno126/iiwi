@@ -71,7 +71,7 @@ export function AddReviewFlow() {
             <Button
               type="button"
               onClick={() => setMode({ type: "NEW_PRODUCT_AND_REVIEW" })}
-              className="shrink-0 gap-1.5 w-full md:w-auto"
+              className="w-full shrink-0 gap-1.5 md:w-auto"
             >
               <PlusCircle className="size-4" />
               {ADD_REVIEW_FLOW_MESSAGES.addNewProductButton}
@@ -87,7 +87,7 @@ export function AddReviewFlow() {
               setMode({ type: "REVIEW_EXISTING_PRODUCT", product })
             }
             emptyState={
-              <div className="p-6 border border-dashed rounded-lg text-center space-y-3">
+              <div className="space-y-3 rounded-lg border border-dashed p-6 text-center">
                 <p className="text-sm text-muted-foreground">
                   {ADD_REVIEW_FLOW_MESSAGES.emptySearchDescription}
                 </p>
@@ -96,7 +96,7 @@ export function AddReviewFlow() {
                   size="sm"
                   onClick={() => setMode({ type: "NEW_PRODUCT_AND_REVIEW" })}
                 >
-                  <PlusCircle className="size-4 mr-2" />
+                  <PlusCircle className="mr-2 size-4" />
                   {ADD_REVIEW_FLOW_MESSAGES.emptySearchAddReviewButton}
                 </Button>
               </div>
@@ -115,8 +115,8 @@ export function AddReviewFlow() {
             }}
           />
 
-          <div className="p-6 border rounded-lg bg-card shadow-xs">
-            <h2 className="text-lg font-semibold mb-4">
+          <div className="rounded-lg border bg-card p-6 shadow-xs">
+            <h2 className="mb-4 text-lg font-semibold">
               {ADD_REVIEW_FLOW_MESSAGES.formHeading}
             </h2>
             <ReviewForm
@@ -135,7 +135,7 @@ export function AddReviewFlow() {
       {mode.type === "NEW_PRODUCT_AND_REVIEW" && (
         <Suspense
           fallback={
-            <div className="space-y-4 p-6 border rounded-xl bg-card">
+            <div className="space-y-4 rounded-xl border bg-card p-6">
               <Skeleton className="h-8 w-1/3" />
               <Skeleton className="h-10 w-full" />
               <Skeleton className="h-32 w-full" />

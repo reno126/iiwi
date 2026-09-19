@@ -50,8 +50,11 @@ export function ProductFields({
   hideProductUrl = false,
   showFieldStatus = false,
 }: ProductFieldsProps) {
-  const [selectedShop, setSelectedShop] = useState<MatchedShopResult | null>(initialShop);
-  const [prevInitialShop, setPrevInitialShop] = useState<MatchedShopResult | null>(initialShop);
+  const [selectedShop, setSelectedShop] = useState<MatchedShopResult | null>(
+    initialShop,
+  );
+  const [prevInitialShop, setPrevInitialShop] =
+    useState<MatchedShopResult | null>(initialShop);
 
   if (prevInitialShop !== initialShop) {
     setPrevInitialShop(initialShop);
@@ -67,10 +70,7 @@ export function ProductFields({
     <FieldSet className={className}>
       {legend && <FieldLegend>{legend}</FieldLegend>}
       <FieldGroup className="gap-3 sm:gap-4">
-        <ProductNameField
-          showStatus={isStatusActive}
-          disabled={isPending}
-        />
+        <ProductNameField showStatus={isStatusActive} disabled={isPending} />
 
         <ProductUrlField
           hideProductUrl={hideProductUrl}
@@ -94,15 +94,9 @@ export function ProductFields({
           showFieldStatus={isStatusActive}
         />
 
-        <ProductImageField
-          showStatus={isStatusActive}
-          disabled={isPending}
-        />
+        <ProductImageField showStatus={isStatusActive} disabled={isPending} />
 
-        <ProductCodeField
-          showStatus={isStatusActive}
-          disabled={isPending}
-        />
+        <ProductCodeField showStatus={isStatusActive} disabled={isPending} />
       </FieldGroup>
     </FieldSet>
   );

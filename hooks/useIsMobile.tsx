@@ -11,7 +11,7 @@ export function useIsMobile(breakpoint = MOBILE_BREAKPOINT): boolean {
         mql.removeEventListener("change", callback);
       };
     },
-    [breakpoint]
+    [breakpoint],
   );
 
   const getSnapshot = React.useCallback(() => {

@@ -28,7 +28,9 @@ describe("components/reviews/StarRating", () => {
     const filledStars = container.querySelectorAll(".fill-amber-400");
     expect(filledStars).toHaveLength(3);
 
-    const unfilledStars = container.querySelectorAll(".text-muted-foreground\\/30");
+    const unfilledStars = container.querySelectorAll(
+      ".text-muted-foreground\\/30",
+    );
     expect(unfilledStars).toHaveLength(2);
   });
 
@@ -47,7 +49,9 @@ describe("components/reviews/StarRating", () => {
     const filledStars = container.querySelectorAll(".fill-amber-400");
     expect(filledStars).toHaveLength(7);
 
-    const unfilledStars = container.querySelectorAll(".text-muted-foreground\\/30");
+    const unfilledStars = container.querySelectorAll(
+      ".text-muted-foreground\\/30",
+    );
     expect(unfilledStars).toHaveLength(3);
   });
 

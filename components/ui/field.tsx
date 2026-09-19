@@ -223,7 +223,7 @@ function FieldError({
       role={content ? "alert" : undefined}
       data-slot="field-error"
       className={cn(
-        "text-sm font-normal text-destructive leading-tight",
+        "text-sm leading-tight font-normal text-destructive",
         reserveSpace && "min-h-5",
         reserveSpace && !content && "invisible select-none",
         className,

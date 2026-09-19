@@ -30,7 +30,7 @@ export default async function ProductsPage({
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 py-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
+      <div className="flex flex-col justify-between gap-4 border-b border-border pb-6 sm:flex-row sm:items-center">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
             Produkty

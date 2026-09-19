@@ -39,9 +39,7 @@ describe("app/dashboard components", () => {
         }),
       ).toBeInTheDocument();
       expect(screen.getByText("jan@example.com")).toBeInTheDocument();
-      expect(
-        screen.getByText(formatPolishDate(createdAt)),
-      ).toBeInTheDocument();
+      expect(screen.getByText(formatPolishDate(createdAt))).toBeInTheDocument();
     });
 
     it("falls back to email prefix when user name is null", () => {
@@ -90,9 +88,7 @@ describe("app/dashboard components", () => {
           name: DASHBOARD_MESSAGES.statsHeading,
         }),
       ).toBeInTheDocument();
-      expect(
-        screen.getByText(formatRatedProductsCount(2)),
-      ).toBeInTheDocument();
+      expect(screen.getByText(formatRatedProductsCount(2))).toBeInTheDocument();
 
       const productLink1 = screen.getByRole("link", {
         name: /ekspres delonghi/i,
@@ -122,9 +118,7 @@ describe("app/dashboard components", () => {
         <UserProductStats totalReviewedProducts={0} reviewedProducts={[]} />,
       );
 
-      expect(
-        screen.getByText(formatRatedProductsCount(0)),
-      ).toBeInTheDocument();
+      expect(screen.getByText(formatRatedProductsCount(0))).toBeInTheDocument();
       expect(
         screen.getByText(DASHBOARD_MESSAGES.emptyProductsMessage),
       ).toBeInTheDocument();

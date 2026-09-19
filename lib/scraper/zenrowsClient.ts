@@ -24,7 +24,7 @@ function isBotChallengeDetected(html: string): boolean {
 
 async function saveDebugHtmlSnapshotIfDevelopment(
   html: string,
-  targetUrl: string
+  targetUrl: string,
 ): Promise<void> {
   if (process.env.NODE_ENV === "production") {
     return;
@@ -37,7 +37,10 @@ async function saveDebugHtmlSnapshotIfDevelopment(
     if (!fs.existsSync(debugDir)) {
       fs.mkdirSync(debugDir, { recursive: true });
     }
-    const hostname = new URL(targetUrl).hostname.replace(/[^a-zA-Z0-9.-]/g, "_");
+    const hostname = new URL(targetUrl).hostname.replace(
+      /[^a-zA-Z0-9.-]/g,
+      "_",
+    );
     const debugFile = path.join(debugDir, `${hostname}_last_zenrows.html`);
     fs.writeFileSync(debugFile, html, "utf-8");
     console.log(`[ZenRows] Debug HTML snapshot saved to: ${debugFile}`);
@@ -48,11 +51,13 @@ async function saveDebugHtmlSnapshotIfDevelopment(
 
 export async function fetchWithZenRows(
   targetUrl: string,
-  options: ZenRowsScrapeOptions = {}
+  options: ZenRowsScrapeOptions = {},
 ): Promise<string | null> {
   const apiKey = process.env.ZENROWS_API_KEY?.trim();
   if (!apiKey) {
-    console.warn("[ZenRows] ZENROWS_API_KEY is not configured in environment variables.");
+    console.warn(
+      "[ZenRows] ZENROWS_API_KEY is not configured in environment variables.",
+    );
     return null;
   }
 
@@ -89,7 +94,9 @@ export async function fetchWithZenRows(
 
     const maskedEndpoint = new URL(zenrowsEndpoint.toString());
     maskedEndpoint.searchParams.set("apikey", "***MASKED***");
-    console.log(`[ZenRows] Calling API for: ${targetUrl} [${maskedEndpoint.toString()}]`);
+    console.log(
+      `[ZenRows] Calling API for: ${targetUrl} [${maskedEndpoint.toString()}]`,
+    );
 
     const startTime = Date.now();
     const response = await fetch(zenrowsEndpoint.toString(), {
@@ -103,12 +110,12 @@ export async function fetchWithZenRows(
     const contentType = response.headers.get("content-type");
 
     console.log(
-      `[ZenRows] Response HTTP ${response.status} in ${durationMs}ms | zr-status: ${zrStatus ?? "N/A"} | zr-url: ${zrUrl ?? targetUrl} | type: ${contentType ?? "unknown"}`
+      `[ZenRows] Response HTTP ${response.status} in ${durationMs}ms | zr-status: ${zrStatus ?? "N/A"} | zr-url: ${zrUrl ?? targetUrl} | type: ${contentType ?? "unknown"}`,
     );
 
     if (!response.ok) {
       console.warn(
-        `[ZenRows] API error: HTTP ${response.status} (${response.statusText}) for ${targetUrl}`
+        `[ZenRows] API error: HTTP ${response.status} (${response.statusText}) for ${targetUrl}`,
       );
       return null;
     }
@@ -118,11 +125,11 @@ export async function fetchWithZenRows(
 
     if (isBotChallengeDetected(html)) {
       console.warn(
-        `[ZenRows] WARNING: Bot challenge / captcha detected in returned HTML despite HTTP ${response.status}! Title: "${pageTitle}"`
+        `[ZenRows] WARNING: Bot challenge / captcha detected in returned HTML despite HTTP ${response.status}! Title: "${pageTitle}"`,
       );
     } else {
       console.log(
-        `[ZenRows] Successfully received HTML (${html.length} chars). Page title: "${pageTitle}"`
+        `[ZenRows] Successfully received HTML (${html.length} chars). Page title: "${pageTitle}"`,
       );
     }
 
@@ -131,7 +138,9 @@ export async function fetchWithZenRows(
     return html;
   } catch (err: unknown) {
     if (err instanceof Error && err.name === "AbortError") {
-      console.warn(`[ZenRows] Request timed out after ${timeoutMs}ms for ${targetUrl}`);
+      console.warn(
+        `[ZenRows] Request timed out after ${timeoutMs}ms for ${targetUrl}`,
+      );
     } else {
       console.warn("[ZenRows] Request failed:", err);
     }

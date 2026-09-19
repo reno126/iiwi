@@ -21,7 +21,9 @@ const { mockTx } = vi.hoisted(() => {
 vi.mock("@/lib/db/prisma", () => ({
   prisma: {
     ...mockTx,
-    $transaction: vi.fn(async (cb: (tx: typeof mockTx) => unknown) => cb(mockTx)),
+    $transaction: vi.fn(async (cb: (tx: typeof mockTx) => unknown) =>
+      cb(mockTx),
+    ),
   },
 }));
 
@@ -70,7 +72,11 @@ describe("serverActions/reviewCreate", () => {
   });
 
   it("creates review and recalculates rate_avg and rate_count on the fly", async () => {
-    const mockUser = { id: "user-abc-123", name: "Jan", email: "jan@example.com" };
+    const mockUser = {
+      id: "user-abc-123",
+      name: "Jan",
+      email: "jan@example.com",
+    };
     vi.mocked(auth).mockResolvedValueOnce({
       user: mockUser,
       expires: "9999-12-31",

@@ -19,7 +19,7 @@ export function UserProductStats({
         <h2 className="text-xl font-bold tracking-tight text-foreground">
           {DASHBOARD_MESSAGES.statsHeading}
         </h2>
-        <p className="text-sm sm:text-base font-medium text-foreground">
+        <p className="text-sm font-medium text-foreground sm:text-base">
           {formatRatedProductsCount(totalReviewedProducts)}
         </p>
       </div>
@@ -33,22 +33,23 @@ export function UserProductStats({
           {reviewedProducts.map((item) => (
             <li
               key={item.productId}
-              className="flex items-center justify-between gap-3 text-sm border-b border-border/60 pb-2 last:border-b-0 last:pb-0"
+              className="flex items-center justify-between gap-3 border-b border-border/60 pb-2 text-sm last:border-b-0 last:pb-0"
             >
-              <div className="flex items-center gap-2 min-w-0 truncate">
+              <div className="flex min-w-0 items-center gap-2 truncate">
                 <Link
                   href={`/produkty/${item.productId}`}
-                  className="font-medium text-foreground hover:text-primary hover:underline transition-colors truncate"
+                  className="truncate font-medium text-foreground transition-colors hover:text-primary hover:underline"
                 >
                   {item.productName}
                 </Link>
                 {item.userReviewsCount > 1 && (
-                  <span className="text-xs text-muted-foreground shrink-0">
-                    ({DASHBOARD_MESSAGES.userRatingsLabel} {item.userReviewsCount})
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    ({DASHBOARD_MESSAGES.userRatingsLabel}{" "}
+                    {item.userReviewsCount})
                   </span>
                 )}
               </div>
-              <span className="flex items-center gap-1 shrink-0 text-xs sm:text-sm font-semibold text-muted-foreground">
+              <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-muted-foreground sm:text-sm">
                 <Star className="size-3.5 fill-amber-400 text-amber-500" />
                 <span>{item.rate.toFixed(1)}</span>
               </span>

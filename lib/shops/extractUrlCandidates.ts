@@ -28,7 +28,9 @@ function isTwoPartTopLevelDomain(parts: string[]): boolean {
 
   const commonTwoPartTlds = new Set(["pl", "uk"]);
 
-  return commonSecondLevelLabels.has(secondToLast) && commonTwoPartTlds.has(last);
+  return (
+    commonSecondLevelLabels.has(secondToLast) && commonTwoPartTlds.has(last)
+  );
 }
 
 function extractRootDomain(hostname: string, parts: string[]): string | null {
@@ -75,13 +77,17 @@ function extractBaseShopLabels(parts: string[]): string[] {
   const labels: string[] = [];
 
   for (const label of parts) {
-    const isValidLabel = !ignoredGenericShopLabels.has(label) && label.length >= 3;
+    const isValidLabel =
+      !ignoredGenericShopLabels.has(label) && label.length >= 3;
     if (isValidLabel) {
       labels.push(label);
 
       if (label.includes("-")) {
         const withoutDashes = label.replace(/-/g, "");
-        if (withoutDashes.length >= 3 && !ignoredGenericShopLabels.has(withoutDashes)) {
+        if (
+          withoutDashes.length >= 3 &&
+          !ignoredGenericShopLabels.has(withoutDashes)
+        ) {
           labels.push(withoutDashes);
         }
       }
@@ -91,7 +97,9 @@ function extractBaseShopLabels(parts: string[]): string[] {
   return labels;
 }
 
-export function extractUrlCandidates(rawUrl: string | null | undefined): string[] {
+export function extractUrlCandidates(
+  rawUrl: string | null | undefined,
+): string[] {
   if (!rawUrl || typeof rawUrl !== "string") return [];
 
   const trimmed = rawUrl.trim().toLowerCase();

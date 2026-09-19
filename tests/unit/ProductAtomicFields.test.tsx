@@ -54,16 +54,20 @@ describe("app/opinie/dodaj/_components/fields (Atomic Fields)", () => {
       render(
         <ProductFormWrapper>
           <ProductNameField showStatus={true} />
-        </ProductFormWrapper>
+        </ProductFormWrapper>,
       );
 
-      expect(screen.getByText(PRODUCT_FIELDS_MESSAGES.statusMissing)).toBeInTheDocument();
+      expect(
+        screen.getByText(PRODUCT_FIELDS_MESSAGES.statusMissing),
+      ).toBeInTheDocument();
 
       const input = screen.getByLabelText(PRODUCT_FIELDS_MESSAGES.nameLabel);
       await user.type(input, "Klawiatura mechaniczna");
 
       await waitFor(() => {
-        expect(screen.getByText(PRODUCT_FIELDS_MESSAGES.statusFilled)).toBeInTheDocument();
+        expect(
+          screen.getByText(PRODUCT_FIELDS_MESSAGES.statusFilled),
+        ).toBeInTheDocument();
       });
     });
   });
@@ -74,16 +78,20 @@ describe("app/opinie/dodaj/_components/fields (Atomic Fields)", () => {
       render(
         <ProductFormWrapper>
           <ProductCodeField showStatus={true} />
-        </ProductFormWrapper>
+        </ProductFormWrapper>,
       );
 
-      expect(screen.getByText(PRODUCT_FIELDS_MESSAGES.statusMissing)).toBeInTheDocument();
+      expect(
+        screen.getByText(PRODUCT_FIELDS_MESSAGES.statusMissing),
+      ).toBeInTheDocument();
 
       const input = screen.getByLabelText(PRODUCT_FIELDS_MESSAGES.codeLabel);
       await user.type(input, "1234567890123");
 
       await waitFor(() => {
-        expect(screen.getByText(PRODUCT_FIELDS_MESSAGES.statusFilled)).toBeInTheDocument();
+        expect(
+          screen.getByText(PRODUCT_FIELDS_MESSAGES.statusFilled),
+        ).toBeInTheDocument();
       });
     });
   });
@@ -93,11 +101,15 @@ describe("app/opinie/dodaj/_components/fields (Atomic Fields)", () => {
       render(
         <ProductFormWrapper>
           <ProductImageField />
-        </ProductFormWrapper>
+        </ProductFormWrapper>,
       );
 
-      expect(screen.getByLabelText(PRODUCT_FIELDS_MESSAGES.imageUrlLabel)).toBeInTheDocument();
-      expect(screen.queryByText(PRODUCT_FIELDS_MESSAGES.imagePreviewAlt)).not.toBeInTheDocument();
+      expect(
+        screen.getByLabelText(PRODUCT_FIELDS_MESSAGES.imageUrlLabel),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByText(PRODUCT_FIELDS_MESSAGES.imagePreviewAlt),
+      ).not.toBeInTheDocument();
     });
 
     it("renders preview card and allows removing image via delete button", async () => {
@@ -109,19 +121,27 @@ describe("app/opinie/dodaj/_components/fields (Atomic Fields)", () => {
           }}
         >
           <ProductImageField />
-        </ProductFormWrapper>
+        </ProductFormWrapper>,
       );
 
-      expect(screen.queryByLabelText(PRODUCT_FIELDS_MESSAGES.imageUrlLabel)).not.toBeInTheDocument();
-      expect(screen.getByText(PRODUCT_FIELDS_MESSAGES.imagePreviewAlt)).toBeInTheDocument();
+      expect(
+        screen.queryByLabelText(PRODUCT_FIELDS_MESSAGES.imageUrlLabel),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByText(PRODUCT_FIELDS_MESSAGES.imagePreviewAlt),
+      ).toBeInTheDocument();
 
       const deleteBtn = screen.getByRole("button", {
         name: PRODUCT_FIELDS_MESSAGES.deleteImageButton,
       });
       await user.click(deleteBtn);
 
-      expect(screen.getByLabelText(PRODUCT_FIELDS_MESSAGES.imageUrlLabel)).toBeInTheDocument();
-      expect(screen.queryByText(PRODUCT_FIELDS_MESSAGES.imagePreviewAlt)).not.toBeInTheDocument();
+      expect(
+        screen.getByLabelText(PRODUCT_FIELDS_MESSAGES.imageUrlLabel),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByText(PRODUCT_FIELDS_MESSAGES.imagePreviewAlt),
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -130,7 +150,7 @@ describe("app/opinie/dodaj/_components/fields (Atomic Fields)", () => {
       render(
         <ProductFormWrapper>
           <ProductUrlField />
-        </ProductFormWrapper>
+        </ProductFormWrapper>,
       );
 
       const scrapeBtn = screen.getByRole("button", {
@@ -155,10 +175,12 @@ describe("app/opinie/dodaj/_components/fields (Atomic Fields)", () => {
       render(
         <ProductFormWrapper>
           <ProductUrlField onScrapeFinished={onScrapeFinished} />
-        </ProductFormWrapper>
+        </ProductFormWrapper>,
       );
 
-      const urlInput = screen.getByLabelText(PRODUCT_FIELDS_MESSAGES.productUrlLabel);
+      const urlInput = screen.getByLabelText(
+        PRODUCT_FIELDS_MESSAGES.productUrlLabel,
+      );
       await user.type(urlInput, "https://example.com/item");
 
       const scrapeBtn = screen.getByRole("button", {
@@ -190,10 +212,12 @@ describe("app/opinie/dodaj/_components/fields (Atomic Fields)", () => {
       render(
         <ProductFormWrapper>
           <ProductUrlField onShopMatched={onShopMatched} />
-        </ProductFormWrapper>
+        </ProductFormWrapper>,
       );
 
-      const urlInput = screen.getByLabelText(PRODUCT_FIELDS_MESSAGES.productUrlLabel);
+      const urlInput = screen.getByLabelText(
+        PRODUCT_FIELDS_MESSAGES.productUrlLabel,
+      );
       await user.type(urlInput, "https://morele.net/item-123");
       await user.tab();
 
@@ -213,11 +237,15 @@ describe("app/opinie/dodaj/_components/fields (Atomic Fields)", () => {
       const { container } = render(
         <ProductFormWrapper>
           <ProductUrlField hideProductUrl={true} />
-        </ProductFormWrapper>
+        </ProductFormWrapper>,
       );
 
-      expect(screen.queryByLabelText(PRODUCT_FIELDS_MESSAGES.productUrlLabel)).not.toBeInTheDocument();
-      const hiddenInput = container.querySelector("input[type='hidden'][name='productUrl']");
+      expect(
+        screen.queryByLabelText(PRODUCT_FIELDS_MESSAGES.productUrlLabel),
+      ).not.toBeInTheDocument();
+      const hiddenInput = container.querySelector(
+        "input[type='hidden'][name='productUrl']",
+      );
       expect(hiddenInput).toBeInTheDocument();
     });
   });

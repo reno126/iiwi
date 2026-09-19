@@ -13,7 +13,7 @@ interface RecentReviewsBannerProps {
 export function RecentReviewsBanner({ reviews }: RecentReviewsBannerProps) {
   if (reviews.length === 0) {
     return (
-      <Card className="border-dashed p-8 text-center bg-white shadow-2xs">
+      <Card className="border-dashed bg-white p-8 text-center shadow-2xs">
         <p className="text-sm text-muted-foreground">
           Brak dodanych opinii. Bądź pierwszą osobą, która doda opinię!
         </p>
@@ -22,7 +22,7 @@ export function RecentReviewsBanner({ reviews }: RecentReviewsBannerProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+    <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
       {reviews.map((review) => {
         const rating = review.rate;
         const authorName = review.user?.name || "Anonimowy użytkownik";
@@ -33,7 +33,7 @@ export function RecentReviewsBanner({ reviews }: RecentReviewsBannerProps) {
             key={review.id}
             className="group block h-full"
           >
-            <Card className="h-full flex flex-col justify-between transition-all hover:border-primary/50 hover:shadow-md bg-white p-4 sm:p-5">
+            <Card className="flex h-full flex-col justify-between bg-white p-4 transition-all hover:border-primary/50 hover:shadow-md sm:p-5">
               <div>
                 <div className="flex items-start gap-3">
                   <ProductThumbnail
@@ -41,11 +41,11 @@ export function RecentReviewsBanner({ reviews }: RecentReviewsBannerProps) {
                     alt={review.product.name}
                     size="md"
                     priority={true}
-                    className="size-16 rounded-lg border shrink-0"
+                    className="size-16 shrink-0 rounded-lg border"
                   />
 
                   <div className="min-w-0 flex-1 space-y-1">
-                    <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug">
+                    <h3 className="line-clamp-2 text-base leading-snug font-semibold text-foreground transition-colors group-hover:text-primary">
                       {review.product.name}
                     </h3>
 
@@ -53,13 +53,13 @@ export function RecentReviewsBanner({ reviews }: RecentReviewsBannerProps) {
                       {review.product.shop?.name && (
                         <Badge
                           variant="secondary"
-                          className="text-xs px-2 py-0.5"
+                          className="px-2 py-0.5 text-xs"
                         >
                           {review.product.shop.name}
                         </Badge>
                       )}
                       {review.product.code && (
-                        <span className="text-xs text-muted-foreground truncate">
+                        <span className="truncate text-xs text-muted-foreground">
                           {review.product.code}
                         </span>
                       )}
@@ -78,7 +78,7 @@ export function RecentReviewsBanner({ reviews }: RecentReviewsBannerProps) {
                   </div>
 
                   {review.description ? (
-                    <p className="text-sm text-muted-foreground italic line-clamp-3">
+                    <p className="line-clamp-3 text-sm text-muted-foreground italic">
                       &ldquo;{review.description}&rdquo;
                     </p>
                   ) : (
@@ -89,8 +89,8 @@ export function RecentReviewsBanner({ reviews }: RecentReviewsBannerProps) {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 border-t border-border mt-auto">
-                <span className="font-medium truncate max-w-40">
+              <div className="mt-auto flex items-center justify-between border-t border-border pt-3 text-xs text-muted-foreground">
+                <span className="max-w-40 truncate font-medium">
                   {authorName}
                 </span>
                 <span>{formatPolishDate(review.createdAt)}</span>

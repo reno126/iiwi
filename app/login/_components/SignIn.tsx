@@ -128,7 +128,9 @@ export function SignIn({ className }: SignInProps) {
 
         <FieldGroup>
           <Field data-invalid={!!errors.email}>
-            <FieldLabel htmlFor="email">{SIGN_IN_MESSAGES.emailLabel}</FieldLabel>
+            <FieldLabel htmlFor="email">
+              {SIGN_IN_MESSAGES.emailLabel}
+            </FieldLabel>
             <Input
               id="email"
               type="email"

@@ -33,13 +33,28 @@ function createSignInDriver() {
   const user = userEvent.setup();
   return {
     user,
-    heading: () => screen.getByRole("heading", { name: new RegExp(SIGN_IN_MESSAGES.title, "i") }),
-    emailInput: () => screen.getByRole("textbox", { name: new RegExp(SIGN_IN_MESSAGES.emailLabel, "i") }),
-    passwordInput: () => screen.getByLabelText(new RegExp(SIGN_IN_MESSAGES.passwordLabel, "i")),
-    submitButton: () => screen.getByRole("button", { name: new RegExp(`^${SIGN_IN_MESSAGES.submitButton}$`, "i") }),
+    heading: () =>
+      screen.getByRole("heading", {
+        name: new RegExp(SIGN_IN_MESSAGES.title, "i"),
+      }),
+    emailInput: () =>
+      screen.getByRole("textbox", {
+        name: new RegExp(SIGN_IN_MESSAGES.emailLabel, "i"),
+      }),
+    passwordInput: () =>
+      screen.getByLabelText(new RegExp(SIGN_IN_MESSAGES.passwordLabel, "i")),
+    submitButton: () =>
+      screen.getByRole("button", {
+        name: new RegExp(`^${SIGN_IN_MESSAGES.submitButton}$`, "i"),
+      }),
     googleButton: () =>
-      screen.getByRole("button", { name: new RegExp(SIGN_IN_MESSAGES.googleButton, "i") }),
-    registerLink: () => screen.getByRole("link", { name: new RegExp(SIGN_IN_MESSAGES.registerLink, "i") }),
+      screen.getByRole("button", {
+        name: new RegExp(SIGN_IN_MESSAGES.googleButton, "i"),
+      }),
+    registerLink: () =>
+      screen.getByRole("link", {
+        name: new RegExp(SIGN_IN_MESSAGES.registerLink, "i"),
+      }),
     alert: () => screen.getByRole("alert"),
     async fillForm(data: { email?: string; password?: string }) {
       if (data.email) await user.type(this.emailInput(), data.email);
@@ -80,9 +95,7 @@ describe("app/login/_components/SignIn", () => {
     await waitFor(() => {
       expect(driver.emailInput()).toBeInvalid();
       expect(driver.passwordInput()).toBeInvalid();
-      expect(
-        screen.getByText(LOGIN_ERRORS.invalidEmail),
-      ).toBeInTheDocument();
+      expect(screen.getByText(LOGIN_ERRORS.invalidEmail)).toBeInTheDocument();
       expect(
         screen.getByText(LOGIN_ERRORS.passwordRequired),
       ).toBeInTheDocument();
@@ -172,7 +185,9 @@ describe("app/login/_components/SignIn", () => {
   });
 
   it("displays alert when URL search param contains error", () => {
-    mockSearchParams = new URLSearchParams(`error=${AUTH_ERRORS.oauthAccountOnly}`);
+    mockSearchParams = new URLSearchParams(
+      `error=${AUTH_ERRORS.oauthAccountOnly}`,
+    );
 
     render(<SignIn />);
     const driver = createSignInDriver();

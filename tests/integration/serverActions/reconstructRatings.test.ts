@@ -32,7 +32,9 @@ describe("serverActions/reconstructRatings", () => {
       },
     ];
 
-    vi.mocked(prisma.product.findMany).mockResolvedValueOnce(mockProducts as never);
+    vi.mocked(prisma.product.findMany).mockResolvedValueOnce(
+      mockProducts as never,
+    );
 
     const result = await reconstructRatings();
 
@@ -66,7 +68,9 @@ describe("serverActions/reconstructRatings", () => {
       },
     ];
 
-    vi.mocked(prisma.product.findMany).mockResolvedValueOnce(mockProducts as never);
+    vi.mocked(prisma.product.findMany).mockResolvedValueOnce(
+      mockProducts as never,
+    );
 
     const result = await reconstructRatings("prod-1");
 
@@ -97,7 +101,9 @@ describe("serverActions/reconstructRatings", () => {
       },
     ];
 
-    vi.mocked(prisma.product.findMany).mockResolvedValueOnce(mockProducts as never);
+    vi.mocked(prisma.product.findMany).mockResolvedValueOnce(
+      mockProducts as never,
+    );
 
     const result = await reconstructRatings({ productId: "prod-1" });
 

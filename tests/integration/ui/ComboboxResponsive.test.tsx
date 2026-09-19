@@ -24,7 +24,7 @@ describe("components/ui/combobox-responsive", () => {
         getItemLabel={(i) => i.name}
         placeholder="Wybierz sklep..."
         renderItem={(i) => <span>{i.name}</span>}
-      />
+      />,
     );
 
     expect(screen.getByRole("combobox")).toBeInTheDocument();
@@ -40,7 +40,7 @@ describe("components/ui/combobox-responsive", () => {
         getItemLabel={(i) => i.name}
         placeholder="Wybierz sklep..."
         renderItem={(i) => <span>{i.name}</span>}
-      />
+      />,
     );
 
     expect(screen.getByText("Media Expert")).toBeInTheDocument();
@@ -57,10 +57,12 @@ describe("components/ui/combobox-responsive", () => {
         renderTrigger={(selectedItem) => (
           <span data-testid="custom-trigger">Sklep: {selectedItem?.name}</span>
         )}
-      />
+      />,
     );
 
-    expect(screen.getByTestId("custom-trigger")).toHaveTextContent("Sklep: Biedronka");
+    expect(screen.getByTestId("custom-trigger")).toHaveTextContent(
+      "Sklep: Biedronka",
+    );
   });
 
   it("opens popover on desktop and displays all items using renderItem", async () => {
@@ -75,13 +77,15 @@ describe("components/ui/combobox-responsive", () => {
             {i.name} {isSelected ? "(wybrany)" : ""}
           </span>
         )}
-      />
+      />,
     );
 
     const trigger = screen.getByRole("combobox");
     fireEvent.click(trigger);
 
-    expect(await screen.findByTestId("item-shop-1")).toHaveTextContent("Media Expert");
+    expect(await screen.findByTestId("item-shop-1")).toHaveTextContent(
+      "Media Expert",
+    );
     expect(screen.getByTestId("item-shop-2")).toHaveTextContent("Biedronka");
     expect(screen.getByTestId("item-shop-3")).toHaveTextContent("Allegro");
   });
@@ -96,7 +100,7 @@ describe("components/ui/combobox-responsive", () => {
         onValueChange={handleChange}
         placeholder="Wybierz sklep..."
         renderItem={(i) => <span>{i.name}</span>}
-      />
+      />,
     );
 
     fireEvent.click(screen.getByRole("combobox"));
@@ -117,13 +121,15 @@ describe("components/ui/combobox-responsive", () => {
         placeholder="Wybierz sklep..."
         dialogTitle="Wybierz sklep z listy"
         renderItem={(i) => <span>{i.name}</span>}
-      />
+      />,
     );
 
     const trigger = screen.getByRole("combobox");
     fireEvent.click(trigger);
 
-    expect(await screen.findByText("Wybierz sklep z listy")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Wybierz sklep z listy"),
+    ).toBeInTheDocument();
     expect(screen.getByText("Biedronka")).toBeInTheDocument();
   });
 });

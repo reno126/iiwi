@@ -24,7 +24,11 @@ interface WrapperProps {
   showFieldStatus?: boolean;
 }
 
-function FormWrapper({ defaultValues, hideProductUrl, showFieldStatus }: WrapperProps) {
+function FormWrapper({
+  defaultValues,
+  hideProductUrl,
+  showFieldStatus,
+}: WrapperProps) {
   const methods = useForm<ProductCreateInput>({
     defaultValues: {
       name: "",
@@ -103,7 +107,10 @@ describe("app/opinie/dodaj/_components/ProductFields", () => {
     render(<FormWrapper />);
     const driver = createProductFieldsDriver();
 
-    await driver.user.type(driver.productUrlInput(), "https://example.com/item");
+    await driver.user.type(
+      driver.productUrlInput(),
+      "https://example.com/item",
+    );
     expect(driver.scrapeButton()).toBeEnabled();
 
     await driver.user.click(driver.scrapeButton());
@@ -191,7 +198,8 @@ describe("app/opinie/dodaj/_components/ProductFields", () => {
   });
 
   it("displays non-blocking error message when scraper fails", async () => {
-    const scraperErrorMessage = "Nie udało się pobrać zdjęcia z podanej strony.";
+    const scraperErrorMessage =
+      "Nie udało się pobrać zdjęcia z podanej strony.";
     vi.mocked(productScrapeMetadata).mockResolvedValueOnce({
       serverError: scraperErrorMessage,
     });
@@ -339,7 +347,10 @@ describe("app/opinie/dodaj/_components/ProductFields", () => {
       screen.queryByText(PRODUCT_FIELDS_MESSAGES.statusMissing),
     ).not.toBeInTheDocument();
 
-    await driver.user.type(driver.productUrlInput(), "https://example.com/item");
+    await driver.user.type(
+      driver.productUrlInput(),
+      "https://example.com/item",
+    );
     await driver.user.click(driver.scrapeButton());
 
     const nameInput = driver.nameInput() as HTMLInputElement;

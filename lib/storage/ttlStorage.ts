@@ -12,7 +12,7 @@ function isExpired<T>(item: StorageItemWithTtl<T>): boolean {
 export function setItemWithTtl<T>(
   key: string,
   value: T,
-  ttlMs: number = DEFAULT_TTL_MS
+  ttlMs: number = DEFAULT_TTL_MS,
 ): boolean {
   if (typeof window === "undefined" || !window.localStorage) {
     return false;

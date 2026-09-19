@@ -19,10 +19,9 @@ export const shopSchema = z.object({
     .optional(),
   logo: z
     .string()
-    .refine(
-      (val) => !val || val.startsWith("/") || /^https?:\/\//i.test(val),
-      { message: SHOP_ERRORS.invalidLogo }
-    )
+    .refine((val) => !val || val.startsWith("/") || /^https?:\/\//i.test(val), {
+      message: SHOP_ERRORS.invalidLogo,
+    })
     .nullable()
     .optional()
     .or(z.literal("")),
@@ -42,10 +41,9 @@ export const shopCreateSchema = z.object({
     .optional(),
   logo: z
     .string()
-    .refine(
-      (val) => !val || val.startsWith("/") || /^https?:\/\//i.test(val),
-      { message: SHOP_ERRORS.invalidLogo }
-    )
+    .refine((val) => !val || val.startsWith("/") || /^https?:\/\//i.test(val), {
+      message: SHOP_ERRORS.invalidLogo,
+    })
     .nullable()
     .optional()
     .or(z.literal("")),

@@ -128,7 +128,9 @@ export function Register({ className }: RegisterProps) {
 
         <FieldGroup>
           <Field data-invalid={!!errors.name}>
-            <FieldLabel htmlFor="name">{REGISTER_MESSAGES.nameLabel}</FieldLabel>
+            <FieldLabel htmlFor="name">
+              {REGISTER_MESSAGES.nameLabel}
+            </FieldLabel>
             <Input
               id="name"
               type="text"
@@ -142,7 +144,9 @@ export function Register({ className }: RegisterProps) {
           </Field>
 
           <Field data-invalid={!!errors.email}>
-            <FieldLabel htmlFor="email">{REGISTER_MESSAGES.emailLabel}</FieldLabel>
+            <FieldLabel htmlFor="email">
+              {REGISTER_MESSAGES.emailLabel}
+            </FieldLabel>
             <Input
               id="email"
               type="email"

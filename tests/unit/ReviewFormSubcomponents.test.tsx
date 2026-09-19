@@ -33,7 +33,9 @@ describe("app/opinie/dodaj/_components/SelectedProductCard", () => {
     const user = userEvent.setup();
     const onReselectMock = vi.fn();
 
-    render(<SelectedProductCard product={mockProduct} onReselect={onReselectMock} />);
+    render(
+      <SelectedProductCard product={mockProduct} onReselect={onReselectMock} />,
+    );
 
     const changeButton = screen.getByRole("button", { name: /zmień produkt/i });
     await user.click(changeButton);
@@ -78,11 +80,7 @@ describe("app/opinie/dodaj/_components/StickyFormActionBar", () => {
 
   it("disables all action buttons and displays spinner when isSubmitting is true", () => {
     const { container } = render(
-      <StickyFormActionBar
-        onBack={vi.fn()}
-        onCancel={vi.fn()}
-        isSubmitting
-      />,
+      <StickyFormActionBar onBack={vi.fn()} onCancel={vi.fn()} isSubmitting />,
     );
 
     const buttons = screen.getAllByRole("button");

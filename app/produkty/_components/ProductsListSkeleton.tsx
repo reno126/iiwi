@@ -5,16 +5,14 @@ interface ProductsListSkeletonProps {
   count?: number;
 }
 
-export function ProductsListSkeleton({
-  count = 6,
-}: ProductsListSkeletonProps) {
+export function ProductsListSkeleton({ count = 6 }: ProductsListSkeletonProps) {
   return (
-    <div className="flex flex-col gap-4 w-full" aria-busy="true">
+    <div className="flex w-full flex-col gap-4" aria-busy="true">
       {Array.from({ length: count }).map((_, i) => (
         <Card key={i} className="py-1 md:py-5">
           <CardContent className="p-1 md:p-5">
             <div className="flex items-start gap-4">
-              <Skeleton className="size-20 rounded-lg shrink-0" />
+              <Skeleton className="size-20 shrink-0 rounded-lg" />
               <div className="flex-1 space-y-2 py-1">
                 <Skeleton className="h-5 w-3/4 max-w-sm" />
                 <div className="flex gap-4">

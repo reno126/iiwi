@@ -94,7 +94,7 @@ export function ReadMore({
         <p
           ref={clampedRef}
           className={cn(
-            "whitespace-pre-line text-sm leading-relaxed text-muted-foreground",
+            "text-sm leading-relaxed whitespace-pre-line text-muted-foreground",
             clampClass,
           )}
         >
@@ -103,7 +103,7 @@ export function ReadMore({
       )}
 
       <CollapsibleContent>
-        <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+        <p className="text-sm leading-relaxed whitespace-pre-line text-muted-foreground">
           {children ?? content}
         </p>
       </CollapsibleContent>

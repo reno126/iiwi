@@ -43,7 +43,7 @@ export function ProductCodeField({
         placeholder={PRODUCT_FIELDS_MESSAGES.codePlaceholder}
         disabled={disabled}
         aria-invalid={!!errors.code}
-        className="h-11 text-base sm:text-sm bg-white dark:bg-card"
+        className="h-11 bg-white text-base sm:text-sm dark:bg-card"
         {...register("code")}
       />
     </FormFieldCard>

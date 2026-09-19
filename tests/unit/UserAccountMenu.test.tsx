@@ -76,12 +76,7 @@ describe("components/navigation/UserAccountMenu", () => {
   it("triggers signOut with callback to /login when clicking sign out", async () => {
     const user = userEvent.setup();
 
-    render(
-      <UserAccountMenu
-        user="test@example.com"
-        userName="Tester"
-      />,
-    );
+    render(<UserAccountMenu user="test@example.com" userName="Tester" />);
 
     const trigger = screen.getByRole("button", {
       name: new RegExp(USER_ACCOUNT_MESSAGES.userMenuAriaLabel, "i"),

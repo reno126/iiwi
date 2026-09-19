@@ -34,7 +34,9 @@ describe("components/products/ProductThumbnail", () => {
   });
 
   it("renders fallback package icon when src is missing or null", () => {
-    const { container } = render(<ProductThumbnail alt="Produkt bez zdjęcia" />);
+    const { container } = render(
+      <ProductThumbnail alt="Produkt bez zdjęcia" />,
+    );
 
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
     const svgIcon = container.querySelector("svg");
@@ -44,24 +46,40 @@ describe("components/products/ProductThumbnail", () => {
 
   it("applies sizing classes correctly", () => {
     const { container: xsContainer } = render(
-      <ProductThumbnail src="https://example.com/item.jpg" alt="Item" size="xs" />,
+      <ProductThumbnail
+        src="https://example.com/item.jpg"
+        alt="Item"
+        size="xs"
+      />,
     );
     expect(xsContainer.firstChild).toHaveClass("size-8");
 
     const { container: lgContainer } = render(
-      <ProductThumbnail src="https://example.com/item.jpg" alt="Item" size="lg" />,
+      <ProductThumbnail
+        src="https://example.com/item.jpg"
+        alt="Item"
+        size="lg"
+      />,
     );
     expect(lgContainer.firstChild).toHaveClass("size-24");
   });
 
   it("applies aspect ratio classes correctly", () => {
     const { container: squareContainer } = render(
-      <ProductThumbnail src="https://example.com/item.jpg" alt="Item" aspectRatio="square" />,
+      <ProductThumbnail
+        src="https://example.com/item.jpg"
+        alt="Item"
+        aspectRatio="square"
+      />,
     );
     expect(squareContainer.firstChild).toHaveClass("aspect-square");
 
     const { container: videoContainer } = render(
-      <ProductThumbnail src="https://example.com/item.jpg" alt="Item" aspectRatio="video" />,
+      <ProductThumbnail
+        src="https://example.com/item.jpg"
+        alt="Item"
+        aspectRatio="video"
+      />,
     );
     expect(videoContainer.firstChild).toHaveClass("aspect-video");
   });
@@ -69,7 +87,9 @@ describe("components/products/ProductThumbnail", () => {
 
 describe("components/shops/ShopLogo", () => {
   it("renders img tag when logo URL is provided", () => {
-    render(<ShopLogo logo="https://example.com/shop.png" name="Media Expert" />);
+    render(
+      <ShopLogo logo="https://example.com/shop.png" name="Media Expert" />,
+    );
 
     const img = screen.getByRole("img", { name: "Media Expert" });
     expect(img).toBeInTheDocument();

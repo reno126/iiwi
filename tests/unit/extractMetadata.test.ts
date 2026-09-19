@@ -53,7 +53,9 @@ describe("lib/scraper/extractMetadata", () => {
 
     const result = extractProductMetadata(html, "https://example.com/item/1");
     expect(result).not.toBeNull();
-    expect(result?.imageUrl).toBe("https://example.com/images/sony-xm5-front.jpg");
+    expect(result?.imageUrl).toBe(
+      "https://example.com/images/sony-xm5-front.jpg",
+    );
     expect(result?.name).toBe("Sony WH-1000XM5");
     expect(result?.code).toBe("5099206103734");
   });
@@ -88,7 +90,10 @@ describe("lib/scraper/extractMetadata", () => {
       </html>
     `;
 
-    const result = extractProductMetadata(html, "https://sklep.pl/products/keyboard");
+    const result = extractProductMetadata(
+      html,
+      "https://sklep.pl/products/keyboard",
+    );
     expect(result).not.toBeNull();
     expect(result?.imageUrl).toBe("https://sklep.pl/media/keyboard.png");
     expect(result?.name).toBe("Klawiatura Mechaniczna RGB");
@@ -137,7 +142,10 @@ describe("lib/scraper/extractMetadata", () => {
       </html>
     `;
 
-    const result = extractProductMetadata(html, "https://store.com/electronics/monitor");
+    const result = extractProductMetadata(
+      html,
+      "https://store.com/electronics/monitor",
+    );
     expect(result).not.toBeNull();
     expect(result?.imageUrl).toBe("https://store.com/static/monitor-main.jpg");
     expect(result?.name).toBe("Monitor Gamingowy 27 cali");
@@ -224,11 +232,11 @@ describe("lib/scraper/extractMetadata", () => {
 
     const result = extractProductMetadata(
       html,
-      "https://zakupy.biedronka.pl/pl/pano-wafle-ryzowe-wieloziarniste-100-g.html"
+      "https://zakupy.biedronka.pl/pl/pano-wafle-ryzowe-wieloziarniste-100-g.html",
     );
     expect(result).not.toBeNull();
     expect(result?.imageUrl).toBe(
-      "https://zakupy.biedronka.pl/dw/image/v2/img_large.jpg?sw=424&sh=424"
+      "https://zakupy.biedronka.pl/dw/image/v2/img_large.jpg?sw=424&sh=424",
     );
     expect(result?.name).toBe("Pano wafle ryżowe wieloziarniste 100 g");
   });
@@ -252,20 +260,27 @@ describe("lib/scraper/extractMetadata", () => {
 
     const result = extractProductMetadata(html, "https://cdn.store.pl/kawa");
     expect(result).not.toBeNull();
-    expect(result?.imageUrl).toBe("https://cdn.store.pl/zoom/product_hi_res.jpg?sw=1000");
+    expect(result?.imageUrl).toBe(
+      "https://cdn.store.pl/zoom/product_hi_res.jpg?sw=1000",
+    );
     expect(result?.name).toBe("Kawa Ziarnista 1kg");
   });
 
   it("successfully extracts metadata from the real Biedronka dump (tmp/scrapes)", async () => {
     const fs = await import("fs");
     const path = await import("path");
-    const dumpPath = path.resolve(process.cwd(), "tmp", "scrapes", "zakupy.biedronka.pl_last_zenrows.html");
+    const dumpPath = path.resolve(
+      process.cwd(),
+      "tmp",
+      "scrapes",
+      "zakupy.biedronka.pl_last_zenrows.html",
+    );
 
     if (fs.existsSync(dumpPath)) {
       const html = fs.readFileSync(dumpPath, "utf-8");
       const result = extractProductMetadata(
         html,
-        "https://zakupy.biedronka.pl/pl/pano-wafle-ryzowe-wieloziarniste-100-g.html"
+        "https://zakupy.biedronka.pl/pl/pano-wafle-ryzowe-wieloziarniste-100-g.html",
       );
 
       expect(result).not.toBeNull();

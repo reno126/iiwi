@@ -56,7 +56,11 @@ function mergeScrapedMetadata(
 }
 
 function buildScrapedFieldsList(
-  metadata: { imageUrl?: string | null; name?: string | null; code?: string | null },
+  metadata: {
+    imageUrl?: string | null;
+    name?: string | null;
+    code?: string | null;
+  },
   shop?: MatchedShopResult | null,
 ): Array<"name" | "imageUrl" | "code" | "shop"> {
   const fields: Array<"name" | "imageUrl" | "code" | "shop"> = [];
@@ -66,7 +70,6 @@ function buildScrapedFieldsList(
   if (shop) fields.push("shop");
   return fields;
 }
-
 
 export const productScrapeMetadata = createSafeActionClient({
   defaultValidationErrorsShape: "flattened",
@@ -134,7 +137,9 @@ export const productScrapeMetadata = createSafeActionClient({
       );
       tier1Metadata = extractProductMetadata(tier1Html, productUrl);
 
-      const isTier1Complete = Boolean(tier1Metadata?.imageUrl && tier1Metadata?.name);
+      const isTier1Complete = Boolean(
+        tier1Metadata?.imageUrl && tier1Metadata?.name,
+      );
       if (tier1Metadata && isTier1Complete) {
         console.log(`[Scraper] Tier 1 full extraction success:`, tier1Metadata);
         const shop = await findShopByUrl(productUrl);

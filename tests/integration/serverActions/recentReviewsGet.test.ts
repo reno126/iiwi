@@ -40,7 +40,9 @@ describe("serverActions/recentReviewsGet", () => {
   ];
 
   it("fetches recent reviews with default limit of 3", async () => {
-    vi.mocked(prisma.review.findMany).mockResolvedValueOnce(mockReviews as never);
+    vi.mocked(prisma.review.findMany).mockResolvedValueOnce(
+      mockReviews as never,
+    );
 
     const result = await recentReviewsGet();
 
@@ -80,7 +82,9 @@ describe("serverActions/recentReviewsGet", () => {
   });
 
   it("fetches recent reviews with custom limit parameter", async () => {
-    vi.mocked(prisma.review.findMany).mockResolvedValueOnce(mockReviews as never);
+    vi.mocked(prisma.review.findMany).mockResolvedValueOnce(
+      mockReviews as never,
+    );
 
     const result = await recentReviewsGet(10);
 

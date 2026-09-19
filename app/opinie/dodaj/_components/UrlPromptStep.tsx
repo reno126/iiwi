@@ -53,7 +53,7 @@ export function UrlPromptStep({
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-3">
-        <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <Input
             type="url"
             value={url}
@@ -67,7 +67,7 @@ export function UrlPromptStep({
           <Button
             type="submit"
             disabled={isPending || !url.trim()}
-            className="h-11 px-6 shrink-0 gap-2 font-medium"
+            className="h-11 shrink-0 gap-2 px-6 font-medium"
           >
             {isPending ? (
               <Spinner className="size-4" />
@@ -84,7 +84,7 @@ export function UrlPromptStep({
         />
       </form>
 
-      <div className="border-t pt-6 text-center space-y-2">
+      <div className="space-y-2 border-t pt-6 text-center">
         <span className="block text-sm font-medium text-foreground">
           {URL_PROMPT_MESSAGES.noLinkQuestion}
         </span>
@@ -103,14 +103,14 @@ export function UrlPromptStep({
       </div>
 
       {onCancel && (
-        <div className="text-center pt-2">
+        <div className="pt-2 text-center">
           <Button
             type="button"
             variant="ghost"
             size="sm"
             onClick={onCancel}
             disabled={isPending}
-            className="text-xs text-muted-foreground hover:text-foreground gap-1.5"
+            className="gap-1.5 text-xs text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="size-3.5" />
             {URL_PROMPT_MESSAGES.backButton}

@@ -21,10 +21,10 @@ export function RatingInput({
   disabled = false,
 }: RatingInputProps) {
   const [hovered, setHovered] = useState<number | null>(null);
-  const activeRating = hovered ?? (value ?? 0);
+  const activeRating = hovered ?? value ?? 0;
 
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-3">
+    <div className="flex flex-col items-center gap-3 sm:flex-row">
       <div
         className="flex items-center gap-1"
         role="radiogroup"
@@ -43,14 +43,14 @@ export function RatingInput({
               onClick={() => onChange?.(star)}
               onMouseEnter={() => setHovered(star)}
               onMouseLeave={() => setHovered(null)}
-              className="p-2 sm:p-1.5 text-muted-foreground transition-colors hover:text-amber-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md disabled:pointer-events-none cursor-pointer disabled:cursor-not-allowed touch-manipulation"
+              className="cursor-pointer touch-manipulation rounded-md p-2 text-muted-foreground transition-colors hover:text-amber-500 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:cursor-not-allowed sm:p-1.5"
             >
               <Star
                 className={cn(
-                  "size-7 sm:size-6 transition-all",
+                  "size-7 transition-all sm:size-6",
                   isFilled
-                    ? "fill-amber-400 text-amber-500 scale-105"
-                    : "text-muted-foreground/40"
+                    ? "scale-105 fill-amber-400 text-amber-500"
+                    : "text-muted-foreground/40",
                 )}
               />
             </button>
@@ -59,7 +59,7 @@ export function RatingInput({
       </div>
 
       {typeof value === "number" && value >= 1 && (
-        <span className="text-sm sm:text-base font-semibold text-foreground whitespace-nowrap">
+        <span className="text-sm font-semibold whitespace-nowrap text-foreground sm:text-base">
           {value} / 5
         </span>
       )}

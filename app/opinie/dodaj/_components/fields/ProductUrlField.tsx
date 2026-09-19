@@ -66,7 +66,10 @@ export function ProductUrlField({
     try {
       const res = await shopMatchByUrlAction({ url: rawUrl });
       if (res?.data) {
-        setValue("shopId", res.data.id, { shouldValidate: true, shouldDirty: true });
+        setValue("shopId", res.data.id, {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
         onShopMatched?.(res.data);
       }
     } catch {
@@ -81,14 +84,14 @@ export function ProductUrlField({
       error={errors.productUrl?.message}
       className={className}
     >
-      <div className="flex flex-col sm:flex-row gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row">
         <Input
           id="product-url"
           type="url"
           inputMode="url"
           aria-invalid={!!errors.productUrl}
           placeholder={PRODUCT_FIELDS_MESSAGES.productUrlPlaceholder}
-          className="h-11 text-base sm:text-sm flex-1"
+          className="h-11 flex-1 text-base sm:text-sm"
           {...register("productUrl", {
             onBlur: handleUrlBlur,
           })}
@@ -98,7 +101,7 @@ export function ProductUrlField({
           variant="outline"
           onClick={scrape}
           disabled={isPending || !productUrlValue?.trim()}
-          className="h-11 sm:h-11 shrink-0 font-medium"
+          className="h-11 shrink-0 font-medium sm:h-11"
         >
           {isPending ? (
             <Spinner className="mr-2 size-4" />
@@ -117,7 +120,7 @@ export function ProductUrlField({
       {scrapeNotice && (
         <Alert
           variant={scrapeNotice.type === "error" ? "destructive" : "success"}
-          className="mt-2 text-xs py-2 px-3"
+          className="mt-2 px-3 py-2 text-xs"
         >
           {scrapeNotice.type === "error" ? (
             <CircleAlert className="size-4 shrink-0" />

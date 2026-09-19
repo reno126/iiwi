@@ -76,7 +76,10 @@ describe("lib/seo/schemaMarkup", () => {
   });
 
   it("builds complete Product and BreadcrumbList schema graph for a rated product", () => {
-    const schema = buildProductDetailSchema(baseProductMock, "https://iiwi.test");
+    const schema = buildProductDetailSchema(
+      baseProductMock,
+      "https://iiwi.test",
+    );
 
     expect(schema["@context"]).toBe("https://schema.org");
     expect(schema["@graph"]).toHaveLength(2);
@@ -84,7 +87,9 @@ describe("lib/seo/schemaMarkup", () => {
     const [productNode, breadcrumbNode] = schema["@graph"];
 
     expect(productNode["@type"]).toBe("Product");
-    expect(productNode["@id"]).toBe("https://iiwi.test/produkty/prod-abc-123#product");
+    expect(productNode["@id"]).toBe(
+      "https://iiwi.test/produkty/prod-abc-123#product",
+    );
     expect(productNode.name).toBe("Kawa Ziarnista 1kg");
     expect(productNode.image).toBe("https://example.com/kawa.jpg");
     expect(productNode.sku).toBe("5901234567890");
@@ -128,7 +133,9 @@ describe("lib/seo/schemaMarkup", () => {
     });
 
     expect(breadcrumbNode["@type"]).toBe("BreadcrumbList");
-    expect(breadcrumbNode["@id"]).toBe("https://iiwi.test/produkty/prod-abc-123#breadcrumbs");
+    expect(breadcrumbNode["@id"]).toBe(
+      "https://iiwi.test/produkty/prod-abc-123#breadcrumbs",
+    );
     expect(breadcrumbNode.itemListElement).toEqual([
       {
         "@type": "ListItem",
@@ -162,7 +169,10 @@ describe("lib/seo/schemaMarkup", () => {
       imageUrl: null,
     };
 
-    const schema = buildProductDetailSchema(unratedProduct, "https://iiwi.test");
+    const schema = buildProductDetailSchema(
+      unratedProduct,
+      "https://iiwi.test",
+    );
     const [productNode] = schema["@graph"];
 
     expect(productNode.aggregateRating).toBeUndefined();
@@ -178,7 +188,11 @@ describe("lib/seo/schemaMarkup", () => {
       { id: "p-2", name: "Produkt 2", imageUrl: null },
     ];
 
-    const schema = buildProductsCatalogSchema(catalogProducts, 2, "https://iiwi.test");
+    const schema = buildProductsCatalogSchema(
+      catalogProducts,
+      2,
+      "https://iiwi.test",
+    );
 
     expect(schema["@context"]).toBe("https://schema.org");
     expect(schema["@graph"]).toHaveLength(2);
@@ -186,10 +200,14 @@ describe("lib/seo/schemaMarkup", () => {
     const [breadcrumbNode, itemListNode] = schema["@graph"];
 
     expect(breadcrumbNode["@type"]).toBe("BreadcrumbList");
-    expect(breadcrumbNode["@id"]).toBe("https://iiwi.test/produkty?page=2#breadcrumbs");
+    expect(breadcrumbNode["@id"]).toBe(
+      "https://iiwi.test/produkty?page=2#breadcrumbs",
+    );
 
     expect(itemListNode["@type"]).toBe("ItemList");
-    expect(itemListNode["@id"]).toBe("https://iiwi.test/produkty?page=2#itemlist");
+    expect(itemListNode["@id"]).toBe(
+      "https://iiwi.test/produkty?page=2#itemlist",
+    );
     expect(itemListNode.numberOfItems).toBe(2);
     expect(itemListNode.itemListElement).toEqual([
       {

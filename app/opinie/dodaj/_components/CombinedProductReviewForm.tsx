@@ -23,10 +23,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { UrlPromptStep } from "./UrlPromptStep";
-import {
-  ActiveCombinedForm,
-  type ActiveFormPhase,
-} from "./ActiveCombinedForm";
+import { ActiveCombinedForm, type ActiveFormPhase } from "./ActiveCombinedForm";
 import type { MatchedShopResult } from "@/lib/shops/findShopByUrl";
 
 export const COMBINED_FORM_MESSAGES = {
@@ -49,9 +46,7 @@ interface CombinedProductReviewFormProps {
   onSuccess: (productId: string) => void;
 }
 
-type FormPhase =
-  | { type: "URL_PROMPT" }
-  | ActiveFormPhase;
+type FormPhase = { type: "URL_PROMPT" } | ActiveFormPhase;
 
 export function CombinedProductReviewForm({
   onCancel,
@@ -77,7 +72,7 @@ export function CombinedProductReviewForm({
   const [isScraping, startScrapingTransition] = useTransition();
   const [isTier2NoticeVisible, setIsTier2NoticeVisible] = useState(false);
   const [detectedShop, setDetectedShop] = useState<MatchedShopResult | null>(
-    () => draft?.detectedShop ?? null
+    () => draft?.detectedShop ?? null,
   );
   const [isDraftRestored] = useState(() => Boolean(draft));
 
@@ -215,7 +210,7 @@ export function CombinedProductReviewForm({
   };
 
   return (
-    <Card className="border-none shadow-none ring-0 md:border md:shadow-xs bg-transparent md:bg-card overflow-visible">
+    <Card className="overflow-visible border-none bg-transparent shadow-none ring-0 md:border md:bg-card md:shadow-xs">
       <CardHeader className="px-0 md:px-6">
         <CardTitle className="text-xl">
           {phase.type === "URL_PROMPT"

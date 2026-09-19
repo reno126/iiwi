@@ -114,7 +114,9 @@ describe("serverActions/productGetById", () => {
       },
     };
 
-    vi.mocked(prisma.product.findUnique).mockResolvedValueOnce(mockProductFromDb as never);
+    vi.mocked(prisma.product.findUnique).mockResolvedValueOnce(
+      mockProductFromDb as never,
+    );
 
     const result = await productGetById("prod-1");
 
@@ -151,7 +153,9 @@ describe("serverActions/productGetById", () => {
       },
     };
 
-    vi.mocked(prisma.product.findUnique).mockResolvedValueOnce(mockProductWithoutReviews as never);
+    vi.mocked(prisma.product.findUnique).mockResolvedValueOnce(
+      mockProductWithoutReviews as never,
+    );
 
     const result = await productGetById("prod-empty");
 

@@ -67,8 +67,17 @@ describe("hooks/useProductScrape", () => {
       name: "Słuchawki",
       imageUrl: "https://example.com/audio.jpg",
       code: "AUDIO-01",
-      shop: { id: "shop-1", name: "Media", logo: "https://example.com/logo.png" },
-      scrapedFields: ["name", "code"] as ("name" | "code" | "shop" | "imageUrl")[],
+      shop: {
+        id: "shop-1",
+        name: "Media",
+        logo: "https://example.com/logo.png",
+      },
+      scrapedFields: ["name", "code"] as (
+        | "name"
+        | "code"
+        | "shop"
+        | "imageUrl"
+      )[],
     };
 
     vi.mocked(productScrapeMetadata).mockResolvedValueOnce({
@@ -80,7 +89,11 @@ describe("hooks/useProductScrape", () => {
     const onErrorMock = vi.fn();
 
     await act(async () => {
-      await result.current.scrapeUrl("https://example.com/item", onSuccessMock, onErrorMock);
+      await result.current.scrapeUrl(
+        "https://example.com/item",
+        onSuccessMock,
+        onErrorMock,
+      );
     });
 
     expect(onSuccessMock).toHaveBeenCalledWith(mockData);
@@ -92,12 +105,30 @@ describe("hooks/useProductScrape", () => {
   it("displays tier 2 delay notice when scraping takes longer than 2500ms and cleans up afterwards", async () => {
     vi.useFakeTimers();
 
-    let resolvePromise!: (val: { data: { name: string; imageUrl: null; code: null; shop: null; scrapedFields: string[] } }) => void;
-    const delayedPromise = new Promise<{ data: { name: string; imageUrl: null; code: null; shop: null; scrapedFields: string[] } }>((res) => {
+    let resolvePromise!: (val: {
+      data: {
+        name: string;
+        imageUrl: null;
+        code: null;
+        shop: null;
+        scrapedFields: string[];
+      };
+    }) => void;
+    const delayedPromise = new Promise<{
+      data: {
+        name: string;
+        imageUrl: null;
+        code: null;
+        shop: null;
+        scrapedFields: string[];
+      };
+    }>((res) => {
       resolvePromise = res;
     });
 
-    vi.mocked(productScrapeMetadata).mockReturnValueOnce(delayedPromise as never);
+    vi.mocked(productScrapeMetadata).mockReturnValueOnce(
+      delayedPromise as never,
+    );
 
     const { result } = renderHook(() => useProductScrape());
 
@@ -138,7 +169,11 @@ describe("hooks/useProductScrape", () => {
     const onErrorMock = vi.fn();
 
     await act(async () => {
-      await result.current.scrapeUrl("https://error-shop.com", undefined, onErrorMock);
+      await result.current.scrapeUrl(
+        "https://error-shop.com",
+        undefined,
+        onErrorMock,
+      );
     });
 
     expect(result.current.scrapeNotice).toEqual({
@@ -162,7 +197,11 @@ describe("hooks/useProductScrape", () => {
     const onErrorMock = vi.fn();
 
     await act(async () => {
-      await result.current.scrapeUrl("https://invalid-url.com", undefined, onErrorMock);
+      await result.current.scrapeUrl(
+        "https://invalid-url.com",
+        undefined,
+        onErrorMock,
+      );
     });
 
     expect(result.current.scrapeNotice).toEqual({
@@ -193,27 +232,38 @@ describe("hooks/useProductScrape", () => {
   });
 
   it("catches thrown exceptions and sets fallback error notice", async () => {
-    vi.mocked(productScrapeMetadata).mockRejectedValueOnce(new Error("Network failure"));
+    vi.mocked(productScrapeMetadata).mockRejectedValueOnce(
+      new Error("Network failure"),
+    );
 
     const { result } = renderHook(() => useProductScrape());
     const onErrorMock = vi.fn();
 
     await act(async () => {
-      await result.current.scrapeUrl("https://crash-shop.com", undefined, onErrorMock);
+      await result.current.scrapeUrl(
+        "https://crash-shop.com",
+        undefined,
+        onErrorMock,
+      );
     });
 
     expect(result.current.scrapeNotice).toEqual({
       type: "error",
       message: TEST_ERROR_MESSAGES.unexpectedError,
     });
-    expect(onErrorMock).toHaveBeenCalledWith(TEST_ERROR_MESSAGES.unexpectedError);
+    expect(onErrorMock).toHaveBeenCalledWith(
+      TEST_ERROR_MESSAGES.unexpectedError,
+    );
   });
 
   it("allows updating and clearing scrapeNotice via setScrapeNotice", () => {
     const { result } = renderHook(() => useProductScrape());
 
     act(() => {
-      result.current.setScrapeNotice({ type: "success", message: TEST_ERROR_MESSAGES.successNotice });
+      result.current.setScrapeNotice({
+        type: "success",
+        message: TEST_ERROR_MESSAGES.successNotice,
+      });
     });
     expect(result.current.scrapeNotice).toEqual({
       type: "success",

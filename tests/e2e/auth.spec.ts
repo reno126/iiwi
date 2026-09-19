@@ -47,7 +47,9 @@ test.describe("Authentication and Route Protection Flows", () => {
       await page.goto("/register");
       await waitForHydration(page);
 
-      await page.getByLabel(/Imię/i).fill(`${E2E_TEST_PREFIX} Testowy Użytkownik`);
+      await page
+        .getByLabel(/Imię/i)
+        .fill(`${E2E_TEST_PREFIX} Testowy Użytkownik`);
       await page.getByLabel(/Adres e-mail/i).fill(uniqueEmail);
       await page.getByLabel(/Hasło/i).fill("bezpieczneHaslo123");
 
@@ -83,7 +85,9 @@ test.describe("Authentication and Route Protection Flows", () => {
       await page.goto("/register");
       await waitForHydration(page);
 
-      await page.getByLabel(/Imię/i).fill(`${E2E_TEST_PREFIX} Drugi Użytkownik`);
+      await page
+        .getByLabel(/Imię/i)
+        .fill(`${E2E_TEST_PREFIX} Drugi Użytkownik`);
       await page.getByLabel(/Adres e-mail/i).fill(duplicateEmail);
       await page.getByLabel(/Hasło/i).fill("inneHaslo12345");
       await page.getByRole("button", { name: /zarejestruj się/i }).click();
@@ -104,9 +108,7 @@ test.describe("Authentication and Route Protection Flows", () => {
     await page.goto("/login");
     await waitForHydration(page);
 
-    await page
-      .getByRole("button", { name: /^zaloguj się$/i })
-      .click();
+    await page.getByRole("button", { name: /^zaloguj się$/i }).click();
 
     await expect(page.getByLabel(/Adres e-mail/i)).toHaveAttribute(
       "aria-invalid",

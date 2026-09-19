@@ -1,6 +1,6 @@
-import { createSafeActionClient } from 'next-safe-action';
-import { auth } from '@/lib/auth/helper';
-import { UNAUTHORIZED_ERROR_MESSAGE } from '@/lib/constants/authErrors';
+import { createSafeActionClient } from "next-safe-action";
+import { auth } from "@/lib/auth/helper";
+import { UNAUTHORIZED_ERROR_MESSAGE } from "@/lib/constants/authErrors";
 
 export { UNAUTHORIZED_ERROR_MESSAGE };
 
@@ -9,7 +9,7 @@ export const safeActionUserCtx = createSafeActionClient({
   handleServerError: (error) => {
     if (
       error.message === UNAUTHORIZED_ERROR_MESSAGE ||
-      error.message.includes('Unauthorized')
+      error.message.includes("Unauthorized")
     ) {
       return UNAUTHORIZED_ERROR_MESSAGE;
     }
@@ -23,4 +23,4 @@ export const safeActionUserCtx = createSafeActionClient({
   }
 
   return next({ ctx: { userId: session.user.id } });
-});
+});

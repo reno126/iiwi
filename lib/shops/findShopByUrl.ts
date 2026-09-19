@@ -28,7 +28,10 @@ function compareShopsByCandidatePriority(
     return Number.MAX_SAFE_INTEGER;
   }
 
-  return findBestCandidateRank(firstShop.matcherKeys) - findBestCandidateRank(secondShop.matcherKeys);
+  return (
+    findBestCandidateRank(firstShop.matcherKeys) -
+    findBestCandidateRank(secondShop.matcherKeys)
+  );
 }
 
 export async function findShopByUrl(
@@ -58,7 +61,7 @@ export async function findShopByUrl(
   }
 
   matchedShops.sort((firstShop, secondShop) =>
-    compareShopsByCandidatePriority(firstShop, secondShop, candidates)
+    compareShopsByCandidatePriority(firstShop, secondShop, candidates),
   );
 
   const bestRankedShop = matchedShops[0];

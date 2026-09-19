@@ -83,6 +83,8 @@ describe("lib/auth/useEnsureAuthenticated", () => {
     expect(isAuth).toBe(false);
     expect(updateMock).toHaveBeenCalled();
     expect(onUnauthenticatedMock).toHaveBeenCalledTimes(1);
-    expect(pushMock).toHaveBeenCalledWith("/login?callbackUrl=%2Fopinie%2Fdodaj");
+    expect(pushMock).toHaveBeenCalledWith(
+      "/login?callbackUrl=%2Fopinie%2Fdodaj",
+    );
   });
 });

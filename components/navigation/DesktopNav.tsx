@@ -50,7 +50,7 @@ const MemoizedDesktopNav = memo(function MemoizedDesktopNav({
   userImage,
 }: DesktopNavProps) {
   return (
-    <ul className="hidden md:flex items-center space-x-6">
+    <ul className="hidden items-center space-x-6 md:flex">
       {items.map((item) => (
         <li key={item.href}>
           <MenuItem title={item.title} href={item.href} />

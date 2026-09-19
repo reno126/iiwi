@@ -65,12 +65,10 @@ function createCombinedReviewDriver() {
       screen.getByRole("button", {
         name: COMBINED_FORM_MESSAGES.backLabel,
       }),
-    nameInput: () =>
-      screen.getByLabelText(PRODUCT_FIELDS_MESSAGES.nameLabel),
+    nameInput: () => screen.getByLabelText(PRODUCT_FIELDS_MESSAGES.nameLabel),
     productUrlInput: () =>
       screen.getByLabelText(PRODUCT_FIELDS_MESSAGES.productUrlLabel),
-    codeInput: () =>
-      screen.getByLabelText(PRODUCT_FIELDS_MESSAGES.codeLabel),
+    codeInput: () => screen.getByLabelText(PRODUCT_FIELDS_MESSAGES.codeLabel),
     ratingRadio: (rating: number) =>
       screen.getByRole("radio", {
         name: RATING_INPUT_MESSAGES.starAriaLabel(rating),
@@ -114,9 +112,7 @@ describe("CombinedProductReviewForm - New Flow", () => {
     const driver = createCombinedReviewDriver();
 
     expect(driver.urlPromptHeading()).toBeInTheDocument();
-    expect(
-      screen.getByText(URL_PROMPT_MESSAGES.subtitle),
-    ).toBeInTheDocument();
+    expect(screen.getByText(URL_PROMPT_MESSAGES.subtitle)).toBeInTheDocument();
 
     expect(driver.urlInput()).toBeInTheDocument();
 
@@ -160,9 +156,7 @@ describe("CombinedProductReviewForm - New Flow", () => {
     expect(
       screen.queryByLabelText(PRODUCT_FIELDS_MESSAGES.productUrlLabel),
     ).not.toBeInTheDocument();
-    expect(
-      screen.getByText(REVIEW_FIELDS_MESSAGES.legend),
-    ).toBeInTheDocument();
+    expect(screen.getByText(REVIEW_FIELDS_MESSAGES.legend)).toBeInTheDocument();
     expect(driver.reviewTextarea()).toBeInTheDocument();
   });
 
@@ -363,10 +357,7 @@ describe("CombinedProductReviewForm - New Flow", () => {
 
     await driver.user.type(driver.nameInput(), "Część zapasowa XYZ");
     await driver.user.click(driver.ratingRadio(4));
-    await driver.user.type(
-      driver.reviewTextarea(),
-      "Dobra jakość, polecam!",
-    );
+    await driver.user.type(driver.reviewTextarea(), "Dobra jakość, polecam!");
 
     await driver.user.click(driver.submitButton());
 

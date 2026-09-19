@@ -42,7 +42,7 @@ export function ProductsPagination({
         <span
           className={cn(
             buttonVariants({ variant: "outline", size: "sm" }),
-            "gap-1 px-3 opacity-50 pointer-events-none text-muted-foreground",
+            "pointer-events-none gap-1 px-3 text-muted-foreground opacity-50",
           )}
           aria-disabled="true"
         >
@@ -51,7 +51,7 @@ export function ProductsPagination({
         </span>
       )}
 
-      <div className="flex items-center gap-1 mx-1">
+      <div className="mx-1 flex items-center gap-1">
         {pages.map((p, idx) => {
           if (p === "ellipsis") {
             return (
@@ -102,7 +102,7 @@ export function ProductsPagination({
         <span
           className={cn(
             buttonVariants({ variant: "outline", size: "sm" }),
-            "gap-1 px-3 opacity-50 pointer-events-none text-muted-foreground",
+            "pointer-events-none gap-1 px-3 text-muted-foreground opacity-50",
           )}
           aria-disabled="true"
         >

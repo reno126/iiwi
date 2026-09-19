@@ -50,7 +50,7 @@ export function MobileNavDrawer({
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden text-gray-700"
+              className="text-gray-700 md:hidden"
               aria-label="Otwórz menu nawigacji"
             />
           }
@@ -58,7 +58,7 @@ export function MobileNavDrawer({
           <Menu className="size-5" />
         </DrawerTrigger>
 
-        <DrawerContent className="p-6 flex flex-col justify-between max-h-[85vh]">
+        <DrawerContent className="flex max-h-[85vh] flex-col justify-between p-6">
           <div className="space-y-6">
             <DrawerHeader className="p-0 text-left">
               <DrawerTitle className="text-lg font-bold text-foreground">
@@ -77,7 +77,7 @@ export function MobileNavDrawer({
                     <Link
                       href={item.href}
                       onClick={() => onOpenChange(false)}
-                      className="px-3 py-2.5 rounded-md text-base font-medium text-gray-700 hover:bg-muted hover:text-foreground transition-colors"
+                      className="rounded-md px-3 py-2.5 text-base font-medium text-gray-700 transition-colors hover:bg-muted hover:text-foreground"
                     />
                   }
                 >
@@ -93,12 +93,14 @@ export function MobileNavDrawer({
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <Avatar size="default">
-                    {userImage && <AvatarImage src={userImage} alt={userName || user} />}
+                    {userImage && (
+                      <AvatarImage src={userImage} alt={userName || user} />
+                    )}
                     <AvatarFallback>{userInitial}</AvatarFallback>
                   </Avatar>
-                  <div className="text-xs text-muted-foreground truncate">
+                  <div className="truncate text-xs text-muted-foreground">
                     Zalogowano jako:{" "}
-                    <span className="font-semibold text-foreground block truncate">
+                    <span className="block truncate font-semibold text-foreground">
                       {user}
                     </span>
                   </div>

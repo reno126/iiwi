@@ -18,18 +18,18 @@ export function UserProfileCard({
     name?.trim() || email.split("@")[0] || DASHBOARD_MESSAGES.defaultUserName;
 
   return (
-    <Card className="p-5 sm:p-6 shadow-xs">
+    <Card className="p-5 shadow-xs sm:p-6">
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
           <div className="flex size-11 items-center justify-center rounded-full bg-primary/10 text-primary">
             <User className="size-5" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             {DASHBOARD_MESSAGES.greetingPrefix} {displayName}
           </h1>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-sm text-muted-foreground border-t border-border">
+        <div className="grid grid-cols-1 gap-3 border-t border-border pt-2 text-sm text-muted-foreground sm:grid-cols-2">
           <div className="flex items-center gap-2">
             <Mail className="size-4 shrink-0 text-muted-foreground" />
             <span className="truncate">

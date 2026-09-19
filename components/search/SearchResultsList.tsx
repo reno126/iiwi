@@ -58,10 +58,7 @@ function SearchResultsListInternal<T>({
 }: SearchResultsListProps<T>) {
   return (
     <Card
-      className={cn(
-        "p-1 shadow-md border overflow-hidden max-h-72",
-        className,
-      )}
+      className={cn("max-h-72 overflow-hidden border p-1 shadow-md", className)}
     >
       <ScrollArea className="max-h-70 overflow-y-auto">
         <div
@@ -84,19 +81,17 @@ function SearchResultsListInternal<T>({
                 onClick={() => onSelect(item)}
                 onMouseEnter={() => onHighlight(index)}
                 className={cn(
-                  "flex items-center w-full px-3 py-2 text-sm rounded-md cursor-pointer select-none transition-colors outline-none",
+                  "flex w-full cursor-pointer items-center rounded-md px-3 py-2 text-sm transition-colors outline-none select-none",
                   isHighlighted
-                    ? "bg-accent text-accent-foreground font-medium"
-                    : "hover:bg-muted/60 text-foreground",
+                    ? "bg-accent font-medium text-accent-foreground"
+                    : "text-foreground hover:bg-muted/60",
                 )}
               >
                 {renderItem ? (
                   renderItem(item, isHighlighted, index)
                 ) : (
                   <span className="truncate">
-                    {getItemLabel
-                      ? getItemLabel(item)
-                      : defaultItemLabel(item)}
+                    {getItemLabel ? getItemLabel(item) : defaultItemLabel(item)}
                   </span>
                 )}
               </div>
@@ -108,7 +103,8 @@ function SearchResultsListInternal<T>({
   );
 }
 
-const genericMemo: <ComponentType>(component: ComponentType) => ComponentType = memo;
+const genericMemo: <ComponentType>(component: ComponentType) => ComponentType =
+  memo;
 const MemoizedSearchResultsList = genericMemo(SearchResultsListInternal);
 
 export function SearchResultsList<T>(props: SearchResultsListProps<T>) {

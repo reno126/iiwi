@@ -26,7 +26,11 @@ function isCarrierGradeNatIPv4(o1: number, o2: number): boolean {
   return o1 === 100 && o2 >= 64 && o2 <= 127;
 }
 
-function isReservedOrBenchmarkIPv4(o1: number, o2: number, o3: number): boolean {
+function isReservedOrBenchmarkIPv4(
+  o1: number,
+  o2: number,
+  o3: number,
+): boolean {
   const isIetfProtocolAssignment = o1 === 192 && o2 === 0 && o3 === 0;
   const isTestNet1 = o1 === 192 && o2 === 0 && o3 === 2;
   const isBenchmark = o1 === 198 && (o2 === 18 || o2 === 19);
@@ -146,12 +150,17 @@ function stripIpv6Brackets(hostname: string): string {
 
 export const SSRF_ERRORS = {
   invalidUrl: "Nieprawidłowy format adresu URL.",
-  invalidProtocol: "Niedozwolony protokół. Dozwolone są wyłącznie http:// oraz https://",
+  invalidProtocol:
+    "Niedozwolony protokół. Dozwolone są wyłącznie http:// oraz https://",
   missingHostname: "Brak nazwy hosta w podanym adresie URL.",
-  internalOrMetadata: "Podany adres wskazuje na sieć wewnętrzną, lokalną lub metadane chmurowe.",
-  privateOrReservedIPv4: "Podany adres URL wskazuje na prywatny lub zastrzeżony adres IP.",
-  privateOrReservedIPv6: "Podany adres URL wskazuje na prywatny lub zastrzeżony adres IPv6.",
-  missingTopLevelDomain: "Podana nazwa domeny jest nieprawidłowa (wymagana domena najwyższego poziomu).",
+  internalOrMetadata:
+    "Podany adres wskazuje na sieć wewnętrzną, lokalną lub metadane chmurowe.",
+  privateOrReservedIPv4:
+    "Podany adres URL wskazuje na prywatny lub zastrzeżony adres IP.",
+  privateOrReservedIPv6:
+    "Podany adres URL wskazuje na prywatny lub zastrzeżony adres IPv6.",
+  missingTopLevelDomain:
+    "Podana nazwa domeny jest nieprawidłowa (wymagana domena najwyższego poziomu).",
   invalidHostnameFormat: "Nieprawidłowy format nazwy hosta.",
 } as const;
 
@@ -166,7 +175,8 @@ export function validateUrlSafety(inputUrl: string): UrlSafetyResult {
     };
   }
 
-  const isHttpOrHttps = parsed.protocol === "http:" || parsed.protocol === "https:";
+  const isHttpOrHttps =
+    parsed.protocol === "http:" || parsed.protocol === "https:";
   if (!isHttpOrHttps) {
     return {
       isValid: false,
@@ -205,7 +215,8 @@ export function validateUrlSafety(inputUrl: string): UrlSafetyResult {
     };
   }
 
-  const lacksDomainSeparator = !cleanHost.includes(".") && !cleanHost.includes(":");
+  const lacksDomainSeparator =
+    !cleanHost.includes(".") && !cleanHost.includes(":");
   if (lacksDomainSeparator) {
     return {
       isValid: false,
@@ -213,7 +224,8 @@ export function validateUrlSafety(inputUrl: string): UrlSafetyResult {
     };
   }
 
-  const hasLeadingOrTrailingDot = cleanHost.startsWith(".") || cleanHost.endsWith(".");
+  const hasLeadingOrTrailingDot =
+    cleanHost.startsWith(".") || cleanHost.endsWith(".");
   if (hasLeadingOrTrailingDot) {
     return {
       isValid: false,

@@ -86,7 +86,9 @@ describe("HomePage", () => {
     });
 
     expect(
-      screen.getByRole("heading", { name: new RegExp(HOME_MESSAGES.recentReviewsHeading, "i") }),
+      screen.getByRole("heading", {
+        name: new RegExp(HOME_MESSAGES.recentReviewsHeading, "i"),
+      }),
     ).toBeInTheDocument();
     expect(await screen.findByText(/testowy produkt 1/i)).toBeInTheDocument();
     expect(await screen.findByText(/testowy produkt 2/i)).toBeInTheDocument();
@@ -102,9 +104,17 @@ describe("HomePage", () => {
         name: new RegExp(HOME_MESSAGES.shopsHeading, "i"),
       }),
     ).toBeInTheDocument();
-    expect(await screen.findByText(new RegExp(HOME_MESSAGES.popularShopsSubheading, "i"))).toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        new RegExp(HOME_MESSAGES.popularShopsSubheading, "i"),
+      ),
+    ).toBeInTheDocument();
 
-    expect((await screen.findAllByText(/media expert/i)).length).toBeGreaterThanOrEqual(1);
-    expect((await screen.findAllByText(/allegro/i)).length).toBeGreaterThanOrEqual(1);
+    expect(
+      (await screen.findAllByText(/media expert/i)).length,
+    ).toBeGreaterThanOrEqual(1);
+    expect(
+      (await screen.findAllByText(/allegro/i)).length,
+    ).toBeGreaterThanOrEqual(1);
   });
 });

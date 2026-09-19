@@ -134,10 +134,14 @@ export function AsyncSearch<T>({
 
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        setHighlightedIndex((prev) => (prev < results.length - 1 ? prev + 1 : 0));
+        setHighlightedIndex((prev) =>
+          prev < results.length - 1 ? prev + 1 : 0,
+        );
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
-        setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : results.length - 1));
+        setHighlightedIndex((prev) =>
+          prev > 0 ? prev - 1 : results.length - 1,
+        );
       } else if (e.key === "Enter") {
         if (highlightedIndex >= 0 && highlightedIndex < results.length) {
           e.preventDefault();
@@ -161,7 +165,7 @@ export function AsyncSearch<T>({
     results.length > 0;
 
   return (
-    <div className={cn("relative flex flex-col w-full gap-2", className)}>
+    <div className={cn("relative flex w-full flex-col gap-2", className)}>
       <SearchInputBar
         inputRef={inputRef}
         query={query}
@@ -180,10 +184,12 @@ export function AsyncSearch<T>({
       />
 
       {showMinCharsHint && (
-        <div className="h-5 px-2 flex items-center" aria-live="polite">
+        <div className="flex h-5 items-center px-2" aria-live="polite">
           {query.trim().length > 0 && query.trim().length < minChars && (
             <p className="text-xs text-muted-foreground" role="status">
-              {ASYNC_SEARCH_MESSAGES.minCharsHint(minChars - query.trim().length)}
+              {ASYNC_SEARCH_MESSAGES.minCharsHint(
+                minChars - query.trim().length,
+              )}
             </p>
           )}
         </div>
@@ -194,7 +200,7 @@ export function AsyncSearch<T>({
           className={cn(
             "w-full",
             showDropdown &&
-              "absolute top-full left-0 right-0 z-50 mt-1 shadow-lg",
+              "absolute top-full right-0 left-0 z-50 mt-1 shadow-lg",
           )}
         >
           {loadingComponent &&
@@ -205,7 +211,7 @@ export function AsyncSearch<T>({
 
           {error && !isLoading && (
             <Card
-              className="border-destructive/30 bg-destructive/5 text-destructive p-4 text-sm"
+              className="border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive"
               data-slot="search-error"
             >
               {error}

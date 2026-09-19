@@ -344,9 +344,7 @@ describe("app/produkty/[id]/_components/ProductDetails", () => {
 
     await waitFor(() => {
       expect(driver.descriptionInput()).toBeInvalid();
-      expect(
-        screen.getByText(REVIEW_ERRORS.rateRequired),
-      ).toBeInTheDocument();
+      expect(screen.getByText(REVIEW_ERRORS.rateRequired)).toBeInTheDocument();
       expect(
         screen.getByText(REVIEW_ERRORS.descriptionMinLength),
       ).toBeInTheDocument();
