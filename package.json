@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "verify:rules": "npx tsx scripts/verifyAgentRules.ts",
     "build:all": "prisma generate && next build",
     "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
@@ -23,7 +24,8 @@
     "test:e2e": "playwright test",
     "test:cleanup": "npx tsx tests/e2e/helpers/cleanup.ts",
     "ratings:reconstruct": "npx tsx scripts/reconstructRatings.ts",
-    "shops:seed": "npx tsx scripts/seedShops.ts"
+    "shops:seed": "npx tsx scripts/seedShops.ts",
+    "prepare": "husky"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -66,12 +68,19 @@
     "@vitejs/plugin-react": "^4.7.0",
     "eslint": "^9.39.5",
     "eslint-config-next": "16.3.4",
+    "husky": "^9.1.7",
     "jsdom": "^30.0.1",
+    "lint-staged": "^17.5.1",
     "msw": "^2.15.0",
     "prisma": "^7.10.0",
     "schema-dts": "^2.0.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",
     "vitest": "^4.1.11"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint"
+    ]
   }
 }

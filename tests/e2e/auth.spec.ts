@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { prisma } from "@/lib/db/prisma";
 import { E2E_TEST_PREFIX, waitForHydration } from "./helpers/auth";
 import { DASHBOARD_MESSAGES } from "@/app/dashboard/constants";
+import { REGISTER_API_MESSAGES } from "@/schemas/register";
 
 test.describe("Authentication and Route Protection Flows", () => {
   test("redirects unauthenticated user from /dashboard to /login with callbackUrl", async ({
@@ -88,9 +89,7 @@ test.describe("Authentication and Route Protection Flows", () => {
       await page.getByRole("button", { name: /zarejestruj się/i }).click();
 
       await expect(
-        page.getByText(
-          "Ten adres e-mail jest już zajęty. Zaloguj się na swoje konto.",
-        ),
+        page.getByText(REGISTER_API_MESSAGES.emailTaken),
       ).toBeVisible();
     } finally {
       await prisma.user.deleteMany({

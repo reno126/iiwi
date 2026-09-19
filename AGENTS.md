@@ -68,9 +68,32 @@ The codebase strictly follows a **Zero Comments Policy**:
 ## 4. Component Architecture, Reuse & Separation of Concerns (SoC)
 
 1. **Component Reuse & shadcn UI First Policy (Anti-Duplication):**
+   - **The Golden Rule:** Never write ad-hoc HTML + Tailwind (`<div className="...">`, `<span className="...">`, raw `<button>`) for ANY element that fulfills a recognized UI role. If a primitive exists in `components/ui/` (or in the shadcn registry), you MUST use it.
    - **Audit Existing Components First:** When creating or extending any feature, always check `components/` (and the current route's `_components/`) to reuse existing components before writing custom UI markup.
    - **Shadcn UI Generation over Custom Primitives:** If no existing project component fits, check the available shadcn UI component registry before building custom primitives. Prefer generating or adding an official shadcn/base-ui component (`npx shadcn add <component>`).
-   - **Avoid Duplicate UI Templates:** Strictly avoid creating duplicate UI templates (e.g. reinventing card containers, modal wrappers, badge styles, empty states, or form field cards). Actively seek ways to replace custom markup with existing shared components.
+   - **Strictly Banned Ad-Hoc HTML Patterns (by Category):**
+     - *Containers & Structure:*
+       - **Cards / Boxes / Panels:** Strictly forbidden to write ad-hoc markup like `<div className="flex flex-col items-center justify-center p-4 rounded-xl border bg-white ...">` to build a card or boxed container. Always import and use `<Card>` from `@/components/ui/card`.
+       - **Dividers:** Do not write `<div className="h-[1px] w-full bg-border" />` — use `<Separator>` from `@/components/ui/separator`.
+       - **Scroll Areas:** Do not write `<div className="overflow-y-auto max-h-...">` — use `<ScrollArea>` from `@/components/ui/scroll-area`.
+       - **Tabs:** Do not write manual button strips with active index state — use `<Tabs>` from `@/components/ui/tabs`.
+       - **Collapsibles:** Do not write manual `useState` toggling a content div — use `<Collapsible>` from `@/components/ui/collapsible`.
+     - *Overlays & Popups (Zero Custom Overlay Markup):*
+       - **Modals & Dialogs:** Strictly forbidden to write `<div className="fixed inset-0 bg-black/50...">` with manual z-index or event listeners — use `<Dialog>`, `<Sheet>`, or `<Drawer>` from `@/components/ui/`.
+       - **Dropdowns & Context Menus:** Do not write manual `absolute mt-2` popups with local state — use `<DropdownMenu>` from `@/components/ui/dropdown-menu`.
+       - **Popovers & Float Content:** Use `<Popover>` from `@/components/ui/popover`.
+       - **Hover Tooltips:** Do not write CSS `group-hover:visible` hacks — use `<Tooltip>` from `@/components/ui/tooltip`.
+     - *Feedback, States & Status:*
+       - **Alerts & Error Banners:** Do not write `<div className="p-3 rounded-lg bg-destructive/10 border ...">` — use `<Alert>` from `@/components/ui/alert`.
+       - **Loading Spinners:** Do not write inline SVGs with `animate-spin` or CSS border spinners — use `<Spinner>` from `@/components/ui/spinner`.
+       - **Skeletons:** Do not write ad-hoc `<div className="animate-pulse bg-muted ...">` — use `<Skeleton>` from `@/components/ui/skeleton`.
+       - **Empty States:** Use `<Empty>` from `@/components/ui/empty` instead of hand-crafted empty state boxes.
+       - **Badges / Pills / Tags:** Do not write custom rounded-full spans — use `<Badge>` from `@/components/ui/badge`.
+       - **Progress Bars:** Do not write nested divs with inline percentage widths — use `<Progress>` from `@/components/ui/progress`.
+     - *Actions, Inputs & Identity:*
+       - **Buttons:** Do not write custom `<button className="...">` or `<a className="...">` — use `<Button>` or `<Link className={buttonVariants()}>` from `@/components/ui/button`.
+       - **Form Controls:** Do not write raw unstyled HTML form elements with ad-hoc classes — use `<Input>`, `<Textarea>`, `<Checkbox>`, `<RadioGroup>`, `<Select>`, and `<Label>` from `@/components/ui/`.
+       - **User Avatars & Initials:** Do not write custom rounded-full image/initials divs — use `<Avatar>` from `@/components/ui/avatar`.
 
 2. **Offline Inventory of UI Components & Primitives:**
    - **Already Installed in Project (`components/ui/`):**

@@ -1,5 +1,6 @@
-import type { ShopItem } from "@/serverActions/shopsGet";
 import { ShopLogo } from "@/components/shops/ShopLogo";
+import type { ShopItem } from "@/serverActions/shopsGet";
+import { Card } from "@/components/ui/card";
 
 interface ShopsGridProps {
   shops: ShopItem[];
@@ -8,18 +9,18 @@ interface ShopsGridProps {
 export function ShopsGrid({ shops }: ShopsGridProps) {
   if (shops.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground text-center py-4">
-        Brak sklepów w bazie.
-      </p>
+      <div className="rounded-xl border border-dashed p-8 text-center text-muted-foreground">
+        Brak sklepów do wyświetlenia.
+      </div>
     );
   }
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
       {shops.map((shop) => (
-        <div
+        <Card
           key={shop.id}
-          className="flex flex-col items-center justify-center p-4 rounded-xl border bg-white shadow-2xs transition-all text-center gap-2.5 h-28 sm:h-32"
+          className="flex flex-col items-center justify-center p-4 text-center gap-2.5 h-28 sm:h-32 transition-all"
         >
           <div className="h-12 w-full flex items-center justify-center p-1">
             <ShopLogo
@@ -32,7 +33,7 @@ export function ShopsGrid({ shops }: ShopsGridProps) {
           <span className="text-xs sm:text-sm font-medium text-foreground line-clamp-1 w-full px-1">
             {shop.name || "Sklep"}
           </span>
-        </div>
+        </Card>
       ))}
     </div>
   );

@@ -27,49 +27,30 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 
 export interface ComboboxResponsiveProps<T> {
-  /** Array of items to select from. */
   items: T[];
-  /** Controlled selected value. */
   value?: string;
-  /** Callback fired when an item is selected or cleared. */
   onValueChange?: (value: string, item?: T) => void;
 
-  /** Returns the unique identifier for an item. */
   getItemValue: (item: T) => string;
-  /** Returns the display/search string for an item. */
   getItemLabel?: (item: T) => string;
-  /** Optional custom client-side filter function. */
   filterFn?: (item: T, search: string) => boolean;
 
-  /** Render prop for each option in the list. */
   renderItem: (item: T, isSelected: boolean) => React.ReactNode;
-  /** Optional render prop for the trigger button content. */
   renderTrigger?: (selectedItem: T | undefined, isOpen: boolean) => React.ReactNode;
 
-  /** Placeholder when nothing is selected. */
   placeholder?: string;
-  /** Search input placeholder. */
   searchPlaceholder?: string;
-  /** Empty state message. */
   emptyText?: string;
-  /** Title for mobile full-screen dialog (accessibility requirement). */
   dialogTitle?: string;
 
-  /** Disabled state. */
   disabled?: boolean;
-  /** Whether selecting the currently selected item clears it. Defaults to true. */
   clearable?: boolean;
 
-  /** Controlled open state. */
   open?: boolean;
-  /** Callback fired when the open state changes. */
   onOpenChange?: (open: boolean) => void;
-  /** Whether the items are loading. */
   loading?: boolean;
-  /** Loading text. */
   loadingText?: string;
 
-  /** Additional classes. */
   className?: string;
   triggerClassName?: string;
   contentClassName?: string;

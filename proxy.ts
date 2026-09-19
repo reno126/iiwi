@@ -14,7 +14,6 @@ export async function proxy(req: NextRequest) {
     pathname.startsWith("/login") || pathname.startsWith("/register");
   const isProtectedPage = pathname.startsWith("/dashboard");
 
-  // 1. Redirect unauthenticated users to /login
   if (isProtectedPage && !isAuth) {
     const callbackUrl = encodeURIComponent(pathname);
     return NextResponse.redirect(
@@ -22,7 +21,6 @@ export async function proxy(req: NextRequest) {
     );
   }
 
-  // 2. Redirect already logged-in users away from /login or /register
   if (isAuthPage && isAuth) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
@@ -32,13 +30,6 @@ export async function proxy(req: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - api routes (api/auth handles its own logic)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico, images, etc.
-     */
     "/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$).*)",
   ],
 };

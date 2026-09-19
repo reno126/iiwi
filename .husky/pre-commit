@@ -1,0 +1,3 @@
+npx tsx scripts/verifyAgentRules.ts
+npx lint-staged
+npm run typecheck

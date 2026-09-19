@@ -1,12 +1,20 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useProductScrape } from "@/hooks/useProductScrape";
+import { PRODUCT_ERRORS } from "@/schemas/product";
 
 vi.mock("@/serverActions/productScrapeMetadata", () => ({
   productScrapeMetadata: vi.fn(),
 }));
 
 import { productScrapeMetadata } from "@/serverActions/productScrapeMetadata";
+
+const TEST_ERROR_MESSAGES = {
+  serverError: "Strona sklepu jest niedostępna.",
+  globalValidationError: "Błąd walidacji globalnej",
+  unexpectedError: "Wystąpił nieoczekiwany błąd podczas pobierania danych.",
+  successNotice: "Dane pobrane!",
+} as const;
 
 describe("hooks/useProductScrape", () => {
   beforeEach(() => {
@@ -123,7 +131,7 @@ describe("hooks/useProductScrape", () => {
 
   it("sets error notice and calls onError when server returns serverError", async () => {
     vi.mocked(productScrapeMetadata).mockResolvedValueOnce({
-      serverError: "Strona sklepu jest niedostępna.",
+      serverError: TEST_ERROR_MESSAGES.serverError,
     });
 
     const { result } = renderHook(() => useProductScrape());
@@ -135,9 +143,9 @@ describe("hooks/useProductScrape", () => {
 
     expect(result.current.scrapeNotice).toEqual({
       type: "error",
-      message: "Strona sklepu jest niedostępna.",
+      message: TEST_ERROR_MESSAGES.serverError,
     });
-    expect(onErrorMock).toHaveBeenCalledWith("Strona sklepu jest niedostępna.");
+    expect(onErrorMock).toHaveBeenCalledWith(TEST_ERROR_MESSAGES.serverError);
   });
 
   it("sets error notice from validation fieldErrors", async () => {
@@ -145,7 +153,7 @@ describe("hooks/useProductScrape", () => {
       validationErrors: {
         formErrors: [],
         fieldErrors: {
-          productUrl: ["Niepoprawny format URL"],
+          productUrl: [PRODUCT_ERRORS.productUrlInvalid],
         },
       },
     });
@@ -159,15 +167,15 @@ describe("hooks/useProductScrape", () => {
 
     expect(result.current.scrapeNotice).toEqual({
       type: "error",
-      message: "Niepoprawny format URL",
+      message: PRODUCT_ERRORS.productUrlInvalid,
     });
-    expect(onErrorMock).toHaveBeenCalledWith("Niepoprawny format URL");
+    expect(onErrorMock).toHaveBeenCalledWith(PRODUCT_ERRORS.productUrlInvalid);
   });
 
   it("sets error notice from validation formErrors", async () => {
     vi.mocked(productScrapeMetadata).mockResolvedValueOnce({
       validationErrors: {
-        formErrors: ["Błąd walidacji globalnej"],
+        formErrors: [TEST_ERROR_MESSAGES.globalValidationError],
         fieldErrors: {},
       },
     });
@@ -180,7 +188,7 @@ describe("hooks/useProductScrape", () => {
 
     expect(result.current.scrapeNotice).toEqual({
       type: "error",
-      message: "Błąd walidacji globalnej",
+      message: TEST_ERROR_MESSAGES.globalValidationError,
     });
   });
 
@@ -196,20 +204,20 @@ describe("hooks/useProductScrape", () => {
 
     expect(result.current.scrapeNotice).toEqual({
       type: "error",
-      message: "Wystąpił nieoczekiwany błąd podczas pobierania danych.",
+      message: TEST_ERROR_MESSAGES.unexpectedError,
     });
-    expect(onErrorMock).toHaveBeenCalledWith("Wystąpił nieoczekiwany błąd podczas pobierania danych.");
+    expect(onErrorMock).toHaveBeenCalledWith(TEST_ERROR_MESSAGES.unexpectedError);
   });
 
   it("allows updating and clearing scrapeNotice via setScrapeNotice", () => {
     const { result } = renderHook(() => useProductScrape());
 
     act(() => {
-      result.current.setScrapeNotice({ type: "success", message: "Dane pobrane!" });
+      result.current.setScrapeNotice({ type: "success", message: TEST_ERROR_MESSAGES.successNotice });
     });
     expect(result.current.scrapeNotice).toEqual({
       type: "success",
-      message: "Dane pobrane!",
+      message: TEST_ERROR_MESSAGES.successNotice,
     });
 
     act(() => {

@@ -1,4 +1,5 @@
 import { http, HttpResponse } from "msw";
+import { REGISTER_API_MESSAGES } from "@/schemas/register";
 
 export const handlers = [
   http.post("*/api/register", async ({ request }) => {
@@ -10,7 +11,7 @@ export const handlers = [
 
     if (data.email === "zajety@test.pl" || data.email === "existing@example.com") {
       return HttpResponse.json(
-        { error: "Ten adres e-mail jest już zajęty. Zaloguj się na swoje konto." },
+        { error: REGISTER_API_MESSAGES.emailTaken },
         { status: 409 },
       );
     }
@@ -18,8 +19,7 @@ export const handlers = [
     if (data.email === "oauth@test.pl") {
       return HttpResponse.json(
         {
-          error:
-            "Konto z tym adresem e-mail już istnieje i jest połączone z Google. Zaloguj się przez Google.",
+          error: REGISTER_API_MESSAGES.oauthAccountLinked("Google"),
         },
         { status: 409 },
       );
@@ -27,13 +27,13 @@ export const handlers = [
 
     if (!data.name || !data.email || !data.password || data.password.length < 6) {
       return HttpResponse.json(
-        { error: "Nieprawidłowe dane" },
+        { error: REGISTER_API_MESSAGES.invalidData },
         { status: 400 },
       );
     }
 
     return HttpResponse.json(
-      { success: "Użytkownik został utworzony" },
+      { success: REGISTER_API_MESSAGES.userCreated },
       { status: 201 },
     );
   }),
