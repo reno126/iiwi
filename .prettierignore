@@ -1,0 +1,8 @@
+.next
+node_modules
+prisma/generated
+out
+build
+coverage
+next-env.d.ts
+pnpm-lock.yaml

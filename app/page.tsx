@@ -17,7 +17,8 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 export const HOME_MESSAGES = {
-  heroHeading: "Tylko tutaj znajdziesz prawdziwe, całkowicie niezależne opinie o produktach",
+  heroHeading:
+    "Tylko tutaj znajdziesz prawdziwe, całkowicie niezależne opinie o produktach",
   viewAllReviewsLink: "Zobacz wszystkie opinie",
   addReviewLink: "Dodaj opinię",
   recentReviewsHeading: "Ostatnio dodane opinie",
@@ -29,27 +30,27 @@ export const revalidate = 60;
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col gap-10 sm:gap-14 md:gap-16 w-full max-w-5xl mx-auto py-4 sm:py-8">
-      <section className="text-center py-4 sm:py-8 md:py-10">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-muted-foreground max-w-4xl mx-auto leading-tight">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-10 py-4 sm:gap-14 sm:py-8 md:gap-16">
+      <section className="py-4 text-center sm:py-8 md:py-10">
+        <h1 className="mx-auto max-w-4xl text-2xl leading-tight font-bold tracking-tight text-muted-foreground sm:text-3xl md:text-4xl lg:text-5xl">
           Tylko tutaj znajdziesz{" "}
-          <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground">
+          <span className="text-3xl font-extrabold text-foreground sm:text-4xl md:text-5xl lg:text-6xl">
             prawdziwe
           </span>
           , całkowicie niezależne{" "}
-          <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground">
+          <span className="text-3xl font-extrabold text-foreground sm:text-4xl md:text-5xl lg:text-6xl">
             opinie
           </span>{" "}
           o produktach
         </h1>
       </section>
 
-      <section className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full max-w-md mx-auto">
+      <section className="mx-auto flex w-full max-w-md flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
         <Link
           href="/produkty"
           className={cn(
             buttonVariants({ size: "lg", variant: "outline" }),
-            "w-full sm:w-auto font-semibold shadow-xs text-center",
+            "w-full text-center font-semibold shadow-xs sm:w-auto",
           )}
         >
           {HOME_MESSAGES.viewAllReviewsLink}
@@ -58,7 +59,7 @@ export default function HomePage() {
           href="/opinie/dodaj"
           className={cn(
             buttonVariants({ size: "lg" }),
-            "w-full sm:w-auto font-semibold shadow-xs text-center",
+            "w-full text-center font-semibold shadow-xs sm:w-auto",
           )}
         >
           {HOME_MESSAGES.addReviewLink}
@@ -67,7 +68,7 @@ export default function HomePage() {
 
       <section className="w-full space-y-6">
         <div className="text-center sm:text-left">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+          <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             {HOME_MESSAGES.recentReviewsHeading}
           </h2>
         </div>
@@ -78,10 +79,10 @@ export default function HomePage() {
 
       <section className="w-full space-y-6">
         <div className="space-y-1 text-center sm:text-left">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+          <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             {HOME_MESSAGES.shopsHeading}
           </h2>
-          <p className="text-sm sm:text-base text-muted-foreground font-medium">
+          <p className="text-sm font-medium text-muted-foreground sm:text-base">
             {HOME_MESSAGES.popularShopsSubheading}
           </p>
         </div>
@@ -90,12 +91,12 @@ export default function HomePage() {
         </Suspense>
       </section>
 
-      <section className="flex justify-center w-full py-2 sm:py-4">
+      <section className="flex w-full justify-center py-2 sm:py-4">
         <Link
           href="/opinie/dodaj"
           className={cn(
             buttonVariants({ size: "lg" }),
-            "w-full sm:w-auto font-semibold px-8 shadow-xs text-center",
+            "w-full px-8 text-center font-semibold shadow-xs sm:w-auto",
           )}
         >
           {HOME_MESSAGES.addReviewLink}

@@ -25,6 +25,8 @@
     "test:cleanup": "npx tsx tests/e2e/helpers/cleanup.ts",
     "ratings:reconstruct": "npx tsx scripts/reconstructRatings.ts",
     "shops:seed": "npx tsx scripts/seedShops.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "prepare": "husky"
   },
   "dependencies": {
@@ -72,6 +74,8 @@
     "jsdom": "^30.0.1",
     "lint-staged": "^17.5.1",
     "msw": "^2.15.0",
+    "prettier": "^3.4.2",
+    "prettier-plugin-tailwindcss": "^0.6.11",
     "prisma": "^7.10.0",
     "schema-dts": "^2.0.0",
     "tailwindcss": "^4.3.3",
@@ -80,6 +84,7 @@
   },
   "lint-staged": {
     "*.{ts,tsx}": [
+      "prettier --write",
       "eslint"
     ]
   }
