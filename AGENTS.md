@@ -65,19 +65,32 @@ The codebase strictly follows a **Zero Comments Policy**:
 
 ---
 
-## 4. Component Architecture & Separation of Concerns (SoC)
+## 4. Component Architecture, Reuse & Separation of Concerns (SoC)
 
-1. **Component Decomposition (> 100 Lines Rule):**
+1. **Component Reuse & shadcn UI First Policy (Anti-Duplication):**
+   - **Audit Existing Components First:** When creating or extending any feature, always check `components/` (and the current route's `_components/`) to reuse existing components before writing custom UI markup.
+   - **Shadcn UI Generation over Custom Primitives:** If no existing project component fits, check the available shadcn UI component registry before building custom primitives. Prefer generating or adding an official shadcn/base-ui component (`npx shadcn add <component>`).
+   - **Avoid Duplicate UI Templates:** Strictly avoid creating duplicate UI templates (e.g. reinventing card containers, modal wrappers, badge styles, empty states, or form field cards). Actively seek ways to replace custom markup with existing shared components.
+
+2. **Offline Inventory of UI Components & Primitives:**
+   - **Already Installed in Project (`components/ui/`):**
+     - *Layout & Structure:* `Card` (`card.tsx`), `Separator` (`separator.tsx`), `ScrollArea` (`scroll-area.tsx`), `Collapsible` (`collapsible.tsx`), `Tabs` (`tabs.tsx`)
+     - *Forms & Inputs:* `Button` (`button.tsx`), `Input` (`input.tsx`), `Textarea` (`textarea.tsx`), `Checkbox` (`checkbox.tsx`), `RadioGroup` (`radio-group.tsx`), `Select` (`select.tsx`), `Label` (`label.tsx`), `Field` (`field.tsx`), `FormFieldCard` (`form-field-card.tsx`), `ComboboxResponsive` (`combobox-responsive.tsx`), `Command` (`command.tsx`)
+     - *Feedback & Overlays:* `Dialog` (`dialog.tsx`), `Drawer` (`drawer.tsx`), `Sheet` (`sheet.tsx`), `Popover` (`popover.tsx`), `Tooltip` (`tooltip.tsx`), `DropdownMenu` (`dropdown-menu.tsx`), `Alert` (`alert.tsx`), `Badge` (`badge.tsx`), `Avatar` (`avatar.tsx`), `Empty` (`empty.tsx`), `Progress` (`progress.tsx`), `Skeleton` (`skeleton.tsx`), `Spinner` (`spinner.tsx`)
+   - **Available in shadcn Registry (Install via `npx shadcn add <name>`):**
+     - `accordion`, `alert-dialog`, `aspect-ratio`, `breadcrumb`, `calendar`, `carousel`, `chart`, `context-menu`, `hover-card`, `input-otp`, `menubar`, `navigation-menu`, `pagination`, `resizable`, `sidebar`, `slider`, `sonner`, `switch`, `table`, `toggle`, `toggle-group`.
+
+3. **Component Decomposition (> 100 Lines Rule):**
    - Keep components focused and maintainable. Any component approaching or exceeding 100 lines must be audited for decomposition:
      - Extract stateful logic, network requests, debouncing, and timers into custom hooks (e.g. `useAsyncSearch`, `useProductUrlScraper`, `useAuthGatedSubmit`).
      - Extract distinct presentation blocks into atomic subcomponents (e.g. `SearchInputBar`, `SearchResultsList`, `SearchEmptyState`).
      - Keep the parent component as a clean, declarative orchestrator.
 
-2. **Component Colocation Rules:**
+4. **Component Colocation Rules:**
    - **Page-Specific Components:** Place components specific to a single route inside a local `_components/` directory within that route (e.g. `app/login/_components/SignIn.tsx`, `app/produkty/_components/ProductListItemCard.tsx`).
    - **Shared Components:** Only general-purpose primitives used across multiple routes belong in the root `components/` directory (e.g. `components/search/`, `components/reviews/`, `components/ui/`).
 
-3. **Component Template & Props Rules:**
+5. **Component Template & Props Rules:**
    - **Components with Props:**
      - Define props using `interface ComponentNameProps`.
      - Export using `export function ComponentName({ prop }: ComponentNameProps)`.
