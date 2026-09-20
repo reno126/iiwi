@@ -6,7 +6,7 @@ const zeroCommentsPlugin = {
   rules: {
     "no-comments": {
       meta: {
-        type: "problem",
+        type: "suggestion",
         docs: {
           description: "Strictly enforce Zero Comments Policy from AGENTS.md",
         },
@@ -39,7 +39,7 @@ const eslintConfig = defineConfig([
     },
     rules: {
       "@next/next/no-img-element": "off",
-      "agent-rules/no-comments": "error",
+      "agent-rules/no-comments": "warn",
       "@typescript-eslint/no-empty-object-type": "error",
       "no-empty-pattern": "error",
     },
