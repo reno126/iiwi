@@ -11,7 +11,8 @@ import { Sparkles, CircleAlert, CheckCircle2 } from "lucide-react";
 import { ScrapeDelayNotice } from "../ScrapeDelayNotice";
 import { shopMatchByUrlAction } from "@/serverActions/shopMatchByUrlAction";
 import { PRODUCT_FIELDS_MESSAGES } from "../ProductFields";
-import { useProductUrlScraper } from "./useProductUrlScraper";
+import { useProductScrape } from "@/hooks/useProductScrape";
+import { populateScrapedFields } from "../populateScrapedFields";
 import type { MatchedShopResult } from "@/lib/shops/findShopByUrl";
 import type { ProductCreateInput } from "@/schemas/product";
 
@@ -44,17 +45,53 @@ export function ProductUrlField({
 
   const productUrlValue = useWatch({ control, name: "productUrl" });
 
-  const { isPending, isTier2NoticeVisible, scrapeNotice, scrape } =
-    useProductUrlScraper({
-      externalIsPending,
-      externalStartTransition,
-      onScrapeSuccess,
-      onScrapeFinished,
-    });
+  const {
+    isPending,
+    isTier2NoticeVisible,
+    scrapeNotice,
+    setScrapeNotice,
+    scrapeUrl,
+  } = useProductScrape({
+    externalIsPending,
+    externalStartTransition,
+  });
 
   if (hideProductUrl) {
     return <input type="hidden" {...register("productUrl")} />;
   }
+
+  const handleScrape = () => {
+    let url = (getValues("productUrl") || "").trim();
+    if (!url) return;
+
+    if (!/^https?:\/\//i.test(url)) {
+      url = `https://${url}`;
+      setValue("productUrl", url, { shouldValidate: true, shouldDirty: true });
+    }
+
+    scrapeUrl(
+      url,
+      (data) => {
+        populateScrapedFields({
+          data,
+          setValue,
+          getValues,
+          overwrite: false,
+        });
+
+        onScrapeSuccess?.(data.shop ?? null);
+
+        setScrapeNotice({
+          type: "success",
+          message: data.imageUrl
+            ? PRODUCT_FIELDS_MESSAGES.scrapeSuccessWithImage
+            : PRODUCT_FIELDS_MESSAGES.scrapeSuccessWithoutImage,
+        });
+      },
+      undefined,
+      onScrapeFinished,
+    );
+  };
 
   const handleUrlBlur = async () => {
     const currentShopId = getValues("shopId");
@@ -99,7 +136,7 @@ export function ProductUrlField({
         <Button
           type="button"
           variant="outline"
-          onClick={scrape}
+          onClick={handleScrape}
           disabled={isPending || !productUrlValue?.trim()}
           className="h-11 shrink-0 font-medium sm:h-11"
         >

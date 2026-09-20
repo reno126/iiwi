@@ -110,7 +110,7 @@ The codebase strictly follows a **Zero Comments Policy**:
 3. **Component Decomposition (> 100 Lines Rule):**
 
    - Keep components focused and maintainable. Any component approaching or exceeding 100 lines must be audited for decomposition:
-     - Extract stateful logic, network requests, debouncing, and timers into custom hooks (e.g. `useAsyncSearch`, `useProductUrlScraper`, `useAuthGatedSubmit`).
+     - Extract stateful logic, network requests, debouncing, and timers into custom hooks (e.g. `useAsyncSearch`, `useProductScrape`, `useAuthGatedSubmit`).
      - Extract distinct presentation blocks into atomic subcomponents (e.g. `SearchInputBar`, `SearchResultsList`, `SearchEmptyState`).
      - Keep the parent component as a clean, declarative orchestrator.
 

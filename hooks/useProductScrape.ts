@@ -11,8 +11,19 @@ export interface ScrapeNotice {
   message: string;
 }
 
-export function useProductScrape() {
-  const [isPending, startTransition] = useTransition();
+export interface UseProductScrapeOptions {
+  externalIsPending?: boolean;
+  externalStartTransition?: ReturnType<typeof useTransition>[1];
+}
+
+export function useProductScrape({
+  externalIsPending,
+  externalStartTransition,
+}: UseProductScrapeOptions = {}) {
+  const [internalPending, internalStartTransition] = useTransition();
+  const isPending = externalIsPending ?? internalPending;
+  const startTransition = externalStartTransition ?? internalStartTransition;
+
   const [isTier2NoticeVisible, setIsTier2NoticeVisible] = useState(false);
   const [scrapeNotice, setScrapeNotice] = useState<ScrapeNotice | null>(null);
 
@@ -21,6 +32,7 @@ export function useProductScrape() {
       inputUrl: string,
       onSuccess?: (data: ScrapedMetadataResult) => void,
       onError?: (errorMessage: string) => void,
+      onFinished?: () => void,
     ) => {
       let url = inputUrl.trim();
       if (!url) return;
@@ -67,10 +79,13 @@ export function useProductScrape() {
         } finally {
           clearTimeout(timer);
           setIsTier2NoticeVisible(false);
+          if (onFinished) {
+            onFinished();
+          }
         }
       });
     },
-    [],
+    [startTransition],
   );
 
   return {

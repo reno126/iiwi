@@ -41,14 +41,13 @@ vi.mock("@/serverActions/shopMatchByUrlAction", () => ({
   shopMatchByUrlAction: vi.fn().mockResolvedValue(null),
 }));
 
-function createCombinedReviewDriver() {
-  const user = userEvent.setup();
+function createUrlPromptDriver(user = userEvent.setup()) {
   return {
-    user,
-    urlPromptHeading: () =>
+    heading: () =>
       screen.getByRole("heading", {
         name: COMBINED_FORM_MESSAGES.urlPromptTitle,
       }),
+    subtitle: () => screen.getByText(URL_PROMPT_MESSAGES.subtitle),
     urlInput: () =>
       screen.getByRole("textbox", {
         name: URL_PROMPT_MESSAGES.urlInputAriaLabel,
@@ -61,10 +60,22 @@ function createCombinedReviewDriver() {
       screen.getByRole("button", {
         name: URL_PROMPT_MESSAGES.manualButton,
       }),
-    changeModeButton: () =>
-      screen.getByRole("button", {
-        name: COMBINED_FORM_MESSAGES.backLabel,
-      }),
+    noLinkQuestion: () => screen.getByText(URL_PROMPT_MESSAGES.noLinkQuestion),
+    manualHint: () => screen.getByText(URL_PROMPT_MESSAGES.manualHint),
+    async enterUrl(url: string) {
+      await user.type(this.urlInput(), url);
+    },
+    async clickScrape() {
+      await user.click(this.scrapeButton());
+    },
+    async clickManual() {
+      await user.click(this.manualModeButton());
+    },
+  };
+}
+
+function createActiveFormDriver(user = userEvent.setup()) {
+  return {
     nameInput: () => screen.getByLabelText(PRODUCT_FIELDS_MESSAGES.nameLabel),
     productUrlInput: () =>
       screen.getByLabelText(PRODUCT_FIELDS_MESSAGES.productUrlLabel),
@@ -79,12 +90,24 @@ function createCombinedReviewDriver() {
       screen.getByRole("button", {
         name: COMBINED_FORM_MESSAGES.submitLabel,
       }),
-    alert: () => screen.getByRole("alert"),
-    statusBadges: (label: string) => screen.getAllByText(label),
+    backButton: () =>
+      screen.getByRole("button", {
+        name: COMBINED_FORM_MESSAGES.backLabel,
+      }),
+    async fillReview(rating: number, description: string) {
+      await user.click(this.ratingRadio(rating));
+      await user.type(this.reviewTextarea(), description);
+    },
+    async submit() {
+      await user.click(this.submitButton());
+    },
+    async goBack() {
+      await user.click(this.backButton());
+    },
   };
 }
 
-describe("CombinedProductReviewForm - New Flow", () => {
+describe("CombinedProductReviewForm", () => {
   const onCancelMock = vi.fn();
   const onSuccessMock = vi.fn();
   const pushMock = vi.fn();
@@ -102,340 +125,311 @@ describe("CombinedProductReviewForm - New Flow", () => {
     });
   });
 
-  it("initially renders only the 3 main elements and the manual addition option", () => {
-    render(
-      <CombinedProductReviewForm
-        onCancel={onCancelMock}
-        onSuccess={onSuccessMock}
-      />,
-    );
-    const driver = createCombinedReviewDriver();
+  describe("Phase Navigation", () => {
+    it("initially renders only the 3 main elements and the manual addition option", () => {
+      render(
+        <CombinedProductReviewForm
+          onCancel={onCancelMock}
+          onSuccess={onSuccessMock}
+        />,
+      );
+      const promptDriver = createUrlPromptDriver();
 
-    expect(driver.urlPromptHeading()).toBeInTheDocument();
-    expect(screen.getByText(URL_PROMPT_MESSAGES.subtitle)).toBeInTheDocument();
+      expect(promptDriver.heading()).toBeInTheDocument();
+      expect(promptDriver.subtitle()).toBeInTheDocument();
+      expect(promptDriver.urlInput()).toBeInTheDocument();
+      expect(promptDriver.scrapeButton()).toBeInTheDocument();
+      expect(promptDriver.scrapeButton()).toBeDisabled();
+      expect(promptDriver.noLinkQuestion()).toBeInTheDocument();
+      expect(promptDriver.manualModeButton()).toBeInTheDocument();
+      expect(promptDriver.manualHint()).toBeInTheDocument();
 
-    expect(driver.urlInput()).toBeInTheDocument();
-
-    expect(driver.scrapeButton()).toBeInTheDocument();
-    expect(driver.scrapeButton()).toBeDisabled();
-
-    expect(
-      screen.getByText(URL_PROMPT_MESSAGES.noLinkQuestion),
-    ).toBeInTheDocument();
-    expect(driver.manualModeButton()).toBeInTheDocument();
-    expect(
-      screen.getByText(URL_PROMPT_MESSAGES.manualHint),
-    ).toBeInTheDocument();
-
-    expect(
-      screen.queryByLabelText(PRODUCT_FIELDS_MESSAGES.nameLabel),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByLabelText(REVIEW_FIELDS_MESSAGES.rateLabel),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByLabelText(REVIEW_FIELDS_MESSAGES.descriptionLabel),
-    ).not.toBeInTheDocument();
-  });
-
-  it("navigates immediately to manual form without URL field when clicking 'Dodaj produkt ręcznie'", async () => {
-    render(
-      <CombinedProductReviewForm
-        onCancel={onCancelMock}
-        onSuccess={onSuccessMock}
-      />,
-    );
-    const driver = createCombinedReviewDriver();
-
-    await driver.user.click(driver.manualModeButton());
-
-    expect(driver.nameInput()).toBeInTheDocument();
-    expect(
-      screen.getByText(COMBINED_FORM_MESSAGES.manualTitle),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByLabelText(PRODUCT_FIELDS_MESSAGES.productUrlLabel),
-    ).not.toBeInTheDocument();
-    expect(screen.getByText(REVIEW_FIELDS_MESSAGES.legend)).toBeInTheDocument();
-    expect(driver.reviewTextarea()).toBeInTheDocument();
-  });
-
-  it("handles scraping flow: fills data, displays success banner with scraped fields, and submits", async () => {
-    vi.mocked(productScrapeMetadata).mockResolvedValueOnce({
-      data: {
-        imageUrl: "https://example.com/item.jpg",
-        name: "Słuchawki Sony XM5",
-        code: "SKU-999",
-        shop: null,
-        scrapedFields: ["name", "imageUrl", "code", "shop"],
-      },
+      expect(
+        screen.queryByLabelText(PRODUCT_FIELDS_MESSAGES.nameLabel),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByLabelText(REVIEW_FIELDS_MESSAGES.rateLabel),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByLabelText(REVIEW_FIELDS_MESSAGES.descriptionLabel),
+      ).not.toBeInTheDocument();
     });
 
-    vi.mocked(productWithReviewCreate).mockResolvedValueOnce({
-      data: {
-        product: { id: "new-prod-id" } as unknown as Product,
-        review: { id: "new-rev-id" } as unknown as Review,
-      },
+    it("navigates immediately to manual form without URL field when clicking manual addition", async () => {
+      const user = userEvent.setup();
+      render(
+        <CombinedProductReviewForm
+          onCancel={onCancelMock}
+          onSuccess={onSuccessMock}
+        />,
+      );
+      const promptDriver = createUrlPromptDriver(user);
+      const formDriver = createActiveFormDriver(user);
+
+      await promptDriver.clickManual();
+
+      expect(formDriver.nameInput()).toBeInTheDocument();
+      expect(
+        screen.getByText(COMBINED_FORM_MESSAGES.manualTitle),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByLabelText(PRODUCT_FIELDS_MESSAGES.productUrlLabel),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByText(REVIEW_FIELDS_MESSAGES.legend),
+      ).toBeInTheDocument();
+      expect(formDriver.reviewTextarea()).toBeInTheDocument();
     });
 
-    render(
-      <CombinedProductReviewForm
-        onCancel={onCancelMock}
-        onSuccess={onSuccessMock}
-      />,
-    );
-    const driver = createCombinedReviewDriver();
+    it("allows switching back to URL prompt from active form", async () => {
+      const user = userEvent.setup();
+      render(
+        <CombinedProductReviewForm
+          onCancel={onCancelMock}
+          onSuccess={onSuccessMock}
+        />,
+      );
+      const promptDriver = createUrlPromptDriver(user);
+      const formDriver = createActiveFormDriver(user);
 
-    await driver.user.type(driver.urlInput(), "https://sklep.pl/item-123");
+      await promptDriver.clickManual();
+      expect(formDriver.nameInput()).toBeInTheDocument();
 
-    expect(driver.scrapeButton()).toBeEnabled();
-    await driver.user.click(driver.scrapeButton());
+      await formDriver.goBack();
+      expect(promptDriver.heading()).toBeInTheDocument();
+    });
+  });
 
-    await waitFor(() => {
-      expect(productScrapeMetadata).toHaveBeenCalledWith({
-        productUrl: "https://sklep.pl/item-123",
+  describe("Scraper Integration", () => {
+    it("handles scraping flow: fills data and displays success banner", async () => {
+      vi.mocked(productScrapeMetadata).mockResolvedValueOnce({
+        data: {
+          imageUrl: "https://example.com/item.jpg",
+          name: "Słuchawki Sony XM5",
+          code: "SKU-999",
+          shop: null,
+          scrapedFields: ["name", "imageUrl", "code", "shop"],
+        },
+      });
+
+      const user = userEvent.setup();
+      render(
+        <CombinedProductReviewForm
+          onCancel={onCancelMock}
+          onSuccess={onSuccessMock}
+        />,
+      );
+      const promptDriver = createUrlPromptDriver(user);
+      const formDriver = createActiveFormDriver(user);
+
+      await promptDriver.enterUrl("https://sklep.pl/item-123");
+      expect(promptDriver.scrapeButton()).toBeEnabled();
+      await promptDriver.clickScrape();
+
+      await waitFor(() => {
+        expect(productScrapeMetadata).toHaveBeenCalledWith({
+          productUrl: "https://sklep.pl/item-123",
+        });
+      });
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(SCRAPE_BANNER_MESSAGES.success.title),
+        ).toBeInTheDocument();
+      });
+
+      const nameInput = formDriver.nameInput() as HTMLInputElement;
+      expect(nameInput.value).toBe("Słuchawki Sony XM5");
+
+      expect(
+        screen.queryByLabelText(PRODUCT_FIELDS_MESSAGES.productUrlLabel),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", {
+          name: PRODUCT_FIELDS_MESSAGES.scrapeButton,
+        }),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByLabelText(PRODUCT_FIELDS_MESSAGES.imageUrlLabel),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByText(PRODUCT_FIELDS_MESSAGES.imagePreviewAlt),
+      ).toBeInTheDocument();
+    });
+
+    it("handles scraping failure: retains productUrl and displays failure banner", async () => {
+      vi.mocked(productScrapeMetadata).mockResolvedValueOnce({
+        serverError: "Nie udało się pobrać danych ze wskazanego sklepu.",
+      });
+
+      const user = userEvent.setup();
+      render(
+        <CombinedProductReviewForm
+          onCancel={onCancelMock}
+          onSuccess={onSuccessMock}
+        />,
+      );
+      const promptDriver = createUrlPromptDriver(user);
+      const formDriver = createActiveFormDriver(user);
+
+      await promptDriver.enterUrl("https://unknown-shop.com/item");
+      await promptDriver.clickScrape();
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(SCRAPE_BANNER_MESSAGES.failed.title),
+        ).toBeInTheDocument();
+      });
+
+      const productUrlInput = formDriver.productUrlInput() as HTMLInputElement;
+      expect(productUrlInput.value).toBe("https://unknown-shop.com/item");
+
+      const nameInput = formDriver.nameInput() as HTMLInputElement;
+      expect(nameInput.value).toBe("");
+    });
+  });
+
+  describe("Form Submission", () => {
+    it("submits complete product and review payload and triggers onSuccess callback", async () => {
+      vi.mocked(productWithReviewCreate).mockResolvedValueOnce({
+        data: {
+          product: { id: "new-prod-id" } as unknown as Product,
+          review: { id: "new-rev-id" } as unknown as Review,
+        },
+      });
+
+      const user = userEvent.setup();
+      render(
+        <CombinedProductReviewForm
+          onCancel={onCancelMock}
+          onSuccess={onSuccessMock}
+        />,
+      );
+      const promptDriver = createUrlPromptDriver(user);
+      const formDriver = createActiveFormDriver(user);
+
+      await promptDriver.clickManual();
+
+      await user.type(formDriver.nameInput(), "Słuchawki Sony XM5");
+      await formDriver.fillReview(5, "Fantastyczne słuchawki, polecam!");
+      await formDriver.submit();
+
+      await waitFor(() => {
+        expect(productWithReviewCreate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: "Słuchawki Sony XM5",
+            rate: 5,
+            description: "Fantastyczne słuchawki, polecam!",
+          }),
+        );
+        expect(onSuccessMock).toHaveBeenCalledWith("new-prod-id");
       });
     });
+  });
 
-    await waitFor(() => {
-      expect(
-        screen.getByText(SCRAPE_BANNER_MESSAGES.success.title),
-      ).toBeInTheDocument();
-    });
+  describe("Auth-Gated Draft Lifecycle", () => {
+    it("when unauthenticated, tries session refresh and redirects to login saving draft in localStorage", async () => {
+      const updateMock = vi.fn().mockResolvedValue(null);
 
-    const nameInput = driver.nameInput() as HTMLInputElement;
-    expect(nameInput.value).toBe("Słuchawki Sony XM5");
+      vi.mocked(useSession).mockReturnValue({
+        data: null,
+        status: "unauthenticated",
+        update: updateMock,
+      });
 
-    expect(
-      screen.queryByLabelText(PRODUCT_FIELDS_MESSAGES.productUrlLabel),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", {
-        name: PRODUCT_FIELDS_MESSAGES.scrapeButton,
-      }),
-    ).not.toBeInTheDocument();
-
-    expect(
-      screen.queryByLabelText(PRODUCT_FIELDS_MESSAGES.imageUrlLabel),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByText(PRODUCT_FIELDS_MESSAGES.imagePreviewAlt),
-    ).toBeInTheDocument();
-
-    await driver.user.click(driver.ratingRadio(5));
-    await driver.user.type(
-      driver.reviewTextarea(),
-      "Fantastyczne słuchawki, polecam!",
-    );
-
-    await driver.user.click(driver.submitButton());
-
-    await waitFor(() => {
-      expect(productWithReviewCreate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          name: "Słuchawki Sony XM5",
-          productUrl: "https://sklep.pl/item-123",
-          imageUrl: "https://example.com/item.jpg",
-          code: "SKU-999",
-        }),
+      const user = userEvent.setup();
+      render(
+        <CombinedProductReviewForm
+          onCancel={onCancelMock}
+          onSuccess={onSuccessMock}
+        />,
       );
-      expect(onSuccessMock).toHaveBeenCalledWith("new-prod-id");
-    });
-  });
+      const promptDriver = createUrlPromptDriver(user);
+      const formDriver = createActiveFormDriver(user);
 
-  it("handles scraping failure: retains productUrl and displays failure banner", async () => {
-    vi.mocked(productScrapeMetadata).mockResolvedValueOnce({
-      serverError: "Nie udało się pobrać danych ze wskazanego sklepu.",
-    });
+      await promptDriver.clickManual();
 
-    render(
-      <CombinedProductReviewForm
-        onCancel={onCancelMock}
-        onSuccess={onSuccessMock}
-      />,
-    );
-    const driver = createCombinedReviewDriver();
+      await user.type(formDriver.nameInput(), "Część zapasowa XYZ");
+      await formDriver.fillReview(4, "Dobra jakość, polecam!");
+      await formDriver.submit();
 
-    await driver.user.type(driver.urlInput(), "https://unknown-shop.com/item");
-    await driver.user.click(driver.scrapeButton());
+      expect(updateMock).toHaveBeenCalled();
+      expect(productWithReviewCreate).not.toHaveBeenCalled();
 
-    await waitFor(() => {
-      expect(
-        screen.getByText(SCRAPE_BANNER_MESSAGES.failed.title),
-      ).toBeInTheDocument();
-    });
+      const savedDraft = getReviewDraft();
+      expect(savedDraft).toBeDefined();
+      expect(savedDraft?.type).toBe("NEW_PRODUCT_AND_REVIEW");
+      if (savedDraft?.type === "NEW_PRODUCT_AND_REVIEW") {
+        expect(savedDraft.formData.name).toBe("Część zapasowa XYZ");
+        expect(savedDraft.formData.rate).toBe(4);
+        expect(savedDraft.formData.description).toBe("Dobra jakość, polecam!");
+        expect(savedDraft.phase?.mode).toBe("manual");
+      }
 
-    const productUrlInput = driver.productUrlInput() as HTMLInputElement;
-    expect(productUrlInput.value).toBe("https://unknown-shop.com/item");
-
-    const nameInput = driver.nameInput() as HTMLInputElement;
-    expect(nameInput.value).toBe("");
-  });
-
-  it("allows switching back to URL prompt from active form", async () => {
-    render(
-      <CombinedProductReviewForm
-        onCancel={onCancelMock}
-        onSuccess={onSuccessMock}
-      />,
-    );
-    const driver = createCombinedReviewDriver();
-
-    await driver.user.click(driver.manualModeButton());
-
-    expect(driver.nameInput()).toBeInTheDocument();
-
-    await driver.user.click(driver.changeModeButton());
-
-    expect(driver.urlPromptHeading()).toBeInTheDocument();
-  });
-
-  it("marks scraped vs missing fields and reactively updates status when user completes missing data", async () => {
-    vi.mocked(productScrapeMetadata).mockResolvedValueOnce({
-      data: {
-        imageUrl: "https://example.com/keyboard.jpg",
-        name: "Klawiatura Mechaniczna Pro",
-        code: "",
-        shop: null,
-        scrapedFields: ["name", "imageUrl"],
-      },
+      expect(pushMock).toHaveBeenCalledWith(
+        expect.stringContaining("/login?callbackUrl="),
+      );
     });
 
-    render(
-      <CombinedProductReviewForm
-        onCancel={onCancelMock}
-        onSuccess={onSuccessMock}
-      />,
-    );
-    const driver = createCombinedReviewDriver();
-
-    await driver.user.type(driver.urlInput(), "https://sklep.pl/keyboard");
-    await driver.user.click(driver.scrapeButton());
-
-    await waitFor(() => {
-      const nameInput = driver.nameInput() as HTMLInputElement;
-      expect(nameInput.value).toBe("Klawiatura Mechaniczna Pro");
-    });
-
-    expect(
-      driver.statusBadges(PRODUCT_FIELDS_MESSAGES.statusFilled).length,
-    ).toBe(2);
-    expect(
-      driver.statusBadges(PRODUCT_FIELDS_MESSAGES.statusMissing).length,
-    ).toBe(2);
-
-    await driver.user.type(driver.codeInput(), "5901234567890");
-
-    await waitFor(() => {
-      expect(
-        driver.statusBadges(PRODUCT_FIELDS_MESSAGES.statusFilled).length,
-      ).toBe(3);
-      expect(
-        driver.statusBadges(PRODUCT_FIELDS_MESSAGES.statusMissing).length,
-      ).toBe(1);
-    });
-  });
-
-  it("when unauthenticated, tries session refresh and redirects to login saving draft in localStorage", async () => {
-    const updateMock = vi.fn().mockResolvedValue(null);
-
-    vi.mocked(useSession).mockReturnValue({
-      data: null,
-      status: "unauthenticated",
-      update: updateMock,
-    });
-
-    render(
-      <CombinedProductReviewForm
-        onCancel={onCancelMock}
-        onSuccess={onSuccessMock}
-      />,
-    );
-    const driver = createCombinedReviewDriver();
-
-    await driver.user.click(driver.manualModeButton());
-
-    await driver.user.type(driver.nameInput(), "Część zapasowa XYZ");
-    await driver.user.click(driver.ratingRadio(4));
-    await driver.user.type(driver.reviewTextarea(), "Dobra jakość, polecam!");
-
-    await driver.user.click(driver.submitButton());
-
-    expect(updateMock).toHaveBeenCalled();
-    expect(productWithReviewCreate).not.toHaveBeenCalled();
-
-    const savedDraft = getReviewDraft();
-    expect(savedDraft).toBeDefined();
-    expect(savedDraft?.type).toBe("NEW_PRODUCT_AND_REVIEW");
-    if (savedDraft?.type === "NEW_PRODUCT_AND_REVIEW") {
-      expect(savedDraft.formData.name).toBe("Część zapasowa XYZ");
-      expect(savedDraft.formData.rate).toBe(4);
-      expect(savedDraft.formData.description).toBe("Dobra jakość, polecam!");
-      expect(savedDraft.phase?.mode).toBe("manual");
-    }
-
-    expect(pushMock).toHaveBeenCalledWith(
-      expect.stringContaining("/login?callbackUrl="),
-    );
-  });
-
-  it("restores form data and active phase from existing localStorage draft on mount, and displays banner", async () => {
-    saveReviewDraft({
-      type: "NEW_PRODUCT_AND_REVIEW",
-      formData: {
-        name: "Przywrócony produkt",
-        productUrl: "https://sklep.pl/item-restored",
-        imageUrl: "https://sklep.pl/image-restored.jpg",
-        code: "RESTORED-123",
-        shopId: "",
-        rate: 5,
-        description: "Opinia przywrócona ze szkicu.",
-      },
-      phase: {
-        mode: "scraped_success",
-        scrapedFields: ["name", "imageUrl", "code"],
-      },
-      detectedShop: null,
-    });
-
-    vi.mocked(productWithReviewCreate).mockResolvedValueOnce({
-      data: {
-        product: { id: "restored-prod-id" } as unknown as Product,
-        review: { id: "restored-rev-id" } as unknown as Review,
-      },
-    });
-
-    render(
-      <CombinedProductReviewForm
-        onCancel={onCancelMock}
-        onSuccess={onSuccessMock}
-      />,
-    );
-    const driver = createCombinedReviewDriver();
-
-    expect(
-      screen.getByText(COMBINED_FORM_MESSAGES.draftRestored),
-    ).toBeInTheDocument();
-
-    const nameInput = driver.nameInput() as HTMLInputElement;
-    expect(nameInput.value).toBe("Przywrócony produkt");
-
-    const descTextarea = driver.reviewTextarea() as HTMLTextAreaElement;
-    expect(descTextarea.value).toBe("Opinia przywrócona ze szkicu.");
-
-    await driver.user.click(driver.submitButton());
-
-    await waitFor(() => {
-      expect(productWithReviewCreate).toHaveBeenCalledWith(
-        expect.objectContaining({
+    it("restores form data and active phase from existing localStorage draft on mount, and displays banner", async () => {
+      saveReviewDraft({
+        type: "NEW_PRODUCT_AND_REVIEW",
+        formData: {
           name: "Przywrócony produkt",
+          productUrl: "https://sklep.pl/item-restored",
+          imageUrl: "https://sklep.pl/image-restored.jpg",
+          code: "RESTORED-123",
+          shopId: "",
           rate: 5,
           description: "Opinia przywrócona ze szkicu.",
-        }),
-      );
-      expect(onSuccessMock).toHaveBeenCalledWith("restored-prod-id");
-    });
+        },
+        phase: {
+          mode: "scraped_success",
+          scrapedFields: ["name", "imageUrl", "code"],
+        },
+        detectedShop: null,
+      });
 
-    expect(getReviewDraft()).toBeNull();
+      vi.mocked(productWithReviewCreate).mockResolvedValueOnce({
+        data: {
+          product: { id: "restored-prod-id" } as unknown as Product,
+          review: { id: "restored-rev-id" } as unknown as Review,
+        },
+      });
+
+      const user = userEvent.setup();
+      render(
+        <CombinedProductReviewForm
+          onCancel={onCancelMock}
+          onSuccess={onSuccessMock}
+        />,
+      );
+      const formDriver = createActiveFormDriver(user);
+
+      expect(
+        screen.getByText(COMBINED_FORM_MESSAGES.draftRestored),
+      ).toBeInTheDocument();
+
+      const nameInput = formDriver.nameInput() as HTMLInputElement;
+      expect(nameInput.value).toBe("Przywrócony produkt");
+
+      const descTextarea = formDriver.reviewTextarea() as HTMLTextAreaElement;
+      expect(descTextarea.value).toBe("Opinia przywrócona ze szkicu.");
+
+      await formDriver.submit();
+
+      await waitFor(() => {
+        expect(productWithReviewCreate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: "Przywrócony produkt",
+            rate: 5,
+            description: "Opinia przywrócona ze szkicu.",
+          }),
+        );
+        expect(onSuccessMock).toHaveBeenCalledWith("restored-prod-id");
+      });
+
+      expect(getReviewDraft()).toBeNull();
+    });
   });
 });
