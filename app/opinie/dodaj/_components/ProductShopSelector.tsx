@@ -1,25 +1,16 @@
 "use client";
 
-import { useState, useTransition, useCallback } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
-import { Trash2, Check, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { ComboboxResponsive } from "@/components/ui/combobox-responsive";
 import { FormFieldCard } from "@/components/ui/form-field-card";
-import { shopsGet, type ShopItem } from "@/serverActions/shopsGet";
 import type { ProductCreateInput } from "@/schemas/product";
 import type { MatchedShopResult } from "@/lib/shops/findShopByUrl";
-import { ShopLogo } from "@/components/shops/ShopLogo";
+import type { ShopItem } from "@/serverActions/shopsGet";
+import { useLazyShops } from "./useLazyShops";
+import { SHOP_SELECTOR_MESSAGES } from "./shopSelectorMessages";
+import { SelectedShopCard } from "./shopSelector/SelectedShopCard";
+import { EmptyShopPlaceholder } from "./shopSelector/EmptyShopPlaceholder";
 
-export const SHOP_SELECTOR_MESSAGES = {
-  helperText:
-    "Jeśli nie znasz sklepu lub nie ma go na liście pozostaw pole puste.",
-  selectedShop: "Wybrany sklep",
-  selectFromList: "Wybierz z listy",
-  change: "Zmień",
-  deleteShopAriaLabel: "Usuń sklep",
-  deleteButton: "Usuń",
-} as const;
+export { SHOP_SELECTOR_MESSAGES } from "./shopSelectorMessages";
 
 interface ProductShopSelectorProps {
   selectedShop: MatchedShopResult | null;
@@ -40,21 +31,7 @@ export function ProductShopSelector({
     selectedShop || (shopId && shopId.trim().length > 0),
   );
 
-  const [shopsList, setShopsList] = useState<ShopItem[] | null>(null);
-  const [isLoadingShops, startTransition] = useTransition();
-
-  const loadShopsIfNeeded = useCallback(() => {
-    if (shopsList === null && !isLoadingShops) {
-      startTransition(async () => {
-        try {
-          const data = await shopsGet();
-          setShopsList(data);
-        } catch {
-          setShopsList([]);
-        }
-      });
-    }
-  }, [shopsList, isLoadingShops]);
+  const { shopsList, isLoadingShops, loadShopsIfNeeded } = useLazyShops();
 
   const handleValueChange = (newShopId: string, item?: ShopItem) => {
     setValue("shopId", newShopId, { shouldValidate: true, shouldDirty: true });
@@ -78,116 +55,32 @@ export function ProductShopSelector({
 
   return (
     <FormFieldCard
-      label="Sklep"
+      label={SHOP_SELECTOR_MESSAGES.fieldLabel}
       isFilled={isShopFilled}
       showStatus={showFieldStatus}
-      filledBadgeText="Uzupełnione"
-      missingBadgeText="Do uzupełnienia"
+      filledBadgeText={SHOP_SELECTOR_MESSAGES.statusFilled}
+      missingBadgeText={SHOP_SELECTOR_MESSAGES.statusMissing}
     >
       {selectedShop ? (
-        <div className="flex flex-col items-center justify-between gap-3 rounded-lg border bg-white p-3 text-card-foreground shadow-2xs md:flex-row dark:bg-card">
-          <div className="flex min-w-0 items-center gap-3">
-            <ShopLogo
-              logo={selectedShop.logo}
-              name={selectedShop.name}
-              size="lg"
-            />
-            <div className="flex min-w-0 flex-col">
-              <span className="truncate text-sm font-medium">
-                {selectedShop.name || "Nieznany sklep"}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {SHOP_SELECTOR_MESSAGES.selectedShop}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex shrink-0 items-center gap-2">
-            <ComboboxResponsive<ShopItem>
-              items={shopsList || []}
-              value={shopId || ""}
-              onValueChange={handleValueChange}
-              getItemValue={(item) => item.id}
-              getItemLabel={(item) => item.name || "Sklep"}
-              dialogTitle="Wybierz sklep"
-              searchPlaceholder="Szukaj sklepu..."
-              emptyText="Nie znaleziono sklepu."
-              loading={isLoadingShops}
-              loadingText="Wczytywanie listy sklepów..."
-              disabled={disabled}
-              onOpenChange={(open) => {
-                if (open) loadShopsIfNeeded();
-              }}
-              renderTrigger={() => (
-                <span className="flex items-center gap-1.5 text-xs font-normal">
-                  <RefreshCw className="size-3" />
-                  {SHOP_SELECTOR_MESSAGES.change}
-                </span>
-              )}
-              triggerClassName="h-8 px-2.5 text-xs"
-              renderItem={(item, isSelected) => (
-                <div className="flex w-full items-center justify-between gap-2 py-1">
-                  <div className="flex min-w-0 items-center gap-2.5">
-                    <ShopLogo logo={item.logo} name={item.name} size="sm" />
-                    <span className="truncate">{item.name || "Sklep"}</span>
-                  </div>
-                  {isSelected && (
-                    <Check className="size-4 shrink-0 text-primary" />
-                  )}
-                </div>
-              )}
-            />
-
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              aria-label={SHOP_SELECTOR_MESSAGES.deleteShopAriaLabel}
-              disabled={disabled}
-              onClick={handleClearShop}
-              className="text-muted-foreground hover:border-destructive/40 hover:text-destructive sm:w-auto"
-            >
-              <Trash2 className="mr-1 size-3.5" />{" "}
-              {SHOP_SELECTOR_MESSAGES.deleteButton}
-            </Button>
-          </div>
-        </div>
+        <SelectedShopCard
+          selectedShop={selectedShop}
+          shopId={shopId || ""}
+          onValueChange={handleValueChange}
+          onClear={handleClearShop}
+          disabled={disabled}
+          shopsList={shopsList}
+          isLoading={isLoadingShops}
+          onOpen={loadShopsIfNeeded}
+        />
       ) : (
-        <div className="flex flex-col items-start justify-between gap-3 rounded-lg border border-dashed bg-white p-3 text-sm text-muted-foreground sm:flex-row sm:items-center dark:bg-card">
-          <ComboboxResponsive<ShopItem>
-            items={shopsList || []}
-            value={shopId || ""}
-            onValueChange={handleValueChange}
-            getItemValue={(item) => item.id}
-            getItemLabel={(item) => item.name || "Sklep"}
-            dialogTitle="Wybierz sklep z listy"
-            searchPlaceholder="Szukaj sklepu..."
-            emptyText="Nie znaleziono sklepu."
-            loading={isLoadingShops}
-            loadingText="Wczytywanie listy sklepów..."
-            disabled={disabled}
-            onOpenChange={(open) => {
-              if (open) loadShopsIfNeeded();
-            }}
-            renderTrigger={() => (
-              <span className="text-xs font-medium">
-                {SHOP_SELECTOR_MESSAGES.selectFromList}
-              </span>
-            )}
-            triggerClassName="h-10 sm:h-8 w-full sm:w-auto px-3 text-xs shrink-0 font-medium"
-            renderItem={(item, isSelected) => (
-              <div className="flex w-full items-center justify-between gap-2 py-1">
-                <div className="flex min-w-0 items-center gap-2.5">
-                  <ShopLogo logo={item.logo} name={item.name} size="sm" />
-                  <span className="truncate">{item.name || "Sklep"}</span>
-                </div>
-                {isSelected && (
-                  <Check className="size-4 shrink-0 text-primary" />
-                )}
-              </div>
-            )}
-          />
-        </div>
+        <EmptyShopPlaceholder
+          shopId={shopId || ""}
+          onValueChange={handleValueChange}
+          disabled={disabled}
+          shopsList={shopsList}
+          isLoading={isLoadingShops}
+          onOpen={loadShopsIfNeeded}
+        />
       )}
 
       <p className="mt-1 text-xs text-muted-foreground">
