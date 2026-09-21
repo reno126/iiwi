@@ -154,6 +154,12 @@ The codebase strictly follows a **Zero Comments Policy**:
      - Automatically intercept 401 unauthorized errors, refresh the session, and retry the action once before failing.
      - Clear the draft upon successful submission.
 
+5. **Reference Stability & Context Hygiene:**
+   - **Context Value Memoization:** Every object or array passed as the `value` prop to a `<Context.Provider>` must be memoized using `useMemo` (or sourced from a memoized hook return). Never pass inline unmemoized object literals (`value={{ ... }}` or `value={form}`).
+   - **Action Handler Stability:** All callbacks exposed via context or passed as props to memoized components (`React.memo`) must be wrapped in `useCallback` with complete dependency arrays.
+   - **Custom Hook Return Memoization:** When a custom hook exposes multiple handlers and state objects for consumption by context providers or memoized children, its return object must be wrapped in `useMemo`.
+   - **No Inline Closures for Memoized Children:** Never pass inline arrow functions `() => ...` or fresh object references to components wrapped in `React.memo()`.
+
 ---
 
 ## 6. Zod Schema & Validation Conventions

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { ScrapeDelayNotice } from "./ScrapeDelayNotice";
 import { Sparkles, ArrowLeft } from "lucide-react";
+import { useCombinedReviewFormContext } from "./CombinedReviewFormContext";
 
 export const URL_PROMPT_MESSAGES = {
   subtitle: "wklej go poniżej, to pójdzie szybko!",
@@ -18,35 +19,26 @@ export const URL_PROMPT_MESSAGES = {
   backButton: "Wróć do wyszukiwania",
 } as const;
 
-interface UrlPromptStepProps {
-  onScrape: (url: string) => void;
-  onManualSelect: () => void;
-  onCancel?: () => void;
-  isPending: boolean;
-  isTier2NoticeVisible: boolean;
-  initialUrl?: string;
-}
-
-export function UrlPromptStep({
-  onScrape,
-  onManualSelect,
-  onCancel,
-  isPending,
-  isTier2NoticeVisible,
-  initialUrl = "",
-}: UrlPromptStepProps) {
-  const [url, setUrl] = useState(initialUrl);
+export function UrlPromptStep() {
+  const {
+    handleScrape,
+    handleManualSelect,
+    handleCancel,
+    isScraping,
+    isTier2NoticeVisible,
+  } = useCombinedReviewFormContext();
+  const [url, setUrl] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = url.trim();
     if (!trimmed) return;
-    onScrape(trimmed);
+    handleScrape(trimmed);
   };
 
   return (
     <div className="space-y-6">
-      <div className="">
+      <div>
         <p className="text-sm text-muted-foreground">
           {URL_PROMPT_MESSAGES.subtitle}
         </p>
@@ -61,15 +53,15 @@ export function UrlPromptStep({
             placeholder={URL_PROMPT_MESSAGES.placeholder}
             aria-label={URL_PROMPT_MESSAGES.urlInputAriaLabel}
             autoFocus
-            disabled={isPending}
+            disabled={isScraping}
             className="h-11 flex-1 text-base sm:text-sm"
           />
           <Button
             type="submit"
-            disabled={isPending || !url.trim()}
+            disabled={isScraping || !url.trim()}
             className="h-11 shrink-0 gap-2 px-6 font-medium"
           >
-            {isPending ? (
+            {isScraping ? (
               <Spinner className="size-4" />
             ) : (
               <Sparkles className="size-4" />
@@ -79,7 +71,7 @@ export function UrlPromptStep({
         </div>
 
         <ScrapeDelayNotice
-          isVisible={isPending && isTier2NoticeVisible}
+          isVisible={isScraping && isTier2NoticeVisible}
           className="justify-center pt-1"
         />
       </form>
@@ -91,8 +83,8 @@ export function UrlPromptStep({
         <Button
           type="button"
           variant="outline"
-          onClick={onManualSelect}
-          disabled={isPending}
+          onClick={handleManualSelect}
+          disabled={isScraping}
           className="mx-auto"
         >
           {URL_PROMPT_MESSAGES.manualButton}
@@ -102,21 +94,19 @@ export function UrlPromptStep({
         </span>
       </div>
 
-      {onCancel && (
-        <div className="pt-2 text-center">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={onCancel}
-            disabled={isPending}
-            className="gap-1.5 text-xs text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="size-3.5" />
-            {URL_PROMPT_MESSAGES.backButton}
-          </Button>
-        </div>
-      )}
+      <div className="pt-2 text-center">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={handleCancel}
+          disabled={isScraping}
+          className="gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="size-3.5" />
+          {URL_PROMPT_MESSAGES.backButton}
+        </Button>
+      </div>
     </div>
   );
 }

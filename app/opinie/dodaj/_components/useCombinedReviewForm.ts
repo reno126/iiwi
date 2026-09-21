@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useForm, type DefaultValues } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -78,22 +78,25 @@ export function useCombinedReviewForm({
     defaultValues: draft?.formData ?? initialDefaultValues,
   });
 
-  const saveCurrentFormDraft = (formData: ProductWithReviewCreateInput) => {
-    saveReviewDraft({
-      type: "NEW_PRODUCT_AND_REVIEW",
-      returnUrl: resolveCurrentPath(),
-      formData,
-      phase:
-        phase.type === "ACTIVE_FORM"
-          ? {
-              mode: phase.mode,
-              scrapedFields: phase.scrapedFields,
-              scrapeError: phase.scrapeError,
-            }
-          : undefined,
-      detectedShop,
-    });
-  };
+  const saveCurrentFormDraft = useCallback(
+    (formData: ProductWithReviewCreateInput) => {
+      saveReviewDraft({
+        type: "NEW_PRODUCT_AND_REVIEW",
+        returnUrl: resolveCurrentPath(),
+        formData,
+        phase:
+          phase.type === "ACTIVE_FORM"
+            ? {
+                mode: phase.mode,
+                scrapedFields: phase.scrapedFields,
+                scrapeError: phase.scrapeError,
+              }
+            : undefined,
+        detectedShop,
+      });
+    },
+    [phase, detectedShop],
+  );
 
   const { handleSubmitAction } = useAuthGatedSubmit({
     setError: methods.setError,
@@ -109,43 +112,46 @@ export function useCombinedReviewForm({
     scrapeUrl,
   } = useProductScrape();
 
-  const handleScrape = (inputUrl: string) => {
-    const trimmed = inputUrl.trim();
-    if (!trimmed) return;
+  const handleScrape = useCallback(
+    (inputUrl: string) => {
+      const trimmed = inputUrl.trim();
+      if (!trimmed) return;
 
-    methods.setValue("productUrl", trimmed, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
+      methods.setValue("productUrl", trimmed, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
 
-    scrapeUrl(
-      trimmed,
-      (data) => {
-        populateScrapedFields({
-          data,
-          setValue: methods.setValue,
-          overwrite: true,
-        });
-        if (data.shop) {
-          setDetectedShop(data.shop);
-        }
-        setPhase({
-          type: "ACTIVE_FORM",
-          mode: "scraped_success",
-          scrapedFields: data.scrapedFields,
-        });
-      },
-      (errorMsg) => {
-        setPhase({
-          type: "ACTIVE_FORM",
-          mode: "scraped_failed",
-          scrapeError: errorMsg,
-        });
-      },
-    );
-  };
+      scrapeUrl(
+        trimmed,
+        (data) => {
+          populateScrapedFields({
+            data,
+            setValue: methods.setValue,
+            overwrite: true,
+          });
+          if (data.shop) {
+            setDetectedShop(data.shop);
+          }
+          setPhase({
+            type: "ACTIVE_FORM",
+            mode: "scraped_success",
+            scrapedFields: data.scrapedFields,
+          });
+        },
+        (errorMsg) => {
+          setPhase({
+            type: "ACTIVE_FORM",
+            mode: "scraped_failed",
+            scrapeError: errorMsg,
+          });
+        },
+      );
+    },
+    [methods, scrapeUrl],
+  );
 
-  const handleManualSelect = () => {
+  const handleManualSelect = useCallback(() => {
     methods.setValue("productUrl", "", {
       shouldValidate: false,
       shouldDirty: false,
@@ -154,29 +160,53 @@ export function useCombinedReviewForm({
       type: "ACTIVE_FORM",
       mode: "manual",
     });
-  };
+  }, [methods]);
 
-  const handleBackToPrompt = () => {
+  const handleBackToPrompt = useCallback(() => {
     clearReviewDraft();
     setPhase({ type: "URL_PROMPT" });
-  };
+  }, []);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     clearReviewDraft();
     onCancel();
-  };
+  }, [onCancel]);
 
-  return {
-    methods,
-    phase,
-    detectedShop,
-    isDraftRestored,
-    isScraping,
-    isTier2NoticeVisible,
-    handleScrape,
-    handleManualSelect,
-    handleBackToPrompt,
-    handleCancel,
-    onSubmit: methods.handleSubmit(handleSubmitAction),
-  };
+  const onSubmit = useMemo(
+    () => methods.handleSubmit(handleSubmitAction),
+    [methods, handleSubmitAction],
+  );
+
+  return useMemo(
+    () => ({
+      methods,
+      phase,
+      detectedShop,
+      isDraftRestored,
+      isScraping,
+      isTier2NoticeVisible,
+      handleScrape,
+      handleManualSelect,
+      handleBackToPrompt,
+      handleCancel,
+      onSubmit,
+    }),
+    [
+      methods,
+      phase,
+      detectedShop,
+      isDraftRestored,
+      isScraping,
+      isTier2NoticeVisible,
+      handleScrape,
+      handleManualSelect,
+      handleBackToPrompt,
+      handleCancel,
+      onSubmit,
+    ],
+  );
 }
+
+export type UseCombinedReviewFormReturn = ReturnType<
+  typeof useCombinedReviewForm
+>;

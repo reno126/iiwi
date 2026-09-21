@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SelectedProductCard } from "@/app/opinie/dodaj/_components/SelectedProductCard";
-import { StickyFormActionBar } from "@/app/opinie/dodaj/_components/StickyFormActionBar";
+import { StickyFormActionBar } from "@/components/ui/sticky-form-action-bar";
 import { ScrapeDelayNotice } from "@/app/opinie/dodaj/_components/ScrapeDelayNotice";
 import type { Product } from "@/prisma/generated/client";
 

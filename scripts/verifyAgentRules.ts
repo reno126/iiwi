@@ -252,6 +252,57 @@ function checkMagicLiteralsInTests(filePath: string, content: string): void {
   }
 }
 
+function checkContextProviderMemoization(
+  filePath: string,
+  sourceFile: ts.SourceFile,
+): void {
+  function visit(node: ts.Node) {
+    if (ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node)) {
+      const tag = ts.isJsxElement(node)
+        ? node.openingElement.tagName.getText(sourceFile)
+        : node.tagName.getText(sourceFile);
+
+      if (tag.endsWith(".Provider") || tag.endsWith("Provider")) {
+        const attributes = ts.isJsxElement(node)
+          ? node.openingElement.attributes.properties
+          : node.attributes.properties;
+
+        for (const attr of attributes) {
+          if (
+            ts.isJsxAttribute(attr) &&
+            ts.isIdentifier(attr.name) &&
+            attr.name.text === "value"
+          ) {
+            if (attr.initializer && ts.isJsxExpression(attr.initializer)) {
+              const expr = attr.initializer.expression;
+              if (
+                expr &&
+                (ts.isObjectLiteralExpression(expr) ||
+                  ts.isArrowFunction(expr) ||
+                  ts.isFunctionExpression(expr))
+              ) {
+                const line =
+                  sourceFile.getLineAndCharacterOfPosition(attr.getStart())
+                    .line + 1;
+                VIOLATIONS.push({
+                  file: filePath,
+                  line,
+                  rule: "Reference Stability & Context Hygiene (AGENTS.md Sec. 5.5)",
+                  message: `Inline constructed value "${expr.getText(sourceFile)}" passed to <${tag}>. Wrap context value in useMemo to prevent unnecessary consumer re-renders.`,
+                });
+              }
+            }
+          }
+        }
+      }
+    }
+
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+}
+
 function runVerification(): void {
   const projectRoot = process.cwd();
   const allSourceFiles: string[] = [];
@@ -274,6 +325,7 @@ function runVerification(): void {
     checkMagicLiteralsInTests(filePath, content);
     checkEmptyPropsInterfaces(filePath, sourceFile);
     checkSchemaConventions(filePath, sourceFile);
+    checkContextProviderMemoization(filePath, sourceFile);
   }
 
   if (VIOLATIONS.length > 0) {

@@ -6,14 +6,14 @@ import { ReviewFields } from "@/components/reviews/ReviewFields";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CircleAlert, CheckCircle2 } from "lucide-react";
-import { StickyFormActionBar } from "./StickyFormActionBar";
+import { StickyFormActionBar } from "@/components/ui/sticky-form-action-bar";
 import {
   ScrapeNoticeBanner,
   type ScrapedFieldType,
 } from "./ScrapeNoticeBanner";
-import type { MatchedShopResult } from "@/lib/shops/findShopByUrl";
 import type { ProductWithReviewCreateInput } from "@/schemas/productWithReview";
 import { COMBINED_FORM_MESSAGES } from "./CombinedProductReviewForm";
+import { useCombinedReviewFormContext } from "./CombinedReviewFormContext";
 
 export type ActiveFormPhase = {
   type: "ACTIVE_FORM";
@@ -22,26 +22,23 @@ export type ActiveFormPhase = {
   scrapeError?: string | null;
 };
 
-interface ActiveCombinedFormProps {
-  phase: ActiveFormPhase;
-  detectedShop: MatchedShopResult | null;
-  isDraftRestored: boolean;
-  onSubmit: (e?: React.BaseSyntheticEvent) => Promise<void>;
-  onBack: () => void;
-  onCancel: () => void;
-}
+export function ActiveCombinedForm() {
+  const {
+    phase,
+    detectedShop,
+    isDraftRestored,
+    onSubmit,
+    handleBackToPrompt,
+    handleCancel,
+  } = useCombinedReviewFormContext();
 
-export function ActiveCombinedForm({
-  phase,
-  detectedShop,
-  isDraftRestored,
-  onSubmit,
-  onBack,
-  onCancel,
-}: ActiveCombinedFormProps) {
   const {
     formState: { errors, isSubmitting },
   } = useFormContext<ProductWithReviewCreateInput>();
+
+  const isManualMode = phase.type === "ACTIVE_FORM" && phase.mode === "manual";
+  const isScrapedSuccess =
+    phase.type === "ACTIVE_FORM" && phase.mode === "scraped_success";
 
   return (
     <form onSubmit={onSubmit} className="space-y-4 pb-0 md:space-y-6">
@@ -61,7 +58,7 @@ export function ActiveCombinedForm({
         </Alert>
       )}
 
-      {phase.mode !== "manual" && (
+      {phase.type === "ACTIVE_FORM" && phase.mode !== "manual" && (
         <ScrapeNoticeBanner
           mode={phase.mode}
           scrapedFields={phase.scrapedFields}
@@ -70,12 +67,10 @@ export function ActiveCombinedForm({
       )}
 
       <ProductFields
-        hideProductUrl={
-          phase.mode === "manual" || phase.mode === "scraped_success"
-        }
+        hideProductUrl={isManualMode || isScrapedSuccess}
         initialShop={detectedShop}
         legend=""
-        showFieldStatus={phase.mode !== "manual"}
+        showFieldStatus={!isManualMode}
       />
 
       <Separator className="my-2" />
@@ -83,9 +78,9 @@ export function ActiveCombinedForm({
       <ReviewFields />
 
       <StickyFormActionBar
-        onBack={onBack}
+        onBack={handleBackToPrompt}
         backLabel={COMBINED_FORM_MESSAGES.backLabel}
-        onCancel={onCancel}
+        onCancel={handleCancel}
         cancelLabel={COMBINED_FORM_MESSAGES.cancelLabel}
         submitLabel={COMBINED_FORM_MESSAGES.submitLabel}
         isSubmitting={isSubmitting}

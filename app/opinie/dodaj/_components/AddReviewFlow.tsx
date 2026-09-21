@@ -60,6 +60,11 @@ export function AddReviewFlow() {
     router.push(`/produkty/${productId}`);
   };
 
+  const handleCancelFlow = () => {
+    clearReviewDraft();
+    setMode({ type: "SEARCHING" });
+  };
+
   return (
     <div className="space-y-6">
       {mode.type === "SEARCHING" && (
@@ -109,10 +114,7 @@ export function AddReviewFlow() {
         <div className="space-y-6">
           <SelectedProductCard
             product={mode.product}
-            onReselect={() => {
-              clearReviewDraft();
-              setMode({ type: "SEARCHING" });
-            }}
+            onReselect={handleCancelFlow}
           />
 
           <div className="rounded-lg border bg-card p-6 shadow-xs">
@@ -123,10 +125,7 @@ export function AddReviewFlow() {
               productId={mode.product.id}
               product={mode.product}
               onSuccess={handleSuccess}
-              onCancel={() => {
-                clearReviewDraft();
-                setMode({ type: "SEARCHING" });
-              }}
+              onCancel={handleCancelFlow}
             />
           </div>
         </div>
@@ -143,10 +142,7 @@ export function AddReviewFlow() {
           }
         >
           <CombinedProductReviewForm
-            onCancel={() => {
-              clearReviewDraft();
-              setMode({ type: "SEARCHING" });
-            }}
+            onCancel={handleCancelFlow}
             onSuccess={handleSuccess}
           />
         </Suspense>

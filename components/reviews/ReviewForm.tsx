@@ -13,8 +13,7 @@ import {
 } from "@/lib/storage/reviewDraftStorage";
 import type { Product } from "@/prisma/generated/client";
 import { ReviewFields } from "./ReviewFields";
-import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
+import { StickyFormActionBar } from "@/components/ui/sticky-form-action-bar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CircleAlert, CheckCircle2 } from "lucide-react";
 
@@ -129,29 +128,12 @@ export function ReviewForm({
 
         <ReviewFields />
 
-        <div className="flex items-center justify-end gap-3 pt-2">
-          {onCancel && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleCancel}
-              disabled={isSubmitting}
-            >
-              {REVIEW_FORM_MESSAGES.cancelButton}
-            </Button>
-          )}
-
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? (
-              <>
-                <Spinner className="mr-2 size-4" />
-                {REVIEW_FORM_MESSAGES.submitButton}
-              </>
-            ) : (
-              REVIEW_FORM_MESSAGES.submitButton
-            )}
-          </Button>
-        </div>
+        <StickyFormActionBar
+          onCancel={onCancel ? handleCancel : undefined}
+          cancelLabel={REVIEW_FORM_MESSAGES.cancelButton}
+          submitLabel={REVIEW_FORM_MESSAGES.submitButton}
+          isSubmitting={isSubmitting}
+        />
       </form>
     </FormProvider>
   );
