@@ -2,6 +2,7 @@ import { formatReviewCount } from "@/lib/formatters";
 import type { UserDashboardShopItem } from "@/serverActions/userDashboardGet";
 import { Store } from "lucide-react";
 import { DASHBOARD_MESSAGES } from "@/app/dashboard/constants";
+import { Heading } from "@/components/ui/heading";
 
 interface UserShopStatsProps {
   reviewedShops: UserDashboardShopItem[];
@@ -12,9 +13,9 @@ export function UserShopStats({ reviewedShops }: UserShopStatsProps) {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <Store className="size-4 text-muted-foreground" />
-        <h3 className="text-lg font-semibold tracking-tight text-foreground">
+        <Heading level={3} size="lg">
           {DASHBOARD_MESSAGES.shopsHeading}
-        </h3>
+        </Heading>
       </div>
 
       {reviewedShops.length === 0 ? (

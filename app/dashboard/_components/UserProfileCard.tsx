@@ -1,6 +1,7 @@
 import { formatPolishDate, formatUserDisplayName } from "@/lib/formatters";
 import { User, Calendar, Mail } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Heading } from "@/components/ui/heading";
 import { DASHBOARD_MESSAGES } from "@/app/dashboard/constants";
 
 interface UserProfileCardProps {
@@ -26,9 +27,9 @@ export function UserProfileCard({
           <div className="flex size-11 items-center justify-center rounded-full bg-primary/10 text-primary">
             <User className="size-5" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          <Heading level={1}>
             {DASHBOARD_MESSAGES.greetingPrefix} {displayName}
-          </h1>
+          </Heading>
         </div>
 
         <div className="grid grid-cols-1 gap-3 border-t border-border pt-2 text-sm text-muted-foreground sm:grid-cols-2">

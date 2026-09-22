@@ -86,6 +86,7 @@ The codebase strictly follows a **Zero Comments Policy**:
        - **Scroll Areas:** Do not write `<div className="overflow-y-auto max-h-...">` — use `<ScrollArea>` from `@/components/ui/scroll-area`.
        - **Tabs:** Do not write manual button strips with active index state — use `<Tabs>` from `@/components/ui/tabs`.
        - **Collapsibles:** Do not write manual `useState` toggling a content div — use `<Collapsible>` from `@/components/ui/collapsible`.
+       - **Headings & Subtitles:** Do not write ad-hoc heading elements with inconsistent typography classes or `<div className="space-y-1">` for titles and subtitles — use `<Heading>`, `<HeadingDescription>`, and `<HeadingGroup>` from `@/components/ui/heading` and `<PageHeader>` / `<SectionHeader>` from `@/components/ui/page-header`.
      - _Overlays & Popups (Zero Custom Overlay Markup):_
        - **Modals & Dialogs:** Strictly forbidden to write `<div className="fixed inset-0 bg-black/50...">` with manual z-index or event listeners — use `<Dialog>`, `<Sheet>`, or `<Drawer>` from `@/components/ui/`.
        - **Dropdowns & Context Menus:** Do not write manual `absolute mt-2` popups with local state — use `<DropdownMenu>` from `@/components/ui/dropdown-menu`.
@@ -106,7 +107,7 @@ The codebase strictly follows a **Zero Comments Policy**:
 2. **Offline Inventory of UI Components & Primitives:**
 
    - **Already Installed in Project (`components/ui/`):**
-     - _Layout & Structure:_ `Card` (`card.tsx`), `Separator` (`separator.tsx`), `ScrollArea` (`scroll-area.tsx`), `Collapsible` (`collapsible.tsx`), `Tabs` (`tabs.tsx`)
+     - _Layout & Structure:_ `Card` (`card.tsx`), `Separator` (`separator.tsx`), `ScrollArea` (`scroll-area.tsx`), `Collapsible` (`collapsible.tsx`), `Tabs` (`tabs.tsx`), `Heading` / `HeadingGroup` / `HeadingDescription` (`heading.tsx`), `PageHeader` / `SectionHeader` (`page-header.tsx`), `StickyFormActionBar` (`sticky-form-action-bar.tsx`)
      - _Forms & Inputs:_ `Button` (`button.tsx`), `Input` (`input.tsx`), `Textarea` (`textarea.tsx`), `Checkbox` (`checkbox.tsx`), `RadioGroup` (`radio-group.tsx`), `Select` (`select.tsx`), `Label` (`label.tsx`), `Field` (`field.tsx`), `FormFieldCard` (`form-field-card.tsx`), `ComboboxResponsive` (`combobox-responsive.tsx`), `Command` (`command.tsx`)
      - _Feedback & Overlays:_ `Dialog` (`dialog.tsx`), `Drawer` (`drawer.tsx`), `Sheet` (`sheet.tsx`), `Popover` (`popover.tsx`), `Tooltip` (`tooltip.tsx`), `DropdownMenu` (`dropdown-menu.tsx`), `Alert` (`alert.tsx`), `Badge` (`badge.tsx`), `Avatar` (`avatar.tsx`), `Empty` (`empty.tsx`), `Progress` (`progress.tsx`), `Skeleton` (`skeleton.tsx`), `Spinner` (`spinner.tsx`)
    - **Available in shadcn Registry (Install via `npx shadcn add <name>`):**

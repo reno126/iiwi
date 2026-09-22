@@ -4,6 +4,12 @@ import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "cn";
+import {
+  Heading,
+  HeadingDescription,
+  HeadingGroup,
+} from "@/components/ui/heading";
+import { PageHeader, PageHeaderActions } from "@/components/ui/page-header";
 import { ProductsListSection } from "./_components/ProductsListSection";
 import { ProductsListSkeleton } from "./_components/ProductsListSkeleton";
 import { buildPageMetadata } from "@/lib/seo/metadata";
@@ -30,27 +36,24 @@ export default async function ProductsPage({
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 py-4">
-      <div className="flex flex-col justify-between gap-4 border-b border-border pb-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Produkty
-          </h1>
-          <p className="text-sm text-muted-foreground">
+      <PageHeader bordered={true}>
+        <HeadingGroup>
+          <Heading level={1}>Produkty</Heading>
+          <HeadingDescription>
             Przeglądaj wszystkie produkty i rzetelne opinie użytkowników
-          </p>
-        </div>
+          </HeadingDescription>
+        </HeadingGroup>
 
-        <Link
-          href="/opinie/dodaj"
-          className={cn(
-            buttonVariants(),
-            "shrink-0 gap-1.5 self-start sm:self-center",
-          )}
-        >
-          <PlusCircle className="size-4" />
-          Dodaj opinię
-        </Link>
-      </div>
+        <PageHeaderActions>
+          <Link
+            href="/opinie/dodaj"
+            className={cn(buttonVariants(), "gap-1.5")}
+          >
+            <PlusCircle className="size-4" />
+            Dodaj opinię
+          </Link>
+        </PageHeaderActions>
+      </PageHeader>
 
       <Suspense key={page} fallback={<ProductsListSkeleton count={6} />}>
         <ProductsListSection page={page} />

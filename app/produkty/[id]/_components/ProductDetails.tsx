@@ -11,6 +11,8 @@ import { ReviewForm } from "@/components/reviews/ReviewForm";
 import { StarRating } from "@/components/reviews/StarRating";
 import { ProductOverviewCard } from "./ProductOverviewCard";
 import { ProductReviewsSection } from "./ProductReviewsSection";
+import { Heading } from "@/components/ui/heading";
+import { SectionHeader } from "@/components/ui/page-header";
 import { getReviewDraft } from "@/lib/storage/reviewDraftStorage";
 import { cn } from "cn";
 
@@ -99,14 +101,11 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           aria-labelledby="review-form-heading"
           className="space-y-4"
         >
-          <div className="border-b border-border pb-3">
-            <h2
-              id="review-form-heading"
-              className="text-xl font-bold tracking-tight text-foreground"
-            >
+          <SectionHeader bordered={true}>
+            <Heading id="review-form-heading" level={2} size="xl">
               {PRODUCT_DETAILS_MESSAGES.formHeading}
-            </h2>
-          </div>
+            </Heading>
+          </SectionHeader>
           <Card className="border p-6 shadow-sm">
             <CardContent className="p-0">
               <ReviewForm

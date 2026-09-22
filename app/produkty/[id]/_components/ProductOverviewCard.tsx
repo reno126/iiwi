@@ -13,6 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Heading } from "@/components/ui/heading";
 import { StarRating } from "@/components/reviews/StarRating";
 import { ProductThumbnail } from "@/components/products/ProductThumbnail";
 import {
@@ -53,9 +54,7 @@ const MemoizedProductOverviewCard = memo(function MemoizedProductOverviewCard({
           <div className="min-w-0 flex-1 space-y-4">
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                  {product.name}
-                </h1>
+                <Heading level={1}>{product.name}</Heading>
                 {product.code && (
                   <Badge variant="secondary" className="gap-1 text-xs">
                     <Tag className="size-3" />

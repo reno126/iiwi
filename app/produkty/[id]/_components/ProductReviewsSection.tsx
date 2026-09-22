@@ -2,6 +2,8 @@ import { memo } from "react";
 import { MessageSquare, PlusCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Heading } from "@/components/ui/heading";
+import { SectionHeader } from "@/components/ui/page-header";
 import {
   Empty,
   EmptyHeader,
@@ -28,17 +30,16 @@ const MemoizedProductReviewsSection = memo(
   }: ProductReviewsSectionProps) {
     return (
       <section aria-labelledby="reviews-heading" className="space-y-4">
-        <div className="border-b border-border pb-3">
-          <h2
-            id="reviews-heading"
-            className="flex items-center gap-2 text-xl font-bold tracking-tight text-foreground"
-          >
-            {PRODUCT_DETAILS_MESSAGES.reviewsHeading}
+        <SectionHeader bordered={true}>
+          <div className="flex items-center gap-2">
+            <Heading id="reviews-heading" level={2} size="xl">
+              {PRODUCT_DETAILS_MESSAGES.reviewsHeading}
+            </Heading>
             <Badge variant="outline" className="text-xs">
               {reviews.length}
             </Badge>
-          </h2>
-        </div>
+          </div>
+        </SectionHeader>
 
         {reviews.length === 0 ? (
           <Empty className="border p-8 text-center">

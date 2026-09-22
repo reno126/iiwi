@@ -3,6 +3,11 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "cn";
+import {
+  Heading,
+  HeadingDescription,
+  HeadingGroup,
+} from "@/components/ui/heading";
 import { RecentReviewsSection } from "./_components/RecentReviewsSection";
 import { RecentReviewsSkeleton } from "./_components/RecentReviewsSkeleton";
 import { ShopsSection } from "./_components/ShopsSection";
@@ -32,7 +37,11 @@ export default function HomePage() {
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-10 py-4 sm:gap-14 sm:py-8 md:gap-16">
       <section className="py-4 text-center sm:py-8 md:py-10">
-        <h1 className="mx-auto max-w-4xl text-2xl leading-tight font-bold tracking-tight text-muted-foreground sm:text-3xl md:text-4xl lg:text-5xl">
+        <Heading
+          level={1}
+          size="hero"
+          className="mx-auto max-w-4xl text-2xl leading-tight font-bold tracking-tight text-muted-foreground sm:text-3xl md:text-4xl lg:text-5xl"
+        >
           Tylko tutaj znajdziesz{" "}
           <span className="text-3xl font-extrabold text-foreground sm:text-4xl md:text-5xl lg:text-6xl">
             prawdziwe
@@ -42,7 +51,7 @@ export default function HomePage() {
             opinie
           </span>{" "}
           o produktach
-        </h1>
+        </Heading>
       </section>
 
       <section className="mx-auto flex w-full max-w-md flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
@@ -67,25 +76,23 @@ export default function HomePage() {
       </section>
 
       <section className="w-full space-y-6">
-        <div className="text-center sm:text-left">
-          <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            {HOME_MESSAGES.recentReviewsHeading}
-          </h2>
-        </div>
+        <Heading level={2} size="3xl" className="text-center sm:text-left">
+          {HOME_MESSAGES.recentReviewsHeading}
+        </Heading>
         <Suspense fallback={<RecentReviewsSkeleton />}>
           <RecentReviewsSection />
         </Suspense>
       </section>
 
       <section className="w-full space-y-6">
-        <div className="space-y-1 text-center sm:text-left">
-          <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+        <HeadingGroup align="responsive">
+          <Heading level={2} size="3xl">
             {HOME_MESSAGES.shopsHeading}
-          </h2>
-          <p className="text-sm font-medium text-muted-foreground sm:text-base">
+          </Heading>
+          <HeadingDescription>
             {HOME_MESSAGES.popularShopsSubheading}
-          </p>
-        </div>
+          </HeadingDescription>
+        </HeadingGroup>
         <Suspense fallback={<ShopsSkeleton />}>
           <ShopsSection />
         </Suspense>

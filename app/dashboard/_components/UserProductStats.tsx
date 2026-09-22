@@ -3,6 +3,11 @@ import { formatRatedProductsCount } from "@/lib/formatters";
 import type { UserDashboardProductItem } from "@/serverActions/userDashboardGet";
 import { DASHBOARD_MESSAGES } from "@/app/dashboard/constants";
 import { Star } from "lucide-react";
+import {
+  Heading,
+  HeadingDescription,
+  HeadingGroup,
+} from "@/components/ui/heading";
 
 interface UserProductStatsProps {
   totalReviewedProducts: number;
@@ -15,14 +20,14 @@ export function UserProductStats({
 }: UserProductStatsProps) {
   return (
     <div className="space-y-3">
-      <div className="space-y-1">
-        <h2 className="text-xl font-bold tracking-tight text-foreground">
+      <HeadingGroup>
+        <Heading level={2} size="xl">
           {DASHBOARD_MESSAGES.statsHeading}
-        </h2>
-        <p className="text-sm font-medium text-foreground sm:text-base">
+        </Heading>
+        <HeadingDescription className="font-medium text-foreground">
           {formatRatedProductsCount(totalReviewedProducts)}
-        </p>
-      </div>
+        </HeadingDescription>
+      </HeadingGroup>
 
       {reviewedProducts.length === 0 ? (
         <p className="text-sm text-muted-foreground">
