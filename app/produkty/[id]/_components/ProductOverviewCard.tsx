@@ -15,6 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { Heading } from "@/components/ui/heading";
 import { RatingSummary } from "@/components/reviews/RatingSummary";
 import { ProductThumbnail } from "@/components/products/ProductThumbnail";
+import { PropertyRow } from "@/components/ui/property-row";
 import { formatPolishDate, formatUserDisplayName } from "@/lib/formatters";
 import { PRODUCT_DETAILS_MESSAGES } from "./ProductDetails";
 
@@ -70,11 +71,11 @@ const MemoizedProductOverviewCard = memo(function MemoizedProductOverviewCard({
 
             <dl className="grid grid-cols-1 gap-x-6 gap-y-2.5 text-xs text-muted-foreground sm:grid-cols-2">
               {product.productUrl && (
-                <div className="flex items-center gap-1.5 sm:col-span-2">
-                  <dt className="font-medium text-foreground">
-                    Strona produktu:
-                  </dt>
-                  <dd className="truncate">
+                <PropertyRow
+                  semantic="dl"
+                  label="Strona produktu:"
+                  className="sm:col-span-2"
+                  value={
                     <a
                       href={product.productUrl}
                       target="_blank"
@@ -84,47 +85,46 @@ const MemoizedProductOverviewCard = memo(function MemoizedProductOverviewCard({
                       <span className="truncate">{product.productUrl}</span>
                       <ExternalLink className="size-3 shrink-0" />
                     </a>
-                  </dd>
-                </div>
+                  }
+                />
               )}
 
               {product.code && (
-                <div className="flex items-center gap-1.5">
-                  <dt className="font-medium text-foreground">
-                    Kod SKU / EAN:
-                  </dt>
-                  <dd className="font-mono text-foreground">{product.code}</dd>
-                </div>
+                <PropertyRow
+                  semantic="dl"
+                  label="Kod SKU / EAN:"
+                  valueClassName="font-mono text-foreground"
+                  value={product.code}
+                />
               )}
 
-              <div className="flex items-center gap-1.5">
-                <dt className="font-medium text-foreground">Dodany przez:</dt>
-                <dd className="flex items-center gap-1 text-foreground">
-                  <User className="size-3.5 text-muted-foreground" />
-                  {creatorDisplayName}
-                </dd>
-              </div>
+              <PropertyRow
+                semantic="dl"
+                label="Dodany przez:"
+                icon={User}
+                value={creatorDisplayName}
+              />
 
-              <div className="flex items-center gap-1.5">
-                <dt className="font-medium text-foreground">
-                  Data utworzenia:
-                </dt>
-                <dd className="flex items-center gap-1">
-                  <Calendar className="size-3.5" />
-                  {formatPolishDate(product.createdAt, "d MMMM yyyy, HH:mm")}
-                </dd>
-              </div>
+              <PropertyRow
+                semantic="dl"
+                label="Data utworzenia:"
+                icon={Calendar}
+                value={formatPolishDate(
+                  product.createdAt,
+                  "d MMMM yyyy, HH:mm",
+                )}
+              />
 
               {hasDistinctUpdateDate && (
-                <div className="flex items-center gap-1.5">
-                  <dt className="font-medium text-foreground">
-                    Ostatnia modyfikacja:
-                  </dt>
-                  <dd className="flex items-center gap-1">
-                    <Clock className="size-3.5" />
-                    {formatPolishDate(product.updatedAt, "d MMMM yyyy, HH:mm")}
-                  </dd>
-                </div>
+                <PropertyRow
+                  semantic="dl"
+                  label="Ostatnia modyfikacja:"
+                  icon={Clock}
+                  value={formatPolishDate(
+                    product.updatedAt,
+                    "d MMMM yyyy, HH:mm",
+                  )}
+                />
               )}
             </dl>
 

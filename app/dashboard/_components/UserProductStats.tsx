@@ -9,6 +9,7 @@ import {
   HeadingGroup,
 } from "@/components/ui/heading";
 import { Empty, EmptyDescription } from "@/components/ui/empty";
+import { DividedListItem } from "@/components/ui/divided-list-item";
 
 interface UserProductStatsProps {
   totalReviewedProducts: number;
@@ -39,29 +40,31 @@ export function UserProductStats({
       ) : (
         <ul role="list" className="space-y-2 pt-1">
           {reviewedProducts.map((item) => (
-            <li
+            <DividedListItem
               key={item.productId}
-              className="flex items-center justify-between gap-3 border-b border-border/60 pb-2 text-sm last:border-b-0 last:pb-0"
-            >
-              <div className="flex min-w-0 items-center gap-2 truncate">
-                <Link
-                  href={`/produkty/${item.productId}`}
-                  className="truncate font-medium text-foreground transition-colors hover:text-primary hover:underline"
-                >
-                  {item.productName}
-                </Link>
-                {item.userReviewsCount > 1 && (
-                  <span className="shrink-0 text-xs text-muted-foreground">
-                    ({DASHBOARD_MESSAGES.userRatingsLabel}{" "}
-                    {item.userReviewsCount})
-                  </span>
-                )}
-              </div>
-              <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-muted-foreground sm:text-sm">
-                <Star className="size-3.5 fill-amber-400 text-amber-500" />
-                <span>{item.rate.toFixed(1)}</span>
-              </span>
-            </li>
+              left={
+                <>
+                  <Link
+                    href={`/produkty/${item.productId}`}
+                    className="truncate font-medium text-foreground transition-colors hover:text-primary hover:underline"
+                  >
+                    {item.productName}
+                  </Link>
+                  {item.userReviewsCount > 1 && (
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      ({DASHBOARD_MESSAGES.userRatingsLabel}{" "}
+                      {item.userReviewsCount})
+                    </span>
+                  )}
+                </>
+              }
+              right={
+                <>
+                  <Star className="size-3.5 fill-amber-400 text-amber-500" />
+                  <span className="font-semibold">{item.rate.toFixed(1)}</span>
+                </>
+              }
+            />
           ))}
         </ul>
       )}

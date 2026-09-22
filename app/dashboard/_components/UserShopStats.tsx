@@ -4,6 +4,7 @@ import { Store } from "lucide-react";
 import { DASHBOARD_MESSAGES } from "@/app/dashboard/constants";
 import { Heading } from "@/components/ui/heading";
 import { Empty, EmptyDescription } from "@/components/ui/empty";
+import { DividedListItem } from "@/components/ui/divided-list-item";
 
 interface UserShopStatsProps {
   reviewedShops: UserDashboardShopItem[];
@@ -28,17 +29,19 @@ export function UserShopStats({ reviewedShops }: UserShopStatsProps) {
       ) : (
         <ul role="list" className="space-y-2 pt-1">
           {reviewedShops.map((item) => (
-            <li
+            <DividedListItem
               key={item.shopName}
-              className="flex items-center justify-between border-b border-border/60 pb-2 text-sm last:border-b-0 last:pb-0"
-            >
-              <span className="truncate font-medium text-foreground">
-                {item.shopName}
-              </span>
-              <span className="shrink-0 text-xs font-medium text-muted-foreground sm:text-sm">
-                {formatReviewCount(item.reviewCount)}
-              </span>
-            </li>
+              left={
+                <span className="truncate font-medium text-foreground">
+                  {item.shopName}
+                </span>
+              }
+              right={
+                <span className="font-medium text-muted-foreground">
+                  {formatReviewCount(item.reviewCount)}
+                </span>
+              }
+            />
           ))}
         </ul>
       )}

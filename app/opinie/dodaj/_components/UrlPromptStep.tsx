@@ -30,8 +30,8 @@ export function UrlPromptStep() {
   } = useCombinedReviewFormContext();
   const [url, setUrl] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
     const trimmed = url.trim();
     if (!trimmed) return;
     handleScrape(trimmed);
@@ -50,7 +50,7 @@ export function UrlPromptStep() {
           <Input
             type="url"
             value={url}
-            onChange={(e) => setUrl(e.target.value)}
+            onChange={(changeEvent) => setUrl(changeEvent.target.value)}
             placeholder={URL_PROMPT_MESSAGES.placeholder}
             aria-label={URL_PROMPT_MESSAGES.urlInputAriaLabel}
             autoFocus

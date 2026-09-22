@@ -7,9 +7,9 @@ export function ShopsSkeleton() {
       className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4"
       aria-busy="true"
     >
-      {Array.from({ length: 8 }).map((_, i) => (
+      {Array.from({ length: 8 }).map((_, itemIndex) => (
         <Card
-          key={i}
+          key={itemIndex}
           className="flex h-28 flex-col items-center justify-center gap-2.5 p-4 sm:h-32"
         >
           <div className="flex h-12 w-full items-center justify-center p-1">

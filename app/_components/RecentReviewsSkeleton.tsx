@@ -7,9 +7,9 @@ export function RecentReviewsSkeleton() {
       className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3"
       aria-busy="true"
     >
-      {Array.from({ length: 3 }).map((_, i) => (
+      {Array.from({ length: 3 }).map((_, itemIndex) => (
         <Card
-          key={i}
+          key={itemIndex}
           className="flex h-full flex-col justify-between bg-white p-4 sm:p-5"
         >
           <div className="space-y-3">

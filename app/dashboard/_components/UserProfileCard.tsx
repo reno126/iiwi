@@ -2,6 +2,7 @@ import { formatPolishDate, formatUserDisplayName } from "@/lib/formatters";
 import { User, Calendar, Mail } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Heading } from "@/components/ui/heading";
+import { PropertyRow } from "@/components/ui/property-row";
 import { DASHBOARD_MESSAGES } from "@/app/dashboard/constants";
 
 interface UserProfileCardProps {
@@ -33,23 +34,25 @@ export function UserProfileCard({
         </div>
 
         <div className="grid grid-cols-1 gap-3 border-t border-border pt-2 text-sm text-muted-foreground sm:grid-cols-2">
-          <div className="flex items-center gap-2">
-            <Mail className="size-4 shrink-0 text-muted-foreground" />
-            <span className="truncate">
-              {DASHBOARD_MESSAGES.emailLabel}{" "}
+          <PropertyRow
+            icon={Mail}
+            iconClassName="size-4"
+            label={`${DASHBOARD_MESSAGES.emailLabel} `}
+            value={
               <strong className="font-semibold text-foreground">{email}</strong>
-            </span>
-          </div>
+            }
+          />
 
-          <div className="flex items-center gap-2">
-            <Calendar className="size-4 shrink-0 text-muted-foreground" />
-            <span>
-              {DASHBOARD_MESSAGES.accountCreatedLabel}{" "}
+          <PropertyRow
+            icon={Calendar}
+            iconClassName="size-4"
+            label={`${DASHBOARD_MESSAGES.accountCreatedLabel} `}
+            value={
               <strong className="font-semibold text-foreground">
                 {formatPolishDate(createdAt)}
               </strong>
-            </span>
-          </div>
+            }
+          />
         </div>
       </div>
     </Card>

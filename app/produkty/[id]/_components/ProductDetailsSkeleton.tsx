@@ -1,6 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { PageContainer } from "@/components/ui/page-container";
+import { AuthorSignatureSkeleton } from "@/components/reviews/AuthorSignature";
 
 export function ProductDetailsSkeleton() {
   return (
@@ -55,13 +56,7 @@ export function ProductDetailsSkeleton() {
             <Card key={itemIndex} className="border shadow-2xs">
               <CardHeader className="p-4 pb-2">
                 <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2.5">
-                    <Skeleton className="size-10 rounded-full" />
-                    <div className="space-y-1.5">
-                      <Skeleton className="h-4 w-32 rounded-md" />
-                      <Skeleton className="h-3 w-20 rounded-md" />
-                    </div>
-                  </div>
+                  <AuthorSignatureSkeleton />
                   <Skeleton className="h-5 w-24 rounded-md" />
                 </div>
               </CardHeader>

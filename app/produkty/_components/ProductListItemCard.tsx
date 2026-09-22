@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ProductThumbnail } from "@/components/products/ProductThumbnail";
 import { RatingSummary } from "@/components/reviews/RatingSummary";
+import { PropertyRow } from "@/components/ui/property-row";
 
 interface ProductListItemCardProps {
   product: ProductListItem;
@@ -48,10 +49,12 @@ export function ProductListItemCard({
                   size="sm"
                 />
                 {product?.shop?.name && (
-                  <span className="flex items-center gap-1.5 text-xs text-foreground">
-                    <Store className="size-4 text-muted-foreground" />{" "}
-                    {product.shop.name}
-                  </span>
+                  <PropertyRow
+                    icon={Store}
+                    iconClassName="size-4"
+                    value={product.shop.name}
+                    className="text-xs text-foreground"
+                  />
                 )}
               </div>
             </div>

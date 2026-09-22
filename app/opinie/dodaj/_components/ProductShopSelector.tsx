@@ -44,9 +44,9 @@ export function ProductShopSelector({
     }
   };
 
-  const handleClearShop = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleClearShop = (event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
     setValue("shopId", "", { shouldValidate: true, shouldDirty: true });
     onSelectShop(null);
   };
