@@ -4,8 +4,9 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { BackButton } from "@/components/ui/back-link";
 import { ScrapeDelayNotice } from "./ScrapeDelayNotice";
-import { Sparkles, ArrowLeft } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { useCombinedReviewFormContext } from "./CombinedReviewFormContext";
 
 export const URL_PROMPT_MESSAGES = {
@@ -95,17 +96,13 @@ export function UrlPromptStep() {
       </div>
 
       <div className="pt-2 text-center">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
+        <BackButton
           onClick={handleCancel}
           disabled={isScraping}
-          className="gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+          className="text-xs"
         >
-          <ArrowLeft className="size-3.5" />
           {URL_PROMPT_MESSAGES.backButton}
-        </Button>
+        </BackButton>
       </div>
     </div>
   );

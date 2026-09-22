@@ -10,6 +10,7 @@ import {
   HeadingGroup,
 } from "@/components/ui/heading";
 import { PageHeader, PageHeaderActions } from "@/components/ui/page-header";
+import { PageContainer } from "@/components/ui/page-container";
 import { ProductsListSection } from "./_components/ProductsListSection";
 import { ProductsListSkeleton } from "./_components/ProductsListSkeleton";
 import { buildPageMetadata } from "@/lib/seo/metadata";
@@ -35,7 +36,7 @@ export default async function ProductsPage({
   const page = pageParam ? Math.max(1, parseInt(pageParam, 10) || 1) : 1;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 py-4">
+    <PageContainer size="lg">
       <PageHeader bordered={true}>
         <HeadingGroup>
           <Heading level={1}>Produkty</Heading>
@@ -58,6 +59,6 @@ export default async function ProductsPage({
       <Suspense key={page} fallback={<ProductsListSkeleton count={6} />}>
         <ProductsListSection page={page} />
       </Suspense>
-    </div>
+    </PageContainer>
   );
 }

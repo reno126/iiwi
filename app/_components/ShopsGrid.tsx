@@ -1,6 +1,7 @@
 import { ShopLogo } from "@/components/shops/ShopLogo";
 import type { ShopItem } from "@/serverActions/shopsGet";
 import { Card } from "@/components/ui/card";
+import { Empty, EmptyDescription } from "@/components/ui/empty";
 
 interface ShopsGridProps {
   shops: ShopItem[];
@@ -9,9 +10,9 @@ interface ShopsGridProps {
 export function ShopsGrid({ shops }: ShopsGridProps) {
   if (shops.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed p-8 text-center text-muted-foreground">
-        Brak sklepów do wyświetlenia.
-      </div>
+      <Empty className="border p-8 text-center">
+        <EmptyDescription>Brak sklepów do wyświetlenia.</EmptyDescription>
+      </Empty>
     );
   }
 

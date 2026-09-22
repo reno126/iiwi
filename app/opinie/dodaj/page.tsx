@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { AddReviewFlow } from "./_components/AddReviewFlow";
 import { Heading } from "@/components/ui/heading";
 import { PageHeader } from "@/components/ui/page-header";
+import { PageContainer } from "@/components/ui/page-container";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -12,13 +13,13 @@ export const metadata: Metadata = buildPageMetadata({
 
 export function NewReviewPage() {
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
+    <PageContainer size="sm">
       <PageHeader>
         <Heading level={1}>Dodaj opinię</Heading>
       </PageHeader>
 
       <AddReviewFlow />
-    </div>
+    </PageContainer>
   );
 }
 

@@ -8,6 +8,7 @@ import {
   HeadingDescription,
   HeadingGroup,
 } from "@/components/ui/heading";
+import { Empty, EmptyDescription } from "@/components/ui/empty";
 
 interface UserProductStatsProps {
   totalReviewedProducts: number;
@@ -30,9 +31,11 @@ export function UserProductStats({
       </HeadingGroup>
 
       {reviewedProducts.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          {DASHBOARD_MESSAGES.emptyProductsMessage}
-        </p>
+        <Empty className="p-6 text-center">
+          <EmptyDescription>
+            {DASHBOARD_MESSAGES.emptyProductsMessage}
+          </EmptyDescription>
+        </Empty>
       ) : (
         <ul role="list" className="space-y-2 pt-1">
           {reviewedProducts.map((item) => (

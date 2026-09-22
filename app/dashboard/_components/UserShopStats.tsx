@@ -3,6 +3,7 @@ import type { UserDashboardShopItem } from "@/serverActions/userDashboardGet";
 import { Store } from "lucide-react";
 import { DASHBOARD_MESSAGES } from "@/app/dashboard/constants";
 import { Heading } from "@/components/ui/heading";
+import { Empty, EmptyDescription } from "@/components/ui/empty";
 
 interface UserShopStatsProps {
   reviewedShops: UserDashboardShopItem[];
@@ -19,9 +20,11 @@ export function UserShopStats({ reviewedShops }: UserShopStatsProps) {
       </div>
 
       {reviewedShops.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          {DASHBOARD_MESSAGES.emptyShopsMessage}
-        </p>
+        <Empty className="p-6 text-center">
+          <EmptyDescription>
+            {DASHBOARD_MESSAGES.emptyShopsMessage}
+          </EmptyDescription>
+        </Empty>
       ) : (
         <ul role="list" className="space-y-2 pt-1">
           {reviewedShops.map((item) => (

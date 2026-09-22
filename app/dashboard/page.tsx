@@ -6,6 +6,7 @@ import { authOptions } from "@/lib/auth/authOptions";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { userDashboardGet } from "@/serverActions/userDashboardGet";
 import { Card } from "@/components/ui/card";
+import { PageContainer } from "@/components/ui/page-container";
 import { UserProfileCard } from "./_components/UserProfileCard";
 import { UserProductStats } from "./_components/UserProductStats";
 import { UserShopStats } from "./_components/UserShopStats";
@@ -59,10 +60,10 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl py-4 pb-28 sm:pb-8">
+    <PageContainer size="md">
       <Suspense fallback={<DashboardSkeleton />}>
         <DashboardContent />
       </Suspense>
-    </div>
+    </PageContainer>
   );
 }

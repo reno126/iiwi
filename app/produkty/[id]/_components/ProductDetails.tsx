@@ -3,23 +3,26 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
 import type { ProductWithReviews } from "@/serverActions/productGetById";
 import { Card, CardContent } from "@/components/ui/card";
-import { buttonVariants } from "@/components/ui/button";
 import { ReviewForm } from "@/components/reviews/ReviewForm";
-import { StarRating } from "@/components/reviews/StarRating";
 import { ProductOverviewCard } from "./ProductOverviewCard";
 import { ProductReviewsSection } from "./ProductReviewsSection";
 import { Heading } from "@/components/ui/heading";
 import { SectionHeader } from "@/components/ui/page-header";
+import { PageContainer } from "@/components/ui/page-container";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { getReviewDraft } from "@/lib/storage/reviewDraftStorage";
-import { cn } from "cn";
-
-export { StarRating };
 
 export const PRODUCT_DETAILS_MESSAGES = {
-  backToList: "Wróć do listy produktów",
+  productsBreadcrumb: "Produkty",
   formHeading: "Napisz swoją opinię",
   reviewsHeading: "Opinie użytkowników",
   emptyTitle: "Brak opinii dla tego produktu",
@@ -75,19 +78,20 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   }, []);
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8 py-4">
-      <div>
-        <Link
-          href="/produkty"
-          className={cn(
-            buttonVariants({ variant: "ghost", size: "sm" }),
-            "-ml-2 gap-1.5 text-muted-foreground hover:text-foreground",
-          )}
-        >
-          <ChevronLeft className="size-4" />
-          {PRODUCT_DETAILS_MESSAGES.backToList}
-        </Link>
-      </div>
+    <PageContainer size="lg" className="gap-8">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink render={<Link href="/produkty" />}>
+              {PRODUCT_DETAILS_MESSAGES.productsBreadcrumb}
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{product.name}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
       <ProductOverviewCard
         product={product}
@@ -125,6 +129,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           isReviewFormOpen={isReviewFormOpen}
         />
       )}
-    </div>
+    </PageContainer>
   );
 }

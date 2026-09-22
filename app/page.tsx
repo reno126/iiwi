@@ -8,6 +8,7 @@ import {
   HeadingDescription,
   HeadingGroup,
 } from "@/components/ui/heading";
+import { PageContainer } from "@/components/ui/page-container";
 import { RecentReviewsSection } from "./_components/RecentReviewsSection";
 import { RecentReviewsSkeleton } from "./_components/RecentReviewsSkeleton";
 import { ShopsSection } from "./_components/ShopsSection";
@@ -35,7 +36,7 @@ export const revalidate = 60;
 
 export default function HomePage() {
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-10 py-4 sm:gap-14 sm:py-8 md:gap-16">
+    <PageContainer size="xl">
       <section className="py-4 text-center sm:py-8 md:py-10">
         <Heading
           level={1}
@@ -109,6 +110,6 @@ export default function HomePage() {
           {HOME_MESSAGES.addReviewLink}
         </Link>
       </section>
-    </div>
+    </PageContainer>
   );
 }

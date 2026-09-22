@@ -3,8 +3,9 @@ import type { RecentReviewItem } from "@/serverActions/recentReviewsGet";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ProductThumbnail } from "@/components/products/ProductThumbnail";
-import { StarRating } from "@/components/reviews/StarRating";
-import { formatPolishDate, formatReviewCount } from "@/lib/formatters";
+import { RatingSummary } from "@/components/reviews/RatingSummary";
+import { Empty, EmptyDescription } from "@/components/ui/empty";
+import { formatPolishDate } from "@/lib/formatters";
 
 interface RecentReviewsBannerProps {
   reviews: RecentReviewItem[];
@@ -13,11 +14,11 @@ interface RecentReviewsBannerProps {
 export function RecentReviewsBanner({ reviews }: RecentReviewsBannerProps) {
   if (reviews.length === 0) {
     return (
-      <Card className="border-dashed bg-white p-8 text-center shadow-2xs">
-        <p className="text-sm text-muted-foreground">
+      <Empty className="border p-8 text-center">
+        <EmptyDescription>
           Brak dodanych opinii. Bądź pierwszą osobą, która doda opinię!
-        </p>
-      </Card>
+        </EmptyDescription>
+      </Empty>
     );
   }
 
@@ -68,14 +69,11 @@ export function RecentReviewsBanner({ reviews }: RecentReviewsBannerProps) {
                 </div>
 
                 <div className="my-3 space-y-2">
-                  <div className="flex items-center gap-1.5">
-                    <StarRating rate={rating} size="sm" showValue />
-                    {review.product.rate_count > 0 && (
-                      <span className="text-xs text-muted-foreground">
-                        ({formatReviewCount(review.product.rate_count)})
-                      </span>
-                    )}
-                  </div>
+                  <RatingSummary
+                    rate={rating}
+                    count={review.product.rate_count}
+                    size="sm"
+                  />
 
                   {review.description ? (
                     <p className="line-clamp-3 text-sm text-muted-foreground italic">

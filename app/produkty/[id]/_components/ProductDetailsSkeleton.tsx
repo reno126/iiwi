@@ -1,11 +1,13 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { PageContainer } from "@/components/ui/page-container";
 
 export function ProductDetailsSkeleton() {
   return (
-    <div
+    <PageContainer
       data-testid="product-details-skeleton"
-      className="mx-auto max-w-4xl animate-pulse space-y-8 py-4"
+      size="lg"
+      className="animate-pulse gap-8"
     >
       <div>
         <Skeleton className="h-8 w-44 rounded-md" />
@@ -49,8 +51,8 @@ export function ProductDetailsSkeleton() {
         </div>
 
         <div className="space-y-4">
-          {[1, 2].map((i) => (
-            <Card key={i} className="border shadow-2xs">
+          {[1, 2].map((itemIndex) => (
+            <Card key={itemIndex} className="border shadow-2xs">
               <CardHeader className="p-4 pb-2">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2.5">
@@ -71,6 +73,6 @@ export function ProductDetailsSkeleton() {
           ))}
         </div>
       </section>
-    </div>
+    </PageContainer>
   );
 }

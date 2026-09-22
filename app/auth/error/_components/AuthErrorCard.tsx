@@ -1,7 +1,6 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import Link from "next/link";
 import { FaGoogle } from "react-icons/fa";
 import { CircleAlert } from "lucide-react";
 import {
@@ -13,8 +12,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { cn } from "cn";
+import { Button } from "@/components/ui/button";
+import { BackLink } from "@/components/ui/back-link";
 
 export function AuthErrorCard() {
   return (
@@ -45,15 +44,9 @@ export function AuthErrorCard() {
       </CardContent>
 
       <CardFooter className="justify-center border-t border-border pt-4">
-        <Link
-          href="/"
-          className={cn(
-            buttonVariants({ variant: "ghost", size: "sm" }),
-            "w-full text-muted-foreground",
-          )}
-        >
+        <BackLink href="/" className="w-full justify-center">
           Wróć do strony głównej
-        </Link>
+        </BackLink>
       </CardFooter>
     </Card>
   );

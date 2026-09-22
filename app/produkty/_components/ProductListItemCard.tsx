@@ -1,11 +1,10 @@
 import Link from "next/link";
-import { MessageSquare, Store } from "lucide-react";
+import { Store } from "lucide-react";
 import type { ProductListItem } from "@/serverActions/productsGet";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ProductThumbnail } from "@/components/products/ProductThumbnail";
-import { StarRating } from "@/components/reviews/StarRating";
-import { formatReviewCount } from "@/lib/formatters";
+import { RatingSummary } from "@/components/reviews/RatingSummary";
 
 interface ProductListItemCardProps {
   product: ProductListItem;
@@ -43,21 +42,11 @@ export function ProductListItemCard({
                   )}
                 </div>
 
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1.5 font-medium text-foreground">
-                    <MessageSquare className="size-3.5 text-muted-foreground" />
-                    {formatReviewCount(product.rate_count)}
-                  </span>
-
-                  {product.rate_count > 0 && (
-                    <StarRating
-                      rate={product.rate_avg}
-                      size="sm"
-                      showValue
-                      className="text-amber-600 dark:text-amber-400"
-                    />
-                  )}
-                </div>
+                <RatingSummary
+                  rate={product.rate_avg}
+                  count={product.rate_count}
+                  size="sm"
+                />
                 {product?.shop?.name && (
                   <span className="flex items-center gap-1.5 text-xs text-foreground">
                     <Store className="size-4 text-muted-foreground" />{" "}

@@ -3,7 +3,6 @@ import {
   Calendar,
   ExternalLink,
   User,
-  MessageSquare,
   PlusCircle,
   Tag,
   Clock,
@@ -14,13 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Heading } from "@/components/ui/heading";
-import { StarRating } from "@/components/reviews/StarRating";
+import { RatingSummary } from "@/components/reviews/RatingSummary";
 import { ProductThumbnail } from "@/components/products/ProductThumbnail";
-import {
-  formatPolishDate,
-  formatReviewCount,
-  formatUserDisplayName,
-} from "@/lib/formatters";
+import { formatPolishDate, formatUserDisplayName } from "@/lib/formatters";
 import { PRODUCT_DETAILS_MESSAGES } from "./ProductDetails";
 
 interface ProductOverviewCardProps {
@@ -63,20 +58,12 @@ const MemoizedProductOverviewCard = memo(function MemoizedProductOverviewCard({
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
-                {product.rate_count > 0 ? (
-                  <StarRating rate={product.rate_avg} size="md" showValue />
-                ) : (
-                  <span className="text-sm text-muted-foreground">
-                    Brak ocen
-                  </span>
-                )}
-                <span className="text-muted-foreground">•</span>
-                <span className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
-                  <MessageSquare className="size-4 text-muted-foreground" />
-                  {formatReviewCount(product.rate_count)}
-                </span>
-              </div>
+              <RatingSummary
+                rate={product.rate_avg}
+                count={product.rate_count}
+                size="md"
+                showEmptyText={true}
+              />
             </div>
 
             <Separator />
