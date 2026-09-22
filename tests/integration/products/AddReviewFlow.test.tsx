@@ -4,7 +4,7 @@ import {
   AddReviewFlow,
   ADD_REVIEW_FLOW_MESSAGES,
 } from "@/app/opinie/dodaj/_components/AddReviewFlow";
-import { COMBINED_FORM_MESSAGES } from "@/app/opinie/dodaj/_components/CombinedProductReviewForm";
+import { COMBINED_FORM_MESSAGES } from "@/app/opinie/dodaj/_components/combinedFormMessages";
 import { REVIEW_FORM_MESSAGES } from "@/components/reviews/ReviewForm";
 import {
   saveReviewDraft,

@@ -6,7 +6,7 @@ import {
   ProductFields,
   PRODUCT_FIELDS_MESSAGES,
 } from "@/app/opinie/dodaj/_components/ProductFields";
-import { SHOP_SELECTOR_MESSAGES } from "@/app/opinie/dodaj/_components/ProductShopSelector";
+import { SHOP_SELECTOR_MESSAGES } from "@/app/opinie/dodaj/_components/shopSelectorMessages";
 import { productScrapeMetadata } from "@/serverActions/productScrapeMetadata";
 import type { ProductCreateInput } from "@/schemas/product";
 

@@ -2,10 +2,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useForm, FormProvider } from "react-hook-form";
-import {
-  ProductShopSelector,
-  SHOP_SELECTOR_MESSAGES,
-} from "@/app/opinie/dodaj/_components/ProductShopSelector";
+import { ProductShopSelector } from "@/app/opinie/dodaj/_components/ProductShopSelector";
+import { SHOP_SELECTOR_MESSAGES } from "@/app/opinie/dodaj/_components/shopSelectorMessages";
 import { shopsGet } from "@/serverActions/shopsGet";
 import type { ProductCreateInput } from "@/schemas/product";
 import type { MatchedShopResult } from "@/lib/shops/findShopByUrl";

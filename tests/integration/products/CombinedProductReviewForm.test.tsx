@@ -3,10 +3,8 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import {
-  CombinedProductReviewForm,
-  COMBINED_FORM_MESSAGES,
-} from "@/app/opinie/dodaj/_components/CombinedProductReviewForm";
+import { CombinedProductReviewForm } from "@/app/opinie/dodaj/_components/CombinedProductReviewForm";
+import { COMBINED_FORM_MESSAGES } from "@/app/opinie/dodaj/_components/combinedFormMessages";
 import { URL_PROMPT_MESSAGES } from "@/app/opinie/dodaj/_components/UrlPromptStep";
 import { SCRAPE_BANNER_MESSAGES } from "@/app/opinie/dodaj/_components/ScrapeNoticeBanner";
 import { PRODUCT_FIELDS_MESSAGES } from "@/app/opinie/dodaj/_components/ProductFields";

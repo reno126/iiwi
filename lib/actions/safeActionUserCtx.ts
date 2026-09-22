@@ -2,8 +2,6 @@ import { createSafeActionClient } from "next-safe-action";
 import { auth } from "@/lib/auth/helper";
 import { UNAUTHORIZED_ERROR_MESSAGE } from "@/lib/constants/authErrors";
 
-export { UNAUTHORIZED_ERROR_MESSAGE };
-
 export const safeActionUserCtx = createSafeActionClient({
   defaultValidationErrorsShape: "flattened",
   handleServerError: (error) => {

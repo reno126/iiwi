@@ -3,7 +3,7 @@ import { render, screen, fireEvent, act } from "@testing-library/react";
 import {
   AsyncSearch,
   ASYNC_SEARCH_MESSAGES,
-} from "@/app/opinie/dodaj/_components/AsyncSearch";
+} from "@/components/search/AsyncSearch";
 
 interface TestProduct {
   id: string;
@@ -68,7 +68,7 @@ function createAsyncSearchDriver() {
   };
 }
 
-describe("app/opinie/dodaj/_components/AsyncSearch", () => {
+describe("components/search/AsyncSearch", () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });

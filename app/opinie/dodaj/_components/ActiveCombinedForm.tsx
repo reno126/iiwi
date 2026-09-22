@@ -12,7 +12,7 @@ import {
   type ScrapedFieldType,
 } from "./ScrapeNoticeBanner";
 import type { ProductWithReviewCreateInput } from "@/schemas/productWithReview";
-import { COMBINED_FORM_MESSAGES } from "./CombinedProductReviewForm";
+import { COMBINED_FORM_MESSAGES } from "./combinedFormMessages";
 import { useCombinedReviewFormContext } from "./CombinedReviewFormContext";
 
 export type ActiveFormPhase = {

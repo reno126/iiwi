@@ -3,7 +3,7 @@
 import { useState, lazy, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import type { Product } from "@/prisma/generated/client";
-import { AsyncSearch } from "./AsyncSearch";
+import { AsyncSearch } from "@/components/search/AsyncSearch";
 import { productSearch } from "@/serverActions/productSearch";
 import { ReviewForm } from "@/components/reviews/ReviewForm";
 import {

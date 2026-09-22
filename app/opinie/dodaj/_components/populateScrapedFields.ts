@@ -5,7 +5,7 @@ import type {
   Path,
   PathValue,
 } from "react-hook-form";
-import type { ScrapedMetadataResult } from "@/serverActions/productScrapeMetadata";
+import type { ScrapedMetadataResult } from "@/schemas/productScrape";
 
 interface PopulateScrapedFieldsOptions<T extends FieldValues> {
   data: ScrapedMetadataResult;

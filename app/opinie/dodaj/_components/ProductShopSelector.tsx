@@ -10,8 +10,6 @@ import { SHOP_SELECTOR_MESSAGES } from "./shopSelectorMessages";
 import { SelectedShopCard } from "./shopSelector/SelectedShopCard";
 import { EmptyShopPlaceholder } from "./shopSelector/EmptyShopPlaceholder";
 
-export { SHOP_SELECTOR_MESSAGES } from "./shopSelectorMessages";
-
 interface ProductShopSelectorProps {
   selectedShop: MatchedShopResult | null;
   onSelectShop: (shop: MatchedShopResult | null) => void;

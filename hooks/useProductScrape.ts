@@ -1,10 +1,8 @@
 "use client";
 
 import { useState, useTransition, useCallback } from "react";
-import {
-  productScrapeMetadata,
-  type ScrapedMetadataResult,
-} from "@/serverActions/productScrapeMetadata";
+import { productScrapeMetadata } from "@/serverActions/productScrapeMetadata";
+import type { ScrapedMetadataResult } from "@/schemas/productScrape";
 
 export interface ScrapeNotice {
   type: "success" | "error";
