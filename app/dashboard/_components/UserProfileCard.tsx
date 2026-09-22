@@ -1,4 +1,4 @@
-import { formatPolishDate } from "@/lib/formatters";
+import { formatPolishDate, formatUserDisplayName } from "@/lib/formatters";
 import { User, Calendar, Mail } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { DASHBOARD_MESSAGES } from "@/app/dashboard/constants";
@@ -14,8 +14,10 @@ export function UserProfileCard({
   email,
   createdAt,
 }: UserProfileCardProps) {
-  const displayName =
-    name?.trim() || email.split("@")[0] || DASHBOARD_MESSAGES.defaultUserName;
+  const displayName = formatUserDisplayName(
+    { name, email },
+    DASHBOARD_MESSAGES.defaultUserName,
+  );
 
   return (
     <Card className="p-5 shadow-xs sm:p-6">

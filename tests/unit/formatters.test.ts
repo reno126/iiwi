@@ -3,6 +3,7 @@ import {
   formatReviewCount,
   formatPolishDate,
   formatRatedProductsCount,
+  formatUserDisplayName,
   REVIEW_COUNT_SUFFIXES,
   RATED_PRODUCTS_MESSAGES,
 } from "@/lib/formatters";
@@ -114,6 +115,50 @@ describe("lib/formatters", () => {
       const date = new Date(2026, 9, 28);
       expect(formatPolishDate(date, "yyyy-MM-dd")).toBe("2026-10-28");
       expect(formatPolishDate(date, "d MMM yyyy")).toBe("28 paź 2026");
+    });
+  });
+
+  describe("formatUserDisplayName", () => {
+    it("returns trimmed name when user object provides a non-empty name", () => {
+      expect(
+        formatUserDisplayName({
+          name: "  Anna Kowalska  ",
+          email: "anna@example.com",
+        }),
+      ).toBe("Anna Kowalska");
+    });
+
+    it("falls back to email prefix before @ when name is null or whitespace", () => {
+      expect(
+        formatUserDisplayName({
+          name: null,
+          email: "marek.nowak@domena.pl",
+        }),
+      ).toBe("marek.nowak");
+
+      expect(
+        formatUserDisplayName({
+          name: "   ",
+          email: "tomasz@example.com",
+        }),
+      ).toBe("tomasz");
+    });
+
+    it("returns default fallback 'Użytkownik' when name and email are missing", () => {
+      expect(formatUserDisplayName({ name: null, email: null })).toBe(
+        "Użytkownik",
+      );
+      expect(formatUserDisplayName(null)).toBe("Użytkownik");
+      expect(formatUserDisplayName(undefined)).toBe("Użytkownik");
+    });
+
+    it("returns custom fallback when specified and both name and email are missing", () => {
+      expect(
+        formatUserDisplayName(
+          { name: null, email: null },
+          "Anonimowy użytkownik",
+        ),
+      ).toBe("Anonimowy użytkownik");
     });
   });
 });

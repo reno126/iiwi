@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { StarRating } from "@/components/reviews/StarRating";
 import { ReadMore } from "./ReadMore";
 import { Calendar } from "lucide-react";
-import { formatPolishDate } from "@/lib/formatters";
+import { formatPolishDate, formatUserDisplayName } from "@/lib/formatters";
 
 interface ReviewItemUser {
   name?: string | null;
@@ -26,10 +26,10 @@ interface ProductReviewItemProps {
 const MemoizedProductReviewItem = memo(function MemoizedProductReviewItem({
   review,
 }: ProductReviewItemProps) {
-  const reviewerName =
-    review.user.name ||
-    review.user.email.split("@")[0] ||
-    "Anonimowy użytkownik";
+  const reviewerName = formatUserDisplayName(
+    review.user,
+    "Anonimowy użytkownik",
+  );
 
   return (
     <Card className="border shadow-2xs">

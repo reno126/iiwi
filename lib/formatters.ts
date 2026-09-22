@@ -52,3 +52,10 @@ export function formatPolishDate(
   const parsedDate = typeof date === "string" ? new Date(date) : date;
   return format(parsedDate, formatString, { locale: pl });
 }
+
+export function formatUserDisplayName(
+  user?: { name?: string | null; email?: string | null } | null,
+  fallback: string = "Użytkownik",
+): string {
+  return user?.name?.trim() || user?.email?.split("@")[0] || fallback;
+}

@@ -15,7 +15,11 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { StarRating } from "@/components/reviews/StarRating";
 import { ProductThumbnail } from "@/components/products/ProductThumbnail";
-import { formatPolishDate, formatReviewCount } from "@/lib/formatters";
+import {
+  formatPolishDate,
+  formatReviewCount,
+  formatUserDisplayName,
+} from "@/lib/formatters";
 import { PRODUCT_DETAILS_MESSAGES } from "./ProductDetails";
 
 interface ProductOverviewCardProps {
@@ -29,8 +33,7 @@ const MemoizedProductOverviewCard = memo(function MemoizedProductOverviewCard({
   onAddReview,
   isReviewFormOpen,
 }: ProductOverviewCardProps) {
-  const creatorDisplayName =
-    product.creator.name || product.creator.email.split("@")[0] || "Użytkownik";
+  const creatorDisplayName = formatUserDisplayName(product.creator);
 
   const hasDistinctUpdateDate =
     product.updatedAt.getTime() - product.createdAt.getTime() > 60000;

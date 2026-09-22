@@ -61,21 +61,21 @@ export function buildProductDetailSchema(
         : undefined,
     review:
       product.reviews.length > 0
-        ? product.reviews.map((r) => ({
+        ? product.reviews.map((reviewItem) => ({
             "@type": "Review",
-            "@id": `${productUrl}#review-${r.id}`,
+            "@id": `${productUrl}#review-${reviewItem.id}`,
             reviewRating: {
               "@type": "Rating",
-              ratingValue: r.rate,
+              ratingValue: reviewItem.rate,
               bestRating: 5,
               worstRating: 1,
             },
             author: {
               "@type": "Person",
-              name: r.user.name || "Użytkownik TrueReview",
+              name: reviewItem.user.name || "Użytkownik TrueReview",
             },
-            datePublished: r.createdAt.toISOString(),
-            reviewBody: r.description,
+            datePublished: reviewItem.createdAt.toISOString(),
+            reviewBody: reviewItem.description,
           }))
         : undefined,
   };
