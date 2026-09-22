@@ -35,3 +35,19 @@ export const productScrapeSchema = z.object({
 });
 
 export type ProductScrapeInput = z.infer<typeof productScrapeSchema>;
+
+export const matchedShopResultSchema = z.object({
+  id: z.string(),
+  name: z.string().nullable(),
+  logo: z.string().nullable(),
+});
+
+export const scrapedMetadataResultSchema = z.object({
+  imageUrl: z.string().nullable().optional(),
+  name: z.string().nullable().optional(),
+  code: z.string().nullable().optional(),
+  shop: matchedShopResultSchema.nullable().optional(),
+  scrapedFields: z.array(z.enum(["name", "imageUrl", "code", "shop"])),
+});
+
+export type ScrapedMetadataResult = z.infer<typeof scrapedMetadataResultSchema>;

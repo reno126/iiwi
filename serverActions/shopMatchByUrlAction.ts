@@ -2,9 +2,9 @@
 
 import { shopMatchSchema } from "@/schemas/shop";
 import { findShopByUrl } from "@/lib/shops/findShopByUrl";
-import { createSafeActionClient } from "next-safe-action";
+import { publicActionClient } from "@/lib/actions/safeActionClient";
 
-export const shopMatchByUrlAction = createSafeActionClient()
+export const shopMatchByUrlAction = publicActionClient
   .inputSchema(shopMatchSchema)
   .action(async ({ parsedInput }) => {
     return await findShopByUrl(parsedInput.url);
