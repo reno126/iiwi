@@ -41,9 +41,10 @@ export function ReviewForm({
   autoFocus = false,
 }: ReviewFormProps) {
   const [draft] = useState(() => {
-    const d = getReviewDraft();
-    return d?.type === "REVIEW_EXISTING_PRODUCT" && d.productId === productId
-      ? d
+    const savedDraft = getReviewDraft();
+    return savedDraft?.type === "REVIEW_EXISTING_PRODUCT" &&
+      savedDraft.productId === productId
+      ? savedDraft
       : null;
   });
 

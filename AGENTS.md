@@ -65,6 +65,11 @@ The codebase strictly follows a **Zero Comments Policy**:
      - `ensureHttpProtocolPrefix()`
      - `compareShopsByCandidatePriority()`
 
+4. **Strict Prohibition of Single-Letter & Cryptic Identifiers:**
+   - **Zero Single-Letter Variables:** Strictly forbidden to declare or use single-letter variable names (e.g. `const d = ...`, `const p = ...`, `const r = ...`, `(e) => ...`) for domain models, draft objects, state, entities, handlers, or parameters.
+   - **Domain-Descriptive Naming:** All identifiers must explicitly communicate their domain meaning and identity (e.g. `savedDraft` instead of `d`, `product` instead of `p`, `rating` instead of `r`, `event` instead of `e`, `actionResult` instead of `res`).
+   - **Allowed Exception:** Pure numeric counters in standard for-loops (`for (let i = 0; i < length; i++)`) where the index carries zero business or domain meaning. Everywhere else, full descriptive naming is strictly mandatory.
+
 ---
 
 ## 4. Component Architecture, Reuse & Separation of Concerns (SoC)
@@ -118,6 +123,7 @@ The codebase strictly follows a **Zero Comments Policy**:
 
    - **Page-Specific Components:** Place components specific to a single route inside a local `_components/` directory within that route (e.g. `app/login/_components/SignIn.tsx`, `app/produkty/_components/ProductListItemCard.tsx`).
    - **Shared Components:** Only general-purpose primitives used across multiple routes belong in the root `components/` directory (e.g. `components/search/`, `components/reviews/`, `components/ui/`).
+   - **Direct Imports & No Barrel Re-Exports:** Avoid creating intermediate or redundant barrel `index.ts` files that merely re-export components across layers. Components must be imported directly from their defining module paths.
 
 5. **Component Template & Props Rules:**
    - **Components with Props:**

@@ -49,6 +49,6 @@ export function formatPolishDate(
   date: Date | string,
   formatString: string = "d MMMM yyyy",
 ): string {
-  const d = typeof date === "string" ? new Date(date) : date;
-  return format(d, formatString, { locale: pl });
+  const parsedDate = typeof date === "string" ? new Date(date) : date;
+  return format(parsedDate, formatString, { locale: pl });
 }

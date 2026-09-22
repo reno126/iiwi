@@ -303,6 +303,41 @@ function checkContextProviderMemoization(
   visit(sourceFile);
 }
 
+function isStandardForLoopCounter(node: ts.VariableDeclaration): boolean {
+  const parent = node.parent;
+  if (!parent || !ts.isVariableDeclarationList(parent)) return false;
+  const grandParent = parent.parent;
+  if (!grandParent || !ts.isForStatement(grandParent)) return false;
+  return grandParent.initializer === parent;
+}
+
+function checkSingleLetterVariables(
+  filePath: string,
+  sourceFile: ts.SourceFile,
+): void {
+  function visit(node: ts.Node) {
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name)) {
+      const varName = node.name.text;
+      if (varName.length === 1 && /^[a-zA-Z]$/.test(varName)) {
+        if (!isStandardForLoopCounter(node)) {
+          const line =
+            sourceFile.getLineAndCharacterOfPosition(node.getStart()).line + 1;
+          VIOLATIONS.push({
+            file: filePath,
+            line,
+            rule: "Self-Descriptive Code (AGENTS.md Sec. 3.4)",
+            message: `Single-letter variable name "${varName}" detected. Use a descriptive domain name (e.g. savedDraft, product, rating) instead.`,
+          });
+        }
+      }
+    }
+
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+}
+
 function runVerification(): void {
   const projectRoot = process.cwd();
   const allSourceFiles: string[] = [];
@@ -326,6 +361,7 @@ function runVerification(): void {
     checkEmptyPropsInterfaces(filePath, sourceFile);
     checkSchemaConventions(filePath, sourceFile);
     checkContextProviderMemoization(filePath, sourceFile);
+    checkSingleLetterVariables(filePath, sourceFile);
   }
 
   if (VIOLATIONS.length > 0) {
@@ -333,10 +369,10 @@ function runVerification(): void {
       `\n❌ AGENTS.md Architecture Verification Failed (${VIOLATIONS.length} violations found):\n`,
     );
 
-    for (const v of VIOLATIONS) {
-      const relativePath = path.relative(projectRoot, v.file);
+    for (const violation of VIOLATIONS) {
+      const relativePath = path.relative(projectRoot, violation.file);
       console.error(
-        `  • [${v.rule}] ${relativePath}:${v.line}\n    ${v.message}\n`,
+        `  • [${violation.rule}] ${relativePath}:${violation.line}\n    ${violation.message}\n`,
       );
     }
 
