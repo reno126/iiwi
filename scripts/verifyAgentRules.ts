@@ -84,7 +84,7 @@ function checkZeroComments(filePath: string, sourceFile: ts.SourceFile): void {
         VIOLATIONS.push({
           file: filePath,
           line,
-          rule: "Zero Comments Policy (AGENTS.md Sec. 3)",
+          rule: "Zero Comments Policy (AGENTS.md Sec. 2.1)",
           message: `Comment detected: "${preview}"`,
         });
       }
@@ -108,7 +108,7 @@ function checkEmptyPropsInterfaces(
         VIOLATIONS.push({
           file: filePath,
           line,
-          rule: "Components without Props (AGENTS.md Sec. 4.5)",
+          rule: "Components without Props (docs/components.md Sec. 4)",
           message: `Empty interface "${node.name.text}" is forbidden. Omit props interface when component takes no props.`,
         });
       }
@@ -130,7 +130,7 @@ function checkEmptyPropsInterfaces(
           VIOLATIONS.push({
             file: filePath,
             line,
-            rule: "Components without Props (AGENTS.md Sec. 4.5)",
+            rule: "Components without Props (docs/components.md Sec. 4)",
             message:
               "Empty prop destructuring ({}: Props) is forbidden. Omit props argument completely.",
           });
@@ -156,7 +156,7 @@ function checkSchemaConventions(
     VIOLATIONS.push({
       file: filePath,
       line: 1,
-      rule: "Schema Domain Separation (AGENTS.md Sec. 6.1)",
+      rule: "Schema Domain Separation (docs/forms-and-state.md Sec. 4)",
       message:
         "Monolithic schema.ts or index.ts is forbidden. Split schemas into dedicated domain files.",
     });
@@ -183,7 +183,7 @@ function checkSchemaConventions(
               VIOLATIONS.push({
                 file: filePath,
                 line,
-                rule: "Schema Naming Convention (AGENTS.md Sec. 6.2)",
+                rule: "Schema Naming Convention (docs/forms-and-state.md Sec. 4)",
                 message: `Schema constant "${varName}" must be camelCase ending with Schema (e.g. loginSchema).`,
               });
             }
@@ -205,7 +205,7 @@ function checkSchemaConventions(
           VIOLATIONS.push({
             file: filePath,
             line,
-            rule: "Schema Inferred Type Naming (AGENTS.md Sec. 6.2)",
+            rule: "Schema Inferred Type Naming (docs/forms-and-state.md Sec. 4)",
             message: `Inferred schema type "${typeName}" must be PascalCase ending with Input (e.g. LoginInput).`,
           });
         }
@@ -244,7 +244,7 @@ function checkMagicLiteralsInTests(filePath: string, content: string): void {
         VIOLATIONS.push({
           file: filePath,
           line: i + 1,
-          rule: "Single Source of Truth for Error Messages (AGENTS.md Sec. 7.1)",
+          rule: "Single Source of Truth for Error Messages (docs/testing.md Sec. 2)",
           message: `Hardcoded error literal "${knownError}..." found in test assertion. Import from schema error dictionary instead.`,
         });
       }
@@ -287,7 +287,7 @@ function checkContextProviderMemoization(
                 VIOLATIONS.push({
                   file: filePath,
                   line,
-                  rule: "Reference Stability & Context Hygiene (AGENTS.md Sec. 5.5)",
+                  rule: "Reference Stability & Context Hygiene (docs/forms-and-state.md Sec. 3)",
                   message: `Inline constructed value "${expr.getText(sourceFile)}" passed to <${tag}>. Wrap context value in useMemo to prevent unnecessary consumer re-renders.`,
                 });
               }
@@ -325,8 +325,118 @@ function checkSingleLetterVariables(
           VIOLATIONS.push({
             file: filePath,
             line,
-            rule: "Self-Descriptive Code (AGENTS.md Sec. 3.4)",
+            rule: "Self-Descriptive Code (AGENTS.md Sec. 2.2)",
             message: `Single-letter variable name "${varName}" detected. Use a descriptive domain name (e.g. savedDraft, product, rating) instead.`,
+          });
+        }
+      }
+    }
+
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+}
+
+function checkAriaRoleAttributes(
+  filePath: string,
+  sourceFile: ts.SourceFile,
+): void {
+  const normalized = filePath.replace(/\\/g, "/");
+  if (normalized.includes("/tests/")) return;
+
+  function visit(node: ts.Node) {
+    if (ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node)) {
+      const attributes = ts.isJsxElement(node)
+        ? node.openingElement.attributes.properties
+        : node.attributes.properties;
+
+      let roleValue: string | null = null;
+      const presentAttributes = new Set<string>();
+
+      for (const attr of attributes) {
+        if (ts.isJsxAttribute(attr) && ts.isIdentifier(attr.name)) {
+          const attrName = attr.name.text;
+          presentAttributes.add(attrName);
+
+          if (attrName === "role") {
+            if (attr.initializer && ts.isStringLiteral(attr.initializer)) {
+              roleValue = attr.initializer.text;
+            }
+          }
+        }
+      }
+
+      if (roleValue === "meter") {
+        const line =
+          sourceFile.getLineAndCharacterOfPosition(node.getStart()).line + 1;
+
+        if (
+          !presentAttributes.has("aria-label") &&
+          !presentAttributes.has("aria-labelledby")
+        ) {
+          VIOLATIONS.push({
+            file: filePath,
+            line,
+            rule: "Accessible-First Component Contract (docs/components.md Sec. 5)",
+            message:
+              'Element with role="meter" must declare an accessible name using "aria-label" or "aria-labelledby".',
+          });
+        }
+
+        if (!presentAttributes.has("aria-valuenow")) {
+          VIOLATIONS.push({
+            file: filePath,
+            line,
+            rule: "Accessible-First Component Contract (docs/components.md Sec. 5)",
+            message:
+              'Element with role="meter" must declare "aria-valuenow" representing the current value.',
+          });
+        }
+
+        if (
+          !presentAttributes.has("aria-valuemin") ||
+          !presentAttributes.has("aria-valuemax")
+        ) {
+          VIOLATIONS.push({
+            file: filePath,
+            line,
+            rule: "Accessible-First Component Contract (docs/components.md Sec. 5)",
+            message:
+              'Element with role="meter" must declare both "aria-valuemin" and "aria-valuemax" defining the range bounds.',
+          });
+        }
+      }
+
+      if (roleValue === "radiogroup") {
+        const line =
+          sourceFile.getLineAndCharacterOfPosition(node.getStart()).line + 1;
+
+        if (
+          !presentAttributes.has("aria-label") &&
+          !presentAttributes.has("aria-labelledby")
+        ) {
+          VIOLATIONS.push({
+            file: filePath,
+            line,
+            rule: "Accessible-First Component Contract (docs/components.md Sec. 5)",
+            message:
+              'Element with role="radiogroup" must declare an accessible name using "aria-label" or "aria-labelledby".',
+          });
+        }
+      }
+
+      if (roleValue === "radio") {
+        const line =
+          sourceFile.getLineAndCharacterOfPosition(node.getStart()).line + 1;
+
+        if (!presentAttributes.has("aria-checked")) {
+          VIOLATIONS.push({
+            file: filePath,
+            line,
+            rule: "Accessible-First Component Contract (docs/components.md Sec. 5)",
+            message:
+              'Element with role="radio" must declare "aria-checked" indicating its selection state.',
           });
         }
       }
@@ -362,6 +472,7 @@ function runVerification(): void {
     checkSchemaConventions(filePath, sourceFile);
     checkContextProviderMemoization(filePath, sourceFile);
     checkSingleLetterVariables(filePath, sourceFile);
+    checkAriaRoleAttributes(filePath, sourceFile);
   }
 
   if (VIOLATIONS.length > 0) {
