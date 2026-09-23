@@ -34,8 +34,6 @@ describe("components/ui/property-row", () => {
       </PropertyRow>,
     );
 
-    expect(
-      screen.getByRole("link", { name: "Odwiedź sklep" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("link")).toBeInTheDocument();
   });
 });

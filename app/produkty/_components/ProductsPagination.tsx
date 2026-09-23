@@ -4,6 +4,14 @@ import { buttonVariants } from "@/components/ui/button";
 import { generatePaginationPages } from "@/lib/pagination";
 import { cn } from "cn";
 
+export const PAGINATION_MESSAGES = {
+  navAriaLabel: "Nawigacja stronami",
+  previousPageAriaLabel: "Przejdź do poprzedniej strony",
+  nextPageAriaLabel: "Przejdź do następnej strony",
+  previousButton: "Poprzednia",
+  nextButton: "Następna",
+} as const;
+
 interface ProductsPaginationProps {
   currentPage: number;
   totalPages: number;
@@ -23,7 +31,7 @@ export function ProductsPagination({
 
   return (
     <nav
-      aria-label="Nawigacja stronami"
+      aria-label={PAGINATION_MESSAGES.navAriaLabel}
       className="flex items-center justify-center gap-1.5 pt-6 pb-2"
     >
       {hasPrevious ? (
@@ -33,10 +41,12 @@ export function ProductsPagination({
             buttonVariants({ variant: "outline", size: "sm" }),
             "gap-1 px-3 font-medium",
           )}
-          aria-label="Przejdź do poprzedniej strony"
+          aria-label={PAGINATION_MESSAGES.previousPageAriaLabel}
         >
           <ChevronLeft className="size-4" />
-          <span className="hidden sm:inline">Poprzednia</span>
+          <span className="hidden sm:inline">
+            {PAGINATION_MESSAGES.previousButton}
+          </span>
         </Link>
       ) : (
         <span
@@ -47,16 +57,18 @@ export function ProductsPagination({
           aria-disabled="true"
         >
           <ChevronLeft className="size-4" />
-          <span className="hidden sm:inline">Poprzednia</span>
+          <span className="hidden sm:inline">
+            {PAGINATION_MESSAGES.previousButton}
+          </span>
         </span>
       )}
 
       <div className="mx-1 flex items-center gap-1">
-        {pages.map((p, idx) => {
-          if (p === "ellipsis") {
+        {pages.map((pageItem, pageIndex) => {
+          if (pageItem === "ellipsis") {
             return (
               <span
-                key={`ellipsis-${idx}`}
+                key={`ellipsis-${pageIndex}`}
                 className="px-2 text-sm text-muted-foreground select-none"
               >
                 …
@@ -64,12 +76,12 @@ export function ProductsPagination({
             );
           }
 
-          const isCurrent = p === currentPage;
+          const isCurrent = pageItem === currentPage;
 
           return (
             <Link
-              key={p}
-              href={`/produkty?page=${p}`}
+              key={pageItem}
+              href={`/produkty?page=${pageItem}`}
               className={cn(
                 buttonVariants({
                   variant: isCurrent ? "default" : "outline",
@@ -80,7 +92,7 @@ export function ProductsPagination({
               )}
               aria-current={isCurrent ? "page" : undefined}
             >
-              {p}
+              {pageItem}
             </Link>
           );
         })}
@@ -93,9 +105,11 @@ export function ProductsPagination({
             buttonVariants({ variant: "outline", size: "sm" }),
             "gap-1 px-3 font-medium",
           )}
-          aria-label="Przejdź do następnej strony"
+          aria-label={PAGINATION_MESSAGES.nextPageAriaLabel}
         >
-          <span className="hidden sm:inline">Następna</span>
+          <span className="hidden sm:inline">
+            {PAGINATION_MESSAGES.nextButton}
+          </span>
           <ChevronRight className="size-4" />
         </Link>
       ) : (
@@ -106,7 +120,9 @@ export function ProductsPagination({
           )}
           aria-disabled="true"
         >
-          <span className="hidden sm:inline">Następna</span>
+          <span className="hidden sm:inline">
+            {PAGINATION_MESSAGES.nextButton}
+          </span>
           <ChevronRight className="size-4" />
         </span>
       )}

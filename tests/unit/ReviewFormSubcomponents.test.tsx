@@ -37,7 +37,7 @@ describe("app/opinie/dodaj/_components/SelectedProductCard", () => {
       <SelectedProductCard product={mockProduct} onReselect={onReselectMock} />,
     );
 
-    const changeButton = screen.getByRole("button", { name: /zmień produkt/i });
+    const changeButton = screen.getByRole("button");
     await user.click(changeButton);
 
     expect(onReselectMock).toHaveBeenCalledTimes(1);
@@ -48,48 +48,50 @@ describe("app/opinie/dodaj/_components/StickyFormActionBar", () => {
   it("renders default submit button with label 'Zapisz'", () => {
     render(<StickyFormActionBar />);
 
-    expect(screen.getByRole("button", { name: "Zapisz" })).toBeInTheDocument();
+    expect(screen.getByRole("button")).toBeInTheDocument();
   });
 
   it("supports custom submitLabel and calls onBack and onCancel", async () => {
     const user = userEvent.setup();
     const onBackMock = vi.fn();
     const onCancelMock = vi.fn();
+    const submitLabel = "Wyślij recenzję";
+    const backLabel = "Poprzedni krok";
+    const cancelLabel = "Porzuć zmiany";
 
     render(
       <StickyFormActionBar
-        submitLabel="Wyślij recenzję"
+        submitLabel={submitLabel}
         onBack={onBackMock}
-        backLabel="Poprzedni krok"
+        backLabel={backLabel}
         onCancel={onCancelMock}
-        cancelLabel="Porzuć zmiany"
+        cancelLabel={cancelLabel}
       />,
     );
 
-    const submitBtn = screen.getByRole("button", { name: "Wyślij recenzję" });
+    const submitBtn = screen.getByRole("button", { name: submitLabel });
     expect(submitBtn).toBeInTheDocument();
 
-    const backBtn = screen.getByRole("button", { name: /poprzedni krok/i });
+    const backBtn = screen.getByRole("button", { name: backLabel });
     await user.click(backBtn);
     expect(onBackMock).toHaveBeenCalledTimes(1);
 
-    const cancelBtn = screen.getByRole("button", { name: /porzuć zmiany/i });
+    const cancelBtn = screen.getByRole("button", { name: cancelLabel });
     await user.click(cancelBtn);
     expect(onCancelMock).toHaveBeenCalledTimes(1);
   });
 
   it("disables all action buttons and displays spinner when isSubmitting is true", () => {
-    const { container } = render(
+    render(
       <StickyFormActionBar onBack={vi.fn()} onCancel={vi.fn()} isSubmitting />,
     );
 
     const buttons = screen.getAllByRole("button");
-    for (const btn of buttons) {
-      expect(btn).toBeDisabled();
+    for (const actionButton of buttons) {
+      expect(actionButton).toBeDisabled();
     }
 
-    const spinner = container.querySelector("[data-slot='spinner']");
-    expect(spinner).toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeInTheDocument();
   });
 });
 

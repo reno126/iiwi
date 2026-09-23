@@ -14,7 +14,7 @@ vi.mock("@/serverActions/shopsGet", () => ({
 
 describe("HomePage", () => {
   it("renders all sections one-below-one according to requirements", async () => {
-    vi.mocked(recentReviewsGetModule.recentReviewsGet).mockResolvedValue([
+    const mockReviews = [
       {
         id: "rev-1",
         description: "Doskonały produkt, bardzo polecam!",
@@ -47,7 +47,11 @@ describe("HomePage", () => {
           shop: { name: "Allegro" },
         },
       },
-    ]);
+    ];
+
+    vi.mocked(recentReviewsGetModule.recentReviewsGet).mockResolvedValue(
+      mockReviews,
+    );
 
     vi.mocked(shopsGetModule.shopsGet).mockResolvedValue([
       {
@@ -68,17 +72,17 @@ describe("HomePage", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: new RegExp(HOME_MESSAGES.heroHeading, "i"),
+        name: HOME_MESSAGES.heroHeading,
       }),
     ).toBeInTheDocument();
 
     const viewAllLink = screen.getByRole("link", {
-      name: new RegExp(HOME_MESSAGES.viewAllReviewsLink, "i"),
+      name: HOME_MESSAGES.viewAllReviewsLink,
     });
     expect(viewAllLink).toHaveAttribute("href", "/produkty");
 
     const addReviewLinks = screen.getAllByRole("link", {
-      name: new RegExp(HOME_MESSAGES.addReviewLink, "i"),
+      name: HOME_MESSAGES.addReviewLink,
     });
     expect(addReviewLinks.length).toBeGreaterThanOrEqual(2);
     addReviewLinks.forEach((link) => {
@@ -87,34 +91,36 @@ describe("HomePage", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: new RegExp(HOME_MESSAGES.recentReviewsHeading, "i"),
+        name: HOME_MESSAGES.recentReviewsHeading,
       }),
     ).toBeInTheDocument();
-    expect(await screen.findByText(/testowy produkt 1/i)).toBeInTheDocument();
-    expect(await screen.findByText(/testowy produkt 2/i)).toBeInTheDocument();
     expect(
-      await screen.findByText(/doskonały produkt, bardzo polecam!/i),
+      await screen.findByText(mockReviews[0].product.name),
     ).toBeInTheDocument();
-    expect(await screen.findByText(/jan tester/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(mockReviews[1].product.name),
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText(`“${mockReviews[0].description}”`),
+    ).toBeInTheDocument();
+    expect(await screen.findByText("Jan Tester")).toBeInTheDocument();
 
     expect(recentReviewsGetModule.recentReviewsGet).toHaveBeenCalledWith(3);
 
     expect(
       screen.getByRole("heading", {
-        name: new RegExp(HOME_MESSAGES.shopsHeading, "i"),
+        name: HOME_MESSAGES.shopsHeading,
       }),
     ).toBeInTheDocument();
     expect(
-      await screen.findByText(
-        new RegExp(HOME_MESSAGES.popularShopsSubheading, "i"),
-      ),
+      await screen.findByText(HOME_MESSAGES.popularShopsSubheading),
     ).toBeInTheDocument();
 
     expect(
-      (await screen.findAllByText(/media expert/i)).length,
+      (await screen.findAllByText("Media Expert")).length,
     ).toBeGreaterThanOrEqual(1);
     expect(
-      (await screen.findAllByText(/allegro/i)).length,
+      (await screen.findAllByText("Allegro")).length,
     ).toBeGreaterThanOrEqual(1);
   });
 });

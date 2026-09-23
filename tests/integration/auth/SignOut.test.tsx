@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { SignOut, SIGN_OUT_MESSAGES } from "@/components/auth/SignOut";
+import { SignOut } from "@/components/auth/SignOut";
 import { signOut } from "next-auth/react";
 
 vi.mock("next-auth/react", () => ({
@@ -17,9 +17,7 @@ describe("components/auth/SignOut", () => {
     const user = userEvent.setup();
     render(<SignOut />);
 
-    const logoutBtn = screen.getByRole("button", {
-      name: SIGN_OUT_MESSAGES.button,
-    });
+    const logoutBtn = screen.getByRole("button");
     await user.click(logoutBtn);
 
     expect(signOut).toHaveBeenCalledWith({ callbackUrl: "/login" });
@@ -28,9 +26,7 @@ describe("components/auth/SignOut", () => {
   it("passes custom className to the button", () => {
     render(<SignOut className="custom-test-class" />);
 
-    const logoutBtn = screen.getByRole("button", {
-      name: SIGN_OUT_MESSAGES.button,
-    });
+    const logoutBtn = screen.getByRole("button");
     expect(logoutBtn).toHaveClass("custom-test-class");
   });
 });

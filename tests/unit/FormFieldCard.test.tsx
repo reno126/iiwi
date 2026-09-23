@@ -78,14 +78,14 @@ describe("components/ui/form-field-card", () => {
   });
 
   it("renders reserved space container when reserveSpace is true without error", () => {
-    const { container } = render(
+    render(
       <FormFieldCard label={TEST_MESSAGES.label} reserveSpace={true}>
         <input id="sample-input" />
       </FormFieldCard>,
     );
 
     expect(
-      container.querySelector("[data-slot='field-error']"),
+      screen.getByText("\u00A0", { normalizer: (text) => text }),
     ).toBeInTheDocument();
   });
 });

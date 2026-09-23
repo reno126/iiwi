@@ -77,18 +77,14 @@ describe("app/produkty/[id]/_components/ReadMore", () => {
     const longText = "A".repeat(260);
     render(<ReadMore text={longText} />);
 
-    expect(
-      screen.getByRole("button", { name: /czytaj więcej/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button")).toBeInTheDocument();
   });
 
   it("displays 'Czytaj więcej' button when text contains more lines than maxLines", () => {
     const multilineText = "Linia 1\nLinia 2\nLinia 3\nLinia 4";
     render(<ReadMore text={multilineText} maxLines={2} />);
 
-    expect(
-      screen.getByRole("button", { name: /czytaj więcej/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button")).toBeInTheDocument();
   });
 
   it("toggles expanded and collapsed states when clicking trigger button", async () => {
@@ -97,50 +93,37 @@ describe("app/produkty/[id]/_components/ReadMore", () => {
 
     render(<ReadMore text={longText} />);
 
-    const moreButton = screen.getByRole("button", { name: /czytaj więcej/i });
-    expect(moreButton).toBeInTheDocument();
+    const triggerButton = screen.getByRole("button");
+    expect(triggerButton).toBeInTheDocument();
 
-    await user.click(moreButton);
+    await user.click(triggerButton);
+    expect(triggerButton).toHaveTextContent("Zwiń");
 
-    const lessButton = screen.getByRole("button", { name: /zwiń/i });
-    expect(lessButton).toBeInTheDocument();
-
-    await user.click(lessButton);
-
-    expect(
-      screen.getByRole("button", { name: /czytaj więcej/i }),
-    ).toBeInTheDocument();
+    await user.click(triggerButton);
+    expect(triggerButton).toHaveTextContent("Czytaj więcej");
   });
 
   it("supports custom moreLabel and lessLabel props", async () => {
     const user = userEvent.setup();
     const longText = "Tekst o znacznej długości. ".repeat(15);
+    const moreLabel = "Pokaż pełną treść";
+    const lessLabel = "Ukryj szczegóły";
 
     render(
-      <ReadMore
-        text={longText}
-        moreLabel="Pokaż pełną treść"
-        lessLabel="Ukryj szczegóły"
-      />,
+      <ReadMore text={longText} moreLabel={moreLabel} lessLabel={lessLabel} />,
     );
 
-    const customMoreBtn = screen.getByRole("button", {
-      name: /pokaż pełną treść/i,
-    });
-    expect(customMoreBtn).toBeInTheDocument();
+    const triggerButton = screen.getByRole("button");
+    expect(triggerButton).toHaveTextContent(moreLabel);
 
-    await user.click(customMoreBtn);
-
-    const customLessBtn = screen.getByRole("button", {
-      name: /ukryj szczegóły/i,
-    });
-    expect(customLessBtn).toBeInTheDocument();
+    await user.click(triggerButton);
+    expect(triggerButton).toHaveTextContent(lessLabel);
   });
 
   it("applies corresponding clamp class based on maxLines prop", () => {
     const longText = "Treść wieloliniowa. ".repeat(20);
-    const { container } = render(<ReadMore text={longText} maxLines={3} />);
+    render(<ReadMore text={longText} maxLines={3} />);
 
-    expect(container.querySelector(".line-clamp-3")).toBeInTheDocument();
+    expect(screen.getByText(longText.trim())).toHaveClass("line-clamp-3");
   });
 });

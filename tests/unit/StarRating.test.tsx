@@ -23,36 +23,37 @@ describe("components/reviews/StarRating", () => {
   });
 
   it("renders correct number of filled and unfilled stars based on rounded rating", () => {
-    const { container } = render(<StarRating rating={3.2} maxStars={5} />);
+    render(<StarRating rating={3.2} maxStars={5} />);
 
-    const filledStars = container.querySelectorAll(".fill-amber-400");
-    expect(filledStars).toHaveLength(3);
-
-    const unfilledStars = container.querySelectorAll(
-      ".text-muted-foreground\\/30",
-    );
-    expect(unfilledStars).toHaveLength(2);
+    const ratingContainer = screen.getByLabelText("Ocena: 3.2 na 5");
+    const stars = ratingContainer.querySelectorAll("svg");
+    expect(stars).toHaveLength(5);
+    expect(stars[0]).toHaveClass("fill-amber-400");
+    expect(stars[1]).toHaveClass("fill-amber-400");
+    expect(stars[2]).toHaveClass("fill-amber-400");
+    expect(stars[3]).toHaveClass("text-muted-foreground/30");
+    expect(stars[4]).toHaveClass("text-muted-foreground/30");
   });
 
   it("rounds rating to nearest whole number for star display", () => {
-    const { container } = render(<StarRating rating={4.6} maxStars={5} />);
+    render(<StarRating rating={4.6} maxStars={5} />);
 
-    const filledStars = container.querySelectorAll(".fill-amber-400");
-    expect(filledStars).toHaveLength(5);
+    const ratingContainer = screen.getByLabelText("Ocena: 4.6 na 5");
+    const stars = ratingContainer.querySelectorAll("svg");
+    expect(stars).toHaveLength(5);
+    for (const star of stars) {
+      expect(star).toHaveClass("fill-amber-400");
+    }
   });
 
   it("renders custom number of maxStars", () => {
-    const { container } = render(<StarRating rating={7} maxStars={10} />);
+    render(<StarRating rating={7} maxStars={10} />);
 
-    expect(screen.getByLabelText("Ocena: 7 na 10")).toBeInTheDocument();
-
-    const filledStars = container.querySelectorAll(".fill-amber-400");
-    expect(filledStars).toHaveLength(7);
-
-    const unfilledStars = container.querySelectorAll(
-      ".text-muted-foreground\\/30",
-    );
-    expect(unfilledStars).toHaveLength(3);
+    const ratingContainer = screen.getByLabelText("Ocena: 7 na 10");
+    const stars = ratingContainer.querySelectorAll("svg");
+    expect(stars).toHaveLength(10);
+    expect(stars[6]).toHaveClass("fill-amber-400");
+    expect(stars[7]).toHaveClass("text-muted-foreground/30");
   });
 
   it("does not render numeric text value by default (showValue = false)", () => {
@@ -68,19 +69,25 @@ describe("components/reviews/StarRating", () => {
   });
 
   it("applies size-specific classes for sm size", () => {
-    const { container } = render(<StarRating rating={3} size="sm" showValue />);
-    expect(container.querySelector(".size-4")).toBeInTheDocument();
+    render(<StarRating rating={3} size="sm" showValue />);
+    const ratingContainer = screen.getByLabelText("Ocena: 3 na 5");
+    const star = ratingContainer.querySelector("svg");
+    expect(star).toHaveClass("size-4");
     expect(screen.getByText("3.0 / 5")).toHaveClass("text-sm");
   });
 
   it("applies size-specific classes for md size", () => {
-    const { container } = render(<StarRating rating={3} size="md" showValue />);
-    expect(container.querySelector(".size-5")).toBeInTheDocument();
+    render(<StarRating rating={3} size="md" showValue />);
+    const ratingContainer = screen.getByLabelText("Ocena: 3 na 5");
+    const star = ratingContainer.querySelector("svg");
+    expect(star).toHaveClass("size-5");
     expect(screen.getByText("3.0 / 5")).toHaveClass("text-base");
   });
 
   it("applies size-specific classes for lg size", () => {
-    const { container } = render(<StarRating rating={3} size="lg" />);
-    expect(container.querySelector(".size-6")).toBeInTheDocument();
+    render(<StarRating rating={3} size="lg" />);
+    const ratingContainer = screen.getByLabelText("Ocena: 3 na 5");
+    const star = ratingContainer.querySelector("svg");
+    expect(star).toHaveClass("size-6");
   });
 });

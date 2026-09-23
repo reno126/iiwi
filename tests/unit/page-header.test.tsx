@@ -61,7 +61,7 @@ describe("components/ui/page-header", () => {
   });
 
   it("renders SectionHeader and SectionHeaderActions with slots and borders", () => {
-    const { container } = render(
+    render(
       <SectionHeader bordered={true}>
         <h2>{TEST_MESSAGES.sectionContent}</h2>
         <SectionHeaderActions>
@@ -70,9 +70,8 @@ describe("components/ui/page-header", () => {
       </SectionHeader>,
     );
 
-    const sectionHeader = container.querySelector(
-      "[data-slot='section-header']",
-    );
+    const headingElement = screen.getByRole("heading", { level: 2 });
+    const sectionHeader = headingElement.parentElement;
     expect(sectionHeader).toBeInTheDocument();
     expect(sectionHeader).toHaveClass("border-b");
 

@@ -91,12 +91,12 @@ describe("app/dashboard components", () => {
       expect(screen.getByText(formatRatedProductsCount(2))).toBeInTheDocument();
 
       const productLink1 = screen.getByRole("link", {
-        name: /ekspres delonghi/i,
+        name: mockProducts[0].productName,
       });
       expect(productLink1).toHaveAttribute("href", "/produkty/prod-1");
 
       const productLink2 = screen.getByRole("link", {
-        name: /klawiatura mx keys/i,
+        name: mockProducts[1].productName,
       });
       expect(productLink2).toHaveAttribute("href", "/produkty/prod-2");
 
@@ -109,8 +109,8 @@ describe("app/dashboard components", () => {
 
       expect(screen.getByText("4.5")).toBeInTheDocument();
       expect(screen.getByText("5.0")).toBeInTheDocument();
-      expect(screen.queryByText(/4\.5\/5/)).not.toBeInTheDocument();
-      expect(screen.queryByText(/5\.0\/5/)).not.toBeInTheDocument();
+      expect(screen.queryByText("4.5/5")).not.toBeInTheDocument();
+      expect(screen.queryByText("5.0/5")).not.toBeInTheDocument();
     });
 
     it("renders empty state when user has not rated any products", () => {

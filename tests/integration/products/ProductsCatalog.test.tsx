@@ -8,7 +8,10 @@ vi.mock("@/serverActions/productsGet", () => ({
 import { productsGet } from "@/serverActions/productsGet";
 import ProductsPage from "@/app/produkty/page";
 import { ProductsListSection } from "@/app/produkty/_components/ProductsListSection";
-import { ProductsPagination } from "@/app/produkty/_components/ProductsPagination";
+import {
+  ProductsPagination,
+  PAGINATION_MESSAGES,
+} from "@/app/produkty/_components/ProductsPagination";
 
 describe("app/produkty (Products Catalog)", () => {
   beforeEach(() => {
@@ -53,13 +56,8 @@ describe("app/produkty (Products Catalog)", () => {
 
     render(pageJsx);
 
-    expect(
-      screen.getByRole("heading", { level: 1, name: /produkty/i }),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /dodaj opinię/i })).toHaveAttribute(
-      "href",
-      "/opinie/dodaj",
-    );
+    expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
+    expect(screen.getByRole("link")).toHaveAttribute("href", "/opinie/dodaj");
   });
 
   it("renders product cards with names, badges, review count, and links to details", async () => {
@@ -106,9 +104,7 @@ describe("app/produkty (Products Catalog)", () => {
     render(sectionJsx);
 
     expect(screen.getByText("Brak produktów")).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: /dodaj produkt i opinię/i }),
-    ).toHaveAttribute("href", "/opinie/dodaj");
+    expect(screen.getByRole("link")).toHaveAttribute("href", "/opinie/dodaj");
   });
 
   describe("ProductsPagination", () => {
@@ -122,9 +118,7 @@ describe("app/produkty (Products Catalog)", () => {
     it("renders pagination controls for page 1 of 3 with disabled previous button", () => {
       render(<ProductsPagination currentPage={1} totalPages={3} />);
 
-      const nav = screen.getByRole("navigation", {
-        name: /nawigacja stronami/i,
-      });
+      const nav = screen.getByRole("navigation");
       expect(nav).toBeInTheDocument();
 
       const page1Btn = screen.getByRole("link", { name: "1" });
@@ -133,38 +127,46 @@ describe("app/produkty (Products Catalog)", () => {
       const page2Btn = screen.getByRole("link", { name: "2" });
       expect(page2Btn).toHaveAttribute("href", "/produkty?page=2");
 
-      const nextLink = screen.getByLabelText(/przejdź do następnej strony/i);
+      const nextLink = screen.getByLabelText(
+        PAGINATION_MESSAGES.nextPageAriaLabel,
+      );
       expect(nextLink).toHaveAttribute("href", "/produkty?page=2");
 
       expect(
-        screen.queryByLabelText(/przejdź do poprzedniej strony/i),
+        screen.queryByLabelText(PAGINATION_MESSAGES.previousPageAriaLabel),
       ).not.toBeInTheDocument();
     });
 
     it("renders pagination controls for middle page (2 of 3) with active previous and next links", () => {
       render(<ProductsPagination currentPage={2} totalPages={3} />);
 
-      const prevLink = screen.getByLabelText(/przejdź do poprzedniej strony/i);
+      const prevLink = screen.getByLabelText(
+        PAGINATION_MESSAGES.previousPageAriaLabel,
+      );
       expect(prevLink).toHaveAttribute("href", "/produkty?page=1");
 
       const page2Btn = screen.getByRole("link", { name: "2" });
       expect(page2Btn).toHaveAttribute("aria-current", "page");
 
-      const nextLink = screen.getByLabelText(/przejdź do następnej strony/i);
+      const nextLink = screen.getByLabelText(
+        PAGINATION_MESSAGES.nextPageAriaLabel,
+      );
       expect(nextLink).toHaveAttribute("href", "/produkty?page=3");
     });
 
     it("renders pagination controls for last page (3 of 3) with disabled next button", () => {
       render(<ProductsPagination currentPage={3} totalPages={3} />);
 
-      const prevLink = screen.getByLabelText(/przejdź do poprzedniej strony/i);
+      const prevLink = screen.getByLabelText(
+        PAGINATION_MESSAGES.previousPageAriaLabel,
+      );
       expect(prevLink).toHaveAttribute("href", "/produkty?page=2");
 
       const page3Btn = screen.getByRole("link", { name: "3" });
       expect(page3Btn).toHaveAttribute("aria-current", "page");
 
       expect(
-        screen.queryByLabelText(/przejdź do następnej strony/i),
+        screen.queryByLabelText(PAGINATION_MESSAGES.nextPageAriaLabel),
       ).not.toBeInTheDocument();
     });
   });

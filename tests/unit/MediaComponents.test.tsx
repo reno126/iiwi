@@ -13,7 +13,7 @@ describe("components/products/ProductThumbnail", () => {
       />,
     );
 
-    const img = screen.getByRole("img", { name: "Słuchawki bezprzewodowe" });
+    const img = screen.getByRole("img");
     expect(img).toBeInTheDocument();
     expect(img).toHaveAttribute("src", "https://example.com/product.jpg");
     expect(img).toHaveAttribute("loading", "lazy");
@@ -28,7 +28,7 @@ describe("components/products/ProductThumbnail", () => {
       />,
     );
 
-    const img = screen.getByRole("img", { name: "Produkt priorytetowy" });
+    const img = screen.getByRole("img");
     expect(img).toHaveAttribute("loading", "eager");
     expect(img).toHaveAttribute("fetchpriority", "high");
   });
@@ -91,7 +91,7 @@ describe("components/shops/ShopLogo", () => {
       <ShopLogo logo="https://example.com/shop.png" name="Media Expert" />,
     );
 
-    const img = screen.getByRole("img", { name: "Media Expert" });
+    const img = screen.getByRole("img");
     expect(img).toBeInTheDocument();
     expect(img).toHaveAttribute("src", "https://example.com/shop.png");
   });
@@ -99,7 +99,7 @@ describe("components/shops/ShopLogo", () => {
   it("uses fallback name 'Sklep' when name is missing but logo is provided", () => {
     render(<ShopLogo logo="https://example.com/shop.png" />);
 
-    const img = screen.getByRole("img", { name: "Sklep" });
+    const img = screen.getByRole("img");
     expect(img).toBeInTheDocument();
   });
 

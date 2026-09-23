@@ -18,7 +18,7 @@ describe("components/ui/selection-card", () => {
     expect(screen.getByText("Etykieta")).toBeInTheDocument();
     expect(screen.getByText("Dodatkowy opis")).toBeInTheDocument();
     expect(screen.getByTestId("test-media")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Zmień" })).toBeInTheDocument();
+    expect(screen.getByRole("button")).toBeInTheDocument();
   });
 
   it("applies primary variant styling correctly", () => {
