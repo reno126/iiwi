@@ -2,6 +2,13 @@ import { memo } from "react";
 import { Star } from "lucide-react";
 import { cn } from "cn";
 
+export const STAR_RATING_MESSAGES = {
+  ariaLabel: (rating: number, maxStars: number) =>
+    `Ocena: ${rating} na ${maxStars}`,
+  formattedValue: (rating: number, maxStars: number) =>
+    `${rating.toFixed(1)} / ${maxStars}`,
+} as const;
+
 interface StarRatingProps {
   rating?: number;
   rate?: number;
@@ -28,16 +35,24 @@ const MemoizedStarRating = memo(function MemoizedStarRating({
   const currentRate = rating ?? rate ?? 0;
 
   return (
-    <div className={cn("inline-flex items-center gap-1", className)}>
+    <div
+      className={cn("inline-flex items-center gap-1", className)}
+      data-size={size}
+    >
       <div
         className="flex items-center"
-        aria-label={`Ocena: ${currentRate} na ${maxStars}`}
+        role="meter"
+        aria-label={STAR_RATING_MESSAGES.ariaLabel(currentRate, maxStars)}
+        aria-valuenow={currentRate}
+        aria-valuemin={0}
+        aria-valuemax={maxStars}
+        data-size={size}
       >
-        {Array.from({ length: maxStars }, (_, i) => {
-          const isFilled = i < Math.round(currentRate);
+        {Array.from({ length: maxStars }, (_, index) => {
+          const isFilled = index < Math.round(currentRate);
           return (
             <Star
-              key={i}
+              key={index}
               className={cn(
                 starSizes[size],
                 isFilled
@@ -45,6 +60,7 @@ const MemoizedStarRating = memo(function MemoizedStarRating({
                   : "text-muted-foreground/30",
               )}
               aria-hidden="true"
+              data-state={isFilled ? "filled" : "empty"}
             />
           );
         })}
@@ -56,7 +72,7 @@ const MemoizedStarRating = memo(function MemoizedStarRating({
             size === "md" ? "text-base" : "text-sm",
           )}
         >
-          {currentRate.toFixed(1)} / {maxStars}
+          {STAR_RATING_MESSAGES.formattedValue(currentRate, maxStars)}
         </span>
       )}
     </div>
