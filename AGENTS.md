@@ -167,7 +167,7 @@ The codebase strictly follows a **Zero Comments Policy**:
    - Test user-observable behavior and accessibility contracts rather than CSS classes, internal slots, or implementation details.
    - Prefer querying elements by accessible semantic roles:
      - `screen.getByRole("button")`
-   - If needed, narrow quering by imported dictionary constants, e.g. `getByLabelText(REVIEW_FIELDS_MESSAGES.descriptionLabel)`
+   - If needed, narrow quering by imported dictionary constants, e.g. `getByLabelText(REVIEW_FIELDS_MESSAGES.descriptionLabel)`. The exception case is when the literal is created by test (as arrange) and when is expected in assert part. E.g. `<Component name="Stone"/>; expect(screen.getByText("Stone")).toBeInTheDocument();`
    - Assert accessible states: `toBeDisabled()`, `toHaveAttribute("aria-current", "page")`, `toHaveAttribute("aria-disabled", "true")`.
    - Never query styling classes (`.form-item`, `.card-title`) or component slots (`[data-slot]`).
 
