@@ -52,18 +52,12 @@ The codebase strictly follows a **Zero Comments Policy**:
 
 2. **Named Functions over Anonymous Blocks:**
 
-   - Inside `useEffect` or complex handlers, wrap logic in clear named functions instead of anonymous closures or procedural blocks:
-     - `scrollToReviewFormIfDraftExists()`
-     - `focusDescriptionFieldIfRequested()`
-     - `executeDebouncedSearch()`
+   - Inside `useEffect` or complex handlers, wrap logic in clear named functions instead of anonymous closures or procedural blocks, 
+   e.g.`scrollToReviewFormIfDraftExists()`
 
 3. **Named Predicates over Procedural Logic:**
-   - Replace complex regexes, IP ranges, or conditional checks with named boolean predicate functions:
-     - `isLoopbackIPv4()`
-     - `isPrivateRFC1918()`
-     - `stripLeadingWww()`
-     - `ensureHttpProtocolPrefix()`
-     - `compareShopsByCandidatePriority()`
+   - Replace complex regexes, IP ranges, or any complex conditional checks with named boolean predicate functions, 
+   e.g. `isLoopbackIPv4()`, `compareShopsByCandidatePriority()`
 
 4. **Strict Prohibition of Single-Letter & Cryptic Identifiers:**
    - **Zero Single-Letter Variables:** Strictly forbidden to declare or use single-letter variable names (e.g. `const d = ...`, `const p = ...`, `const r = ...`, `(e) => ...`) for domain models, draft objects, state, entities, handlers, or parameters.
@@ -74,54 +68,32 @@ The codebase strictly follows a **Zero Comments Policy**:
 
 ## 4. Component Architecture, Reuse & Separation of Concerns (SoC)
 
-1. **Component Reuse & shadcn UI First Policy (Anti-Duplication):**
+1. **Component Hierarchy & Directory Structure:**
+   - **`components/ui/` (Design System Primitives):**
+     - Low-level, domain-agnostic presentation primitives built on Base UI and shadcn.
+     - Covers layout structure, typography, navigation, form controls, overlays, and feedback/status.
+     - Strictly presentational and reusable across any domain. Contains zero business logic, server actions, or database calls.
+   - **`components/<domain>/` (Shared Domain Components):**
+     - Reusable feature blocks and composite domain components consumed across more than one route (e.g. `components/reviews/`, `components/products/`).
+     - Constructed by composing `components/ui/` primitives with domain models, formatters, and client handlers.
+   - **`app/**/_components/` (Route-Specific Components):**
+     - View orchestrators, composite sections, and subcomponents exclusive to a single page or route (e.g. `app/login/_components/SignIn.tsx`, `app/produkty/_components/ProductListItemCard.tsx`).
+     - Strictly forbidden to import across different page directories.
 
-   - **The Golden Rule:** Never write ad-hoc HTML + Tailwind (`<div className="...">`, `<span className="...">`, raw `<button>`) for ANY element that fulfills a recognized UI role. If a primitive exists in `components/ui/` (or in the shadcn registry), you MUST use it.
-   - **Audit Existing Components First:** When creating or extending any feature, always check `components/` (and the current route's `_components/`) to reuse existing components before writing custom UI markup.
-   - **Shadcn UI Generation over Custom Primitives:** If no existing project component fits, check the available shadcn UI component registry before building custom primitives. Prefer generating or adding an official shadcn/base-ui component (`npx shadcn add <component>`).
-   - **Strictly Banned Ad-Hoc HTML Patterns (by Category):**
-     - _Containers & Structure:_
-       - **Cards / Boxes / Panels:** Strictly forbidden to write ad-hoc markup like `<div className="flex flex-col items-center justify-center p-4 rounded-xl border bg-white ...">` to build a card or boxed container. Always import and use `<Card>` from `@/components/ui/card`.
-       - **Dividers:** Do not write `<div className="h-[1px] w-full bg-border" />` — use `<Separator>` from `@/components/ui/separator`.
-       - **Scroll Areas:** Do not write `<div className="overflow-y-auto max-h-...">` — use `<ScrollArea>` from `@/components/ui/scroll-area`.
-       - **Tabs:** Do not write manual button strips with active index state — use `<Tabs>` from `@/components/ui/tabs`.
-       - **Collapsibles:** Do not write manual `useState` toggling a content div — use `<Collapsible>` from `@/components/ui/collapsible`.
-       - **Headings & Subtitles:** Do not write ad-hoc heading elements with inconsistent typography classes or `<div className="space-y-1">` for titles and subtitles — use `<Heading>`, `<HeadingDescription>`, and `<HeadingGroup>` from `@/components/ui/heading` and `<PageHeader>` / `<SectionHeader>` from `@/components/ui/page-header`.
-     - _Overlays & Popups (Zero Custom Overlay Markup):_
-       - **Modals & Dialogs:** Strictly forbidden to write `<div className="fixed inset-0 bg-black/50...">` with manual z-index or event listeners — use `<Dialog>`, `<Sheet>`, or `<Drawer>` from `@/components/ui/`.
-       - **Dropdowns & Context Menus:** Do not write manual `absolute mt-2` popups with local state — use `<DropdownMenu>` from `@/components/ui/dropdown-menu`.
-       - **Popovers & Float Content:** Use `<Popover>` from `@/components/ui/popover`.
-       - **Hover Tooltips:** Do not write CSS `group-hover:visible` hacks — use `<Tooltip>` from `@/components/ui/tooltip`.
-     - _Feedback, States & Status:_
-       - **Alerts & Error Banners:** Do not write `<div className="p-3 rounded-lg bg-destructive/10 border ...">` — use `<Alert>` from `@/components/ui/alert`.
-       - **Loading Spinners:** Do not write inline SVGs with `animate-spin` or CSS border spinners — use `<Spinner>` from `@/components/ui/spinner`.
-       - **Skeletons:** Do not write ad-hoc `<div className="animate-pulse bg-muted ...">` — use `<Skeleton>` from `@/components/ui/skeleton`.
-       - **Empty States:** Use `<Empty>` from `@/components/ui/empty` instead of hand-crafted empty state boxes.
-       - **Badges / Pills / Tags:** Do not write custom rounded-full spans — use `<Badge>` from `@/components/ui/badge`.
-       - **Progress Bars:** Do not write nested divs with inline percentage widths — use `<Progress>` from `@/components/ui/progress`.
-     - _Actions, Inputs & Identity:_
-       - **Buttons:** Do not write custom `<button className="...">` or `<a className="...">` — use `<Button>` or `<Link className={buttonVariants()}>` from `@/components/ui/button`.
-       - **Form Controls:** Do not write raw unstyled HTML form elements with ad-hoc classes — use `<Input>`, `<Textarea>`, `<Checkbox>`, `<RadioGroup>`, `<Select>`, and `<Label>` from `@/components/ui/`.
-       - **User Avatars & Initials:** Do not write custom rounded-full image/initials divs — use `<Avatar>` from `@/components/ui/avatar`.
-
-2. **Offline Inventory of UI Components & Primitives:**
-
-   - **Already Installed in Project (`components/ui/`):**
-     - _Layout & Structure:_ `Card` (`card.tsx`), `Separator` (`separator.tsx`), `ScrollArea` (`scroll-area.tsx`), `Collapsible` (`collapsible.tsx`), `Tabs` (`tabs.tsx`), `Heading` / `HeadingGroup` / `HeadingDescription` (`heading.tsx`), `PageHeader` / `SectionHeader` (`page-header.tsx`), `PageContainer` (`page-container.tsx`), `Breadcrumb` (`breadcrumb.tsx`), `StickyFormActionBar` (`sticky-form-action-bar.tsx`), `SelectionCard` (`selection-card.tsx`), `PropertyRow` (`property-row.tsx`), `DividedListItem` (`divided-list-item.tsx`)
-     - _Forms & Inputs:_ `Button` (`button.tsx`), `Input` (`input.tsx`), `Textarea` (`textarea.tsx`), `Checkbox` (`checkbox.tsx`), `RadioGroup` (`radio-group.tsx`), `Select` (`select.tsx`), `Label` (`label.tsx`), `Field` (`field.tsx`), `FormFieldCard` (`form-field-card.tsx`), `ComboboxResponsive` (`combobox-responsive.tsx`), `Command` (`command.tsx`)
-     - _Feedback & Overlays:_ `Dialog` (`dialog.tsx`), `Drawer` (`drawer.tsx`), `Sheet` (`sheet.tsx`), `Popover` (`popover.tsx`), `Tooltip` (`tooltip.tsx`), `DropdownMenu` (`dropdown-menu.tsx`), `Alert` (`alert.tsx`), `Badge` (`badge.tsx`), `Avatar` (`avatar.tsx`), `Empty` (`empty.tsx`), `Progress` (`progress.tsx`), `Skeleton` (`skeleton.tsx`), `Spinner` (`spinner.tsx`), `BackLink` / `BackButton` (`back-link.tsx`)
-   - **Available in shadcn Registry (Install via `npx shadcn add <name>`):**
-     - `accordion`, `alert-dialog`, `aspect-ratio`, `calendar`, `carousel`, `chart`, `context-menu`, `hover-card`, `input-otp`, `menubar`, `navigation-menu`, `pagination`, `resizable`, `sidebar`, `slider`, `sonner`, `switch`, `table`, `toggle`, `toggle-group`.
+2. **Base UI & shadcn First Policy (Strict Anti-Duplication):**
+   - **Zero Ad-Hoc HTML:** Strictly forbidden to write ad-hoc HTML + Tailwind (`<div className="...">`, `<span className="...">`, raw `<button>`) for any UI role that maps to a design system primitive (containers, cards, dividers, headings, dialogs, dropdowns, tooltips, alert banners, loading spinners, skeletons, empty states, badges, buttons, form controls).
+   - **Primitive Selection & Generation Workflow:**
+     1. **Audit `components/ui/` first:** Always inspect existing primitives in `components/ui/` before building any UI element.
+     2. **Add from registry if missing:** If no existing primitive covers the requirement, check the official shadcn / Base UI registry and install it via `npx shadcn add <component>`.
+     3. **Compose over custom HTML:** Construct domain and route-level components by composing these primitives to ensure consistent design tokens, keyboard navigation, and accessibility contracts.
 
 3. **Component Decomposition (> 100 Lines Rule):**
-
    - Keep components focused and maintainable. Any component approaching or exceeding 100 lines must be audited for decomposition:
      - Extract stateful logic, network requests, debouncing, and timers into custom hooks (e.g. `useAsyncSearch`, `useProductScrape`, `useAuthGatedSubmit`).
      - Extract distinct presentation blocks into atomic subcomponents (e.g. `SearchInputBar`, `SearchResultsList`, `SearchEmptyState`).
      - Keep the parent component as a clean, declarative orchestrator.
 
 4. **Component Colocation Rules:**
-
    - **Page-Specific Components:** Place components specific to a single route inside a local `_components/` directory within that route (e.g. `app/login/_components/SignIn.tsx`, `app/produkty/_components/ProductListItemCard.tsx`).
    - **Shared Components:** Only general-purpose primitives used across multiple routes belong in the root `components/` directory (e.g. `components/search/`, `components/reviews/`, `components/ui/`).
    - **Direct Imports & No Barrel Re-Exports:** Avoid creating intermediate or redundant barrel `index.ts` files that merely re-export components across layers. Components must be imported directly from their defining module paths.
@@ -173,12 +145,12 @@ The codebase strictly follows a **Zero Comments Policy**:
 
 1. **Domain File Separation:**
 
-   - Split schemas into dedicated domain files in `schemas/` (e.g. `schemas/product.ts`, `schemas/review.ts`, `schemas/login.ts`, `schemas/register.ts`, `schemas/shop.ts`).
+   - Split schemas into dedicated domain files in `schemas/` (e.g. `schemas/product.ts`, `schemas/review.ts`).
    - Avoid monolithic schema files.
 
 2. **Naming Conventions:**
-   - **Schema Constants (Values):** Always use `camelCase` ending with `Schema` (e.g. `productCreateSchema`, `reviewCreateSchema`, `loginSchema`). PascalCase schema constants are strictly forbidden.
-   - **Inferred Types:** Always use `PascalCase` ending with `Input` (e.g. `ProductCreateInput`, `ReviewCreateInput`, `LoginInput`).
+   - **Schema Constants (Values):** Always use `camelCase` ending with `Schema` (e.g. `productCreateSchema`, `reviewCreateSchema`). PascalCase schema constants are strictly forbidden.
+   - **Inferred Types:** Always use `PascalCase` ending with `Input` (e.g. `ProductCreateInput`, `ReviewCreateInput`).
 
 ---
 
@@ -187,16 +159,15 @@ The codebase strictly follows a **Zero Comments Policy**:
 1. **Single Source of Truth for Error Messages & Text (No Magic Literals):**
 
    - Never duplicate hardcoded string literals across test files.
-   - Export validation error dictionaries from schemas (e.g. `PRODUCT_ERRORS`, `REVIEW_ERRORS`, `REGISTER_ERRORS`, `LOGIN_ERRORS`, `AUTH_ERROR_MESSAGES`).
+   - Export validation error dictionaries from schemas (e.g. `PRODUCT_ERRORS`, `REVIEW_ERRORS`).
    - In assertions, always reference these imported dictionary constants instead of raw magic strings.
 
 2. **Feature-Driven & Accessible Contract Testing:**
 
    - Test user-observable behavior and accessibility contracts rather than CSS classes, internal slots, or implementation details.
    - Prefer querying elements by accessible semantic roles:
-     - `screen.getByRole("button", { name: /zaloguj/i })`
-     - `screen.getByRole("textbox", { name: /e-mail/i })`
-     - `screen.getByRole("navigation", { name: /nawigacja stronami/i })`
+     - `screen.getByRole("button")`
+   - If needed, narrow quering by imported dictionary constants, e.g. `getByLabelText(REVIEW_FIELDS_MESSAGES.descriptionLabel)`
    - Assert accessible states: `toBeDisabled()`, `toHaveAttribute("aria-current", "page")`, `toHaveAttribute("aria-disabled", "true")`.
    - Never query styling classes (`.form-item`, `.card-title`) or component slots (`[data-slot]`).
 
@@ -206,7 +177,7 @@ The codebase strictly follows a **Zero Comments Policy**:
    - Assert `result.data`, `result.serverError`, and `result.validationErrors` without spinning up HTTP servers.
 
 4. **Hook Testing via `renderHook`:**
-   - Isolate stateful hooks (`useAuthGatedSubmit`, `useProductScrape`, `useIsMobile`) using `renderHook` from `@testing-library/react`.
+   - Isolate stateful hooks (e.g. `useProductScrape`, `useIsMobile`) using `renderHook` from `@testing-library/react`.
    - Use fake timers (`vi.useFakeTimers()`) to verify delay thresholds and timer cleanups.
 
 ---
@@ -219,7 +190,7 @@ The codebase strictly follows a **Zero Comments Policy**:
    - Avoid arbitrary bracket syntax (e.g. `p-[16px]`, `w-[320px]`).
 
 2. **Semantic Design Tokens:**
-   - Always use semantic color classes (`bg-background`, `text-foreground`, `text-muted-foreground`, `border-border`, `text-primary`) to ensure dark/light theme consistency.
+   - Always use semantic color classes (e.g. `bg-background`, `text-foreground`) to ensure dark/light theme consistency.
 
 ---
 
