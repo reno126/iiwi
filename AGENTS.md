@@ -107,6 +107,23 @@ The codebase strictly follows a **Zero Comments Policy**:
      - Omit the interface and props argument completely:
        `export function Page() { ... }`
 
+6. **Accessible-First & Testable Component Contract (ARIA & Semantic Roles):**
+   - **W3C ARIA Roles for Custom & Evaluated Widgets:**
+     - Any custom UI component or widget representing a recognizable semantic pattern (e.g. rating, progress bar, meter, status indicator, radio group) that does not map directly to a native interactive HTML element (`<button>`, `<input>`, `<select>`) must declare an explicit W3C ARIA `role` (e.g. `role="meter"`, `role="progressbar"`, `role="radiogroup"`, `role="status"`).
+   - **Standard State & Value ARIA Attributes:**
+     - Components must expose their domain values and states through standard ARIA attributes:
+       - **Numeric & Range Values:** For ratings, meters, and progress: `aria-valuenow`, `aria-valuemin`, `aria-valuemax`, and optional `aria-valuetext`.
+       - **Interactive States:** `aria-expanded`, `aria-selected`, `aria-checked`, `aria-disabled`.
+       - **Accessible Identification:** Meaningful `aria-label` or `aria-labelledby` referencing an exported messages dictionary.
+     - **Goal:** Components must be testable strictly via semantic accessibility contracts (e.g. `getByRole("meter")`, `toHaveAccessibleName(...)`, `toHaveAttribute("aria-valuenow", ...)`) without inspecting internal markup, CSS classes, or text nodes.
+   - **Visual & Sub-Element States via `data-*` Attributes:**
+     - Strictly forbidden to rely on styling classes (e.g. `.fill-amber-400`, `.active`) as indicators of state or as test targets.
+     - Sub-element states (e.g. filled vs empty stars, active steps, current tabs) must be exposed via explicit `data-state` or `data-*` attributes (e.g. `data-state="filled" | "empty"`, `data-size="sm"`).
+     - Tests must assert states using `toHaveAttribute("data-state", ...)` or `data-state` selectors.
+   - **Single Source of Truth for Accessible Labels (`*_MESSAGES`):**
+     - All dynamic or static `aria-label` generators and formatted values must be exported in a dedicated messages dictionary (e.g. `STAR_RATING_MESSAGES`, `RATING_INPUT_MESSAGES`) from the component file.
+     - Tests must import and reference these dictionary functions/constants to prevent magic strings and duplicate literals.
+
 ---
 
 ## 5. Form & State Management Patterns
