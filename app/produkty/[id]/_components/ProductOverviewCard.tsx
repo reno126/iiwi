@@ -74,13 +74,16 @@ const MemoizedProductOverviewCard = memo(function MemoizedProductOverviewCard({
                 <PropertyRow
                   semantic="dl"
                   label="Strona produktu:"
-                  className="sm:col-span-2"
+                  className="min-w-0 sm:col-span-2"
+                  labelClassName="shrink-0"
+                  valueClassName="min-w-0 flex-1"
                   value={
                     <a
                       href={product.productUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-primary hover:underline"
+                      title={product.productUrl}
+                      className="inline-flex max-w-full min-w-0 items-center gap-1 text-primary hover:underline"
                     >
                       <span className="truncate">{product.productUrl}</span>
                       <ExternalLink className="size-3 shrink-0" />

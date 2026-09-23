@@ -35,7 +35,7 @@ const MemoizedProductReviewItem = memo(function MemoizedProductReviewItem({
             fallbackName="Anonimowy użytkownik"
           />
 
-          <StarRating rate={review.rate} />
+          <StarRating rate={review.rate} showValue />
         </div>
       </CardHeader>
 
