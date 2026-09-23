@@ -52,4 +52,22 @@ describe("app/produkty/[id]/_components/ProductOverviewCard", () => {
     expect(productLink).toHaveAttribute("rel", "noopener noreferrer");
     expect(productLink.querySelector(".truncate")).toBeInTheDocument();
   });
+
+  it("renders creation date with responsive time element", () => {
+    const handleAddReview = vi.fn();
+    const { container } = render(
+      <ProductOverviewCard
+        product={mockProduct}
+        onAddReview={handleAddReview}
+        isReviewFormOpen={false}
+      />,
+    );
+
+    const timeElements = container.querySelectorAll("time");
+    expect(timeElements.length).toBeGreaterThan(0);
+    expect(timeElements[0]).toHaveAttribute(
+      "dateTime",
+      mockProduct.createdAt.toISOString(),
+    );
+  });
 });

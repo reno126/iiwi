@@ -3,7 +3,8 @@ import { Calendar } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PropertyRow } from "@/components/ui/property-row";
-import { formatPolishDate, formatUserDisplayName } from "@/lib/formatters";
+import { ResponsiveDateTime } from "@/components/ui/responsive-date-time";
+import { formatUserDisplayName } from "@/lib/formatters";
 import { cn } from "cn";
 
 interface AuthorSignatureSkeletonProps {
@@ -40,6 +41,7 @@ interface AuthorSignatureProps {
   image?: string | null;
   fallbackName?: string;
   date?: Date | string | null;
+  includeTime?: boolean;
   avatarSize?: "sm" | "default" | "lg";
   className?: string;
 }
@@ -50,6 +52,7 @@ export function AuthorSignature({
   image,
   fallbackName = "Anonimowy użytkownik",
   date,
+  includeTime = false,
   avatarSize = "default",
   className,
 }: AuthorSignatureProps) {
@@ -70,7 +73,7 @@ export function AuthorSignature({
           <PropertyRow
             icon={Calendar}
             iconClassName="size-3"
-            value={typeof date === "string" ? date : formatPolishDate(date)}
+            value={<ResponsiveDateTime date={date} includeTime={includeTime} />}
             className="gap-1 text-xs text-muted-foreground"
           />
         )}

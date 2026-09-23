@@ -53,6 +53,21 @@ export function formatPolishDate(
   return format(parsedDate, formatString, { locale: pl });
 }
 
+export function formatPolishDateTime(
+  date: Date | string,
+  variant: "long" | "short" = "long",
+  includeTime: boolean = true,
+): string {
+  const formatString = includeTime
+    ? variant === "short"
+      ? "d MMM yyyy, HH:mm"
+      : "d MMMM yyyy, HH:mm"
+    : variant === "short"
+      ? "d MMM yyyy"
+      : "d MMMM yyyy";
+  return formatPolishDate(date, formatString);
+}
+
 export function formatUserDisplayName(
   user?: { name?: string | null; email?: string | null } | null,
   fallback: string = "Użytkownik",

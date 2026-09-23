@@ -22,7 +22,7 @@ export const PRODUCT_FIELDS_MESSAGES = {
   imagePreviewAlt: "Podgląd zdjęcia produktu",
   imageLoadError: "Błąd ładowania podglądu zdjęcia",
   deleteImageButton: "Usuń",
-  codeLabel: "Kod produktu / EAN",
+  codeLabel: "Kod produktu",
   codePlaceholder: "np. 5099206103734",
   statusFilled: "Uzupełnione",
   statusMissing: "Do uzupełnienia",

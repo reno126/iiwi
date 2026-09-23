@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ProductThumbnail } from "@/components/products/ProductThumbnail";
 import { RatingSummary } from "@/components/reviews/RatingSummary";
-import { formatPolishDate } from "@/lib/formatters";
+import { ResponsiveDateTime } from "@/components/ui/responsive-date-time";
 import type { RecentReviewItem } from "@/serverActions/recentReviewsGet";
 
 interface RecentReviewCardProps {
@@ -71,7 +71,7 @@ export function RecentReviewCard({ review }: RecentReviewCardProps) {
 
         <div className="mt-auto flex items-center justify-between border-t border-border pt-3 text-xs text-muted-foreground">
           <span className="max-w-40 truncate font-medium">{authorName}</span>
-          <span>{formatPolishDate(review.createdAt)}</span>
+          <ResponsiveDateTime date={review.createdAt} includeTime={false} />
         </div>
       </Card>
     </Link>

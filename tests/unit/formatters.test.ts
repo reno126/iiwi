@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   formatReviewCount,
   formatPolishDate,
+  formatPolishDateTime,
   formatRatedProductsCount,
   formatUserDisplayName,
   REVIEW_COUNT_SUFFIXES,
@@ -115,6 +116,19 @@ describe("lib/formatters", () => {
       const date = new Date(2026, 9, 28);
       expect(formatPolishDate(date, "yyyy-MM-dd")).toBe("2026-10-28");
       expect(formatPolishDate(date, "d MMM yyyy")).toBe("28 paź 2026");
+    });
+  });
+
+  describe("formatPolishDateTime", () => {
+    it("formats date with long Polish date-time format by default and with long variant", () => {
+      const date = new Date(2026, 8, 7, 12, 35);
+      expect(formatPolishDateTime(date)).toBe("7 września 2026, 12:35");
+      expect(formatPolishDateTime(date, "long")).toBe("7 września 2026, 12:35");
+    });
+
+    it("formats date with short 3-letter Polish month for mobile variant", () => {
+      const date = new Date(2026, 8, 7, 12, 35);
+      expect(formatPolishDateTime(date, "short")).toBe("7 wrz 2026, 12:35");
     });
   });
 

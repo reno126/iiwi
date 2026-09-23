@@ -1,4 +1,5 @@
-import { formatPolishDate, formatUserDisplayName } from "@/lib/formatters";
+import { formatUserDisplayName } from "@/lib/formatters";
+import { ResponsiveDateTime } from "@/components/ui/responsive-date-time";
 import { User, Calendar, Mail } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Heading } from "@/components/ui/heading";
@@ -49,7 +50,7 @@ export function UserProfileCard({
             label={`${DASHBOARD_MESSAGES.accountCreatedLabel} `}
             value={
               <strong className="font-semibold text-foreground">
-                {formatPolishDate(createdAt)}
+                <ResponsiveDateTime date={createdAt} includeTime={false} />
               </strong>
             }
           />

@@ -16,7 +16,8 @@ import { Heading } from "@/components/ui/heading";
 import { RatingSummary } from "@/components/reviews/RatingSummary";
 import { ProductThumbnail } from "@/components/products/ProductThumbnail";
 import { PropertyRow } from "@/components/ui/property-row";
-import { formatPolishDate, formatUserDisplayName } from "@/lib/formatters";
+import { ResponsiveDateTime } from "@/components/ui/responsive-date-time";
+import { formatUserDisplayName } from "@/lib/formatters";
 import { PRODUCT_DETAILS_MESSAGES } from "./ProductDetails";
 
 interface ProductOverviewCardProps {
@@ -95,7 +96,7 @@ const MemoizedProductOverviewCard = memo(function MemoizedProductOverviewCard({
               {product.code && (
                 <PropertyRow
                   semantic="dl"
-                  label="Kod SKU / EAN:"
+                  label="Kod produktu"
                   valueClassName="font-mono text-foreground"
                   value={product.code}
                 />
@@ -112,10 +113,7 @@ const MemoizedProductOverviewCard = memo(function MemoizedProductOverviewCard({
                 semantic="dl"
                 label="Data utworzenia:"
                 icon={Calendar}
-                value={formatPolishDate(
-                  product.createdAt,
-                  "d MMMM yyyy, HH:mm",
-                )}
+                value={<ResponsiveDateTime date={product.createdAt} />}
               />
 
               {hasDistinctUpdateDate && (
@@ -123,10 +121,7 @@ const MemoizedProductOverviewCard = memo(function MemoizedProductOverviewCard({
                   semantic="dl"
                   label="Ostatnia modyfikacja:"
                   icon={Clock}
-                  value={formatPolishDate(
-                    product.updatedAt,
-                    "d MMMM yyyy, HH:mm",
-                  )}
+                  value={<ResponsiveDateTime date={product.updatedAt} />}
                 />
               )}
             </dl>
