@@ -99,16 +99,23 @@ TrueReview maintains a comprehensive multi-layer automated testing pipeline:
 
 ```
 tests/
-├── unit/                 # 25 test suites (195 tests)
-│   ├── auth/             # useAuthGatedSubmit, useEnsureAuthenticated, authHelpers
-│   ├── components/       # StarRating, FormFieldCard, ProductAtomicFields
+├── unit/                 # 41 test suites (252 tests)
+│   ├── auth/             # useAuthGatedSubmit, useEnsureAuthenticated
 │   ├── hooks/            # useIsMobile, useProductScrape
-│   ├── scraper/          # zenrowsClient, extractMetadata, ssrfProtection
-│   └── storage/          # ttlStorage, reviewDraftStorage
-├── integration/          # 25 test suites (125 tests)
+│   ├── scraper/          # zenrowsClient
+│   ├── storage/          # ttlStorage, reviewDraftStorage
+│   └── *.test.ts(x)      # StarRating, ResponsiveDateTime, FormFieldCard, ProductAtomicFields, formatters, etc.
+├── integration/          # 27 test suites (141 tests)
 │   ├── api/              # Route handlers (registration, auth)
-│   ├── products/         # ProductDetails, CombinedProductReviewForm, ProductFields
-│   └── serverActions/    # productsGet, productGetById, recentReviewsGet, reconstructRatings
+│   ├── auth/             # Register, SignIn, SignOut
+│   ├── dashboard/        # Dashboard
+│   ├── home/             # HomePage
+│   ├── navigation/       # TopMenu
+│   ├── products/         # ProductDetails, CombinedProductReviewForm, ProductFields, catalog, creations
+│   ├── reviews/          # reviewCreate
+│   ├── search/           # AsyncSearch
+│   ├── serverActions/    # productsGet, productGetById, recentReviewsGet, reconstructRatings, etc.
+│   └── ui/               # ComboboxResponsive
 └── e2e/                  # Playwright browser automation
     ├── helpers/          # Test drivers, authentication helpers, database cleanup
     └── specs/            # Full end-to-end user journeys (review creation, auth redirection)
@@ -188,14 +195,18 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 
 ## 🤖 AI Agents & Architecture Guidelines (`AGENTS.md`)
 
-This repository strictly enforces coding standards and architectural principles defined in [`AGENTS.md`](./AGENTS.md), which serves as the single source of truth for AI coding assistants and human developers alike:
+This repository strictly enforces coding standards and architectural principles following **Progressive Disclosure** rooted in [`AGENTS.md`](./AGENTS.md). The root guide defines universal core rules, while specialized domain manuals reside in [`docs/`](./docs):
 
-- **Zero Comments Policy:** Code must be 100% self-descriptive through expressive naming and clean abstractions without inline code comments.
-- **Component Decomposition (> 100 Lines Rule):** Large components are modularized into custom hooks and atomic presentation blocks.
-- **Form & Draft Persistence:** Standardized `useAuthGatedSubmit` + TTL local storage patterns for resilient, auth-safe form submissions.
-- **Accessible Contract Testing:** Feature-driven testing focusing on user-observable behavior and accessible semantic roles (`getByRole`).
-- **Zero-Assertion TypeScript Safety:** Strict hierarchy avoiding `as Type` and `!` assertions in favor of type narrowing, `satisfies`, and Zod validation.
-- **Mobile-First Ergonomics & CWV:** Enforcement of minimum $48\text{px}$ touch targets, grouped "field islands", and Core Web Vitals performance thresholds.
+### Universal Core Rules
+- **AST Architecture Verification:** Enforced via `pnpm verify:rules` (`scripts/verifyAgentRules.ts`) with 0 tolerance for violations.
+- **Zero Comments Policy:** Strictly forbidden to use any inline comments in source code, components, utilities, or test files. Enforced by AST.
+- **Zero Single-Letter Identifiers:** Descriptive domain naming mandatory everywhere (e.g. `savedDraft`, `product`, `actionResult`). Pure loop counters (`i`) are the only exception.
+
+### Specialized Architecture Manuals
+- [**Component Architecture & ARIA Contracts**](./docs/components.md) — Base UI / shadcn first, colocation (`_components`), props templates, accessible contracts (`role="meter"`, `data-state`).
+- [**Forms, State & Schemas**](./docs/forms-and-state.md) — React Hook Form + Zod, `useState` elimination, context value memoization, auth drafts.
+- [**Styling, Mobile & Performance**](./docs/styling-and-performance.md) — Tailwind v4 dynamic scale, mobile field islands, Core Web Vitals (LCP, CLS, INP, FCP).
+- [**Testing Standards**](./docs/testing.md) — Accessible semantic testing, error dictionaries, server action testing, hook testing.
 
 ---
 
@@ -206,6 +217,7 @@ This repository strictly enforces coding standards and architectural principles 
 | `pnpm dev`                 | Starts the Next.js development server with Turbopack          |
 | `pnpm build`               | Builds the production application                             |
 | `pnpm start`               | Starts the production server                                  |
+| `pnpm verify:rules`        | Verifies AGENTS.md architectural rules and AST conventions    |
 | `pnpm typecheck`           | Runs TypeScript type checking (`tsc --noEmit`)                |
 | `pnpm lint`                | Runs ESLint verification                                      |
 | `pnpm test`                | Runs the full Vitest suite (all unit and integration tests)   |
