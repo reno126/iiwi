@@ -36,6 +36,7 @@ export function ProductNameField({
       missingBadgeText={PRODUCT_FIELDS_MESSAGES.statusMissing}
       error={errors.name?.message}
       className={className}
+      reserveSpace
     >
       <Textarea
         id="product-name"

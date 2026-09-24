@@ -98,11 +98,10 @@ export function ProductImageField({
             </div>
             <Button
               type="button"
-              variant="outline"
+              variant="destructive"
               size="sm"
               disabled={disabled}
               onClick={handleClearImage}
-              className="shrink-0 text-muted-foreground hover:border-destructive/40 hover:text-destructive sm:w-auto"
             >
               <Trash2 className="mr-1 size-3.5" />
               {PRODUCT_FIELDS_MESSAGES.deleteImageButton}

@@ -23,8 +23,8 @@ export function SelectedProductCard({
         <ProductThumbnail
           src={product.imageUrl}
           alt={product.name}
-          size="xs"
-          className="size-10 shrink-0 rounded-md border bg-background"
+          size="lg"
+          className="shrink-0 rounded-md border bg-background"
         />
       }
       title={product.name}

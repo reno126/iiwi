@@ -50,12 +50,11 @@ export function SelectedShopCard({
 
           <Button
             type="button"
-            variant="outline"
+            variant="destructive"
             size="sm"
             aria-label={SHOP_SELECTOR_MESSAGES.deleteShopAriaLabel}
             disabled={disabled}
             onClick={onClear}
-            className="text-muted-foreground hover:border-destructive/40 hover:text-destructive sm:w-auto"
           >
             <Trash2 className="mr-1 size-3.5" />
             {SHOP_SELECTOR_MESSAGES.deleteButton}
