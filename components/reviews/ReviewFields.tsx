@@ -4,12 +4,9 @@ import { FieldSet, FieldLegend, FieldGroup } from "@/components/ui/field";
 import { ReviewRatingField } from "./ReviewRatingField";
 import { ReviewDescriptionField } from "./ReviewDescriptionField";
 
-export const REVIEW_FIELDS_MESSAGES = {
-  legend: "Twoja opinia",
-  rateLabel: "Ocena *",
-  descriptionLabel: "Treść recenzji *",
-  descriptionPlaceholder: "Napisz, jak oceniasz ten produkt...",
-} as const;
+import { REVIEW_FIELDS_MESSAGES } from "./reviewFieldsMessages";
+
+export { REVIEW_FIELDS_MESSAGES };
 
 interface ReviewFieldsProps {
   className?: string;

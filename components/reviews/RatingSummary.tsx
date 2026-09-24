@@ -13,13 +13,17 @@ export interface RatingSummaryProps {
   className?: string;
 }
 
+export const RATING_SUMMARY_MESSAGES = {
+  defaultEmptyText: "Brak ocen",
+} as const;
+
 export function RatingSummary({
   rate,
   count,
   size = "sm",
   showCount = true,
   showEmptyText = false,
-  emptyText = "Brak ocen",
+  emptyText = RATING_SUMMARY_MESSAGES.defaultEmptyText,
   className,
 }: RatingSummaryProps) {
   const iconSize =

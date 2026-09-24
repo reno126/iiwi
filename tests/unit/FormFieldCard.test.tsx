@@ -1,13 +1,17 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { FormFieldCard } from "@/components/ui/form-field-card";
+import {
+  FormFieldCard,
+  FORM_FIELD_CARD_MESSAGES,
+} from "@/components/ui/form-field-card";
+import { PRODUCT_ERRORS } from "@/schemas/product";
 
 const TEST_MESSAGES = {
   label: "Przykładowe pole",
   childText: "Zawartość pola formularza",
-  errorMessage: "Pole jest wymagane",
-  statusFilled: "Uzupełnione",
-  statusMissing: "Do uzupełnienia",
+  errorMessage: PRODUCT_ERRORS.nameRequired,
+  statusFilled: FORM_FIELD_CARD_MESSAGES.statusFilled,
+  statusMissing: FORM_FIELD_CARD_MESSAGES.statusMissing,
 } as const;
 
 describe("components/ui/form-field-card", () => {

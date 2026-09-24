@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import { useProductScrape } from "@/hooks/useProductScrape";
+import {
+  useProductScrape,
+  PRODUCT_SCRAPE_HOOK_MESSAGES,
+} from "@/hooks/useProductScrape";
 import { PRODUCT_ERRORS } from "@/schemas/product";
 
 vi.mock("@/serverActions/productScrapeMetadata", () => ({
@@ -12,7 +15,7 @@ import { productScrapeMetadata } from "@/serverActions/productScrapeMetadata";
 const TEST_ERROR_MESSAGES = {
   serverError: "Strona sklepu jest niedostępna.",
   globalValidationError: "Błąd walidacji globalnej",
-  unexpectedError: "Wystąpił nieoczekiwany błąd podczas pobierania danych.",
+  unexpectedError: PRODUCT_SCRAPE_HOOK_MESSAGES.unexpectedError,
   successNotice: "Dane pobrane!",
 } as const;
 

@@ -6,6 +6,13 @@ import {
   waitForHydration,
   type TestUser,
 } from "./helpers/auth";
+import { ADD_REVIEW_FLOW_MESSAGES } from "@/app/opinie/dodaj/_components/addReviewFlowMessages";
+import { COMBINED_FORM_MESSAGES } from "@/app/opinie/dodaj/_components/combinedFormMessages";
+import { URL_PROMPT_MESSAGES } from "@/app/opinie/dodaj/_components/urlPromptMessages";
+import { PRODUCT_FIELDS_MESSAGES } from "@/app/opinie/dodaj/_components/productFieldsMessages";
+import { RATING_INPUT_MESSAGES } from "@/components/reviews/ratingInputMessages";
+import { REVIEW_FIELDS_MESSAGES } from "@/components/reviews/reviewFieldsMessages";
+import { PRODUCT_ERRORS } from "@/schemas/product";
 
 test.describe("Product Creation Flow (End-to-End)", () => {
   let authedUser: TestUser;
@@ -29,29 +36,39 @@ test.describe("Product Creation Flow (End-to-End)", () => {
     await waitForHydration(page);
     await expect(page).toHaveURL(/\/opinie\/dodaj/);
 
-    await page.getByRole("button", { name: /dodaj nowy produkt/i }).click();
+    await page
+      .getByRole("button", {
+        name: ADD_REVIEW_FLOW_MESSAGES.addNewProductButton,
+      })
+      .click();
 
     await expect(
-      page.getByRole("heading", { name: /masz link do oferty produktu\?/i }),
+      page.getByRole("heading", {
+        name: COMBINED_FORM_MESSAGES.urlPromptTitle,
+      }),
     ).toBeVisible();
-    await expect(
-      page.getByText(/wklej go poniżej, to pójdzie szybko!/i),
-    ).toBeVisible();
+    await expect(page.getByText(URL_PROMPT_MESSAGES.subtitle)).toBeVisible();
 
-    await page.getByRole("button", { name: /dodaj produkt ręcznie/i }).click();
+    await page
+      .getByRole("button", { name: URL_PROMPT_MESSAGES.manualButton })
+      .click();
 
     const productName = `${E2E_TEST_PREFIX} Produkt E2E ${timestamp}`;
-    await page.getByLabel(/Nazwa produktu/i).fill(productName);
+    await page.getByLabel(PRODUCT_FIELDS_MESSAGES.nameLabel).fill(productName);
     await page
-      .getByLabel(/Kod produktu \/ EAN/i)
+      .getByLabel(PRODUCT_FIELDS_MESSAGES.codeLabel)
       .fill(`${E2E_TEST_PREFIX}SKU-${timestamp.toString().slice(-6)}`);
 
-    await page.getByRole("radio", { name: /5 z 5 gwiazdek/i }).click();
     await page
-      .getByLabel(/Treść recenzji/i)
+      .getByRole("radio", { name: RATING_INPUT_MESSAGES.starAriaLabel(5) })
+      .click();
+    await page
+      .getByLabel(REVIEW_FIELDS_MESSAGES.descriptionLabel)
       .fill("Świetny testowy produkt E2E!");
 
-    await page.getByRole("button", { name: /dodaj produkt i opinię/i }).click();
+    await page
+      .getByRole("button", { name: COMBINED_FORM_MESSAGES.submitLabel })
+      .click();
 
     await expect(page).toHaveURL(/\/produkty\/.+/);
     await expect(
@@ -64,16 +81,24 @@ test.describe("Product Creation Flow (End-to-End)", () => {
   }) => {
     await page.goto("/opinie/dodaj");
     await waitForHydration(page);
-    await page.getByRole("button", { name: /dodaj nowy produkt/i }).click();
+    await page
+      .getByRole("button", {
+        name: ADD_REVIEW_FLOW_MESSAGES.addNewProductButton,
+      })
+      .click();
 
-    await page.getByRole("button", { name: /dodaj produkt ręcznie/i }).click();
+    await page
+      .getByRole("button", { name: URL_PROMPT_MESSAGES.manualButton })
+      .click();
 
-    await page.getByLabel(/Nazwa produktu/i).fill("AB");
-    await page.getByRole("button", { name: /dodaj produkt i opinię/i }).click();
+    await page.getByLabel(PRODUCT_FIELDS_MESSAGES.nameLabel).fill("AB");
+    await page
+      .getByRole("button", { name: COMBINED_FORM_MESSAGES.submitLabel })
+      .click();
 
-    await expect(page.getByLabel(/Nazwa produktu/i)).toHaveAttribute(
-      "aria-invalid",
-      "true",
-    );
+    await expect(
+      page.getByLabel(PRODUCT_FIELDS_MESSAGES.nameLabel),
+    ).toHaveAttribute("aria-invalid", "true");
+    await expect(page.getByText(PRODUCT_ERRORS.nameMinLength)).toBeVisible();
   });
 });

@@ -68,9 +68,13 @@ export function formatPolishDateTime(
   return formatPolishDate(date, formatString);
 }
 
+export const USER_DISPLAY_MESSAGES = {
+  defaultFallback: "Użytkownik",
+} as const;
+
 export function formatUserDisplayName(
   user?: { name?: string | null; email?: string | null } | null,
-  fallback: string = "Użytkownik",
+  fallback: string = USER_DISPLAY_MESSAGES.defaultFallback,
 ): string {
   return user?.name?.trim() || user?.email?.split("@")[0] || fallback;
 }

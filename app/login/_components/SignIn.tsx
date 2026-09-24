@@ -25,21 +25,9 @@ import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 
-export const SIGN_IN_MESSAGES = {
-  title: "Zaloguj się",
-  description: "Wprowadź swoje dane, aby uzyskać dostęp do konta",
-  footerPrompt: "Nie masz jeszcze konta?",
-  registerLink: "Zarejestruj się",
-  emailLabel: "Adres e-mail",
-  emailPlaceholder: "twoj@email.com",
-  passwordLabel: "Hasło",
-  passwordPlaceholder: "••••••••",
-  submitButton: "Zaloguj się",
-  submittingButton: "Logowanie...",
-  orContinueWith: "Lub kontynuuj przez",
-  googleButton: "Zaloguj się przez Google",
-  googlePending: "Przekierowywanie...",
-} as const;
+import { SIGN_IN_MESSAGES } from "../constants";
+
+export { SIGN_IN_MESSAGES };
 
 interface SignInProps {
   className?: string;

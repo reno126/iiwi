@@ -1,0 +1,15 @@
+export const REGISTER_MESSAGES = {
+  title: "Utwórz konto",
+  description: "Wprowadź swoje dane, aby utworzyć nowe konto",
+  footerPrompt: "Masz już konto?",
+  loginLink: "Zaloguj się",
+  nameLabel: "Imię",
+  namePlaceholder: "Jan Kowalski",
+  emailLabel: "Adres e-mail",
+  emailPlaceholder: "twoj@email.com",
+  passwordLabel: "Hasło",
+  passwordPlaceholder: "••••••••",
+  submitButton: "Zarejestruj się",
+  submittingButton: "Tworzenie konta...",
+  defaultError: "Wystąpił błąd podczas rejestracji",
+} as const;

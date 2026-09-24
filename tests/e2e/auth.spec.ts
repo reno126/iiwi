@@ -2,7 +2,10 @@ import { test, expect } from "@playwright/test";
 import { prisma } from "@/lib/db/prisma";
 import { E2E_TEST_PREFIX, waitForHydration } from "./helpers/auth";
 import { DASHBOARD_MESSAGES } from "@/app/dashboard/constants";
-import { REGISTER_API_MESSAGES } from "@/schemas/register";
+import { SIGN_IN_MESSAGES } from "@/app/login/constants";
+import { REGISTER_MESSAGES } from "@/app/register/constants";
+import { LOGIN_ERRORS } from "@/schemas/login";
+import { REGISTER_API_MESSAGES, REGISTER_ERRORS } from "@/schemas/register";
 
 test.describe("Authentication and Route Protection Flows", () => {
   test("redirects unauthenticated user from /dashboard to /login with callbackUrl", async ({
@@ -12,7 +15,7 @@ test.describe("Authentication and Route Protection Flows", () => {
 
     await expect(page).toHaveURL(/\/login\?callbackUrl=%2Fdashboard/);
     await expect(
-      page.getByRole("heading", { name: /zaloguj się/i }),
+      page.getByRole("heading", { name: SIGN_IN_MESSAGES.title }),
     ).toBeVisible();
   });
 
@@ -22,20 +25,27 @@ test.describe("Authentication and Route Protection Flows", () => {
     await page.goto("/register");
     await waitForHydration(page);
 
-    await page.getByRole("button", { name: /zarejestruj się/i }).click();
+    await page
+      .getByRole("button", { name: REGISTER_MESSAGES.submitButton })
+      .click();
 
-    await expect(page.getByLabel(/Imię/i)).toHaveAttribute(
+    await expect(page.getByLabel(REGISTER_MESSAGES.nameLabel)).toHaveAttribute(
       "aria-invalid",
       "true",
     );
-    await expect(page.getByLabel(/Adres e-mail/i)).toHaveAttribute(
+    await expect(page.getByLabel(REGISTER_MESSAGES.emailLabel)).toHaveAttribute(
       "aria-invalid",
       "true",
     );
-    await expect(page.getByLabel(/Hasło/i)).toHaveAttribute(
-      "aria-invalid",
-      "true",
-    );
+    await expect(
+      page.getByLabel(REGISTER_MESSAGES.passwordLabel),
+    ).toHaveAttribute("aria-invalid", "true");
+
+    await expect(page.getByText(REGISTER_ERRORS.nameMinLength)).toBeVisible();
+    await expect(page.getByText(REGISTER_ERRORS.invalidEmail)).toBeVisible();
+    await expect(
+      page.getByText(REGISTER_ERRORS.passwordMinLength),
+    ).toBeVisible();
   });
 
   test("completes registration flow and automatically logs in to dashboard", async ({
@@ -48,12 +58,16 @@ test.describe("Authentication and Route Protection Flows", () => {
       await waitForHydration(page);
 
       await page
-        .getByLabel(/Imię/i)
+        .getByLabel(REGISTER_MESSAGES.nameLabel)
         .fill(`${E2E_TEST_PREFIX} Testowy Użytkownik`);
-      await page.getByLabel(/Adres e-mail/i).fill(uniqueEmail);
-      await page.getByLabel(/Hasło/i).fill("bezpieczneHaslo123");
+      await page.getByLabel(REGISTER_MESSAGES.emailLabel).fill(uniqueEmail);
+      await page
+        .getByLabel(REGISTER_MESSAGES.passwordLabel)
+        .fill("bezpieczneHaslo123");
 
-      await page.getByRole("button", { name: /zarejestruj się/i }).click();
+      await page
+        .getByRole("button", { name: REGISTER_MESSAGES.submitButton })
+        .click();
 
       await expect(page).toHaveURL(/\/dashboard/);
       await expect(
@@ -86,11 +100,15 @@ test.describe("Authentication and Route Protection Flows", () => {
       await waitForHydration(page);
 
       await page
-        .getByLabel(/Imię/i)
+        .getByLabel(REGISTER_MESSAGES.nameLabel)
         .fill(`${E2E_TEST_PREFIX} Drugi Użytkownik`);
-      await page.getByLabel(/Adres e-mail/i).fill(duplicateEmail);
-      await page.getByLabel(/Hasło/i).fill("inneHaslo12345");
-      await page.getByRole("button", { name: /zarejestruj się/i }).click();
+      await page.getByLabel(REGISTER_MESSAGES.emailLabel).fill(duplicateEmail);
+      await page
+        .getByLabel(REGISTER_MESSAGES.passwordLabel)
+        .fill("inneHaslo12345");
+      await page
+        .getByRole("button", { name: REGISTER_MESSAGES.submitButton })
+        .click();
 
       await expect(
         page.getByText(REGISTER_API_MESSAGES.emailTaken),
@@ -108,15 +126,22 @@ test.describe("Authentication and Route Protection Flows", () => {
     await page.goto("/login");
     await waitForHydration(page);
 
-    await page.getByRole("button", { name: /^zaloguj się$/i }).click();
+    await page
+      .getByRole("button", {
+        name: SIGN_IN_MESSAGES.submitButton,
+        exact: true,
+      })
+      .click();
 
-    await expect(page.getByLabel(/Adres e-mail/i)).toHaveAttribute(
+    await expect(page.getByLabel(SIGN_IN_MESSAGES.emailLabel)).toHaveAttribute(
       "aria-invalid",
       "true",
     );
-    await expect(page.getByLabel(/Hasło/i)).toHaveAttribute(
-      "aria-invalid",
-      "true",
-    );
+    await expect(
+      page.getByLabel(SIGN_IN_MESSAGES.passwordLabel),
+    ).toHaveAttribute("aria-invalid", "true");
+
+    await expect(page.getByText(LOGIN_ERRORS.invalidEmail)).toBeVisible();
+    await expect(page.getByText(LOGIN_ERRORS.passwordRequired)).toBeVisible();
   });
 });

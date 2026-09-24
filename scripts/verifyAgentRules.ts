@@ -38,6 +38,15 @@ const KNOWN_ERROR_MESSAGES = [
   "Niepoprawne dane logowania",
   "Opinia jest za krótka",
   "Wystąpił błąd",
+  "Nie udało się pobrać",
+  "Nazwa jest za krótka",
+  "Ocena jest wymagana",
+  "Nazwa produktu",
+  "Treść recenzji",
+  "Podaj prawidłowy adres",
+  "Wprowadź hasło",
+  "Imię musi mieć",
+  "Hasło musi mieć",
 ];
 
 function collectSourceFiles(dir: string): string[] {
@@ -223,7 +232,9 @@ function isTestAssertionLine(line: string): boolean {
     line.includes("expect(") ||
     line.includes("getByRole(") ||
     line.includes("getByText(") ||
+    line.includes("getByLabel(") ||
     line.includes("findByText(") ||
+    line.includes("findByLabel(") ||
     line.includes("toBe(") ||
     line.includes("toEqual(") ||
     line.includes("toHaveBeenCalledWith(")
@@ -240,7 +251,13 @@ function checkMagicLiteralsInTests(filePath: string, content: string): void {
     if (!isTestAssertionLine(line)) continue;
 
     for (const knownError of KNOWN_ERROR_MESSAGES) {
-      if (line.includes(`"${knownError}`) || line.includes(`'${knownError}`)) {
+      const hasLiteralString =
+        line.includes(`"${knownError}`) || line.includes(`'${knownError}`);
+      const hasRegexLiteral = new RegExp(`/[^/]*${knownError}[^/]*/`, "i").test(
+        line,
+      );
+
+      if (hasLiteralString || hasRegexLiteral) {
         VIOLATIONS.push({
           file: filePath,
           line: i + 1,

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { ComboboxResponsive } from "@/components/ui/combobox-responsive";
+import { SHOP_SELECTOR_MESSAGES } from "@/app/opinie/dodaj/_components/shopSelectorMessages";
 import * as useMobileHook from "@/hooks/useIsMobile";
 
 interface TestItem {
@@ -8,6 +9,8 @@ interface TestItem {
   name: string;
   logo?: string;
 }
+
+const TEST_PLACEHOLDER = "Wybierz sklep...";
 
 const testItems: TestItem[] = [
   { id: "shop-1", name: "Media Expert", logo: "/mediaexpert.png" },
@@ -20,15 +23,15 @@ describe("components/ui/combobox-responsive", () => {
     render(
       <ComboboxResponsive<TestItem>
         items={testItems}
-        getItemValue={(i) => i.id}
-        getItemLabel={(i) => i.name}
-        placeholder="Wybierz sklep..."
-        renderItem={(i) => <span>{i.name}</span>}
+        getItemValue={(item) => item.id}
+        getItemLabel={(item) => item.name}
+        placeholder={TEST_PLACEHOLDER}
+        renderItem={(item) => <span>{item.name}</span>}
       />,
     );
 
     expect(screen.getByRole("combobox")).toBeInTheDocument();
-    expect(screen.getByText("Wybierz sklep...")).toBeInTheDocument();
+    expect(screen.getByText(TEST_PLACEHOLDER)).toBeInTheDocument();
   });
 
   it("renders trigger with selected item name when value is provided", () => {
@@ -36,10 +39,10 @@ describe("components/ui/combobox-responsive", () => {
       <ComboboxResponsive<TestItem>
         items={testItems}
         value="shop-1"
-        getItemValue={(i) => i.id}
-        getItemLabel={(i) => i.name}
-        placeholder="Wybierz sklep..."
-        renderItem={(i) => <span>{i.name}</span>}
+        getItemValue={(item) => item.id}
+        getItemLabel={(item) => item.name}
+        placeholder={TEST_PLACEHOLDER}
+        renderItem={(item) => <span>{item.name}</span>}
       />,
     );
 
@@ -51,9 +54,9 @@ describe("components/ui/combobox-responsive", () => {
       <ComboboxResponsive<TestItem>
         items={testItems}
         value="shop-2"
-        getItemValue={(i) => i.id}
-        getItemLabel={(i) => i.name}
-        renderItem={(i) => <span>{i.name}</span>}
+        getItemValue={(item) => item.id}
+        getItemLabel={(item) => item.name}
+        renderItem={(item) => <span>{item.name}</span>}
         renderTrigger={(selectedItem) => (
           <span data-testid="custom-trigger">Sklep: {selectedItem?.name}</span>
         )}
@@ -69,12 +72,12 @@ describe("components/ui/combobox-responsive", () => {
     render(
       <ComboboxResponsive<TestItem>
         items={testItems}
-        getItemValue={(i) => i.id}
-        getItemLabel={(i) => i.name}
-        placeholder="Wybierz sklep..."
-        renderItem={(i, isSelected) => (
-          <span data-testid={`item-${i.id}`}>
-            {i.name} {isSelected ? "(wybrany)" : ""}
+        getItemValue={(item) => item.id}
+        getItemLabel={(item) => item.name}
+        placeholder={TEST_PLACEHOLDER}
+        renderItem={(item, isSelected) => (
+          <span data-testid={`item-${item.id}`}>
+            {item.name} {isSelected ? "(wybrany)" : ""}
           </span>
         )}
       />,
@@ -95,11 +98,11 @@ describe("components/ui/combobox-responsive", () => {
     render(
       <ComboboxResponsive<TestItem>
         items={testItems}
-        getItemValue={(i) => i.id}
-        getItemLabel={(i) => i.name}
+        getItemValue={(item) => item.id}
+        getItemLabel={(item) => item.name}
         onValueChange={handleChange}
-        placeholder="Wybierz sklep..."
-        renderItem={(i) => <span>{i.name}</span>}
+        placeholder={TEST_PLACEHOLDER}
+        renderItem={(item) => <span>{item.name}</span>}
       />,
     );
 
@@ -116,11 +119,11 @@ describe("components/ui/combobox-responsive", () => {
     render(
       <ComboboxResponsive<TestItem>
         items={testItems}
-        getItemValue={(i) => i.id}
-        getItemLabel={(i) => i.name}
-        placeholder="Wybierz sklep..."
-        dialogTitle="Wybierz sklep z listy"
-        renderItem={(i) => <span>{i.name}</span>}
+        getItemValue={(item) => item.id}
+        getItemLabel={(item) => item.name}
+        placeholder={TEST_PLACEHOLDER}
+        dialogTitle={SHOP_SELECTOR_MESSAGES.dialogTitleSelect}
+        renderItem={(item) => <span>{item.name}</span>}
       />,
     );
 
@@ -128,7 +131,7 @@ describe("components/ui/combobox-responsive", () => {
     fireEvent.click(trigger);
 
     expect(
-      await screen.findByText("Wybierz sklep z listy"),
+      await screen.findByText(SHOP_SELECTOR_MESSAGES.dialogTitleSelect),
     ).toBeInTheDocument();
     expect(screen.getByText("Biedronka")).toBeInTheDocument();
   });

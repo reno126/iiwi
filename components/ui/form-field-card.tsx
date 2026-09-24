@@ -5,6 +5,11 @@ import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "cn";
 
+export const FORM_FIELD_CARD_MESSAGES = {
+  statusFilled: "Uzupełnione",
+  statusMissing: "Do uzupełnienia",
+} as const;
+
 interface FormFieldCardProps {
   label: string;
   htmlFor?: string;
@@ -24,8 +29,8 @@ export function FormFieldCard({
   htmlFor,
   isFilled = false,
   showStatus = false,
-  filledBadgeText = "Uzupełnione",
-  missingBadgeText = "Do uzupełnienia",
+  filledBadgeText = FORM_FIELD_CARD_MESSAGES.statusFilled,
+  missingBadgeText = FORM_FIELD_CARD_MESSAGES.statusMissing,
   error,
   reserveSpace = false,
   dataInvalid,

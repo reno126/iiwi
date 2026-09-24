@@ -11,6 +11,7 @@ import { PRODUCT_FIELDS_MESSAGES } from "@/app/opinie/dodaj/_components/ProductF
 import { REVIEW_FIELDS_MESSAGES } from "@/components/reviews/ReviewFields";
 import { RATING_INPUT_MESSAGES } from "@/components/reviews/RatingInput";
 import { productScrapeMetadata } from "@/serverActions/productScrapeMetadata";
+import { PRODUCT_SCRAPE_MESSAGES } from "@/schemas/productScrape";
 import { productWithReviewCreate } from "@/serverActions/productWithReviewCreate";
 import {
   saveReviewDraft,
@@ -257,7 +258,7 @@ describe("CombinedProductReviewForm", () => {
 
     it("handles scraping failure: retains productUrl and displays failure banner", async () => {
       vi.mocked(productScrapeMetadata).mockResolvedValueOnce({
-        serverError: "Nie udało się pobrać danych ze wskazanego sklepu.",
+        serverError: PRODUCT_SCRAPE_MESSAGES.scrapeFailedError,
       });
 
       const user = userEvent.setup();

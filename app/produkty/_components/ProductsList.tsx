@@ -12,6 +12,13 @@ import {
 } from "@/components/ui/empty";
 import { ProductListItemCard } from "./ProductListItemCard";
 
+export const PRODUCTS_LIST_MESSAGES = {
+  emptyTitle: "Brak produktów",
+  emptyDescription:
+    "W bazie nie ma jeszcze żadnych produktów. Dodaj opinię, aby utworzyć pierwszy produkt.",
+  addReviewButton: "Dodaj produkt i opinię",
+} as const;
+
 export interface ProductsListProps {
   products: ProductListItem[];
 }
@@ -24,15 +31,14 @@ export function ProductsList({ products }: ProductsListProps) {
           <EmptyMedia variant="icon">
             <Package className="size-6" />
           </EmptyMedia>
-          <EmptyTitle>Brak produktów</EmptyTitle>
+          <EmptyTitle>{PRODUCTS_LIST_MESSAGES.emptyTitle}</EmptyTitle>
           <EmptyDescription>
-            W bazie nie ma jeszcze żadnych produktów. Dodaj opinię, aby utworzyć
-            pierwszy produkt.
+            {PRODUCTS_LIST_MESSAGES.emptyDescription}
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
           <Link href="/opinie/dodaj" className={buttonVariants()}>
-            Dodaj produkt i opinię
+            {PRODUCTS_LIST_MESSAGES.addReviewButton}
           </Link>
         </EmptyContent>
       </Empty>

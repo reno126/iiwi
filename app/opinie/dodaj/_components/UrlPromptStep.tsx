@@ -9,16 +9,9 @@ import { ScrapeDelayNotice } from "./ScrapeDelayNotice";
 import { Sparkles } from "lucide-react";
 import { useCombinedReviewFormContext } from "./CombinedReviewFormContext";
 
-export const URL_PROMPT_MESSAGES = {
-  subtitle: "wklej go poniżej, to pójdzie szybko!",
-  placeholder: "https://sklep.pl/produkt...",
-  urlInputAriaLabel: "Link do oferty produktu",
-  scrapeButton: "Pobierz info",
-  noLinkQuestion: "Nie masz linku do oferty?",
-  manualButton: "Dodaj produkt ręcznie",
-  manualHint: "wymagamy tylko nazwy, no i opinii",
-  backButton: "Wróć do wyszukiwania",
-} as const;
+import { URL_PROMPT_MESSAGES } from "./urlPromptMessages";
+
+export { URL_PROMPT_MESSAGES };
 
 export function UrlPromptStep() {
   const {

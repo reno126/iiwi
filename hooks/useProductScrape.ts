@@ -9,6 +9,12 @@ export interface ScrapeNotice {
   message: string;
 }
 
+export const PRODUCT_SCRAPE_HOOK_MESSAGES = {
+  fallbackError:
+    "Nie udało się pobrać informacji o produkcie. Możesz uzupełnić dane ręcznie.",
+  unexpectedError: "Wystąpił nieoczekiwany błąd podczas pobierania danych.",
+} as const;
+
 export interface UseProductScrapeOptions {
   externalIsPending?: boolean;
   externalStartTransition?: ReturnType<typeof useTransition>[1];
@@ -61,15 +67,14 @@ export function useProductScrape({
             res?.serverError ||
             res?.validationErrors?.fieldErrors?.productUrl?.[0] ||
             res?.validationErrors?.formErrors?.[0] ||
-            "Nie udało się pobrać informacji o produkcie. Możesz uzupełnić dane ręcznie.";
+            PRODUCT_SCRAPE_HOOK_MESSAGES.fallbackError;
 
           setScrapeNotice({ type: "error", message: errorMsg });
           if (onError) {
             onError(errorMsg);
           }
         } catch {
-          const fallbackErr =
-            "Wystąpił nieoczekiwany błąd podczas pobierania danych.";
+          const fallbackErr = PRODUCT_SCRAPE_HOOK_MESSAGES.unexpectedError;
           setScrapeNotice({ type: "error", message: fallbackErr });
           if (onError) {
             onError(fallbackErr);

@@ -2,6 +2,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useAuthGatedSubmit } from "@/lib/auth/useAuthGatedSubmit";
 import { UNAUTHORIZED_ERROR_MESSAGE } from "@/lib/constants/authErrors";
+import { PRODUCT_ERRORS } from "@/schemas/product";
+import { REVIEW_ERRORS } from "@/schemas/review";
+
+const TEST_SUBMIT_ERRORS = {
+  serverError: "Błąd serwera podczas zapisu",
+  retryServerError: "Ponowny błąd serwera",
+  formValidationError: "Błąd walidacji całego formularza",
+} as const;
 
 vi.mock("@/lib/auth/useEnsureAuthenticated", () => ({
   useEnsureAuthenticated: vi.fn(),
@@ -89,7 +97,7 @@ describe("lib/auth/useAuthGatedSubmit", () => {
   it("sets root error when action returns a generic serverError", async () => {
     ensureAuthenticatedMock.mockResolvedValueOnce(true);
     actionMock.mockResolvedValueOnce({
-      serverError: "Błąd serwera podczas zapisu",
+      serverError: TEST_SUBMIT_ERRORS.serverError,
     });
 
     const { result } = setupHook();
@@ -102,7 +110,7 @@ describe("lib/auth/useAuthGatedSubmit", () => {
     });
 
     expect(setErrorMock).toHaveBeenCalledWith("root", {
-      message: "Błąd serwera podczas zapisu",
+      message: TEST_SUBMIT_ERRORS.serverError,
     });
     expect(onSuccessMock).not.toHaveBeenCalled();
     expect(clearReviewDraft).not.toHaveBeenCalled();
@@ -113,10 +121,10 @@ describe("lib/auth/useAuthGatedSubmit", () => {
     actionMock.mockResolvedValueOnce({
       validationErrors: {
         fieldErrors: {
-          name: ["Nazwa jest za krótka"],
-          rating: ["Ocena jest wymagana"],
+          name: [PRODUCT_ERRORS.nameMinLength],
+          rating: [REVIEW_ERRORS.rateRequired],
         },
-        formErrors: ["Błąd walidacji całego formularza"],
+        formErrors: [TEST_SUBMIT_ERRORS.formValidationError],
       },
     });
 
@@ -127,13 +135,13 @@ describe("lib/auth/useAuthGatedSubmit", () => {
     });
 
     expect(setErrorMock).toHaveBeenCalledWith("name", {
-      message: "Nazwa jest za krótka",
+      message: PRODUCT_ERRORS.nameMinLength,
     });
     expect(setErrorMock).toHaveBeenCalledWith("rating", {
-      message: "Ocena jest wymagana",
+      message: REVIEW_ERRORS.rateRequired,
     });
     expect(setErrorMock).toHaveBeenCalledWith("root", {
-      message: "Błąd walidacji całego formularza",
+      message: TEST_SUBMIT_ERRORS.formValidationError,
     });
     expect(onSuccessMock).not.toHaveBeenCalled();
   });
@@ -192,7 +200,9 @@ describe("lib/auth/useAuthGatedSubmit", () => {
     });
 
     ensureAuthenticatedMock.mockResolvedValueOnce(true);
-    actionMock.mockResolvedValueOnce({ serverError: "Ponowny błąd serwera" });
+    actionMock.mockResolvedValueOnce({
+      serverError: TEST_SUBMIT_ERRORS.retryServerError,
+    });
 
     const { result } = setupHook();
     const testData: TestFormValues = { name: "Failing Retry", rating: 2 };
@@ -203,7 +213,7 @@ describe("lib/auth/useAuthGatedSubmit", () => {
 
     expect(actionMock).toHaveBeenCalledTimes(2);
     expect(setErrorMock).toHaveBeenCalledWith("root", {
-      message: "Ponowny błąd serwera",
+      message: TEST_SUBMIT_ERRORS.retryServerError,
     });
     expect(onSuccessMock).not.toHaveBeenCalled();
   });

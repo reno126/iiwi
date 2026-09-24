@@ -4,6 +4,7 @@ import {
   ScrapeNoticeBanner,
   SCRAPE_BANNER_MESSAGES,
 } from "@/app/opinie/dodaj/_components/ScrapeNoticeBanner";
+import { PRODUCT_SCRAPE_MESSAGES } from "@/schemas/productScrape";
 
 describe("ScrapeNoticeBanner", () => {
   it("renders Case 1 (all data scraped): static success banner", () => {
@@ -36,7 +37,10 @@ describe("ScrapeNoticeBanner", () => {
 
   it("renders Case 2 (no data scraped - scraped_failed mode): error banner", () => {
     render(
-      <ScrapeNoticeBanner mode="scraped_failed" errorMessage="Błąd serwera" />,
+      <ScrapeNoticeBanner
+        mode="scraped_failed"
+        errorMessage={PRODUCT_SCRAPE_MESSAGES.scrapeFailedError}
+      />,
     );
 
     const alert = screen.getByRole("alert");

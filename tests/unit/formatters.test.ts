@@ -7,6 +7,7 @@ import {
   formatUserDisplayName,
   REVIEW_COUNT_SUFFIXES,
   RATED_PRODUCTS_MESSAGES,
+  USER_DISPLAY_MESSAGES,
 } from "@/lib/formatters";
 
 describe("lib/formatters", () => {
@@ -160,19 +161,21 @@ describe("lib/formatters", () => {
 
     it("returns default fallback 'Użytkownik' when name and email are missing", () => {
       expect(formatUserDisplayName({ name: null, email: null })).toBe(
-        "Użytkownik",
+        USER_DISPLAY_MESSAGES.defaultFallback,
       );
-      expect(formatUserDisplayName(null)).toBe("Użytkownik");
-      expect(formatUserDisplayName(undefined)).toBe("Użytkownik");
+      expect(formatUserDisplayName(null)).toBe(
+        USER_DISPLAY_MESSAGES.defaultFallback,
+      );
+      expect(formatUserDisplayName(undefined)).toBe(
+        USER_DISPLAY_MESSAGES.defaultFallback,
+      );
     });
 
     it("returns custom fallback when specified and both name and email are missing", () => {
+      const customFallback = "Anonimowy użytkownik";
       expect(
-        formatUserDisplayName(
-          { name: null, email: null },
-          "Anonimowy użytkownik",
-        ),
-      ).toBe("Anonimowy użytkownik");
+        formatUserDisplayName({ name: null, email: null }, customFallback),
+      ).toBe(customFallback);
     });
   });
 });

@@ -8,6 +8,7 @@ import {
 } from "@/app/opinie/dodaj/_components/ProductFields";
 import { SHOP_SELECTOR_MESSAGES } from "@/app/opinie/dodaj/_components/shopSelectorMessages";
 import { productScrapeMetadata } from "@/serverActions/productScrapeMetadata";
+import { PRODUCT_SCRAPE_MESSAGES } from "@/schemas/productScrape";
 import type { ProductCreateInput } from "@/schemas/product";
 
 vi.mock("@/serverActions/productScrapeMetadata", () => ({
@@ -198,10 +199,8 @@ describe("app/opinie/dodaj/_components/ProductFields", () => {
   });
 
   it("displays non-blocking error message when scraper fails", async () => {
-    const scraperErrorMessage =
-      "Nie udało się pobrać zdjęcia z podanej strony.";
     vi.mocked(productScrapeMetadata).mockResolvedValueOnce({
-      serverError: scraperErrorMessage,
+      serverError: PRODUCT_SCRAPE_MESSAGES.scrapeFailedError,
     });
 
     render(
@@ -216,7 +215,9 @@ describe("app/opinie/dodaj/_components/ProductFields", () => {
     await driver.user.click(driver.scrapeButton());
 
     await waitFor(() => {
-      expect(screen.getByText(scraperErrorMessage)).toBeInTheDocument();
+      expect(
+        screen.getByText(PRODUCT_SCRAPE_MESSAGES.scrapeFailedError),
+      ).toBeInTheDocument();
     });
 
     expect(driver.productUrlInput()).not.toBeInvalid();

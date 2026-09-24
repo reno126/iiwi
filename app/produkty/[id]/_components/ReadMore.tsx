@@ -28,13 +28,18 @@ const lineClampMap: Record<number, string> = {
   6: "line-clamp-6",
 };
 
+export const READ_MORE_MESSAGES = {
+  moreLabel: "Czytaj więcej",
+  lessLabel: "Zwiń",
+} as const;
+
 export function ReadMore({
   text,
   children,
   maxLines = 5,
   className,
-  moreLabel = "Czytaj więcej",
-  lessLabel = "Zwiń",
+  moreLabel = READ_MORE_MESSAGES.moreLabel,
+  lessLabel = READ_MORE_MESSAGES.lessLabel,
 }: ReadMoreProps) {
   const content = text ?? (typeof children === "string" ? children : undefined);
   const [isOpen, setIsOpen] = useState(false);

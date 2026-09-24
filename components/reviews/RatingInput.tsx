@@ -4,10 +4,9 @@ import { useState } from "react";
 import { Star } from "lucide-react";
 import { cn } from "cn";
 
-export const RATING_INPUT_MESSAGES = {
-  radiogroupAriaLabel: "Ocena w gwiazdkach",
-  starAriaLabel: (star: number) => `${star} z 5 gwiazdek`,
-} as const;
+import { RATING_INPUT_MESSAGES } from "./ratingInputMessages";
+
+export { RATING_INPUT_MESSAGES };
 
 interface RatingInputProps {
   value?: number;

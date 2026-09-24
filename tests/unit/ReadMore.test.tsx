@@ -1,7 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ReadMore } from "@/app/produkty/[id]/_components/ReadMore";
+import {
+  ReadMore,
+  READ_MORE_MESSAGES,
+} from "@/app/produkty/[id]/_components/ReadMore";
 
 describe("app/produkty/[id]/_components/ReadMore", () => {
   const originalScrollHeight = Object.getOwnPropertyDescriptor(
@@ -97,10 +100,10 @@ describe("app/produkty/[id]/_components/ReadMore", () => {
     expect(triggerButton).toBeInTheDocument();
 
     await user.click(triggerButton);
-    expect(triggerButton).toHaveTextContent("Zwiń");
+    expect(triggerButton).toHaveTextContent(READ_MORE_MESSAGES.lessLabel);
 
     await user.click(triggerButton);
-    expect(triggerButton).toHaveTextContent("Czytaj więcej");
+    expect(triggerButton).toHaveTextContent(READ_MORE_MESSAGES.moreLabel);
   });
 
   it("supports custom moreLabel and lessLabel props", async () => {

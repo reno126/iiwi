@@ -8,6 +8,7 @@ vi.mock("@/serverActions/productsGet", () => ({
 import { productsGet } from "@/serverActions/productsGet";
 import ProductsPage from "@/app/produkty/page";
 import { ProductsListSection } from "@/app/produkty/_components/ProductsListSection";
+import { PRODUCTS_LIST_MESSAGES } from "@/app/produkty/_components/ProductsList";
 import {
   ProductsPagination,
   PAGINATION_MESSAGES,
@@ -103,7 +104,9 @@ describe("app/produkty (Products Catalog)", () => {
     const sectionJsx = await ProductsListSection({ page: 1 });
     render(sectionJsx);
 
-    expect(screen.getByText("Brak produktów")).toBeInTheDocument();
+    expect(
+      screen.getByText(PRODUCTS_LIST_MESSAGES.emptyTitle),
+    ).toBeInTheDocument();
     expect(screen.getByRole("link")).toHaveAttribute("href", "/opinie/dodaj");
   });
 
