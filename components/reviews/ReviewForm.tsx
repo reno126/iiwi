@@ -17,11 +17,9 @@ import { StickyFormActionBar } from "@/components/ui/sticky-form-action-bar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CircleAlert, CheckCircle2 } from "lucide-react";
 
-export const REVIEW_FORM_MESSAGES = {
-  draftRestored: "Twoja opinia została przywrócona po zalogowaniu.",
-  cancelButton: "Anuluj",
-  submitButton: "Opublikuj opinię",
-} as const;
+import { REVIEW_FORM_MESSAGES } from "./reviewFormMessages";
+
+export { REVIEW_FORM_MESSAGES };
 
 interface ReviewFormProps {
   productId: string;

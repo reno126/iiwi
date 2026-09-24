@@ -1,6 +1,11 @@
 import { test, expect } from "@playwright/test";
 import { prisma } from "@/lib/db/prisma";
-import { E2E_TEST_PREFIX, waitForHydration } from "./helpers/auth";
+import {
+  E2E_TEST_PREFIX,
+  waitForHydration,
+  createAuthenticatedSession,
+  deleteTestUser,
+} from "./helpers/auth";
 import { DASHBOARD_MESSAGES } from "@/app/dashboard/constants";
 import { SIGN_IN_MESSAGES } from "@/app/login/constants";
 import { REGISTER_MESSAGES } from "@/app/register/constants";
@@ -143,5 +148,34 @@ test.describe("Authentication and Route Protection Flows", () => {
 
     await expect(page.getByText(LOGIN_ERRORS.invalidEmail)).toBeVisible();
     await expect(page.getByText(LOGIN_ERRORS.passwordRequired)).toBeVisible();
+  });
+
+  test("allows authenticated user to log out from dashboard and clears protected access", async ({
+    context,
+    page,
+  }) => {
+    const authedUser = await createAuthenticatedSession(context);
+
+    try {
+      await page.goto("/dashboard");
+      await waitForHydration(page);
+
+      await expect(
+        page.getByRole("heading", {
+          name: new RegExp(DASHBOARD_MESSAGES.greetingPrefix, "i"),
+        }),
+      ).toBeVisible();
+
+      await page
+        .getByRole("button", { name: DASHBOARD_MESSAGES.signOutButton })
+        .click();
+
+      await expect(page).toHaveURL(/\/login/);
+
+      await page.goto("/dashboard");
+      await expect(page).toHaveURL(/\/login\?callbackUrl=%2Fdashboard/);
+    } finally {
+      await deleteTestUser(authedUser.id);
+    }
   });
 });
