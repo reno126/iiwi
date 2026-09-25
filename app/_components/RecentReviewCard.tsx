@@ -19,7 +19,7 @@ export function RecentReviewCard({ review }: RecentReviewCardProps) {
       href={`/produkty/${review.product.id}`}
       className="group block h-full"
     >
-      <Card className="flex h-full flex-col justify-between bg-white p-4 transition-all hover:border-primary/50 hover:shadow-md sm:p-5">
+      <Card className="flex h-full flex-col justify-between border border-border/80 bg-card p-4 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm sm:p-5">
         <div>
           <div className="flex items-start gap-3">
             <ProductThumbnail
@@ -27,11 +27,11 @@ export function RecentReviewCard({ review }: RecentReviewCardProps) {
               alt={review.product.name}
               size="md"
               priority={true}
-              className="size-16 shrink-0 rounded-lg border"
+              className="size-16 shrink-0 rounded-lg border border-border/70 bg-muted/20"
             />
 
             <div className="min-w-0 flex-1 space-y-1">
-              <h3 className="line-clamp-2 text-base leading-snug font-semibold text-foreground transition-colors group-hover:text-primary">
+              <h3 className="line-clamp-2 font-heading text-base leading-snug font-semibold text-foreground transition-colors group-hover:text-primary">
                 {review.product.name}
               </h3>
 
@@ -58,7 +58,7 @@ export function RecentReviewCard({ review }: RecentReviewCardProps) {
             />
 
             {review.description ? (
-              <p className="line-clamp-3 text-sm text-muted-foreground italic">
+              <p className="line-clamp-3 text-sm leading-relaxed text-foreground/80 italic">
                 &ldquo;{review.description}&rdquo;
               </p>
             ) : (
@@ -69,8 +69,10 @@ export function RecentReviewCard({ review }: RecentReviewCardProps) {
           </div>
         </div>
 
-        <div className="mt-auto flex items-center justify-between border-t border-border pt-3 text-xs text-muted-foreground">
-          <span className="max-w-40 truncate font-medium">{authorName}</span>
+        <div className="mt-auto flex items-center justify-between border-t border-border/80 pt-3 text-xs text-muted-foreground">
+          <span className="max-w-40 truncate font-medium text-foreground/90">
+            {authorName}
+          </span>
           <ResponsiveDateTime date={review.createdAt} includeTime={false} />
         </div>
       </Card>

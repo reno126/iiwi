@@ -2,21 +2,24 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "cn";
 
-export const headingVariants = cva("font-bold tracking-tight text-foreground", {
-  variants: {
-    size: {
-      hero: "text-3xl font-extrabold sm:text-4xl md:text-5xl lg:text-6xl",
-      "3xl": "text-2xl font-bold sm:text-3xl",
-      "2xl": "text-xl font-bold sm:text-2xl",
-      xl: "text-lg font-semibold sm:text-xl",
-      lg: "text-base font-semibold sm:text-lg",
-      base: "text-base font-semibold",
+export const headingVariants = cva(
+  "font-heading font-bold tracking-tight text-foreground",
+  {
+    variants: {
+      size: {
+        hero: "text-3xl font-extrabold sm:text-4xl md:text-5xl lg:text-6xl",
+        "3xl": "text-2xl font-bold sm:text-3xl",
+        "2xl": "text-xl font-bold sm:text-2xl",
+        xl: "text-lg font-semibold sm:text-xl",
+        lg: "text-base font-semibold sm:text-lg",
+        base: "text-base font-semibold",
+      },
+    },
+    defaultVariants: {
+      size: "2xl",
     },
   },
-  defaultVariants: {
-    size: "2xl",
-  },
-});
+);
 
 type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 type HeadingElement =

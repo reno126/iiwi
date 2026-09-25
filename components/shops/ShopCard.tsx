@@ -12,7 +12,7 @@ export function ShopCard({ shop, className }: ShopCardProps) {
   return (
     <Card
       className={cn(
-        "flex h-28 flex-col items-center justify-center gap-2.5 p-4 text-center transition-all sm:h-32",
+        "flex h-28 flex-col items-center justify-center gap-2.5 border border-border/80 bg-card p-4 text-center shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-border hover:shadow-sm sm:h-32",
         className,
       )}
     >

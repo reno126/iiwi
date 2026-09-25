@@ -22,7 +22,7 @@ export function MenuItem({ title, href, onClick, className }: MenuItemProps) {
       href={href}
       onClick={onClick}
       className={cn(
-        "text-sm font-medium text-gray-700 transition-colors hover:text-blue-600",
+        "text-sm font-medium text-foreground/85 transition-colors hover:text-primary",
         className,
       )}
     >

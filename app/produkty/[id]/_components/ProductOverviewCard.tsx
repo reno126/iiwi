@@ -37,7 +37,7 @@ const MemoizedProductOverviewCard = memo(function MemoizedProductOverviewCard({
     product.updatedAt.getTime() - product.createdAt.getTime() > 60000;
 
   return (
-    <Card className="overflow-hidden border shadow-sm">
+    <Card className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-xs">
       <CardContent className="p-6 sm:p-8">
         <div className="flex flex-col gap-6 sm:flex-row sm:gap-8">
           <ProductThumbnail
@@ -45,7 +45,7 @@ const MemoizedProductOverviewCard = memo(function MemoizedProductOverviewCard({
             alt={product.name}
             size="xl"
             priority={true}
-            className="mx-auto size-36 rounded-xl border sm:mx-0 sm:size-44"
+            className="mx-auto size-36 rounded-xl border border-border/70 bg-muted/20 sm:mx-0 sm:size-44"
           />
 
           <div className="min-w-0 flex-1 space-y-4">

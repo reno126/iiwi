@@ -8,8 +8,8 @@ interface BrandLogoProps {
 }
 
 export function BrandLogo({
-  width = 160,
-  height = 40,
+  width = 192,
+  height = 36,
   className = "h-9 w-auto",
   priority = true,
 }: BrandLogoProps) {

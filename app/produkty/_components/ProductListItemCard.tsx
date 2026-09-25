@@ -18,7 +18,7 @@ export function ProductListItemCard({
 }: ProductListItemCardProps) {
   return (
     <Link href={`/produkty/${product.id}`} className="group">
-      <Card className="py-1 transition-all hover:border-primary/50 hover:shadow-sm md:py-5">
+      <Card className="border border-border/80 bg-card py-1 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm md:py-5">
         <CardContent className="p-1 md:p-5">
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <div className="flex min-w-0 items-start gap-4">
@@ -27,12 +27,12 @@ export function ProductListItemCard({
                 alt={product.name}
                 size="lg"
                 priority={priority}
-                className="size-20 shrink-0 rounded-lg md:border md:bg-muted"
+                className="size-20 shrink-0 rounded-lg border border-border/70 bg-muted/20"
               />
 
               <div className="min-w-0 space-y-1.5">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-md line-clamp-3 font-semibold text-foreground transition-colors group-hover:text-primary md:text-lg">
+                  <span className="line-clamp-3 font-heading text-base font-semibold text-foreground transition-colors group-hover:text-primary md:text-lg">
                     {product.name}
                   </span>
 

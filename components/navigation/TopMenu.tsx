@@ -58,7 +58,7 @@ export function TopMenu() {
             href="/login"
             className={cn(
               buttonVariants({ variant: "ghost", size: "sm" }),
-              "px-2 text-xs font-semibold text-gray-700 hover:text-blue-600",
+              "px-2 text-xs font-semibold text-foreground/85 hover:text-primary",
             )}
           >
             {NAV_AUTH_MESSAGES.loginLink}

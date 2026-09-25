@@ -41,14 +41,14 @@ export default function HomePage() {
         <Heading
           level={1}
           size="hero"
-          className="mx-auto max-w-4xl text-2xl leading-tight font-bold tracking-tight text-muted-foreground sm:text-3xl md:text-4xl lg:text-5xl"
+          className="mx-auto max-w-4xl font-serif text-3xl leading-tight font-bold tracking-tight text-foreground/85 sm:text-4xl md:text-5xl lg:text-6xl"
         >
           Tylko tutaj znajdziesz{" "}
-          <span className="text-3xl font-extrabold text-foreground sm:text-4xl md:text-5xl lg:text-6xl">
+          <span className="font-serif font-extrabold text-foreground">
             prawdziwe
           </span>
           , całkowicie niezależne{" "}
-          <span className="text-3xl font-extrabold text-foreground sm:text-4xl md:text-5xl lg:text-6xl">
+          <span className="font-serif font-extrabold text-foreground">
             opinie
           </span>{" "}
           o produktach

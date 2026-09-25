@@ -25,8 +25,8 @@ const MemoizedProductReviewItem = memo(function MemoizedProductReviewItem({
   review,
 }: ProductReviewItemProps) {
   return (
-    <Card className="border shadow-2xs">
-      <CardHeader className="p-4 pb-2">
+    <Card className="border border-border/80 bg-card shadow-xs transition-shadow hover:shadow-sm">
+      <CardHeader className="p-4 pb-2 sm:p-5 sm:pb-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <AuthorSignature
             name={review.user.name}
@@ -39,7 +39,7 @@ const MemoizedProductReviewItem = memo(function MemoizedProductReviewItem({
         </div>
       </CardHeader>
 
-      <CardContent className="p-4 pt-2">
+      <CardContent className="p-4 pt-2 sm:p-5 sm:pt-2">
         <ReadMore text={review.description} maxLines={3} />
       </CardContent>
     </Card>
