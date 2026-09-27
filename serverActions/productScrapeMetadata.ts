@@ -7,6 +7,7 @@ import {
 } from "@/schemas/productScrape";
 import { validateUrlSafety } from "@/lib/scraper/ssrfProtection";
 import { scrapeProductMetadata } from "@/lib/scraper/productScrapeService";
+import { findShopByUrl } from "@/lib/shops/findShopByUrl";
 import { publicActionClient } from "@/lib/actions/safeActionClient";
 import { returnServerError } from "next-safe-action";
 
@@ -18,14 +19,19 @@ export const productScrapeMetadata = publicActionClient
 
     const safetyCheck = validateUrlSafety(productUrl);
     if (!safetyCheck.isValid) {
-      returnServerError(
+      return returnServerError(
         safetyCheck.error ?? PRODUCT_SCRAPE_MESSAGES.defaultSecurityError,
       );
     }
 
-    const scrapedResult = await scrapeProductMetadata(productUrl);
+    const matchedShop = await findShopByUrl(productUrl);
+    if (!matchedShop) {
+      return returnServerError(PRODUCT_SCRAPE_MESSAGES.unsupportedShopError);
+    }
+
+    const scrapedResult = await scrapeProductMetadata(productUrl, matchedShop);
     if (!scrapedResult) {
-      returnServerError(PRODUCT_SCRAPE_MESSAGES.scrapeFailedError);
+      return returnServerError(PRODUCT_SCRAPE_MESSAGES.scrapeFailedError);
     }
 
     return scrapedResult;

@@ -114,6 +114,7 @@ async function fetchDirectTier1(
 
 export async function scrapeProductMetadata(
   productUrl: string,
+  knownShop?: MatchedShopResult | null,
 ): Promise<ScrapedMetadataResult | null> {
   const { html: tier1Html, shouldTryTier2: initialTier2Flag } =
     await fetchDirectTier1(productUrl);
@@ -132,7 +133,8 @@ export async function scrapeProductMetadata(
     );
     if (tier1Metadata && isTier1Complete) {
       console.log(`[Scraper] Tier 1 full extraction success:`, tier1Metadata);
-      const matchedShop = await findShopByUrl(productUrl);
+      const matchedShop =
+        knownShop !== undefined ? knownShop : await findShopByUrl(productUrl);
       const scrapedFields = buildScrapedFieldsList(tier1Metadata, matchedShop);
 
       return {
@@ -178,16 +180,14 @@ export async function scrapeProductMetadata(
   }
 
   const mergedMetadata = mergeScrapedMetadata(tier1Metadata, tier2Metadata);
-  const matchedShop = await findShopByUrl(productUrl);
+  const matchedShop =
+    knownShop !== undefined ? knownShop : await findShopByUrl(productUrl);
 
-  const hasAnyData = Boolean(
-    mergedMetadata.imageUrl ||
-      mergedMetadata.name ||
-      mergedMetadata.code ||
-      matchedShop,
+  const hasAnyProductData = Boolean(
+    mergedMetadata.imageUrl || mergedMetadata.name || mergedMetadata.code,
   );
 
-  if (hasAnyData) {
+  if (hasAnyProductData) {
     const scrapedFields = buildScrapedFieldsList(mergedMetadata, matchedShop);
 
     console.log(`[Scraper] Scrape succeeded with partial or full metadata:`, {

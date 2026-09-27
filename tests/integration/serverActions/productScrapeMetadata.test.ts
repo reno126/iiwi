@@ -16,6 +16,11 @@ import { PRODUCT_SCRAPE_MESSAGES } from "@/schemas/productScrape";
 
 describe("serverActions/productScrapeMetadata", () => {
   const originalEnv = process.env;
+  const defaultMockShop = {
+    id: "shop-default-1",
+    name: "Sklep Testowy",
+    logo: "https://shop.pl/logo.svg",
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -24,6 +29,7 @@ describe("serverActions/productScrapeMetadata", () => {
       user: { id: "user-test-1", email: "tester@example.com" },
       expires: "9999-12-31",
     });
+    vi.mocked(findShopByUrl).mockResolvedValue(defaultMockShop);
   });
 
   it("blocks SSRF attack attempts and returns a server error", async () => {
@@ -33,6 +39,19 @@ describe("serverActions/productScrapeMetadata", () => {
 
     expect(result?.data).toBeUndefined();
     expect(result?.serverError).toBe(SSRF_ERRORS.privateOrReservedIPv4);
+  });
+
+  it("blocks scraping and returns an error when shop domain is not recognized", async () => {
+    vi.mocked(findShopByUrl).mockResolvedValueOnce(null);
+
+    const result = await productScrapeMetadata({
+      productUrl: "https://unknown-shop.com/item/123",
+    });
+
+    expect(result?.data).toBeUndefined();
+    expect(result?.serverError).toBe(
+      PRODUCT_SCRAPE_MESSAGES.unsupportedShopError,
+    );
   });
 
   it("successfully extracts metadata in Tier 1 when direct fetch returns 200", async () => {
@@ -65,8 +84,8 @@ describe("serverActions/productScrapeMetadata", () => {
       imageUrl: "https://cdn.shop.pl/items/headphones.jpg",
       name: "Słuchawki Bezprzewodowe Sony",
       code: "12345",
-      shop: null,
-      scrapedFields: ["name", "imageUrl", "code"],
+      shop: defaultMockShop,
+      scrapedFields: ["name", "imageUrl", "code", "shop"],
     });
 
     expect(fetchSpy).toHaveBeenCalledTimes(1);
@@ -111,8 +130,8 @@ describe("serverActions/productScrapeMetadata", () => {
       imageUrl: "https://action.scene7.com/is/image/Action/3222380_1",
       name: "Ładowarka ścienna USB-C Sologic",
       code: "3222380",
-      shop: null,
-      scrapedFields: ["name", "imageUrl", "code"],
+      shop: defaultMockShop,
+      scrapedFields: ["name", "imageUrl", "code", "shop"],
     });
 
     expect(fetchSpy).toHaveBeenCalledTimes(2);
@@ -200,8 +219,8 @@ describe("serverActions/productScrapeMetadata", () => {
       imageUrl: null,
       name: "Myszka bezprzewodowa",
       code: null,
-      shop: null,
-      scrapedFields: ["name"],
+      shop: defaultMockShop,
+      scrapedFields: ["name", "shop"],
     });
   });
 

@@ -11,6 +11,8 @@ export const PRODUCT_SCRAPE_MESSAGES = {
     "Podany adres URL jest niedozwolony ze względów bezpieczeństwa.",
   scrapeFailedError:
     "Nie udało się automatycznie pobrać danych z podanego linku. Możesz uzupełnić dane ręcznie.",
+  unsupportedShopError:
+    "Automatyczne pobieranie danych jest obsługiwane wyłącznie dla rozpoznanych sklepów partnerskich. Możesz uzupełnić dane ręcznie.",
 } as const;
 
 export const productScrapeSchema = z.object({
