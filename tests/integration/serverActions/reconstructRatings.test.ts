@@ -11,11 +11,30 @@ vi.mock("@/lib/db/prisma", () => ({
 }));
 
 import { prisma } from "@/lib/db/prisma";
-import { reconstructRatings } from "@/serverActions/reconstructRatings";
+import {
+  reconstructRatings,
+  RECONSTRUCT_RATINGS_MESSAGES,
+} from "@/serverActions/reconstructRatings";
 
 describe("serverActions/reconstructRatings", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("blocks execution and returns an error when running in production mode", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+
+    try {
+      const result = await reconstructRatings();
+
+      expect(result.success).toBe(false);
+      expect(result.updatedCount).toBe(0);
+      expect(result.products).toEqual([]);
+      expect(result.error).toBe(RECONSTRUCT_RATINGS_MESSAGES.onlyInDevelopment);
+      expect(prisma.product.findMany).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 
   it("reconstructs ratings for all products when no input is provided", async () => {

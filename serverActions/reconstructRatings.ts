@@ -1,5 +1,3 @@
-"use server";
-
 import { prisma } from "@/lib/db/prisma";
 import {
   reconstructRatingsSchema,
@@ -21,9 +19,26 @@ export interface ReconstructRatingsResult {
   error?: string;
 }
 
+export const RECONSTRUCT_RATINGS_MESSAGES = {
+  invalidInput: "Nieprawidłowe dane wejściowe.",
+  onlyInDevelopment:
+    "Ta operacja jest dozwolona wyłącznie w środowisku developerskim.",
+  notFound: (productId: string) =>
+    `Produkt o id "${productId}" nie został znaleziony.`,
+} as const;
+
 export async function reconstructRatings(
   input?: string | ReconstructRatingsInput,
 ): Promise<ReconstructRatingsResult> {
+  if (process.env.NODE_ENV === "production") {
+    return {
+      success: false,
+      updatedCount: 0,
+      products: [],
+      error: RECONSTRUCT_RATINGS_MESSAGES.onlyInDevelopment,
+    };
+  }
+
   const rawId = typeof input === "string" ? input : input?.productId;
 
   const parsed = reconstructRatingsSchema.safeParse({
@@ -35,7 +50,7 @@ export async function reconstructRatings(
       success: false,
       updatedCount: 0,
       products: [],
-      error: "Nieprawidłowe dane wejściowe.",
+      error: RECONSTRUCT_RATINGS_MESSAGES.invalidInput,
     };
   }
 
@@ -59,7 +74,7 @@ export async function reconstructRatings(
       success: false,
       updatedCount: 0,
       products: [],
-      error: `Produkt o id "${targetProductId}" nie został znaleziony.`,
+      error: RECONSTRUCT_RATINGS_MESSAGES.notFound(targetProductId),
     };
   }
 
@@ -71,7 +86,10 @@ export async function reconstructRatings(
       reviewCount > 0
         ? Number(
             (
-              product.reviews.reduce((acc, r) => acc + r.rate, 0) / reviewCount
+              product.reviews.reduce(
+                (accumulator, review) => accumulator + review.rate,
+                0,
+              ) / reviewCount
             ).toFixed(2),
           )
         : 0;

@@ -34,6 +34,14 @@ function parseCliArgs(args: string[]): CliOptions {
 }
 
 async function main(): Promise<void> {
+  if (process.env.NODE_ENV === "production") {
+    console.error(
+      "Błąd: Skrypt reconstructRatings może być uruchamiany wyłącznie lokalnie w środowisku developerskim.",
+    );
+    process.exitCode = 1;
+    return;
+  }
+
   const args = process.argv.slice(2);
   const options = parseCliArgs(args);
 
@@ -83,9 +91,9 @@ Examples:
       console.log(
         `\nSuccessfully updated ${result.updatedCount} product(s):\n`,
       );
-      for (const prod of result.products) {
+      for (const productItem of result.products) {
         console.log(
-          ` - [${prod.id}] "${prod.name}": rate_avg = ${prod.rate_avg}, rate_count = ${prod.rate_count} (${prod.reviewCount} review${prod.reviewCount === 1 ? "" : "s"})`,
+          ` - [${productItem.id}] "${productItem.name}": rate_avg = ${productItem.rate_avg}, rate_count = ${productItem.rate_count} (${productItem.reviewCount} review${productItem.reviewCount === 1 ? "" : "s"})`,
         );
       }
       console.log("\nReconstruction finished successfully.");
@@ -98,7 +106,7 @@ Examples:
   }
 }
 
-main().catch((err) => {
-  console.error("[FATAL] Unhandled CLI error:", err);
+main().catch((error) => {
+  console.error("[FATAL] Unhandled CLI error:", error);
   process.exit(1);
 });
