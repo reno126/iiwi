@@ -3,8 +3,8 @@ import { prisma } from "@/lib/db/prisma";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 
-export async function POST(req: Request) {
-  const body = await req.json();
+export async function POST(request: Request) {
+  const body = await request.json();
   const validated = registerSchema.safeParse(body);
 
   if (!validated.success) {
@@ -24,7 +24,9 @@ export async function POST(req: Request) {
   if (existingUser) {
     if (!existingUser.password && existingUser.accounts.length > 0) {
       const providers = existingUser.accounts
-        .map((a) => (a.provider === "google" ? "Google" : a.provider))
+        .map((account) =>
+          account.provider === "google" ? "Google" : account.provider,
+        )
         .join(", ");
       return NextResponse.json(
         {

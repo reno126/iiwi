@@ -144,4 +144,28 @@ describe("serverActions/productsGet", () => {
 
     expect(result.totalPages).toBe(2);
   });
+
+  it("caps pageSize to MAX_PAGE_SIZE (50) when oversized pageSize is requested", async () => {
+    vi.mocked(prisma.product.findMany).mockResolvedValueOnce([]);
+    vi.mocked(getCachedProductCount).mockResolvedValueOnce(100);
+
+    const result = await productsGet({ page: 1, pageSize: 1000 });
+
+    expect(result.pageSize).toBe(50);
+    expect(prisma.product.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ take: 50 }),
+    );
+  });
+
+  it("normalizes non-positive pageSize to 1", async () => {
+    vi.mocked(prisma.product.findMany).mockResolvedValueOnce([]);
+    vi.mocked(getCachedProductCount).mockResolvedValueOnce(10);
+
+    const result = await productsGet({ page: 1, pageSize: 0 });
+
+    expect(result.pageSize).toBe(1);
+    expect(prisma.product.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ take: 1 }),
+    );
+  });
 });

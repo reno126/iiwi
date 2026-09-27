@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useCallback, useTransition } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { FormFieldCard } from "@/components/ui/form-field-card";
 import { Input } from "@/components/ui/input";
@@ -56,11 +56,7 @@ export function ProductUrlField({
     externalStartTransition,
   });
 
-  if (hideProductUrl) {
-    return <input type="hidden" {...register("productUrl")} />;
-  }
-
-  const handleScrape = () => {
+  const handleScrape = useCallback(() => {
     let url = (getValues("productUrl") || "").trim();
     if (!url) return;
 
@@ -71,19 +67,19 @@ export function ProductUrlField({
 
     scrapeUrl(
       url,
-      (data) => {
+      (scrapedData) => {
         populateScrapedFields({
-          data,
+          data: scrapedData,
           setValue,
           getValues,
           overwrite: false,
         });
 
-        onScrapeSuccess?.(data.shop ?? null);
+        onScrapeSuccess?.(scrapedData.shop ?? null);
 
         setScrapeNotice({
           type: "success",
-          message: data.imageUrl
+          message: scrapedData.imageUrl
             ? PRODUCT_FIELDS_MESSAGES.scrapeSuccessWithImage
             : PRODUCT_FIELDS_MESSAGES.scrapeSuccessWithoutImage,
         });
@@ -91,9 +87,16 @@ export function ProductUrlField({
       undefined,
       onScrapeFinished,
     );
-  };
+  }, [
+    getValues,
+    setValue,
+    scrapeUrl,
+    onScrapeSuccess,
+    onScrapeFinished,
+    setScrapeNotice,
+  ]);
 
-  const handleUrlBlur = async () => {
+  const handleUrlBlur = useCallback(async () => {
     const currentShopId = getValues("shopId");
     if (currentShopId) return;
 
@@ -101,18 +104,22 @@ export function ProductUrlField({
     if (!rawUrl) return;
 
     try {
-      const res = await shopMatchByUrlAction({ url: rawUrl });
-      if (res?.data) {
-        setValue("shopId", res.data.id, {
+      const actionResult = await shopMatchByUrlAction({ url: rawUrl });
+      if (actionResult?.data) {
+        setValue("shopId", actionResult.data.id, {
           shouldValidate: true,
           shouldDirty: true,
         });
-        onShopMatched?.(res.data);
+        onShopMatched?.(actionResult.data);
       }
     } catch {
       return;
     }
-  };
+  }, [getValues, setValue, onShopMatched]);
+
+  if (hideProductUrl) {
+    return <input type="hidden" {...register("productUrl")} />;
+  }
 
   return (
     <FormFieldCard

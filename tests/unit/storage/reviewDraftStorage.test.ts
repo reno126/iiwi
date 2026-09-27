@@ -100,5 +100,21 @@ describe("lib/storage/reviewDraftStorage", () => {
       });
       expect(getReviewDraftReturnUrl()).toBe("/opinie/dodaj");
     });
+
+    it("rejects malicious open redirect returnUrl in draft and falls back to safe url", () => {
+      saveReviewDraft({
+        ...mockNewProductDraft,
+        returnUrl: "https://evil.com/phish",
+      });
+      expect(getReviewDraftReturnUrl("/dashboard")).toBe("/opinie/dodaj");
+
+      saveReviewDraft({
+        ...mockExistingProductDraft,
+        returnUrl: "//attacker.com/steal",
+      });
+      expect(getReviewDraftReturnUrl("/dashboard")).toBe(
+        "/produkty/product-abc-123",
+      );
+    });
   });
 });

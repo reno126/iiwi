@@ -95,4 +95,34 @@ describe("serverActions/recentReviewsGet", () => {
     );
     expect(result).toEqual(mockReviews);
   });
+
+  it("caps limit to MAX_LIMIT (50) when oversized limit is requested", async () => {
+    vi.mocked(prisma.review.findMany).mockResolvedValueOnce(
+      mockReviews as never,
+    );
+
+    const result = await recentReviewsGet(1000);
+
+    expect(prisma.review.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        take: 50,
+      }),
+    );
+    expect(result).toEqual(mockReviews);
+  });
+
+  it("normalizes non-positive limit to 1", async () => {
+    vi.mocked(prisma.review.findMany).mockResolvedValueOnce(
+      mockReviews as never,
+    );
+
+    const result = await recentReviewsGet(0);
+
+    expect(prisma.review.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        take: 1,
+      }),
+    );
+    expect(result).toEqual(mockReviews);
+  });
 });

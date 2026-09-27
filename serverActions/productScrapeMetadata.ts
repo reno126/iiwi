@@ -5,7 +5,7 @@ import {
   scrapedMetadataResultSchema,
   PRODUCT_SCRAPE_MESSAGES,
 } from "@/schemas/productScrape";
-import { validateUrlSafety } from "@/lib/scraper/ssrfProtection";
+import { validateUrlSafetyAsync } from "@/lib/scraper/ssrfProtection";
 import { scrapeProductMetadata } from "@/lib/scraper/productScrapeService";
 import { findShopByUrl } from "@/lib/shops/findShopByUrl";
 import { publicActionClient } from "@/lib/actions/safeActionClient";
@@ -17,7 +17,7 @@ export const productScrapeMetadata = publicActionClient
   .action(async ({ parsedInput }) => {
     const { productUrl } = parsedInput;
 
-    const safetyCheck = validateUrlSafety(productUrl);
+    const safetyCheck = await validateUrlSafetyAsync(productUrl);
     if (!safetyCheck.isValid) {
       return returnServerError(
         safetyCheck.error ?? PRODUCT_SCRAPE_MESSAGES.defaultSecurityError,

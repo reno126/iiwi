@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useLayoutEffect } from "react";
 import {
   Collapsible,
   CollapsibleTrigger,
@@ -51,7 +51,7 @@ export function ReadMore({
   const clampedRef = useRef<HTMLParagraphElement>(null);
   const clampClass = lineClampMap[maxLines] ?? "line-clamp-5";
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     function checkOverflow() {
       if (clampedRef.current) {
         const hasOverflow =

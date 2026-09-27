@@ -34,7 +34,6 @@ describe("serverActions/productGetById", () => {
           select: {
             id: true,
             name: true,
-            email: true,
           },
         },
         shop: {
@@ -51,7 +50,6 @@ describe("serverActions/productGetById", () => {
               select: {
                 id: true,
                 name: true,
-                email: true,
                 image: true,
               },
             },
@@ -89,7 +87,6 @@ describe("serverActions/productGetById", () => {
       creator: {
         id: "user-1",
         name: "Jan Kowalski",
-        email: "jan@example.com",
       },
       reviews: [
         {
@@ -104,7 +101,6 @@ describe("serverActions/productGetById", () => {
           user: {
             id: "user-2",
             name: "Anna Nowak",
-            email: "anna@example.com",
             image: "https://example.com/avatar.jpg",
           },
         },
@@ -145,7 +141,6 @@ describe("serverActions/productGetById", () => {
       creator: {
         id: "user-1",
         name: "Jan Kowalski",
-        email: "jan@example.com",
       },
       reviews: [],
       _count: {

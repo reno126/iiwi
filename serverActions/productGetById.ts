@@ -16,7 +16,6 @@ export type ProductWithReviews = {
   creator: {
     id: string;
     name: string | null;
-    email: string;
   };
   shop?: {
     id: string;
@@ -35,7 +34,6 @@ export type ProductWithReviews = {
     user: {
       id: string;
       name: string | null;
-      email: string;
       image: string | null;
     };
   }[];
@@ -60,7 +58,6 @@ export const productGetById = cache(async function productGetById(
         select: {
           id: true,
           name: true,
-          email: true,
         },
       },
       shop: {
@@ -77,7 +74,6 @@ export const productGetById = cache(async function productGetById(
             select: {
               id: true,
               name: true,
-              email: true,
               image: true,
             },
           },

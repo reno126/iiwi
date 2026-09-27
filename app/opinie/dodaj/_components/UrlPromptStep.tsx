@@ -9,6 +9,7 @@ import { ScrapeDelayNotice } from "./ScrapeDelayNotice";
 import { Sparkles } from "lucide-react";
 import { useCombinedReviewFormContext } from "./CombinedReviewFormContext";
 
+import { Label } from "@/components/ui/label";
 import { URL_PROMPT_MESSAGES } from "./urlPromptMessages";
 
 export { URL_PROMPT_MESSAGES };
@@ -39,8 +40,12 @@ export function UrlPromptStep() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-3">
+        <Label htmlFor="product-scrape-url" className="sr-only">
+          {URL_PROMPT_MESSAGES.urlInputAriaLabel}
+        </Label>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Input
+            id="product-scrape-url"
             type="url"
             value={url}
             onChange={(changeEvent) => setUrl(changeEvent.target.value)}

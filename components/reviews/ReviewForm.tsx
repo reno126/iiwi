@@ -10,6 +10,7 @@ import {
   saveReviewDraft,
   getReviewDraft,
   clearReviewDraft,
+  type ExistingProductSummary,
 } from "@/lib/storage/reviewDraftStorage";
 import type { Product } from "@/prisma/generated/client";
 import { ReviewFields } from "./ReviewFields";
@@ -23,7 +24,7 @@ export { REVIEW_FORM_MESSAGES };
 
 interface ReviewFormProps {
   productId: string;
-  product?: Product;
+  product?: ExistingProductSummary | Product;
   onSuccess?: (productId: string) => void;
   onCancel?: () => void;
   className?: string;

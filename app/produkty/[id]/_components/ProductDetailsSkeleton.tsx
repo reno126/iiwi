@@ -53,7 +53,10 @@ export function ProductDetailsSkeleton() {
 
         <div className="space-y-4">
           {[1, 2].map((itemIndex) => (
-            <Card key={itemIndex} className="border shadow-2xs">
+            <Card
+              key={`product-details-review-skeleton-${itemIndex}`}
+              className="border shadow-2xs"
+            >
               <CardHeader className="p-4 pb-2">
                 <div className="flex items-center justify-between gap-2">
                   <AuthorSignatureSkeleton />

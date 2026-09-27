@@ -48,7 +48,6 @@ const mockProduct: ProductWithReviews = {
   creator: {
     id: "user-creator-1",
     name: "Marek Twórca",
-    email: "marek@example.com",
   },
   reviews: [
     {
@@ -63,7 +62,6 @@ const mockProduct: ProductWithReviews = {
       user: {
         id: "user-rev-1",
         name: "Tomasz Recenzent",
-        email: "tomasz@example.com",
         image: null,
       },
     },
@@ -79,7 +77,6 @@ const mockProduct: ProductWithReviews = {
       user: {
         id: "user-rev-2",
         name: "Kasia Recenzentka",
-        email: "kasia@example.com",
         image: null,
       },
     },

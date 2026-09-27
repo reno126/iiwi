@@ -6,9 +6,10 @@ import { RotateCcw } from "lucide-react";
 import { ProductThumbnail } from "@/components/products/ProductThumbnail";
 import { SelectionCard } from "@/components/ui/selection-card";
 import type { Product } from "@/prisma/generated/client";
+import type { ExistingProductSummary } from "@/lib/storage/reviewDraftStorage";
 
 interface SelectedProductCardProps {
-  product: Product;
+  product: ExistingProductSummary | Product;
   onReselect: () => void;
 }
 

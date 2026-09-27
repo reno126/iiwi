@@ -1,4 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import dns from "node:dns";
+
+vi.mock("node:dns", () => ({
+  default: {
+    promises: {
+      lookup: vi
+        .fn()
+        .mockResolvedValue([{ address: "93.184.216.34", family: 4 }]),
+    },
+  },
+}));
 
 vi.mock("@/lib/auth/helper", () => ({
   auth: vi.fn(),
@@ -239,5 +250,18 @@ describe("serverActions/productScrapeMetadata", () => {
 
     expect(result?.data).toBeUndefined();
     expect(result?.serverError).toBe(PRODUCT_SCRAPE_MESSAGES.scrapeFailedError);
+  });
+
+  it("blocks DNS rebinding attacks when domain resolves to private IP", async () => {
+    vi.mocked(dns.promises.lookup).mockResolvedValueOnce([
+      { address: "192.168.1.1", family: 4 },
+    ] as never);
+
+    const result = await productScrapeMetadata({
+      productUrl: "https://shop.pl/malicious-item",
+    });
+
+    expect(result?.data).toBeUndefined();
+    expect(result?.serverError).toBe(SSRF_ERRORS.dnsRebindingPrivateIp);
   });
 });

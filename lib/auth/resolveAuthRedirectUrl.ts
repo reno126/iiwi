@@ -1,17 +1,7 @@
 import { getReviewDraftReturnUrl } from "@/lib/storage/reviewDraftStorage";
+import { isSafeRedirectUrl } from "./isSafeRedirectUrl";
 
-export function isSafeRedirectUrl(url: string | null | undefined): boolean {
-  if (!url || typeof url !== "string") {
-    return false;
-  }
-  const trimmedUrl = url.trim();
-  return (
-    trimmedUrl.startsWith("/") &&
-    !trimmedUrl.startsWith("//") &&
-    !trimmedUrl.startsWith("/\\") &&
-    !trimmedUrl.includes("\\")
-  );
-}
+export { isSafeRedirectUrl };
 
 export function resolveAuthRedirectUrl(
   callbackUrl: string | null | undefined,

@@ -9,7 +9,10 @@ export function ProductsListSkeleton({ count = 6 }: ProductsListSkeletonProps) {
   return (
     <div className="flex w-full flex-col gap-4" aria-busy="true">
       {Array.from({ length: count }).map((_, itemIndex) => (
-        <Card key={itemIndex} className="py-1 md:py-5">
+        <Card
+          key={`product-list-skeleton-item-${itemIndex}`}
+          className="py-1 md:py-5"
+        >
           <CardContent className="p-1 md:p-5">
             <div className="flex items-start gap-4">
               <Skeleton className="size-20 shrink-0 rounded-lg" />

@@ -9,7 +9,7 @@ export function RecentReviewsSkeleton() {
     >
       {Array.from({ length: 3 }).map((_, itemIndex) => (
         <Card
-          key={itemIndex}
+          key={`recent-reviews-skeleton-item-${itemIndex}`}
           className="flex h-full flex-col justify-between bg-white p-4 sm:p-5"
         >
           <div className="space-y-3">

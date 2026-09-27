@@ -1,5 +1,11 @@
-import { describe, it, expect } from "vitest";
-import { validateUrlSafety } from "@/lib/scraper/ssrfProtection";
+import { describe, it, expect, vi } from "vitest";
+import dns from "node:dns";
+import {
+  validateUrlSafety,
+  validateResolvedIpSafety,
+  validateUrlSafetyAsync,
+  SSRF_ERRORS,
+} from "@/lib/scraper/ssrfProtection";
 
 describe("lib/scraper/ssrfProtection", () => {
   it("accepts valid public HTTP and HTTPS URLs", () => {
@@ -112,5 +118,69 @@ describe("lib/scraper/ssrfProtection", () => {
       expect(result.isValid).toBe(false);
       expect(result.error).toBeDefined();
     }
+  });
+
+  describe("validateResolvedIpSafety", () => {
+    it("returns true for public IPv4 and IPv6 addresses", () => {
+      expect(validateResolvedIpSafety("93.184.216.34", 4)).toBe(true);
+      expect(validateResolvedIpSafety("8.8.8.8", 4)).toBe(true);
+      expect(validateResolvedIpSafety("2606:4700:4700::1111", 6)).toBe(true);
+    });
+
+    it("returns false for private, loopback, or cloud metadata IP addresses", () => {
+      expect(validateResolvedIpSafety("127.0.0.1", 4)).toBe(false);
+      expect(validateResolvedIpSafety("10.0.0.1", 4)).toBe(false);
+      expect(validateResolvedIpSafety("192.168.1.1", 4)).toBe(false);
+      expect(validateResolvedIpSafety("172.16.0.1", 4)).toBe(false);
+      expect(validateResolvedIpSafety("169.254.169.254", 4)).toBe(false);
+      expect(validateResolvedIpSafety("::1", 6)).toBe(false);
+      expect(validateResolvedIpSafety("fc00::1", 6)).toBe(false);
+    });
+  });
+
+  describe("validateUrlSafetyAsync", () => {
+    it("rejects domains that resolve to private or loopback IPs (DNS rebinding)", async () => {
+      const lookupSpy = vi
+        .spyOn(dns.promises, "lookup")
+        .mockResolvedValueOnce([{ address: "127.0.0.1", family: 4 }] as never);
+
+      const result = await validateUrlSafetyAsync(
+        "https://rebind.attacker.com/steal",
+      );
+
+      expect(result.isValid).toBe(false);
+      expect(result.error).toBe(SSRF_ERRORS.dnsRebindingPrivateIp);
+      lookupSpy.mockRestore();
+    });
+
+    it("approves domains that resolve exclusively to public IPs", async () => {
+      const lookupSpy = vi
+        .spyOn(dns.promises, "lookup")
+        .mockResolvedValueOnce([
+          { address: "93.184.216.34", family: 4 },
+        ] as never);
+
+      const result = await validateUrlSafetyAsync(
+        "https://safe-shop.example.com/item/1",
+      );
+
+      expect(result.isValid).toBe(true);
+      expect(result.error).toBeUndefined();
+      lookupSpy.mockRestore();
+    });
+
+    it("rejects domains when DNS lookup fails", async () => {
+      const lookupSpy = vi
+        .spyOn(dns.promises, "lookup")
+        .mockRejectedValueOnce(new Error("ENOTFOUND"));
+
+      const result = await validateUrlSafetyAsync(
+        "https://non-existent-domain.xyz/item",
+      );
+
+      expect(result.isValid).toBe(false);
+      expect(result.error).toBe(SSRF_ERRORS.dnsLookupFailed);
+      lookupSpy.mockRestore();
+    });
   });
 });

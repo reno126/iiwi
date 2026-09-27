@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import {
   type UseFormSetError,
   type UseFormClearErrors,
@@ -38,64 +38,74 @@ export function useAuthGatedSubmit<TForm extends FieldValues, TData>({
   onSuccess,
 }: UseAuthGatedSubmitOptions<TForm, TData>) {
   const { ensureAuthenticated } = useEnsureAuthenticated();
+  const isSubmittingRef = useRef(false);
 
   const handleSubmitAction = useCallback(
-    async (data: TForm) => {
-      clearErrors("root");
-
-      const isAuthenticated = await ensureAuthenticated({
-        onUnauthenticated: () => onSaveDraft(data),
-      });
-
-      if (!isAuthenticated) {
+    async (formData: TForm) => {
+      if (isSubmittingRef.current) {
         return;
       }
+      isSubmittingRef.current = true;
 
-      const res = await action(data);
+      try {
+        clearErrors("root");
 
-      if (res?.serverError === UNAUTHORIZED_ERROR_MESSAGE) {
-        const isStillAuth = await ensureAuthenticated({
-          onUnauthenticated: () => onSaveDraft(data),
+        const isAuthenticated = await ensureAuthenticated({
+          onUnauthenticated: () => onSaveDraft(formData),
         });
-        if (!isStillAuth) return;
 
-        const retryRes = await action(data);
-        if (retryRes?.data) {
-          clearReviewDraft();
-          onSuccess(retryRes.data);
+        if (!isAuthenticated) {
           return;
         }
-        if (retryRes?.serverError) {
-          setError("root", { message: retryRes.serverError });
-          return;
-        }
-      }
 
-      if (res?.serverError) {
-        setError("root", { message: res.serverError });
-        return;
-      }
+        const actionResult = await action(formData);
 
-      if (res?.validationErrors) {
-        const { fieldErrors, formErrors } = res.validationErrors;
-        if (fieldErrors) {
-          for (const [field, messages] of Object.entries(fieldErrors)) {
-            if (messages?.[0]) {
-              setError(field as Path<TForm>, {
-                message: messages[0],
-              });
-            }
+        if (actionResult?.serverError === UNAUTHORIZED_ERROR_MESSAGE) {
+          const isStillAuthenticated = await ensureAuthenticated({
+            onUnauthenticated: () => onSaveDraft(formData),
+          });
+          if (!isStillAuthenticated) return;
+
+          const retryResult = await action(formData);
+          if (retryResult?.data) {
+            clearReviewDraft();
+            onSuccess(retryResult.data);
+            return;
+          }
+          if (retryResult?.serverError) {
+            setError("root", { message: retryResult.serverError });
+            return;
           }
         }
-        if (formErrors?.[0]) {
-          setError("root", { message: formErrors[0] });
-        }
-        return;
-      }
 
-      if (res?.data) {
-        clearReviewDraft();
-        onSuccess(res.data);
+        if (actionResult?.serverError) {
+          setError("root", { message: actionResult.serverError });
+          return;
+        }
+
+        if (actionResult?.validationErrors) {
+          const { fieldErrors, formErrors } = actionResult.validationErrors;
+          if (fieldErrors) {
+            for (const [field, messages] of Object.entries(fieldErrors)) {
+              if (messages?.[0]) {
+                setError(field as Path<TForm>, {
+                  message: messages[0],
+                });
+              }
+            }
+          }
+          if (formErrors?.[0]) {
+            setError("root", { message: formErrors[0] });
+          }
+          return;
+        }
+
+        if (actionResult?.data) {
+          clearReviewDraft();
+          onSuccess(actionResult.data);
+        }
+      } finally {
+        isSubmittingRef.current = false;
       }
     },
     [

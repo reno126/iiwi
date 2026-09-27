@@ -19,6 +19,18 @@ declare module "next-auth" {
   }
 }
 
+function getAuthSecret(): string {
+  const configuredSecret =
+    process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET;
+  if (!configuredSecret) {
+    if (process.env.NODE_ENV === "test") {
+      return "test-nextauth-secret-for-testing-only";
+    }
+    throw new Error("NEXTAUTH_SECRET is required");
+  }
+  return configuredSecret;
+}
+
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -67,7 +79,7 @@ export const authOptions = {
       },
     }),
   ],
-  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
+  secret: getAuthSecret(),
   pages: {
     error: "/auth/error",
     signIn: "/login",

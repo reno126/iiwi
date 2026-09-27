@@ -9,7 +9,7 @@ export function ShopsSkeleton() {
     >
       {Array.from({ length: 8 }).map((_, itemIndex) => (
         <Card
-          key={itemIndex}
+          key={`shops-skeleton-item-${itemIndex}`}
           className="flex h-28 flex-col items-center justify-center gap-2.5 p-4 sm:h-32"
         >
           <div className="flex h-12 w-full items-center justify-center p-1">

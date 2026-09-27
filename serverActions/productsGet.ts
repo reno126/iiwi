@@ -24,22 +24,29 @@ export interface PaginatedProductsResult {
   pageSize: number;
 }
 
+const DEFAULT_PAGE_SIZE = 20;
+const MAX_PAGE_SIZE = 50;
+
 export async function productsGet({
   page = 1,
-  pageSize = 20,
+  pageSize = DEFAULT_PAGE_SIZE,
 }: {
   page?: number;
   pageSize?: number;
 } = {}): Promise<PaginatedProductsResult> {
-  const currentPage = Math.max(1, page);
-  const skip = (currentPage - 1) * pageSize;
+  const currentPage = Math.max(1, Math.floor(page));
+  const safePageSize = Math.min(
+    Math.max(1, Math.floor(pageSize)),
+    MAX_PAGE_SIZE,
+  );
+  const skip = (currentPage - 1) * safePageSize;
 
   const [products, totalCount] = await Promise.all([
     prisma.product.findMany({
       relationLoadStrategy: "join",
       orderBy: { createdAt: "desc" },
       skip,
-      take: pageSize,
+      take: safePageSize,
       select: {
         id: true,
         name: true,
@@ -61,8 +68,8 @@ export async function productsGet({
   return {
     products,
     totalCount,
-    totalPages: Math.ceil(totalCount / pageSize) || 1,
+    totalPages: Math.ceil(totalCount / safePageSize) || 1,
     currentPage,
-    pageSize,
+    pageSize: safePageSize,
   };
 }

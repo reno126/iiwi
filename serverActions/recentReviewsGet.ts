@@ -23,13 +23,17 @@ export interface RecentReviewItem {
   };
 }
 
+const DEFAULT_LIMIT = 3;
+const MAX_LIMIT = 50;
+
 export async function recentReviewsGet(
-  limit: number = 3,
+  limit: number = DEFAULT_LIMIT,
 ): Promise<RecentReviewItem[]> {
+  const safeLimit = Math.min(Math.max(1, Math.floor(limit)), MAX_LIMIT);
   return await prisma.review.findMany({
     relationLoadStrategy: "join",
     orderBy: { createdAt: "desc" },
-    take: limit,
+    take: safeLimit,
     select: {
       id: true,
       description: true,

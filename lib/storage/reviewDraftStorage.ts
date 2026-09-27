@@ -8,6 +8,7 @@ import {
   removeItemWithTtl,
   DEFAULT_TTL_MS,
 } from "./ttlStorage";
+import { isSafeRedirectUrl } from "@/lib/auth/isSafeRedirectUrl";
 
 export const REVIEW_DRAFT_STORAGE_KEY = "iiwi_pending_review_draft";
 
@@ -25,11 +26,18 @@ export interface NewProductReviewDraft {
   detectedShop?: MatchedShopResult | null;
 }
 
+export interface ExistingProductSummary {
+  id: string;
+  name: string;
+  code?: string | null;
+  imageUrl?: string | null;
+}
+
 export interface ExistingProductReviewDraft {
   type: "REVIEW_EXISTING_PRODUCT";
   returnUrl?: string;
   productId: string;
-  product?: Product;
+  product?: ExistingProductSummary | Product;
   formData: ReviewCreateInput;
 }
 
@@ -47,16 +55,21 @@ export function getReviewDraft(): ReviewDraft | null {
 }
 
 export function getReviewDraftReturnUrl(fallbackUrl = "/dashboard"): string {
+  const safeFallback = isSafeRedirectUrl(fallbackUrl)
+    ? fallbackUrl
+    : "/dashboard";
   const draft = getReviewDraft();
-  if (!draft) return fallbackUrl;
+  if (!draft) return safeFallback;
 
-  if (draft.returnUrl) return draft.returnUrl;
+  if (draft.returnUrl && isSafeRedirectUrl(draft.returnUrl)) {
+    return draft.returnUrl;
+  }
   if (draft.type === "NEW_PRODUCT_AND_REVIEW") return "/opinie/dodaj";
   if (draft.type === "REVIEW_EXISTING_PRODUCT") {
     return draft.productId ? `/produkty/${draft.productId}` : "/opinie/dodaj";
   }
 
-  return fallbackUrl;
+  return safeFallback;
 }
 
 export function clearReviewDraft(): void {

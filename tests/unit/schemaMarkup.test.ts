@@ -22,7 +22,6 @@ const baseProductMock: ProductWithReviews = {
   creator: {
     id: "user-1",
     name: "Jan",
-    email: "jan@example.com",
   },
   shop: {
     id: "shop-1",
@@ -42,7 +41,6 @@ const baseProductMock: ProductWithReviews = {
       user: {
         id: "user-2",
         name: "Anna Nowak",
-        email: "anna@example.com",
         image: null,
       },
     },
@@ -58,7 +56,6 @@ const baseProductMock: ProductWithReviews = {
       user: {
         id: "user-3",
         name: null,
-        email: "anonim@example.com",
         image: null,
       },
     },

@@ -6,7 +6,7 @@ import { ReadMore } from "./ReadMore";
 
 interface ReviewItemUser {
   name?: string | null;
-  email: string;
+  image?: string | null;
 }
 
 export interface ReviewItemData {
@@ -30,7 +30,7 @@ export const ProductReviewItem = memo(function ProductReviewItem({
         <div className="flex flex-wrap items-center justify-between gap-2">
           <AuthorSignature
             name={review.user.name}
-            email={review.user.email}
+            image={review.user.image}
             date={review.createdAt}
             fallbackName="Anonimowy użytkownik"
           />

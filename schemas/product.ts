@@ -52,3 +52,7 @@ export const reconstructRatingsSchema = z.object({
 });
 
 export type ReconstructRatingsInput = z.infer<typeof reconstructRatingsSchema>;
+
+export const productSearchSchema = z.string().max(100);
+
+export type ProductSearchInput = z.infer<typeof productSearchSchema>;

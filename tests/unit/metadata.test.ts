@@ -134,7 +134,7 @@ describe("metadata generators", () => {
         averageRate: 4.8,
         createdAt: new Date("2026-01-01"),
         updatedAt: new Date("2026-01-01"),
-        creator: { id: "user-1", name: "Jan", email: "jan@example.com" },
+        creator: { id: "user-1", name: "Jan" },
         shop: { id: "shop-1", name: "Media Markt", logo: null },
         reviews: [],
         _count: { reviews: 5 },
@@ -170,7 +170,7 @@ describe("metadata generators", () => {
         averageRate: 5.0,
         createdAt: new Date("2026-01-01"),
         updatedAt: new Date("2026-01-01"),
-        creator: { id: "user-1", name: "Jan", email: "jan@example.com" },
+        creator: { id: "user-1", name: "Jan" },
         reviews: [],
         _count: { reviews: 1 },
       };

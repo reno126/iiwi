@@ -19,7 +19,6 @@ describe("app/produkty/[id]/_components/ProductOverviewCard", () => {
     creator: {
       id: "user-test-1",
       name: "Anna Nowak",
-      email: "anna.nowak@example.com",
     },
     shop: {
       id: "shop-test-1",

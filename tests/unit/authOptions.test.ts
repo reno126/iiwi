@@ -42,7 +42,7 @@ describe("lib/auth/authOptions", () => {
 
   const getAuthorizeFn = () => {
     const provider = authOptions.providers.find(
-      (p) => p.id === "credentials",
+      (configuredProvider) => configuredProvider.id === "credentials",
     ) as unknown as CredentialsProviderOptions;
 
     const authorize = provider?.options?.authorize ?? provider?.authorize;

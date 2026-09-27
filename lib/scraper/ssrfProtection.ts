@@ -1,3 +1,5 @@
+import dns from "node:dns";
+
 export interface UrlSafetyResult {
   isValid: boolean;
   error?: string;
@@ -162,6 +164,9 @@ export const SSRF_ERRORS = {
   missingTopLevelDomain:
     "Podana nazwa domeny jest nieprawidłowa (wymagana domena najwyższego poziomu).",
   invalidHostnameFormat: "Nieprawidłowy format nazwy hosta.",
+  dnsRebindingPrivateIp:
+    "Rozpoznany adres IP domeny wskazuje na prywatną lub zastrzeżoną sieć.",
+  dnsLookupFailed: "Nie udało się rozpoznać adresu sieciowego podanej domeny.",
 } as const;
 
 export function validateUrlSafety(inputUrl: string): UrlSafetyResult {
@@ -234,4 +239,74 @@ export function validateUrlSafety(inputUrl: string): UrlSafetyResult {
   }
 
   return { isValid: true };
+}
+
+export function validateResolvedIpSafety(
+  address: string,
+  family: number = 4,
+): boolean {
+  if (family === 4 || address.includes(".")) {
+    return !isPrivateOrReservedIPv4(address);
+  }
+  if (family === 6 || address.includes(":")) {
+    return !isPrivateOrReservedIPv6(address);
+  }
+  return false;
+}
+
+export async function validateDnsResolutionSafety(
+  hostname: string,
+): Promise<UrlSafetyResult> {
+  const cleanHost = stripIpv6Brackets(hostname.toLowerCase().trim());
+  if (
+    isPrivateOrReservedIPv4(cleanHost) ||
+    (cleanHost.includes(":") && isPrivateOrReservedIPv6(cleanHost))
+  ) {
+    return {
+      isValid: false,
+      error: cleanHost.includes(":")
+        ? SSRF_ERRORS.privateOrReservedIPv6
+        : SSRF_ERRORS.privateOrReservedIPv4,
+    };
+  }
+
+  try {
+    const resolvedAddresses = await dns.promises.lookup(cleanHost, {
+      all: true,
+    });
+    for (const record of resolvedAddresses) {
+      const isSafe = validateResolvedIpSafety(record.address, record.family);
+      if (!isSafe) {
+        return {
+          isValid: false,
+          error: SSRF_ERRORS.dnsRebindingPrivateIp,
+        };
+      }
+    }
+    return { isValid: true };
+  } catch {
+    return {
+      isValid: false,
+      error: SSRF_ERRORS.dnsLookupFailed,
+    };
+  }
+}
+
+export async function validateUrlSafetyAsync(
+  inputUrl: string,
+): Promise<UrlSafetyResult> {
+  const syncValidation = validateUrlSafety(inputUrl);
+  if (!syncValidation.isValid) {
+    return syncValidation;
+  }
+
+  try {
+    const parsedUrl = new URL(inputUrl);
+    return await validateDnsResolutionSafety(parsedUrl.hostname);
+  } catch {
+    return {
+      isValid: false,
+      error: SSRF_ERRORS.invalidUrl,
+    };
+  }
 }

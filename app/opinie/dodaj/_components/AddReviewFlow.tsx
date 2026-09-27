@@ -1,14 +1,18 @@
 "use client";
 
-import { useState, lazy, Suspense } from "react";
+import { useState, useCallback, lazy, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import type { Product } from "@/prisma/generated/client";
 import { AsyncSearch } from "@/components/search/AsyncSearch";
-import { productSearch } from "@/serverActions/productSearch";
+import {
+  productSearch,
+  type ProductSearchResultItem,
+} from "@/serverActions/productSearch";
 import { ReviewForm } from "@/components/reviews/ReviewForm";
 import {
   getReviewDraft,
   clearReviewDraft,
+  type ExistingProductSummary,
 } from "@/lib/storage/reviewDraftStorage";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SelectedProductCard } from "./SelectedProductCard";
@@ -33,7 +37,10 @@ export { ADD_REVIEW_FLOW_MESSAGES };
 
 export type FlowMode =
   | { type: "SEARCHING" }
-  | { type: "REVIEW_EXISTING_PRODUCT"; product: Product }
+  | {
+      type: "REVIEW_EXISTING_PRODUCT";
+      product: ExistingProductSummary | Product;
+    }
   | { type: "NEW_PRODUCT_AND_REVIEW" };
 
 export function AddReviewFlow() {
@@ -49,15 +56,34 @@ export function AddReviewFlow() {
     return { type: "SEARCHING" };
   });
 
-  const handleSuccess = (productId: string) => {
-    clearReviewDraft();
-    router.push(`/produkty/${productId}`);
-  };
+  const handleSuccess = useCallback(
+    (productId: string) => {
+      clearReviewDraft();
+      router.push(`/produkty/${productId}`);
+    },
+    [router],
+  );
 
-  const handleCancelFlow = () => {
+  const handleCancelFlow = useCallback(() => {
     clearReviewDraft();
     setMode({ type: "SEARCHING" });
-  };
+  }, []);
+
+  const handleStartNewProductFlow = useCallback(() => {
+    setMode({ type: "NEW_PRODUCT_AND_REVIEW" });
+  }, []);
+
+  const handleProductSelect = useCallback(
+    (selectedProduct: ProductSearchResultItem) => {
+      setMode({ type: "REVIEW_EXISTING_PRODUCT", product: selectedProduct });
+    },
+    [],
+  );
+
+  const getProductItemLabel = useCallback(
+    (productItem: ProductSearchResultItem) => productItem.name,
+    [],
+  );
 
   return (
     <div className="space-y-6">
@@ -69,7 +95,7 @@ export function AddReviewFlow() {
             </p>
             <Button
               type="button"
-              onClick={() => setMode({ type: "NEW_PRODUCT_AND_REVIEW" })}
+              onClick={handleStartNewProductFlow}
               className="w-full shrink-0 gap-1.5 md:w-auto"
             >
               <PlusCircle className="size-4" />
@@ -77,14 +103,12 @@ export function AddReviewFlow() {
             </Button>
           </div>
 
-          <AsyncSearch<Product>
+          <AsyncSearch<ProductSearchResultItem>
             autoFocus={true}
             searchAction={productSearch}
             placeholder={ADD_REVIEW_FLOW_MESSAGES.searchPlaceholder}
-            getItemLabel={(p) => p.name}
-            onResultSelect={(product) =>
-              setMode({ type: "REVIEW_EXISTING_PRODUCT", product })
-            }
+            getItemLabel={getProductItemLabel}
+            onResultSelect={handleProductSelect}
             emptyState={
               <div className="space-y-3 rounded-lg border border-dashed p-6 text-center">
                 <p className="text-sm text-muted-foreground">
@@ -93,7 +117,7 @@ export function AddReviewFlow() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setMode({ type: "NEW_PRODUCT_AND_REVIEW" })}
+                  onClick={handleStartNewProductFlow}
                 >
                   <PlusCircle className="mr-2 size-4" />
                   {ADD_REVIEW_FLOW_MESSAGES.emptySearchAddReviewButton}

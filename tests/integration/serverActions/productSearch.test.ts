@@ -18,13 +18,13 @@ describe("serverActions/productSearch", () => {
 
   it("returns an empty array when query is less than 3 characters", async () => {
     const result = await productSearch("ab");
-    expect(result).toEqual([]);
+    expect(result?.data).toEqual([]);
     expect(prisma.product.findMany).not.toHaveBeenCalled();
   });
 
   it("returns an empty array when query is empty or whitespace", async () => {
     const result = await productSearch("   ");
-    expect(result).toEqual([]);
+    expect(result?.data).toEqual([]);
     expect(prisma.product.findMany).not.toHaveBeenCalled();
   });
 
@@ -34,7 +34,6 @@ describe("serverActions/productSearch", () => {
         id: "prod-1",
         name: "Słuchawki bezprzewodowe",
         code: "SLU-01",
-        creatorId: "user-1",
         productUrl: null,
         imageUrl: null,
         shopId: null,
@@ -45,11 +44,13 @@ describe("serverActions/productSearch", () => {
       },
     ];
 
-    vi.mocked(prisma.product.findMany).mockResolvedValueOnce(mockProducts);
+    vi.mocked(prisma.product.findMany).mockResolvedValueOnce(
+      mockProducts as never,
+    );
 
     const result = await productSearch("słuchawki");
 
-    expect(result).toEqual(mockProducts);
+    expect(result?.data).toEqual(mockProducts);
     expect(prisma.product.findMany).toHaveBeenCalledWith({
       where: {
         OR: [
@@ -59,6 +60,18 @@ describe("serverActions/productSearch", () => {
       },
       take: 10,
       orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        code: true,
+        imageUrl: true,
+        productUrl: true,
+        rate_avg: true,
+        rate_count: true,
+        createdAt: true,
+        updatedAt: true,
+        shopId: true,
+      },
     });
   });
 });
