@@ -91,12 +91,12 @@ describe("app/dashboard components", () => {
       expect(screen.getByText(formatRatedProductsCount(2))).toBeInTheDocument();
 
       const productLink1 = screen.getByRole("link", {
-        name: mockProducts[0].productName,
+        name: mockProducts[0]?.productName ?? "",
       });
       expect(productLink1).toHaveAttribute("href", "/produkty/prod-1");
 
       const productLink2 = screen.getByRole("link", {
-        name: mockProducts[1].productName,
+        name: mockProducts[1]?.productName ?? "",
       });
       expect(productLink2).toHaveAttribute("href", "/produkty/prod-2");
 

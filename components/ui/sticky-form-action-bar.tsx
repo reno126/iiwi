@@ -14,7 +14,7 @@ interface StickyFormActionBarProps {
   className?: string;
 }
 
-const MemoizedStickyFormActionBar = memo(function MemoizedStickyFormActionBar({
+export const StickyFormActionBar = memo(function StickyFormActionBar({
   onBack,
   backLabel = "Wróć",
   onCancel,
@@ -71,7 +71,3 @@ const MemoizedStickyFormActionBar = memo(function MemoizedStickyFormActionBar({
     </div>
   );
 });
-
-export function StickyFormActionBar(props: StickyFormActionBarProps) {
-  return <MemoizedStickyFormActionBar {...props} />;
-}

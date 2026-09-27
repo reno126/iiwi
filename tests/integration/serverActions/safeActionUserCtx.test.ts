@@ -45,4 +45,21 @@ describe("lib/actions/safeActionUserCtx middleware", () => {
     expect(result?.serverError).toBeDefined();
     expect(result?.data).toBeUndefined();
   });
+
+  it("sanitizes unexpected internal errors with generic message", async () => {
+    vi.mocked(auth).mockResolvedValueOnce({
+      user: { id: "user-alpha-99", email: "user@example.com" },
+      expires: "9999-12-31",
+    });
+
+    const failingAction = safeActionUserCtx.action(async () => {
+      throw new Error("P2002: Unique constraint failed on field table_secret");
+    });
+
+    const result = await failingAction();
+    expect(result?.serverError).toBe(
+      "Wystąpił nieoczekiwany błąd serwera. Spróbuj ponownie później.",
+    );
+    expect(result?.serverError).not.toContain("P2002");
+  });
 });

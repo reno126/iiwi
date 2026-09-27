@@ -108,7 +108,7 @@ describe("serverActions/reconstructRatings", () => {
 
     expect(result.success).toBe(true);
     expect(result.updatedCount).toBe(1);
-    expect(result.products[0].rate_avg).toBe(4.67);
+    expect(result.products[0]?.rate_avg).toBe(4.67);
   });
 
   it("reconstructs ratings when an object with productId is passed", async () => {
@@ -128,7 +128,7 @@ describe("serverActions/reconstructRatings", () => {
 
     expect(result.success).toBe(true);
     expect(result.updatedCount).toBe(1);
-    expect(result.products[0].rate_avg).toBe(3);
+    expect(result.products[0]?.rate_avg).toBe(3);
   });
 
   it("returns error when targetProductId is not found", async () => {

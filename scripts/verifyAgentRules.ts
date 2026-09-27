@@ -131,6 +131,7 @@ function checkEmptyPropsInterfaces(
       if (node.parameters.length === 1) {
         const param = node.parameters[0];
         if (
+          param &&
           ts.isObjectBindingPattern(param.name) &&
           param.name.elements.length === 0
         ) {
@@ -248,7 +249,7 @@ function checkMagicLiteralsInTests(filePath: string, content: string): void {
   const lines = content.split("\n");
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    if (!isTestAssertionLine(line)) continue;
+    if (!line || !isTestAssertionLine(line)) continue;
 
     for (const knownError of KNOWN_ERROR_MESSAGES) {
       const hasLiteralString =

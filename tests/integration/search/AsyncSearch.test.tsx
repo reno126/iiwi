@@ -287,7 +287,11 @@ describe("components/search/AsyncSearch", () => {
     });
 
     const options = driver.options();
-    fireEvent.click(options[1]);
+    const secondOption = options[1];
+    expect(secondOption).toBeDefined();
+    if (secondOption) {
+      fireEvent.click(secondOption);
+    }
 
     expect(onSelect).toHaveBeenCalledTimes(1);
     expect(onSelect).toHaveBeenCalledWith(mockProducts[1]);

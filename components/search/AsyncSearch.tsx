@@ -129,26 +129,27 @@ export function AsyncSearch<T>({
   );
 
   const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (results.length === 0) return;
 
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
         setHighlightedIndex((prev) =>
           prev < results.length - 1 ? prev + 1 : 0,
         );
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
         setHighlightedIndex((prev) =>
           prev > 0 ? prev - 1 : results.length - 1,
         );
-      } else if (e.key === "Enter") {
-        if (highlightedIndex >= 0 && highlightedIndex < results.length) {
-          e.preventDefault();
-          handleSelect(results[highlightedIndex]);
+      } else if (event.key === "Enter") {
+        const selectedResult = results[highlightedIndex];
+        if (selectedResult) {
+          event.preventDefault();
+          handleSelect(selectedResult);
         }
-      } else if (e.key === "Escape") {
-        e.preventDefault();
+      } else if (event.key === "Escape") {
+        event.preventDefault();
         setHighlightedIndex(-1);
       }
     },

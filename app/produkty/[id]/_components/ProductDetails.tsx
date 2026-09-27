@@ -40,22 +40,13 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   });
 
   useEffect(() => {
-    function scrollToReviewFormIfDraftExists() {
-      const draft = getReviewDraft();
-      const hasDraftForCurrentProduct =
-        draft?.type === "REVIEW_EXISTING_PRODUCT" &&
-        draft.productId === product.id;
-
-      if (!hasDraftForCurrentProduct) {
-        return;
-      }
-
-      const reviewFormElement = document.getElementById("review-form");
-      reviewFormElement?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (!isReviewFormOpen) {
+      return;
     }
 
-    scrollToReviewFormIfDraftExists();
-  }, [product.id]);
+    const reviewFormElement = document.getElementById("review-form");
+    reviewFormElement?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [isReviewFormOpen]);
 
   const handleOpenReviewForm = useCallback(() => {
     setIsReviewFormOpen(true);

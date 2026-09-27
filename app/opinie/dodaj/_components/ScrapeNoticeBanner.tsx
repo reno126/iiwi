@@ -30,7 +30,7 @@ interface ScrapeNoticeBannerProps {
   errorMessage?: string | null;
 }
 
-const MemoizedScrapeNoticeBanner = memo(function MemoizedScrapeNoticeBanner({
+export const ScrapeNoticeBanner = memo(function ScrapeNoticeBanner({
   mode,
   scrapedFields = [],
 }: ScrapeNoticeBannerProps) {
@@ -78,7 +78,3 @@ const MemoizedScrapeNoticeBanner = memo(function MemoizedScrapeNoticeBanner({
     </Alert>
   );
 });
-
-export function ScrapeNoticeBanner(props: ScrapeNoticeBannerProps) {
-  return <MemoizedScrapeNoticeBanner {...props} />;
-}

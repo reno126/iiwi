@@ -13,6 +13,9 @@ function parseCliArgs(args: string[]): CliOptions {
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
+    if (!arg) {
+      continue;
+    }
     if (arg === "-h" || arg === "--help") {
       help = true;
     } else if (arg === "-p" || arg === "--productId" || arg === "--id") {

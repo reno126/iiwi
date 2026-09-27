@@ -26,7 +26,7 @@ interface ProductOverviewCardProps {
   isReviewFormOpen: boolean;
 }
 
-const MemoizedProductOverviewCard = memo(function MemoizedProductOverviewCard({
+export const ProductOverviewCard = memo(function ProductOverviewCard({
   product,
   onAddReview,
   isReviewFormOpen,
@@ -143,17 +143,3 @@ const MemoizedProductOverviewCard = memo(function MemoizedProductOverviewCard({
     </Card>
   );
 });
-
-export function ProductOverviewCard({
-  product,
-  onAddReview,
-  isReviewFormOpen,
-}: ProductOverviewCardProps) {
-  return (
-    <MemoizedProductOverviewCard
-      product={product}
-      onAddReview={onAddReview}
-      isReviewFormOpen={isReviewFormOpen}
-    />
-  );
-}

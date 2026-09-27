@@ -89,7 +89,7 @@ describe("serverActions/productScrapeMetadata", () => {
     });
 
     expect(fetchSpy).toHaveBeenCalledTimes(1);
-    expect(fetchSpy.mock.calls[0][0]).toBe(
+    expect(fetchSpy.mock.calls[0]?.[0]).toBe(
       "https://shop.pl/p/12345/headphones",
     );
   });
@@ -135,7 +135,7 @@ describe("serverActions/productScrapeMetadata", () => {
     });
 
     expect(fetchSpy).toHaveBeenCalledTimes(2);
-    const zenrowsCallUrl = String(fetchSpy.mock.calls[1][0]);
+    const zenrowsCallUrl = String(fetchSpy.mock.calls[1]?.[0]);
     expect(zenrowsCallUrl).toContain("api.zenrows.com");
     expect(zenrowsCallUrl).toContain("js_render=true");
     expect(zenrowsCallUrl).toContain("premium_proxy=true");

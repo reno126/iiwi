@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
+import { isSafeRedirectUrl } from "./resolveAuthRedirectUrl";
 
 export interface EnsureAuthenticatedOptions {
   onUnauthenticated?: () => void;
@@ -24,10 +25,10 @@ export function useEnsureAuthenticated() {
         try {
           const refreshed = await update();
           return Boolean(refreshed?.user?.id);
-        } catch (err) {
+        } catch (error) {
           console.warn(
             "[useEnsureAuthenticated] Błąd podczas próby odświeżenia sesji:",
-            err,
+            error,
           );
           return false;
         }
@@ -39,11 +40,14 @@ export function useEnsureAuthenticated() {
       }
 
       function resolveRedirectTargetUrl(): string {
-        if (options?.callbackUrl) {
-          return options.callbackUrl;
+        if (options?.callbackUrl && isSafeRedirectUrl(options.callbackUrl)) {
+          return options.callbackUrl.trim();
         }
         if (typeof window !== "undefined") {
-          return window.location.pathname + window.location.search;
+          const currentPath = window.location.pathname + window.location.search;
+          if (isSafeRedirectUrl(currentPath)) {
+            return currentPath;
+          }
         }
         return "/";
       }

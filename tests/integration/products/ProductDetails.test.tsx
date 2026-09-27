@@ -115,6 +115,16 @@ function createProductDetailsDriver() {
       screen.getAllByRole("button", {
         name: PRODUCT_DETAILS_MESSAGES.addReviewButton,
       }),
+    topAddReviewButton: () => {
+      const buttons = screen.getAllByRole("button", {
+        name: PRODUCT_DETAILS_MESSAGES.addReviewButton,
+      });
+      const topButton = buttons[0];
+      if (!topButton) {
+        throw new Error("No addReviewButton found");
+      }
+      return topButton;
+    },
     cancelButton: () =>
       screen.getByRole("button", { name: REVIEW_FORM_MESSAGES.cancelButton }),
     publishButton: () =>
@@ -182,7 +192,7 @@ describe("app/produkty/[id]/_components/ProductDetails", () => {
     render(<ProductDetails product={mockProduct} />);
     const driver = createProductDetailsDriver();
 
-    const [topAddReviewBtn] = driver.addReviewButtons();
+    const topAddReviewBtn = driver.topAddReviewButton();
     await driver.user.click(topAddReviewBtn);
 
     expect(
@@ -213,7 +223,7 @@ describe("app/produkty/[id]/_components/ProductDetails", () => {
     render(<ProductDetails product={mockProduct} />);
     const driver = createProductDetailsDriver();
 
-    const [topAddReviewBtn] = driver.addReviewButtons();
+    const topAddReviewBtn = driver.topAddReviewButton();
     await driver.user.click(topAddReviewBtn);
     expect(
       driver.heading(PRODUCT_DETAILS_MESSAGES.formHeading),
@@ -258,7 +268,7 @@ describe("app/produkty/[id]/_components/ProductDetails", () => {
     render(<ProductDetails product={mockProduct} />);
     const driver = createProductDetailsDriver();
 
-    const [topAddReviewBtn] = driver.addReviewButtons();
+    const topAddReviewBtn = driver.topAddReviewButton();
     await driver.user.click(topAddReviewBtn);
 
     await driver.user.click(driver.ratingRadio(5));
@@ -296,7 +306,11 @@ describe("app/produkty/[id]/_components/ProductDetails", () => {
 
     const addReviewBtns = driver.addReviewButtons();
     expect(addReviewBtns).toHaveLength(2);
-    await driver.user.click(addReviewBtns[1]);
+    const secondAddReviewBtn = addReviewBtns[1];
+    expect(secondAddReviewBtn).toBeDefined();
+    if (secondAddReviewBtn) {
+      await driver.user.click(secondAddReviewBtn);
+    }
 
     expect(
       driver.heading(PRODUCT_DETAILS_MESSAGES.formHeading),
@@ -335,7 +349,7 @@ describe("app/produkty/[id]/_components/ProductDetails", () => {
     render(<ProductDetails product={mockProduct} />);
     const driver = createProductDetailsDriver();
 
-    const [topAddReviewBtn] = driver.addReviewButtons();
+    const topAddReviewBtn = driver.topAddReviewButton();
     await driver.user.click(topAddReviewBtn);
 
     expect(driver.descriptionInput()).not.toBeInvalid();

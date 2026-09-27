@@ -62,7 +62,7 @@ describe("lib/scraper/zenrowsClient", () => {
     expect(result).toBe(mockHtml);
     expect(fetchMock).toHaveBeenCalledTimes(1);
 
-    const [calledUrl] = fetchMock.mock.calls[0];
+    const calledUrl = String(fetchMock.mock.calls[0]?.[0]);
     const urlObj = new URL(calledUrl);
 
     expect(urlObj.origin).toBe("https://api.zenrows.com");
@@ -93,7 +93,7 @@ describe("lib/scraper/zenrowsClient", () => {
       waitFor: ".product-loaded",
     });
 
-    const [calledUrl] = fetchMock.mock.calls[0];
+    const calledUrl = String(fetchMock.mock.calls[0]?.[0]);
     const urlObj = new URL(calledUrl);
 
     expect(urlObj.searchParams.get("antibot")).toBeNull();

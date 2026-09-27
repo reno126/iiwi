@@ -107,7 +107,11 @@ describe("components/navigation/TopMenu", () => {
     const avatarTriggers = screen.getAllByRole("button", {
       name: new RegExp(USER_ACCOUNT_MESSAGES.userMenuAriaLabel, "i"),
     });
-    await user.click(avatarTriggers[0]);
+    const avatarTrigger = avatarTriggers[0];
+    expect(avatarTrigger).toBeDefined();
+    if (avatarTrigger) {
+      await user.click(avatarTrigger);
+    }
 
     expect(await screen.findByText(userEmail)).toBeInTheDocument();
     expect(screen.getByText("Jan")).toBeInTheDocument();

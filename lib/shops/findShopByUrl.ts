@@ -21,7 +21,8 @@ function compareShopsByCandidatePriority(
 ): number {
   function findBestCandidateRank(shopKeys: string[]): number {
     for (let index = 0; index < candidates.length; index++) {
-      if (shopKeys.includes(candidates[index])) {
+      const candidate = candidates[index];
+      if (candidate && shopKeys.includes(candidate)) {
         return index;
       }
     }
@@ -55,8 +56,9 @@ export async function findShopByUrl(
   });
 
   if (matchedShops.length === 0) return null;
-  if (matchedShops.length === 1) {
-    const { id, name, logo } = matchedShops[0];
+  const singleShop = matchedShops[0];
+  if (matchedShops.length === 1 && singleShop) {
+    const { id, name, logo } = singleShop;
     return { id, name, logo };
   }
 
@@ -65,6 +67,8 @@ export async function findShopByUrl(
   );
 
   const bestRankedShop = matchedShops[0];
+  if (!bestRankedShop) return null;
+
   return {
     id: bestRankedShop.id,
     name: bestRankedShop.name,

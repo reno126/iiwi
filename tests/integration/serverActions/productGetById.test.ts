@@ -126,7 +126,7 @@ describe("serverActions/productGetById", () => {
     expect(result?.averageRate).toBe(4.67);
     expect(result?._count.reviews).toBe(3);
     expect(result?.reviews).toHaveLength(1);
-    expect(result?.reviews[0].user.name).toBe("Anna Nowak");
+    expect(result?.reviews[0]?.user.name).toBe("Anna Nowak");
   });
 
   it("returns null averageRate and 0 reviews count when rate_count is 0", async () => {

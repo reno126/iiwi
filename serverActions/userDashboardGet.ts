@@ -58,7 +58,7 @@ function aggregateProductReviews(
   }
 
   return Array.from(productsMap.values()).map((entry) => {
-    const totalRate = entry.rates.reduce((sum, r) => sum + r, 0);
+    const totalRate = entry.rates.reduce((sum, rate) => sum + rate, 0);
     const averageRate = totalRate / entry.rates.length;
     const roundedRate = Math.round(averageRate * 10) / 10;
 
@@ -72,24 +72,30 @@ function aggregateProductReviews(
 }
 
 function compareShopEntries(
-  a: UserDashboardShopItem,
-  b: UserDashboardShopItem,
+  firstShop: UserDashboardShopItem,
+  secondShop: UserDashboardShopItem,
 ): number {
-  if (b.reviewCount !== a.reviewCount) {
-    return b.reviewCount - a.reviewCount;
+  if (secondShop.reviewCount !== firstShop.reviewCount) {
+    return secondShop.reviewCount - firstShop.reviewCount;
   }
-  return a.shopName.localeCompare(b.shopName);
+  return firstShop.shopName.localeCompare(secondShop.shopName);
 }
 
 export const userDashboardGet = cache(async function userDashboardGet(
   targetUserId?: string,
 ): Promise<UserDashboardData | null> {
   const session = await auth();
-  const userId = targetUserId ?? session?.user?.id;
+  const sessionUserId = session?.user?.id;
 
-  if (!userId) {
+  if (!sessionUserId) {
     return null;
   }
+
+  if (targetUserId && targetUserId !== sessionUserId) {
+    return null;
+  }
+
+  const userId = sessionUserId;
 
   const user = await prisma.user.findUnique({
     where: { id: userId },

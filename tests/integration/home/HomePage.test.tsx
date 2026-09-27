@@ -95,13 +95,13 @@ describe("HomePage", () => {
       }),
     ).toBeInTheDocument();
     expect(
-      await screen.findByText(mockReviews[0].product.name),
+      await screen.findByText(mockReviews[0]?.product.name ?? ""),
     ).toBeInTheDocument();
     expect(
-      await screen.findByText(mockReviews[1].product.name),
+      await screen.findByText(mockReviews[1]?.product.name ?? ""),
     ).toBeInTheDocument();
     expect(
-      await screen.findByText(`“${mockReviews[0].description}”`),
+      await screen.findByText(`“${mockReviews[0]?.description ?? ""}”`),
     ).toBeInTheDocument();
     expect(await screen.findByText("Jan Tester")).toBeInTheDocument();
 

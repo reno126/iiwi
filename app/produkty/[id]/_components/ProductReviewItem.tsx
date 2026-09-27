@@ -21,7 +21,7 @@ interface ProductReviewItemProps {
   review: ReviewItemData;
 }
 
-const MemoizedProductReviewItem = memo(function MemoizedProductReviewItem({
+export const ProductReviewItem = memo(function ProductReviewItem({
   review,
 }: ProductReviewItemProps) {
   return (
@@ -45,7 +45,3 @@ const MemoizedProductReviewItem = memo(function MemoizedProductReviewItem({
     </Card>
   );
 });
-
-export function ProductReviewItem({ review }: ProductReviewItemProps) {
-  return <MemoizedProductReviewItem review={review} />;
-}

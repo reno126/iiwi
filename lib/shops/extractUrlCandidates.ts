@@ -17,6 +17,10 @@ function isTwoPartTopLevelDomain(parts: string[]): boolean {
   const secondToLast = parts[parts.length - 2];
   const last = parts[parts.length - 1];
 
+  if (!secondToLast || !last) {
+    return false;
+  }
+
   const commonSecondLevelLabels = new Set([
     "com",
     "net",

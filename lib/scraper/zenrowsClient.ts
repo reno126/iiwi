@@ -8,7 +8,8 @@ export interface ZenRowsScrapeOptions {
 
 function extractPageTitle(html: string): string {
   const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-  return titleMatch ? titleMatch[1].trim() : "Brak <title>";
+  const matchedTitle = titleMatch?.[1];
+  return matchedTitle ? matchedTitle.trim() : "Brak <title>";
 }
 
 function isBotChallengeDetected(html: string): boolean {

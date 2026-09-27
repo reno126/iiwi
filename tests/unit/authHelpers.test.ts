@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { getAuthErrorMessage } from "@/lib/auth/getAuthErrorMessage";
-import { resolveAuthRedirectUrl } from "@/lib/auth/resolveAuthRedirectUrl";
+import {
+  resolveAuthRedirectUrl,
+  isSafeRedirectUrl,
+} from "@/lib/auth/resolveAuthRedirectUrl";
 import { AUTH_ERRORS, AUTH_ERROR_MESSAGES } from "@/lib/auth/constants";
 import * as reviewDraftStorage from "@/lib/storage/reviewDraftStorage";
 
@@ -42,10 +45,32 @@ describe("lib/auth/resolveAuthRedirectUrl", () => {
     vi.restoreAllMocks();
   });
 
+  it("identifies safe relative redirect URLs", () => {
+    expect(isSafeRedirectUrl("/produkty/123")).toBe(true);
+    expect(isSafeRedirectUrl("/dashboard?tab=reviews")).toBe(true);
+    expect(isSafeRedirectUrl("https://evil.com")).toBe(false);
+    expect(isSafeRedirectUrl("//evil.com")).toBe(false);
+    expect(isSafeRedirectUrl("/\\evil.com")).toBe(false);
+    expect(isSafeRedirectUrl("javascript:alert(1)")).toBe(false);
+    expect(isSafeRedirectUrl(null)).toBe(false);
+    expect(isSafeRedirectUrl("")).toBe(false);
+  });
+
   it("returns custom callbackUrl when valid and not dashboard", () => {
     expect(resolveAuthRedirectUrl("/produkty/prod-123")).toBe(
       "/produkty/prod-123",
     );
+  });
+
+  it("rejects malicious open redirect URLs and falls back to safe url", () => {
+    vi.spyOn(reviewDraftStorage, "getReviewDraftReturnUrl").mockReturnValue(
+      "/opinie/dodaj",
+    );
+
+    expect(resolveAuthRedirectUrl("https://evil.com")).toBe("/opinie/dodaj");
+    expect(resolveAuthRedirectUrl("//attacker.com/test")).toBe("/opinie/dodaj");
+    expect(resolveAuthRedirectUrl("javascript:evil()")).toBe("/opinie/dodaj");
+    expect(resolveAuthRedirectUrl("/\\evil.com")).toBe("/opinie/dodaj");
   });
 
   it("falls back to review draft return url when callbackUrl is missing or /dashboard", () => {

@@ -169,19 +169,15 @@ describe("serverActions/userDashboardGet", () => {
     expect(result?.reviewedShops).toEqual([]);
   });
 
-  it("supports passing targetUserId directly without active session", async () => {
-    vi.mocked(auth).mockResolvedValueOnce(null);
-    vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({
-      id: "explicit-user-id",
-      name: "Anna",
-      email: "anna@example.com",
-      createdAt: new Date("2026-01-01"),
-      reviews: [],
-    } as never);
+  it("rejects access and returns null when targetUserId does not match active session", async () => {
+    vi.mocked(auth).mockResolvedValueOnce({
+      user: { id: "logged-in-user" },
+      expires: "2099-01-01",
+    });
 
-    const result = await userDashboardGet("explicit-user-id");
+    const result = await userDashboardGet("other-user-id");
 
-    expect(result).not.toBeNull();
-    expect(result?.user.email).toBe("anna@example.com");
+    expect(result).toBeNull();
+    expect(prisma.user.findUnique).not.toHaveBeenCalled();
   });
 });
