@@ -87,7 +87,16 @@ describe("serverActions/productCreate", () => {
 
     expect(result?.serverError).toBeUndefined();
     expect(result?.validationErrors).toBeUndefined();
-    expect(result?.data).toEqual(createdProduct);
+    expect(result?.data).toEqual({
+      id: createdProduct.id,
+      name: createdProduct.name,
+      productUrl: createdProduct.productUrl,
+      imageUrl: createdProduct.imageUrl,
+      code: createdProduct.code,
+      shopId: null,
+      rate_avg: createdProduct.rate_avg,
+      rate_count: createdProduct.rate_count,
+    });
 
     expect(prisma.product.create).toHaveBeenCalledWith({
       data: {
@@ -95,6 +104,7 @@ describe("serverActions/productCreate", () => {
         productUrl: inputData.productUrl,
         imageUrl: inputData.imageUrl,
         code: inputData.code,
+        shopId: null,
         creatorId: mockUser.id,
         rate_avg: 0,
         rate_count: 0,
@@ -141,6 +151,7 @@ describe("serverActions/productCreate", () => {
         productUrl: null,
         imageUrl: null,
         code: null,
+        shopId: null,
         creatorId: mockUser.id,
         rate_avg: 0,
         rate_count: 0,

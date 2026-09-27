@@ -4,9 +4,7 @@ import { ChevronLeft } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "cn";
 
-export interface BackLinkProps
-  extends Omit<React.ComponentProps<typeof Link>, "className"> {
-  className?: string;
+export interface BackLinkProps extends React.ComponentProps<typeof Link> {
   children: React.ReactNode;
 }
 

@@ -337,14 +337,24 @@ describe("schemas/productScrape", () => {
     }
   });
 
-  it("fails when protocol is not http or https", () => {
-    const invalid = {
+  it("fails when protocol is not https", () => {
+    const invalidFtp = {
       productUrl: "ftp://example.com/item",
     };
-    const result = productScrapeSchema.safeParse(invalid);
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      const urlError = result.error.format().productUrl?._errors;
+    const ftpResult = productScrapeSchema.safeParse(invalidFtp);
+    expect(ftpResult.success).toBe(false);
+    if (!ftpResult.success) {
+      const urlError = ftpResult.error.format().productUrl?._errors;
+      expect(urlError).toContain(PRODUCT_SCRAPE_ERRORS.invalidProtocol);
+    }
+
+    const invalidHttp = {
+      productUrl: "http://example.com/item",
+    };
+    const httpResult = productScrapeSchema.safeParse(invalidHttp);
+    expect(httpResult.success).toBe(false);
+    if (!httpResult.success) {
+      const urlError = httpResult.error.format().productUrl?._errors;
       expect(urlError).toContain(PRODUCT_SCRAPE_ERRORS.invalidProtocol);
     }
   });

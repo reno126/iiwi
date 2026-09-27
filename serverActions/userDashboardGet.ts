@@ -1,3 +1,5 @@
+"use server";
+
 import { cache } from "react";
 import { auth } from "@/lib/auth/helper";
 import { prisma } from "@/lib/db/prisma";
@@ -105,6 +107,7 @@ export const userDashboardGet = cache(async function userDashboardGet(
       email: true,
       createdAt: true,
       reviews: {
+        take: 100,
         orderBy: { createdAt: "desc" },
         select: {
           id: true,

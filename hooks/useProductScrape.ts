@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useCallback } from "react";
+import { useState, useTransition, useCallback, useRef, useEffect } from "react";
 import { productScrapeMetadata } from "@/serverActions/productScrapeMetadata";
 import type { ScrapedMetadataResult } from "@/schemas/productScrape";
 
@@ -30,6 +30,15 @@ export function useProductScrape({
 
   const [isTier2NoticeVisible, setIsTier2NoticeVisible] = useState(false);
   const [scrapeNotice, setScrapeNotice] = useState<ScrapeNotice | null>(null);
+  const delayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (delayTimerRef.current) {
+        clearTimeout(delayTimerRef.current);
+      }
+    };
+  }, []);
 
   const scrapeUrl = useCallback(
     async (
@@ -38,49 +47,59 @@ export function useProductScrape({
       onError?: (errorMessage: string) => void,
       onFinished?: () => void,
     ) => {
-      let url = inputUrl.trim();
-      if (!url) return;
+      let targetUrl = inputUrl.trim();
+      if (!targetUrl) return;
 
-      if (!/^https?:\/\//i.test(url)) {
-        url = `https://${url}`;
+      if (!/^https?:\/\//i.test(targetUrl)) {
+        targetUrl = `https://${targetUrl}`;
       }
 
       setScrapeNotice(null);
       setIsTier2NoticeVisible(false);
 
-      const timer = setTimeout(() => {
+      if (delayTimerRef.current) {
+        clearTimeout(delayTimerRef.current);
+      }
+
+      delayTimerRef.current = setTimeout(() => {
         setIsTier2NoticeVisible(true);
       }, 2500);
 
       startTransition(async () => {
         try {
-          const res = await productScrapeMetadata({ productUrl: url });
+          const actionResult = await productScrapeMetadata({
+            productUrl: targetUrl,
+          });
 
-          if (res?.data) {
+          if (actionResult?.data) {
             if (onSuccess) {
-              onSuccess(res.data);
+              onSuccess(actionResult.data);
             }
             return;
           }
 
-          const errorMsg =
-            res?.serverError ||
-            res?.validationErrors?.fieldErrors?.productUrl?.[0] ||
-            res?.validationErrors?.formErrors?.[0] ||
+          const resolvedErrorMessage =
+            actionResult?.serverError ||
+            actionResult?.validationErrors?.fieldErrors?.productUrl?.[0] ||
+            actionResult?.validationErrors?.formErrors?.[0] ||
             PRODUCT_SCRAPE_HOOK_MESSAGES.fallbackError;
 
-          setScrapeNotice({ type: "error", message: errorMsg });
+          setScrapeNotice({ type: "error", message: resolvedErrorMessage });
           if (onError) {
-            onError(errorMsg);
+            onError(resolvedErrorMessage);
           }
         } catch {
-          const fallbackErr = PRODUCT_SCRAPE_HOOK_MESSAGES.unexpectedError;
-          setScrapeNotice({ type: "error", message: fallbackErr });
+          const fallbackErrorMessage =
+            PRODUCT_SCRAPE_HOOK_MESSAGES.unexpectedError;
+          setScrapeNotice({ type: "error", message: fallbackErrorMessage });
           if (onError) {
-            onError(fallbackErr);
+            onError(fallbackErrorMessage);
           }
         } finally {
-          clearTimeout(timer);
+          if (delayTimerRef.current) {
+            clearTimeout(delayTimerRef.current);
+            delayTimerRef.current = null;
+          }
           setIsTier2NoticeVisible(false);
           if (onFinished) {
             onFinished();

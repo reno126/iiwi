@@ -39,6 +39,9 @@ export function ReviewDescriptionField({
         disabled={isDisabled}
         autoFocus={autoFocus}
         aria-invalid={!!errors.description}
+        aria-describedby={
+          errors.description ? "review-description-error" : undefined
+        }
         className="min-h-28 text-base sm:text-sm"
         {...register("description")}
       />

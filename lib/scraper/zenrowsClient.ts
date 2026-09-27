@@ -75,7 +75,6 @@ export async function fetchWithZenRows(
 
   try {
     const zenrowsEndpoint = new URL("https://api.zenrows.com/v1/");
-    zenrowsEndpoint.searchParams.set("apikey", apiKey);
     zenrowsEndpoint.searchParams.set("url", targetUrl);
     zenrowsEndpoint.searchParams.set("js_render", "true");
     zenrowsEndpoint.searchParams.set("premium_proxy", "true");
@@ -93,15 +92,16 @@ export async function fetchWithZenRows(
       zenrowsEndpoint.searchParams.set("wait_for", waitFor);
     }
 
-    const maskedEndpoint = new URL(zenrowsEndpoint.toString());
-    maskedEndpoint.searchParams.set("apikey", "***MASKED***");
     console.log(
-      `[ZenRows] Calling API for: ${targetUrl} [${maskedEndpoint.toString()}]`,
+      `[ZenRows] Calling API for: ${targetUrl} [${zenrowsEndpoint.toString()}]`,
     );
 
     const startTime = Date.now();
     const response = await fetch(zenrowsEndpoint.toString(), {
       method: "GET",
+      headers: {
+        "X-API-Key": apiKey,
+      },
       signal: controller.signal,
     });
     const durationMs = Date.now() - startTime;

@@ -9,12 +9,22 @@ import type {
 } from "schema-dts";
 import type { ProductWithReviews } from "@/serverActions/productGetById";
 
+function clampRating(rating: number): number {
+  return Math.max(1, Math.min(5, rating));
+}
+
 export function getBaseUrl(): string {
   if (process.env.NEXT_PUBLIC_APP_URL) {
     return process.env.NEXT_PUBLIC_APP_URL.replace(/\/+$/, "");
   }
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL.replace(/\/+$/, "")}`;
+  }
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL.replace(/\/+$/, "")}`;
+  }
+  if (process.env.NODE_ENV === "development") {
+    return "http://localhost:3000";
   }
   return "https://iiwi.vercel.app";
 }
@@ -53,7 +63,7 @@ export function buildProductDetailSchema(
       product.rate_count > 0
         ? {
             "@type": "AggregateRating",
-            ratingValue: Number(product.rate_avg.toFixed(1)),
+            ratingValue: clampRating(Number(product.rate_avg.toFixed(1))),
             reviewCount: product.rate_count,
             bestRating: 5,
             worstRating: 1,
@@ -66,7 +76,7 @@ export function buildProductDetailSchema(
             "@id": `${productUrl}#review-${reviewItem.id}`,
             reviewRating: {
               "@type": "Rating",
-              ratingValue: reviewItem.rate,
+              ratingValue: clampRating(reviewItem.rate),
               bestRating: 5,
               worstRating: 1,
             },

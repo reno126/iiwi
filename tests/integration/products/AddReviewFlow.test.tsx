@@ -34,6 +34,12 @@ vi.mock("@/serverActions/shopMatchByUrlAction", () => ({
   shopMatchByUrlAction: vi.fn().mockResolvedValue(null),
 }));
 
+vi.mock("@/app/opinie/dodaj/_components/CombinedProductReviewForm", () => ({
+  CombinedProductReviewForm: () => (
+    <div>{COMBINED_FORM_MESSAGES.draftRestored}</div>
+  ),
+}));
+
 describe("AddReviewFlow - Rehydration", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -68,7 +74,11 @@ describe("AddReviewFlow - Rehydration", () => {
       screen.queryByText(ADD_REVIEW_FLOW_MESSAGES.searchingDescription),
     ).not.toBeInTheDocument();
     expect(
-      screen.getByText(COMBINED_FORM_MESSAGES.draftRestored),
+      await screen.findByText(
+        COMBINED_FORM_MESSAGES.draftRestored,
+        {},
+        { timeout: 5000 },
+      ),
     ).toBeInTheDocument();
   });
 

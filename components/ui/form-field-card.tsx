@@ -89,7 +89,12 @@ export function FormFieldCard({
       </div>
       {children}
       {(error || reserveSpace) && (
-        <FieldError reserveSpace={reserveSpace}>{error}</FieldError>
+        <FieldError
+          id={htmlFor ? `${htmlFor}-error` : undefined}
+          reserveSpace={reserveSpace}
+        >
+          {error}
+        </FieldError>
       )}
     </Field>
   );

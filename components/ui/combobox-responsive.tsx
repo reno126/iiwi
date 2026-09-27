@@ -149,53 +149,23 @@ export function ComboboxResponsive<T>({
     placeholder,
   ]);
 
-  const commandListContent = (
-    <Command
-      className="flex size-full flex-col overflow-hidden"
+  const listContent = (
+    <ComboboxListContent
       shouldFilter={!filterFn}
-    >
-      <CommandInput
-        placeholder={searchPlaceholder}
-        value={search}
-        onValueChange={setSearch}
-        autoFocus
-      />
-      <CommandList
-        className={cn(
-          "max-h-72 overflow-y-auto",
-          isMobile && "max-h-none flex-1",
-        )}
-      >
-        {loading ? (
-          <div className="flex items-center justify-center gap-2 p-6 text-sm text-muted-foreground">
-            <Spinner className="size-4" />
-            <span>{loadingText}</span>
-          </div>
-        ) : (
-          <>
-            <CommandEmpty>{emptyText}</CommandEmpty>
-            <CommandGroup>
-              {displayedItems.map((item) => {
-                const itemValue = getItemValue(item);
-                const isSelected = itemValue === value;
-                const searchKey = getItemLabel ? getItemLabel(item) : itemValue;
-
-                return (
-                  <CommandItem
-                    key={itemValue}
-                    value={searchKey}
-                    onSelect={() => handleSelect(itemValue, item)}
-                    className="cursor-pointer"
-                  >
-                    {renderItem(item, isSelected)}
-                  </CommandItem>
-                );
-              })}
-            </CommandGroup>
-          </>
-        )}
-      </CommandList>
-    </Command>
+      searchPlaceholder={searchPlaceholder}
+      search={search}
+      onSearchChange={setSearch}
+      isMobile={isMobile}
+      loading={loading}
+      loadingText={loadingText}
+      emptyText={emptyText}
+      displayedItems={displayedItems}
+      getItemValue={getItemValue}
+      getItemLabel={getItemLabel}
+      value={value}
+      onSelect={handleSelect}
+      renderItem={renderItem}
+    />
   );
 
   if (isMobile) {
@@ -237,7 +207,7 @@ export function ComboboxResponsive<T>({
               </DialogTitle>
             </DialogHeader>
             <div className="flex flex-1 flex-col overflow-hidden p-2">
-              {commandListContent}
+              {listContent}
             </div>
           </DialogContent>
         </Dialog>
@@ -278,9 +248,92 @@ export function ComboboxResponsive<T>({
             contentClassName,
           )}
         >
-          {commandListContent}
+          {listContent}
         </PopoverContent>
       </Popover>
     </div>
+  );
+}
+
+interface ComboboxListContentProps<T> {
+  shouldFilter: boolean;
+  searchPlaceholder?: string;
+  search: string;
+  onSearchChange: (value: string) => void;
+  isMobile: boolean;
+  loading: boolean;
+  loadingText: string;
+  emptyText: string;
+  displayedItems: T[];
+  getItemValue: (item: T) => string;
+  getItemLabel?: (item: T) => string;
+  value: string | undefined;
+  onSelect: (itemValue: string, item: T) => void;
+  renderItem: (item: T, isSelected: boolean) => React.ReactNode;
+}
+
+function ComboboxListContent<T>({
+  shouldFilter,
+  searchPlaceholder,
+  search,
+  onSearchChange,
+  isMobile,
+  loading,
+  loadingText,
+  emptyText,
+  displayedItems,
+  getItemValue,
+  getItemLabel,
+  value,
+  onSelect,
+  renderItem,
+}: ComboboxListContentProps<T>) {
+  return (
+    <Command
+      className="flex size-full flex-col overflow-hidden"
+      shouldFilter={shouldFilter}
+    >
+      <CommandInput
+        placeholder={searchPlaceholder}
+        value={search}
+        onValueChange={onSearchChange}
+        autoFocus
+      />
+      <CommandList
+        className={cn(
+          "max-h-72 overflow-y-auto",
+          isMobile && "max-h-none flex-1",
+        )}
+      >
+        {loading ? (
+          <div className="flex items-center justify-center gap-2 p-6 text-sm text-muted-foreground">
+            <Spinner className="size-4" />
+            <span>{loadingText}</span>
+          </div>
+        ) : (
+          <>
+            <CommandEmpty>{emptyText}</CommandEmpty>
+            <CommandGroup>
+              {displayedItems.map((item) => {
+                const itemValue = getItemValue(item);
+                const isSelected = itemValue === value;
+                const searchKey = getItemLabel ? getItemLabel(item) : itemValue;
+
+                return (
+                  <CommandItem
+                    key={itemValue}
+                    value={searchKey}
+                    onSelect={() => onSelect(itemValue, item)}
+                    className="cursor-pointer"
+                  >
+                    {renderItem(item, isSelected)}
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          </>
+        )}
+      </CommandList>
+    </Command>
   );
 }

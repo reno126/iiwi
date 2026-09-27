@@ -256,9 +256,7 @@ describe("app/produkty/[id]/_components/ProductDetails", () => {
         rate: 5,
         description: "Absolutnie fantastyczny sprzęt, polecam gorąco!",
         userId: "user-123",
-        likes: 0,
         createdAt: new Date(),
-        updatedAt: new Date(),
       },
     });
 

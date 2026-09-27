@@ -56,3 +56,16 @@ export type ReconstructRatingsInput = z.infer<typeof reconstructRatingsSchema>;
 export const productSearchSchema = z.string().max(100);
 
 export type ProductSearchInput = z.infer<typeof productSearchSchema>;
+
+export const productCreatedOutputSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  productUrl: z.string().nullable().optional(),
+  imageUrl: z.string().nullable().optional(),
+  code: z.string().nullable().optional(),
+  shopId: z.string().nullable().optional(),
+  rate_avg: z.number(),
+  rate_count: z.number(),
+});
+
+export type ProductCreatedOutput = z.infer<typeof productCreatedOutputSchema>;

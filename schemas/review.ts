@@ -28,3 +28,14 @@ export type ReviewCreateInput = z.infer<typeof reviewCreateSchema>;
 
 export const reviewSchema = reviewCreateSchema;
 export type ReviewInput = ReviewCreateInput;
+
+export const reviewCreatedOutputSchema = z.object({
+  id: z.string(),
+  productId: z.string(),
+  rate: z.number(),
+  description: z.string(),
+  userId: z.string(),
+  createdAt: z.date(),
+});
+
+export type ReviewCreatedOutput = z.infer<typeof reviewCreatedOutputSchema>;

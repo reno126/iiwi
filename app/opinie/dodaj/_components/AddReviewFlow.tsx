@@ -16,20 +16,14 @@ import {
 } from "@/lib/storage/reviewDraftStorage";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SelectedProductCard } from "./SelectedProductCard";
-import { CombinedProductReviewForm as StaticCombinedProductReviewForm } from "./CombinedProductReviewForm";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 
-const LazyCombinedProductReviewForm = lazy(() =>
-  import("./CombinedProductReviewForm").then((mod) => ({
-    default: mod.CombinedProductReviewForm,
+const CombinedProductReviewForm = lazy(() =>
+  import("./CombinedProductReviewForm").then((module) => ({
+    default: module.CombinedProductReviewForm,
   })),
 );
-
-const CombinedProductReviewForm =
-  process.env.NODE_ENV === "test"
-    ? StaticCombinedProductReviewForm
-    : LazyCombinedProductReviewForm;
 
 import { ADD_REVIEW_FLOW_MESSAGES } from "./addReviewFlowMessages";
 

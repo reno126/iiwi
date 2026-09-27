@@ -67,12 +67,17 @@ describe("lib/scraper/zenrowsClient", () => {
 
     expect(urlObj.origin).toBe("https://api.zenrows.com");
     expect(urlObj.pathname).toBe("/v1/");
-    expect(urlObj.searchParams.get("apikey")).toBe("test-zenrows-api-key");
+    expect(urlObj.searchParams.get("apikey")).toBeNull();
     expect(urlObj.searchParams.get("url")).toBe("https://sklep.pl/p/1");
     expect(urlObj.searchParams.get("js_render")).toBe("true");
     expect(urlObj.searchParams.get("premium_proxy")).toBe("true");
     expect(urlObj.searchParams.get("antibot")).toBe("true");
     expect(urlObj.searchParams.get("proxy_country")).toBe("pl");
+
+    const calledOptions = fetchMock.mock.calls[0]?.[1];
+    expect(calledOptions?.headers).toEqual({
+      "X-API-Key": "test-zenrows-api-key",
+    });
   });
 
   it("passes custom options (antibot, proxyCountry, waitMs, waitFor) to the URL", async () => {

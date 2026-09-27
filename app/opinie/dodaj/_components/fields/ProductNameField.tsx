@@ -44,6 +44,7 @@ export function ProductNameField({
         placeholder={PRODUCT_FIELDS_MESSAGES.namePlaceholder}
         disabled={disabled}
         aria-invalid={!!errors.name}
+        aria-describedby={errors.name ? "product-name-error" : undefined}
         className="min-h-11 resize-none overflow-hidden bg-white py-2.5 text-base sm:text-sm dark:bg-card"
         {...register("name")}
       />

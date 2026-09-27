@@ -134,6 +134,7 @@ export function ProductUrlField({
           type="url"
           inputMode="url"
           aria-invalid={!!errors.productUrl}
+          aria-describedby={errors.productUrl ? "product-url-error" : undefined}
           placeholder={PRODUCT_FIELDS_MESSAGES.productUrlPlaceholder}
           className="h-11 flex-1 text-base sm:text-sm"
           {...register("productUrl", {

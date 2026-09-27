@@ -3,15 +3,20 @@
 import { revalidatePath } from "next/cache";
 import { safeActionUserCtx } from "@/lib/actions/safeActionUserCtx";
 import { prisma } from "@/lib/db/prisma";
-import { reviewCreateSchema } from "@/schemas/review";
+import {
+  reviewCreateSchema,
+  reviewCreatedOutputSchema,
+  type ReviewCreatedOutput,
+} from "@/schemas/review";
 
 export const reviewCreate = safeActionUserCtx
   .inputSchema(reviewCreateSchema)
-  .action(async ({ parsedInput, ctx }) => {
+  .outputSchema(reviewCreatedOutputSchema)
+  .action(async ({ parsedInput, ctx }): Promise<ReviewCreatedOutput> => {
     const { productId, rate, description } = parsedInput;
     const { userId } = ctx;
 
-    const result = await prisma.$transaction(async (tx) => {
+    const createdReview = await prisma.$transaction(async (tx) => {
       const review = await tx.review.create({
         data: {
           productId,
@@ -44,12 +49,21 @@ export const reviewCreate = safeActionUserCtx
       return review;
     });
 
+    const responsePayload: ReviewCreatedOutput = {
+      id: createdReview.id,
+      productId: createdReview.productId,
+      rate: createdReview.rate,
+      description: createdReview.description,
+      userId: createdReview.userId,
+      createdAt: createdReview.createdAt,
+    };
+
     try {
       revalidatePath(`/produkty/${productId}`);
       revalidatePath("/produkty");
     } catch {
-      return result;
+      return responsePayload;
     }
 
-    return result;
+    return responsePayload;
   });

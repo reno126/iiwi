@@ -1,13 +1,7 @@
 "use client";
 
 import { FormProvider } from "react-hook-form";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UrlPromptStep } from "./UrlPromptStep";
 import { ActiveCombinedForm } from "./ActiveCombinedForm";
 import { useCombinedReviewForm, type FormPhase } from "./useCombinedReviewForm";
@@ -42,7 +36,6 @@ export function CombinedProductReviewForm({
           <CardTitle className="text-xl">
             {resolveCardTitle(form.phase)}
           </CardTitle>
-          <CardDescription></CardDescription>
         </CardHeader>
 
         <CardContent className="px-0 md:px-6">

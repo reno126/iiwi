@@ -45,7 +45,7 @@ describe("serverActions/productScrapeMetadata", () => {
 
   it("blocks SSRF attack attempts and returns a server error", async () => {
     const result = await productScrapeMetadata({
-      productUrl: "http://169.254.169.254/latest/meta-data",
+      productUrl: "https://169.254.169.254/latest/meta-data",
     });
 
     expect(result?.data).toBeUndefined();

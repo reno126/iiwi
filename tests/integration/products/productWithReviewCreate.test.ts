@@ -132,10 +132,25 @@ describe("serverActions/productWithReviewCreate", () => {
     const result = await productWithReviewCreate(inputData);
 
     expect(result?.serverError).toBeUndefined();
-    expect(result?.validationErrors).toBeUndefined();
     expect(result?.data).toEqual({
-      product: updatedProduct,
-      review: createdReview,
+      product: {
+        id: updatedProduct.id,
+        name: updatedProduct.name,
+        productUrl: updatedProduct.productUrl,
+        imageUrl: updatedProduct.imageUrl,
+        code: updatedProduct.code,
+        shopId: null,
+        rate_avg: updatedProduct.rate_avg,
+        rate_count: updatedProduct.rate_count,
+      },
+      review: {
+        id: createdReview.id,
+        productId: createdReview.productId,
+        rate: createdReview.rate,
+        description: createdReview.description,
+        userId: createdReview.userId,
+        createdAt: createdReview.createdAt,
+      },
     });
 
     expect(mockTx.product.create).toHaveBeenCalledWith({

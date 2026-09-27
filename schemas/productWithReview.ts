@@ -1,6 +1,12 @@
 import { z } from "zod";
-import { productCreateSchema } from "@/schemas/product";
-import { reviewCreateSchema } from "@/schemas/review";
+import {
+  productCreateSchema,
+  productCreatedOutputSchema,
+} from "@/schemas/product";
+import {
+  reviewCreateSchema,
+  reviewCreatedOutputSchema,
+} from "@/schemas/review";
 
 export const productWithReviewCreateSchema = productCreateSchema.extend(
   reviewCreateSchema.omit({ productId: true }).shape,
@@ -8,4 +14,13 @@ export const productWithReviewCreateSchema = productCreateSchema.extend(
 
 export type ProductWithReviewCreateInput = z.infer<
   typeof productWithReviewCreateSchema
+>;
+
+export const productWithReviewCreatedOutputSchema = z.object({
+  product: productCreatedOutputSchema,
+  review: reviewCreatedOutputSchema,
+});
+
+export type ProductWithReviewCreatedOutput = z.infer<
+  typeof productWithReviewCreatedOutputSchema
 >;

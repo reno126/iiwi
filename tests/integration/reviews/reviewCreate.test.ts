@@ -114,7 +114,14 @@ describe("serverActions/reviewCreate", () => {
 
     expect(result?.serverError).toBeUndefined();
     expect(result?.validationErrors).toBeUndefined();
-    expect(result?.data).toEqual(createdReview);
+    expect(result?.data).toEqual({
+      id: createdReview.id,
+      productId: createdReview.productId,
+      rate: createdReview.rate,
+      description: createdReview.description,
+      userId: createdReview.userId,
+      createdAt: createdReview.createdAt,
+    });
 
     expect(mockTx.review.create).toHaveBeenCalledWith({
       data: {

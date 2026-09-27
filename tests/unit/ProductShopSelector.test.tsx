@@ -124,9 +124,8 @@ describe("app/opinie/dodaj/_components/ProductShopSelector", () => {
         id: "shop-1",
         name: "Biedronka",
         logo: null,
-        matcherKeys: ["biedronka.pl"],
       },
-      { id: "shop-2", name: "Lidl", logo: null, matcherKeys: ["lidl.pl"] },
+      { id: "shop-2", name: "Lidl", logo: null },
     ]);
 
     render(<SelectorWrapper selectedShop={null} onSelectShop={onSelectShop} />);

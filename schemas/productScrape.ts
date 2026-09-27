@@ -3,7 +3,7 @@ import { z } from "zod";
 export const PRODUCT_SCRAPE_ERRORS = {
   invalidUrl: "Podaj prawidłowy adres URL produktu",
   noWhitespace: "Adres URL nie może zawierać spacji",
-  invalidProtocol: "Dozwolone są wyłącznie protokoły http:// oraz https://",
+  invalidProtocol: "Dozwolony jest wyłącznie protokół https://",
 } as const;
 
 export const PRODUCT_SCRAPE_MESSAGES = {
@@ -18,14 +18,14 @@ export const PRODUCT_SCRAPE_MESSAGES = {
 export const productScrapeSchema = z.object({
   productUrl: z
     .url({ message: PRODUCT_SCRAPE_ERRORS.invalidUrl })
-    .refine((val) => !/\s/.test(val), {
+    .refine((urlValue) => !/\s/.test(urlValue), {
       message: PRODUCT_SCRAPE_ERRORS.noWhitespace,
     })
     .refine(
-      (val) => {
+      (urlValue) => {
         try {
-          const parsed = new URL(val);
-          return parsed.protocol === "http:" || parsed.protocol === "https:";
+          const parsedUrl = new URL(urlValue);
+          return parsedUrl.protocol === "https:";
         } catch {
           return false;
         }
