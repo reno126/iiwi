@@ -133,8 +133,8 @@ tests/
 
 ### Prerequisites
 
-- **Node.js:** `>= 20.0.0`
-- **Package Manager:** `pnpm` (`>= 9.0.0`)
+- **Node.js:** `24.20.0` (pinned in `.node-version`)
+- **Package Manager:** `pnpm@11.10.0` (pinned in `package.json`)
 - **Database:** Running PostgreSQL instance (local or hosted, e.g., Supabase, Neon)
 
 ### 1. Clone the Repository
@@ -228,6 +228,23 @@ This repository strictly enforces coding standards and architectural principles 
 | `pnpm prisma:studio`       | Launches interactive Prisma Studio database viewer            |
 | `pnpm shops:seed`          | Seeds default physical and online stores into the database    |
 | `pnpm ratings:reconstruct` | Recalculates and synchronizes aggregate product review scores |
+
+---
+
+## Continuous Integration
+
+[GitHub Actions](./.github/workflows/ci.yml) runs on pull requests, pushes to `main`, merge queues, and manual dispatches. Two jobs run in parallel:
+
+| Required check | Verification |
+| :------------- | :----------- |
+| `Quality` | Architecture rules, ESLint, Next.js type generation, TypeScript, and all Vitest unit and integration tests |
+| `Production build and E2E` | Migrations against disposable PostgreSQL 17, a production build, and all Chromium browser tests against `pnpm start` |
+
+Configure both checks as required in the GitHub branch rules for `main`. CI uses disposable database credentials and a test authentication secret, so repository secrets are unnecessary. `DATABASE_URL` is available before dependency installation because Prisma generates its client during `postinstall`.
+
+The workflow caches the pnpm store and `.next/cache`. Browser reports and retry traces are retained for seven days. Action references are pinned to commit SHAs and maintained by weekly Dependabot updates.
+
+Local browser tests continue to start the development server. When `CI` is set, build the application before running `pnpm test:e2e`; Playwright starts the production server automatically.
 
 ---
 

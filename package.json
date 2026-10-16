@@ -3,13 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@11.10.0",
+  "engines": {
+    "node": ">=24.15.0 <25"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "verify:rules": "npx tsx scripts/verifyAgentRules.ts",
+    "verify:rules": "tsx scripts/verifyAgentRules.ts",
     "build:all": "prisma generate && next build",
     "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
@@ -22,9 +26,9 @@
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",
     "test:e2e": "playwright test",
-    "test:cleanup": "npx tsx tests/e2e/helpers/cleanup.ts",
-    "ratings:reconstruct": "npx tsx scripts/reconstructRatings.ts",
-    "shops:seed": "npx tsx scripts/seedShops.ts",
+    "test:cleanup": "tsx tests/e2e/helpers/cleanup.ts",
+    "ratings:reconstruct": "tsx scripts/reconstructRatings.ts",
+    "shops:seed": "tsx scripts/seedShops.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky"
@@ -79,6 +83,7 @@
     "prisma": "^7.10.0",
     "schema-dts": "^2.0.0",
     "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
     "typescript": "^5.9.3",
     "vitest": "^4.1.11"
   },
