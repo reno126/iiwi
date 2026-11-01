@@ -6,6 +6,7 @@ import { ProductDetails } from "./_components/ProductDetails";
 import { ProductDetailsSkeleton } from "./_components/ProductDetailsSkeleton";
 import { buildProductDetailSchema } from "@/lib/seo/schemaMarkup";
 import { buildProductMetadata } from "@/lib/seo/metadata";
+import { serializeJsonLd } from "@/lib/seo/serializeJsonLd";
 
 export const revalidate = 60;
 
@@ -38,7 +39,7 @@ async function ProductDetailsSection({ id }: ProductDetailsSectionProps) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <ProductDetails product={product} />
     </>

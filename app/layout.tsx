@@ -10,6 +10,7 @@ import { Plus_Jakarta_Sans, Newsreader } from "next/font/google";
 import { cn } from "cn";
 import { buildWebSiteSchema } from "@/lib/seo/schemaMarkup";
 import { buildRootMetadata } from "@/lib/seo/metadata";
+import { serializeJsonLd } from "@/lib/seo/serializeJsonLd";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin", "latin-ext"],
@@ -53,7 +54,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       <body className="flex min-h-full flex-col overflow-x-clip bg-background text-foreground selection:bg-primary/20 selection:text-primary">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(webSiteJsonLd) }}
         />
         <ClientSessionProvider session={session}>
           <header className="sticky top-0 z-50 border-b border-border/70 bg-card/90 shadow-xs backdrop-blur-xs">

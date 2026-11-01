@@ -6,6 +6,7 @@ import {
   buildWebSiteSchema,
 } from "@/lib/seo/schemaMarkup";
 import type { ProductWithReviews } from "@/serverActions/productGetById";
+import { serializeJsonLd } from "@/lib/seo/serializeJsonLd";
 
 const baseProductMock: ProductWithReviews = {
   id: "prod-abc-123",
@@ -67,6 +68,47 @@ const baseProductMock: ProductWithReviews = {
 };
 
 describe("lib/seo/schemaMarkup", () => {
+  it.each([
+    "</script><script>window.reviewProbe = true</script>",
+    '</ScRiPt><img src="invalid" onerror="window.reviewProbe = true">',
+    '<!--<script> & "Zażółć gęślą jaźń" \\ </script>',
+  ])("keeps untrusted structured data inside its script: %s", (payload) => {
+    const maliciousProduct: ProductWithReviews = {
+      ...baseProductMock,
+      name: payload,
+      reviews: baseProductMock.reviews.map((review) => ({
+        ...review,
+        description: payload,
+        user: { ...review.user, name: payload },
+      })),
+    };
+    const schemas = [
+      buildProductDetailSchema(maliciousProduct, "https://iiwi.test"),
+      buildProductsCatalogSchema([maliciousProduct], 1, "https://iiwi.test"),
+      { ...buildWebSiteSchema("https://iiwi.test"), name: payload },
+    ];
+
+    for (const schema of schemas) {
+      const serializedSchema = serializeJsonLd(schema);
+      const parsedDocument = new DOMParser().parseFromString(
+        `<html><head><script type="application/ld+json">${serializedSchema}</script></head><body><main>Page content</main></body></html>`,
+        "text/html",
+      );
+      const scripts = parsedDocument.getElementsByTagName("script");
+      const structuredDataScript = scripts.item(0);
+
+      expect(scripts).toHaveLength(1);
+      expect(structuredDataScript?.getAttribute("type")).toBe(
+        "application/ld+json",
+      );
+      expect(parsedDocument.getElementsByTagName("img")).toHaveLength(0);
+      expect(parsedDocument.body.textContent).toBe("Page content");
+      expect(JSON.parse(structuredDataScript?.textContent ?? "")).toEqual(
+        JSON.parse(JSON.stringify(schema)),
+      );
+    }
+  });
+
   it("returns configured baseUrl or default fallback", () => {
     const url = getBaseUrl();
     expect(url).toMatch(/^https?:\/\//);
