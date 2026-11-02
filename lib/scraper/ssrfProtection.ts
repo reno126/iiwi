@@ -1,123 +1,48 @@
 import dns from "node:dns";
+import { BlockList, isIP } from "node:net";
 
 export interface UrlSafetyResult {
   isValid: boolean;
   error?: string;
 }
 
-function isCurrentNetworkIPv4(o1: number): boolean {
-  return o1 === 0;
-}
+function createBlockedAddressRanges(): BlockList {
+  const blockedRanges = new BlockList();
+  const ipv4Subnets: Array<[string, number]> = [
+    ["0.0.0.0", 8],
+    ["10.0.0.0", 8],
+    ["100.64.0.0", 10],
+    ["127.0.0.0", 8],
+    ["169.254.0.0", 16],
+    ["172.16.0.0", 12],
+    ["192.0.0.0", 24],
+    ["192.0.2.0", 24],
+    ["192.168.0.0", 16],
+    ["198.18.0.0", 15],
+    ["198.51.100.0", 24],
+    ["203.0.113.0", 24],
+    ["224.0.0.0", 3],
+  ];
 
-function isLoopbackIPv4(o1: number): boolean {
-  return o1 === 127;
-}
-
-function isLinkLocalOrCloudMetadataIPv4(o1: number, o2: number): boolean {
-  return o1 === 169 && o2 === 254;
-}
-
-function isPrivateNetworkRFC1918(o1: number, o2: number): boolean {
-  const isClassA = o1 === 10;
-  const isClassB = o1 === 172 && o2 >= 16 && o2 <= 31;
-  const isClassC = o1 === 192 && o2 === 168;
-  return isClassA || isClassB || isClassC;
-}
-
-function isCarrierGradeNatIPv4(o1: number, o2: number): boolean {
-  return o1 === 100 && o2 >= 64 && o2 <= 127;
-}
-
-function isReservedOrBenchmarkIPv4(
-  o1: number,
-  o2: number,
-  o3: number,
-): boolean {
-  const isIetfProtocolAssignment = o1 === 192 && o2 === 0 && o3 === 0;
-  const isTestNet1 = o1 === 192 && o2 === 0 && o3 === 2;
-  const isBenchmark = o1 === 198 && (o2 === 18 || o2 === 19);
-  const isTestNet2 = o1 === 198 && o2 === 51 && o3 === 100;
-  const isTestNet3 = o1 === 203 && o2 === 0 && o3 === 113;
-  return (
-    isIetfProtocolAssignment ||
-    isTestNet1 ||
-    isBenchmark ||
-    isTestNet2 ||
-    isTestNet3
-  );
-}
-
-function isMulticastOrBroadcastIPv4(o1: number): boolean {
-  return o1 >= 224;
-}
-
-function isPrivateOrReservedIPv4(hostname: string): boolean {
-  const ipv4Pattern = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
-  const match = hostname.match(ipv4Pattern);
-
-  if (!match) return false;
-
-  const [, oct1, oct2, oct3, oct4] = match;
-  const o1 = Number(oct1);
-  const o2 = Number(oct2);
-  const o3 = Number(oct3);
-  const o4 = Number(oct4);
-
-  const hasInvalidOctet = [o1, o2, o3, o4].some((o) => o < 0 || o > 255);
-  if (hasInvalidOctet) {
-    return true;
+  for (const [networkAddress, prefixLength] of ipv4Subnets) {
+    blockedRanges.addSubnet(networkAddress, prefixLength, "ipv4");
   }
 
-  return (
-    isCurrentNetworkIPv4(o1) ||
-    isPrivateNetworkRFC1918(o1, o2) ||
-    isCarrierGradeNatIPv4(o1, o2) ||
-    isLoopbackIPv4(o1) ||
-    isLinkLocalOrCloudMetadataIPv4(o1, o2) ||
-    isReservedOrBenchmarkIPv4(o1, o2, o3) ||
-    isMulticastOrBroadcastIPv4(o1)
-  );
+  blockedRanges.addAddress("::", "ipv6");
+  blockedRanges.addAddress("::1", "ipv6");
+  blockedRanges.addSubnet("fc00::", 7, "ipv6");
+  blockedRanges.addSubnet("fe80::", 10, "ipv6");
+  return blockedRanges;
 }
 
-function isLoopbackIPv6(host: string): boolean {
-  return host === "::1" || host === "0000:0000:0000:0000:0000:0000:0000:0001";
+const blockedAddressRanges = createBlockedAddressRanges();
+
+function isPrivateOrReservedIPv4(address: string): boolean {
+  return isIP(address) === 4 && blockedAddressRanges.check(address, "ipv4");
 }
 
-function isUnspecifiedIPv6(host: string): boolean {
-  return host === "::" || host === "0000:0000:0000:0000:0000:0000:0000:0000";
-}
-
-function isUniqueLocalAddressIPv6(host: string): boolean {
-  return host.startsWith("fc") || host.startsWith("fd");
-}
-
-function isLinkLocalIPv6(host: string): boolean {
-  return (
-    host.startsWith("fe8") ||
-    host.startsWith("fe9") ||
-    host.startsWith("fea") ||
-    host.startsWith("feb")
-  );
-}
-
-function isIPv4MappedIPv6(host: string): boolean {
-  if (host.startsWith("::ffff:") || host.startsWith("0:0:0:0:0:ffff:")) {
-    const ipv4Part = host.split(":").pop();
-    return Boolean(ipv4Part && isPrivateOrReservedIPv4(ipv4Part));
-  }
-  return false;
-}
-
-function isPrivateOrReservedIPv6(cleanHost: string): boolean {
-  const host = cleanHost.toLowerCase();
-
-  return (
-    isLoopbackIPv6(host) ||
-    isUnspecifiedIPv6(host) ||
-    isUniqueLocalAddressIPv6(host) ||
-    isLinkLocalIPv6(host) ||
-    isIPv4MappedIPv6(host)
-  );
+function isPrivateOrReservedIPv6(address: string): boolean {
+  return isIP(address) === 6 && blockedAddressRanges.check(address, "ipv6");
 }
 
 const FORBIDDEN_HOSTS = new Set([
@@ -243,12 +168,15 @@ export function validateUrlSafety(inputUrl: string): UrlSafetyResult {
 
 export function validateResolvedIpSafety(
   address: string,
-  family: number = 4,
+  family: number = isIP(address),
 ): boolean {
-  if (family === 4 || address.includes(".")) {
+  if (isIP(address) !== family) {
+    return false;
+  }
+  if (family === 4) {
     return !isPrivateOrReservedIPv4(address);
   }
-  if (family === 6 || address.includes(":")) {
+  if (family === 6) {
     return !isPrivateOrReservedIPv6(address);
   }
   return false;

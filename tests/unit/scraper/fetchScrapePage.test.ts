@@ -98,6 +98,9 @@ describe("scraper HTTPS transport", () => {
   it.each([
     [],
     [{ address: "127.0.0.1", family: 4 }],
+    [{ address: "::ffff:127.0.0.1", family: 6 }],
+    [{ address: "::ffff:7f00:1", family: 6 }],
+    [{ address: "0000:0000:0000:0000:0000:ffff:a9fe:a9fe", family: 6 }],
     [
       { address: "93.184.216.34", family: 4 },
       { address: "192.168.1.1", family: 4 },
