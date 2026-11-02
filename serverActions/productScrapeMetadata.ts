@@ -7,7 +7,7 @@ import {
 } from "@/schemas/productScrape";
 import { validateUrlSafetyAsync } from "@/lib/scraper/ssrfProtection";
 import { scrapeProductMetadata } from "@/lib/scraper/productScrapeService";
-import { findShopByUrl } from "@/lib/shops/findShopByUrl";
+import { findScrapingShop } from "@/lib/scraper/findScrapingShop";
 import { publicActionClient } from "@/lib/actions/safeActionClient";
 import { returnServerError } from "next-safe-action";
 
@@ -24,7 +24,7 @@ export const productScrapeMetadata = publicActionClient
       );
     }
 
-    const matchedShop = await findShopByUrl(productUrl);
+    const matchedShop = await findScrapingShop(productUrl);
     if (!matchedShop) {
       return returnServerError(PRODUCT_SCRAPE_MESSAGES.unsupportedShopError);
     }

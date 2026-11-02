@@ -15,12 +15,24 @@ vi.mock("@/lib/auth/helper", () => ({
   auth: vi.fn(),
 }));
 
-vi.mock("@/lib/shops/findShopByUrl", () => ({
-  findShopByUrl: vi.fn().mockResolvedValue(null),
+vi.mock("@/lib/scraper/findScrapingShop", () => ({
+  findScrapingShop: vi.fn().mockResolvedValue(null),
+}));
+
+vi.mock("@/lib/scraper/fetchScrapePage", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/scraper/fetchScrapePage")>()),
+  fetchScrapePage: vi.fn(async (url: string) => {
+    const response = await fetch(url);
+    return { status: response.status, html: await response.text() };
+  }),
 }));
 
 import { auth } from "@/lib/auth/helper";
-import { findShopByUrl } from "@/lib/shops/findShopByUrl";
+import { findScrapingShop } from "@/lib/scraper/findScrapingShop";
+import {
+  fetchScrapePage,
+  ScrapeSecurityError,
+} from "@/lib/scraper/fetchScrapePage";
 import { SSRF_ERRORS } from "@/lib/scraper/ssrfProtection";
 import { productScrapeMetadata } from "@/serverActions/productScrapeMetadata";
 import { PRODUCT_SCRAPE_MESSAGES } from "@/schemas/productScrape";
@@ -40,7 +52,7 @@ describe("serverActions/productScrapeMetadata", () => {
       user: { id: "user-test-1", email: "tester@example.com" },
       expires: "9999-12-31",
     });
-    vi.mocked(findShopByUrl).mockResolvedValue(defaultMockShop);
+    vi.mocked(findScrapingShop).mockResolvedValue(defaultMockShop);
   });
 
   it("blocks SSRF attack attempts and returns a server error", async () => {
@@ -53,7 +65,7 @@ describe("serverActions/productScrapeMetadata", () => {
   });
 
   it("blocks scraping and returns an error when shop domain is not recognized", async () => {
-    vi.mocked(findShopByUrl).mockResolvedValueOnce(null);
+    vi.mocked(findScrapingShop).mockResolvedValueOnce(null);
 
     const result = await productScrapeMetadata({
       productUrl: "https://unknown-shop.com/item/123",
@@ -63,6 +75,7 @@ describe("serverActions/productScrapeMetadata", () => {
     expect(result?.serverError).toBe(
       PRODUCT_SCRAPE_MESSAGES.unsupportedShopError,
     );
+    expect(fetchScrapePage).not.toHaveBeenCalled();
   });
 
   it("successfully extracts metadata in Tier 1 when direct fetch returns 200", async () => {
@@ -152,7 +165,7 @@ describe("serverActions/productScrapeMetadata", () => {
     expect(zenrowsCallUrl).toContain("premium_proxy=true");
   });
 
-  it("enriches metadata with matched shop when findShopByUrl finds a shop", async () => {
+  it("enriches metadata with the shop authorized for scraping", async () => {
     const mockHtml = `
       <!DOCTYPE html>
       <html>
@@ -178,7 +191,7 @@ describe("serverActions/productScrapeMetadata", () => {
       name: "Media Expert",
       logo: "https://example.com/me.svg",
     };
-    vi.mocked(findShopByUrl).mockResolvedValueOnce(mockShop);
+    vi.mocked(findScrapingShop).mockResolvedValueOnce(mockShop);
 
     const result = await productScrapeMetadata({
       productUrl: "https://www.mediaexpert.pl/hulajnogi/item-123",
@@ -263,5 +276,19 @@ describe("serverActions/productScrapeMetadata", () => {
 
     expect(result?.data).toBeUndefined();
     expect(result?.serverError).toBe(SSRF_ERRORS.dnsRebindingPrivateIp);
+  });
+
+  it("does not invoke the paid provider after a transport security rejection", async () => {
+    vi.mocked(fetchScrapePage).mockRejectedValueOnce(
+      new ScrapeSecurityError("Unsafe destination"),
+    );
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+
+    const result = await productScrapeMetadata({
+      productUrl: "https://shop.pl/redirect",
+    });
+
+    expect(result?.serverError).toBe(PRODUCT_SCRAPE_MESSAGES.scrapeFailedError);
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 });

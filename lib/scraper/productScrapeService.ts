@@ -1,9 +1,10 @@
 import { extractProductMetadata } from "@/lib/scraper/extractMetadata";
 import { fetchWithZenRows } from "@/lib/scraper/zenrowsClient";
+import type { MatchedShopResult } from "@/lib/shops/findShopByUrl";
 import {
-  findShopByUrl,
-  type MatchedShopResult,
-} from "@/lib/shops/findShopByUrl";
+  fetchScrapePage,
+  ScrapeSecurityError,
+} from "@/lib/scraper/fetchScrapePage";
 import type { ScrapedMetadataResult } from "@/schemas/productScrape";
 
 const BROWSER_HEADERS = {
@@ -68,26 +69,15 @@ async function fetchDirectTier1(
   const tier1Start = Date.now();
 
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-    const response = await fetch(productUrl, {
-      method: "GET",
-      headers: BROWSER_HEADERS,
-      signal: controller.signal,
-      redirect: "follow",
-    });
-
-    clearTimeout(timeoutId);
+    const response = await fetchScrapePage(productUrl, BROWSER_HEADERS);
     const tier1Duration = Date.now() - tier1Start;
 
     console.log(
       `[Scraper] Tier 1 responded with HTTP ${response.status} in ${tier1Duration}ms for: ${productUrl}`,
     );
 
-    if (response.ok) {
-      const html = await response.text();
-      return { html, shouldTryTier2: false };
+    if (response.status >= 200 && response.status < 300) {
+      return { html: response.html, shouldTryTier2: false };
     }
 
     if (
@@ -108,13 +98,16 @@ async function fetchDirectTier1(
       `[Scraper] Tier 1 network error/timeout after ${tier1Duration}ms:`,
       error instanceof Error ? error.message : error,
     );
-    return { html: null, shouldTryTier2: true };
+    return {
+      html: null,
+      shouldTryTier2: !(error instanceof ScrapeSecurityError),
+    };
   }
 }
 
 export async function scrapeProductMetadata(
   productUrl: string,
-  knownShop?: MatchedShopResult | null,
+  knownShop: MatchedShopResult,
 ): Promise<ScrapedMetadataResult | null> {
   const { html: tier1Html, shouldTryTier2: initialTier2Flag } =
     await fetchDirectTier1(productUrl);
@@ -133,8 +126,7 @@ export async function scrapeProductMetadata(
     );
     if (tier1Metadata && isTier1Complete) {
       console.log(`[Scraper] Tier 1 full extraction success:`, tier1Metadata);
-      const matchedShop =
-        knownShop !== undefined ? knownShop : await findShopByUrl(productUrl);
+      const matchedShop = knownShop;
       const scrapedFields = buildScrapedFieldsList(tier1Metadata, matchedShop);
 
       return {
@@ -180,8 +172,7 @@ export async function scrapeProductMetadata(
   }
 
   const mergedMetadata = mergeScrapedMetadata(tier1Metadata, tier2Metadata);
-  const matchedShop =
-    knownShop !== undefined ? knownShop : await findShopByUrl(productUrl);
+  const matchedShop = knownShop;
 
   const hasAnyProductData = Boolean(
     mergedMetadata.imageUrl || mergedMetadata.name || mergedMetadata.code,

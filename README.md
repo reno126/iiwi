@@ -51,6 +51,10 @@ Most modern product reviews are hosted directly on vendor or marketplace platfor
 - **Enterprise-Grade SSRF Protection:** Strict IP range and protocol validation blocking private RFC-1918 addresses, loopbacks, link-local metadata endpoints, and internal network scans.
 - **Resilient Proxy Integration:** Optional ZenRows web scraper integration with anti-bot bypass and geo-proxy support for JavaScript-rendered stores.
 
+Scraping authorization uses exact domain entries in a shop's `matcherKeys`, plus the `www` form of those domains. Bare brand keys remain useful for shop discovery but do not authorize requests. Other subdomains must have their own exact domain entry. Only HTTPS on the default port is accepted, without URL credentials.
+
+Direct scraping pins each connection to the DNS addresses validated for that request and preserves hostname-based TLS verification. Redirects are rejected, including redirects to another partner URL; users can supply the final URL or enter product details manually. Redirect and address-safety rejections do not trigger ZenRows. Other supported fallback cases still delegate fetching to ZenRows, whose network policy is separate from the application's direct-request protections.
+
 ### 3. Auth-Gated Submission with Seamless Draft Persistence
 
 - **Zero Initial Friction:** Users can start writing their review immediately without an account.
@@ -198,11 +202,13 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 This repository strictly enforces coding standards and architectural principles following **Progressive Disclosure** rooted in [`AGENTS.md`](./AGENTS.md). The root guide defines universal core rules, while specialized domain manuals reside in [`docs/`](./docs):
 
 ### Universal Core Rules
+
 - **AST Architecture Verification:** Enforced via `pnpm verify:rules` (`scripts/verifyAgentRules.ts`) with 0 tolerance for violations.
 - **Zero Comments Policy:** Strictly forbidden to use any inline comments in source code, components, utilities, or test files. Enforced by AST.
 - **Zero Single-Letter Identifiers:** Descriptive domain naming mandatory everywhere (e.g. `savedDraft`, `product`, `actionResult`). Pure loop counters (`i`) are the only exception.
 
 ### Specialized Architecture Manuals
+
 - [**Component Architecture & ARIA Contracts**](./docs/components.md) — Base UI / shadcn first, colocation (`_components`), props templates, accessible contracts (`role="meter"`, `data-state`).
 - [**Forms, State & Schemas**](./docs/forms-and-state.md) — React Hook Form + Zod, `useState` elimination, context value memoization, auth drafts.
 - [**Styling, Mobile & Performance**](./docs/styling-and-performance.md) — Tailwind v4 dynamic scale, mobile field islands, Core Web Vitals (LCP, CLS, INP, FCP).
@@ -235,9 +241,9 @@ This repository strictly enforces coding standards and architectural principles 
 
 [GitHub Actions](./.github/workflows/ci.yml) runs on pull requests, pushes to `main`, merge queues, and manual dispatches. Two jobs run in parallel:
 
-| Required check | Verification |
-| :------------- | :----------- |
-| `Quality` | Architecture rules, ESLint, Next.js type generation, TypeScript, and all Vitest unit and integration tests |
+| Required check             | Verification                                                                                                         |
+| :------------------------- | :------------------------------------------------------------------------------------------------------------------- |
+| `Quality`                  | Architecture rules, ESLint, Next.js type generation, TypeScript, and all Vitest unit and integration tests           |
 | `Production build and E2E` | Migrations against disposable PostgreSQL 17, a production build, and all Chromium browser tests against `pnpm start` |
 
 Configure both checks as required in the GitHub branch rules for `main`. CI uses disposable database credentials and a test authentication secret, so repository secrets are unnecessary. `DATABASE_URL` is available before dependency installation because Prisma generates its client during `postinstall`.
