@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { fetchWithZenRows } from "@/lib/scraper/zenrowsClient";
+import { reservePaidScrape } from "@/lib/abuse/limits";
+
+vi.mock("@/lib/abuse/limits", () => ({
+  reservePaidScrape: vi.fn().mockResolvedValue(true),
+}));
 
 describe("lib/scraper/zenrowsClient", () => {
   const originalEnv = process.env;
@@ -13,6 +18,28 @@ describe("lib/scraper/zenrowsClient", () => {
   afterEach(() => {
     process.env = originalEnv;
     globalThis.fetch = originalFetch;
+  });
+
+  it("does not contact the provider after the shared paid budget is exhausted", async () => {
+    process.env.ZENROWS_API_KEY = "test-key";
+    vi.mocked(reservePaidScrape).mockResolvedValueOnce(false);
+    const fetchMock = vi.fn();
+    globalThis.fetch = fetchMock;
+
+    expect(await fetchWithZenRows("https://shop.pl/product")).toBeNull();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("fails closed before contacting the provider when budget storage is unavailable", async () => {
+    process.env.ZENROWS_API_KEY = "test-key";
+    vi.mocked(reservePaidScrape).mockRejectedValueOnce(
+      new Error("Database unavailable"),
+    );
+    const fetchMock = vi.fn();
+    globalThis.fetch = fetchMock;
+
+    await expect(fetchWithZenRows("https://shop.pl/product")).rejects.toThrow();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("returns null immediately when ZENROWS_API_KEY is not configured", async () => {

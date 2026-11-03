@@ -1,6 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import dns from "node:dns";
 
+vi.mock("next/headers", () => ({ headers: vi.fn(async () => new Headers()) }));
+vi.mock("@/lib/abuse/limits", () => ({
+  enforceRequestLimits: vi.fn().mockResolvedValue("test-client"),
+  enforceScrapeQuota: vi.fn(),
+  reservePaidScrape: vi.fn().mockResolvedValue(true),
+}));
+vi.mock("@/lib/scraper/scrapeCache", () => ({
+  withScrapeCache: vi.fn(
+    async (
+      productUrl: string,
+      shopId: string,
+      scrape: (signal: AbortSignal) => Promise<unknown>,
+    ) => scrape(new AbortController().signal),
+  ),
+}));
+
 vi.mock("node:dns", () => ({
   default: {
     promises: {
@@ -36,6 +52,8 @@ import {
 import { SSRF_ERRORS } from "@/lib/scraper/ssrfProtection";
 import { productScrapeMetadata } from "@/serverActions/productScrapeMetadata";
 import { PRODUCT_SCRAPE_MESSAGES } from "@/schemas/productScrape";
+import { enforceRequestLimits, enforceScrapeQuota } from "@/lib/abuse/limits";
+import { AbuseLimitError, ABUSE_MESSAGES } from "@/lib/abuse/errors";
 
 describe("serverActions/productScrapeMetadata", () => {
   const originalEnv = process.env;
@@ -53,6 +71,40 @@ describe("serverActions/productScrapeMetadata", () => {
       expires: "9999-12-31",
     });
     vi.mocked(findScrapingShop).mockResolvedValue(defaultMockShop);
+  });
+
+  it.each([enforceRequestLimits, enforceScrapeQuota])(
+    "rejects exhausted limits before DNS or provider requests",
+    async (limitCheck) => {
+      vi.mocked(limitCheck).mockRejectedValueOnce(new AbuseLimitError(60));
+      const fetchSpy = vi.spyOn(globalThis, "fetch");
+      const result = await productScrapeMetadata({
+        productUrl: "https://shop.pl/product",
+      });
+
+      expect(result?.serverError).toBe(ABUSE_MESSAGES.rateLimited);
+      expect(dns.promises.lookup).not.toHaveBeenCalled();
+      expect(fetchScrapePage).not.toHaveBeenCalled();
+      expect(fetchSpy).not.toHaveBeenCalled();
+    },
+  );
+
+  it("assigns a guest quota without requiring login", async () => {
+    vi.mocked(auth).mockResolvedValueOnce(null);
+    vi.mocked(findScrapingShop).mockResolvedValueOnce(null);
+    await productScrapeMetadata({ productUrl: "https://shop.pl/product" });
+
+    expect(enforceScrapeQuota).toHaveBeenCalledWith("test-client", undefined);
+  });
+
+  it("assigns the quota to the server authenticated account", async () => {
+    vi.mocked(findScrapingShop).mockResolvedValueOnce(null);
+    await productScrapeMetadata({ productUrl: "https://shop.pl/product" });
+
+    expect(enforceScrapeQuota).toHaveBeenCalledWith(
+      "test-client",
+      "user-test-1",
+    );
   });
 
   it("blocks SSRF attack attempts and returns a server error", async () => {

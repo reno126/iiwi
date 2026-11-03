@@ -55,7 +55,10 @@ export const ModelName = {
   Account: 'Account',
   Product: 'Product',
   Shop: 'Shop',
-  Review: 'Review'
+  Review: 'Review',
+  AbuseBucket: 'AbuseBucket',
+  OperationLease: 'OperationLease',
+  ScrapeCache: 'ScrapeCache'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -157,12 +160,46 @@ export const ReviewScalarFieldEnum = {
 export type ReviewScalarFieldEnum = (typeof ReviewScalarFieldEnum)[keyof typeof ReviewScalarFieldEnum]
 
 
+export const AbuseBucketScalarFieldEnum = {
+  key: 'key',
+  used: 'used',
+  expiresAt: 'expiresAt'
+} as const
+
+export type AbuseBucketScalarFieldEnum = (typeof AbuseBucketScalarFieldEnum)[keyof typeof AbuseBucketScalarFieldEnum]
+
+
+export const OperationLeaseScalarFieldEnum = {
+  key: 'key',
+  token: 'token',
+  expiresAt: 'expiresAt'
+} as const
+
+export type OperationLeaseScalarFieldEnum = (typeof OperationLeaseScalarFieldEnum)[keyof typeof OperationLeaseScalarFieldEnum]
+
+
+export const ScrapeCacheScalarFieldEnum = {
+  key: 'key',
+  payload: 'payload',
+  expiresAt: 'expiresAt'
+} as const
+
+export type ScrapeCacheScalarFieldEnum = (typeof ScrapeCacheScalarFieldEnum)[keyof typeof ScrapeCacheScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -179,4 +216,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

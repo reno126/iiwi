@@ -2,8 +2,32 @@ import { registerSchema, REGISTER_API_MESSAGES } from "@/schemas/register";
 import { prisma } from "@/lib/db/prisma";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { enforceRequestLimits, enforceAccountLimit } from "@/lib/abuse/limits";
+import { AbuseLimitError, ABUSE_MESSAGES } from "@/lib/abuse/errors";
 
 export async function POST(request: Request) {
+  try {
+    await enforceRequestLimits("register", request.headers);
+    return await registerUser(request);
+  } catch (error) {
+    if (error instanceof AbuseLimitError) {
+      return NextResponse.json(
+        { error: error.message },
+        {
+          status: 429,
+          headers: { "Retry-After": String(error.retryAfterSeconds) },
+        },
+      );
+    }
+    console.error("[Registration] Request failed", error);
+    return NextResponse.json(
+      { error: ABUSE_MESSAGES.unavailable },
+      { status: 503 },
+    );
+  }
+}
+
+async function registerUser(request: Request) {
   const body = await request.json();
   const validated = registerSchema.safeParse(body);
 
@@ -15,6 +39,7 @@ export async function POST(request: Request) {
   }
 
   const { email, password, name } = validated.data;
+  await enforceAccountLimit("register", email);
 
   const existingUser = await prisma.user.findUnique({
     where: { email },

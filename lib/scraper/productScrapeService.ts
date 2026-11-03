@@ -6,6 +6,7 @@ import {
   ScrapeSecurityError,
 } from "@/lib/scraper/fetchScrapePage";
 import type { ScrapedMetadataResult } from "@/schemas/productScrape";
+import { withScrapeCache } from "@/lib/scraper/scrapeCache";
 
 const BROWSER_HEADERS = {
   "User-Agent":
@@ -64,12 +65,13 @@ function buildScrapedFieldsList(
 
 async function fetchDirectTier1(
   productUrl: string,
+  signal: AbortSignal,
 ): Promise<Tier1FetchOutcome> {
   console.log(`[Scraper] Starting Tier 1 direct fetch for: ${productUrl}`);
   const tier1Start = Date.now();
 
   try {
-    const response = await fetchScrapePage(productUrl, BROWSER_HEADERS);
+    const response = await fetchScrapePage(productUrl, BROWSER_HEADERS, signal);
     const tier1Duration = Date.now() - tier1Start;
 
     console.log(
@@ -109,8 +111,20 @@ export async function scrapeProductMetadata(
   productUrl: string,
   knownShop: MatchedShopResult,
 ): Promise<ScrapedMetadataResult | null> {
+  return withScrapeCache(productUrl, knownShop.id, (signal) =>
+    scrapeUncachedProductMetadata(productUrl, knownShop, signal),
+  );
+}
+
+async function scrapeUncachedProductMetadata(
+  productUrl: string,
+  knownShop: MatchedShopResult,
+  signal: AbortSignal,
+): Promise<ScrapedMetadataResult | null> {
+  signal.throwIfAborted();
   const { html: tier1Html, shouldTryTier2: initialTier2Flag } =
-    await fetchDirectTier1(productUrl);
+    await fetchDirectTier1(productUrl, signal);
+  signal.throwIfAborted();
 
   let tier1Metadata: ReturnType<typeof extractProductMetadata> = null;
   let shouldTryTier2 = initialTier2Flag;
@@ -151,6 +165,7 @@ export async function scrapeProductMetadata(
     );
     const tier2Html = await fetchWithZenRows(productUrl, {
       timeoutMs: 60000,
+      signal,
     });
     if (tier2Html) {
       console.log(

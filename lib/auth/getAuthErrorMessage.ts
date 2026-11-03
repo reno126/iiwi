@@ -2,6 +2,10 @@ import { AUTH_ERRORS, AUTH_ERROR_MESSAGES } from "./constants";
 
 export function getAuthErrorMessage(errorCode: string | null): string {
   switch (errorCode) {
+    case AUTH_ERRORS.rateLimited:
+      return AUTH_ERROR_MESSAGES.rateLimited;
+    case AUTH_ERRORS.unavailable:
+      return AUTH_ERROR_MESSAGES.unavailable;
     case AUTH_ERRORS.oauthAccountNotLinked:
       return AUTH_ERROR_MESSAGES.oauthAccountNotLinked;
     case AUTH_ERRORS.oauthAccountOnly:

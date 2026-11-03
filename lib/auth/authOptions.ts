@@ -5,6 +5,8 @@ import Credentials from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/lib/db/prisma";
 import { AUTH_ERRORS } from "@/lib/auth/constants";
+import { enforceRequestLimits, enforceAccountLimit } from "@/lib/abuse/limits";
+import { AbuseLimitError } from "@/lib/abuse/errors";
 
 export { AUTH_ERRORS };
 
@@ -43,7 +45,7 @@ export const authOptions = {
         email: { type: "text" },
         password: { type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         const email = credentials?.email;
         const password = credentials?.password;
 
@@ -54,6 +56,16 @@ export const authOptions = {
           typeof password !== "string"
         ) {
           return null;
+        }
+
+        try {
+          await enforceRequestLimits("login", new Headers(request?.headers));
+          await enforceAccountLimit("login", email);
+        } catch (error) {
+          if (error instanceof AbuseLimitError)
+            throw new Error(AUTH_ERRORS.rateLimited);
+          console.error("[Authentication] Abuse control unavailable", error);
+          throw new Error(AUTH_ERRORS.unavailable);
         }
 
         const user = await prisma.user.findUnique({

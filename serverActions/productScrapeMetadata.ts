@@ -10,12 +10,22 @@ import { scrapeProductMetadata } from "@/lib/scraper/productScrapeService";
 import { findScrapingShop } from "@/lib/scraper/findScrapingShop";
 import { publicActionClient } from "@/lib/actions/safeActionClient";
 import { returnServerError } from "next-safe-action";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth/helper";
+import { enforceRequestLimits, enforceScrapeQuota } from "@/lib/abuse/limits";
 
 export const productScrapeMetadata = publicActionClient
   .inputSchema(productScrapeSchema)
   .outputSchema(scrapedMetadataResultSchema)
   .action(async ({ parsedInput }) => {
     const { productUrl } = parsedInput;
+
+    const clientIdentity = await enforceRequestLimits(
+      "scrape",
+      await headers(),
+    );
+    const session = await auth();
+    await enforceScrapeQuota(clientIdentity, session?.user?.id);
 
     const safetyCheck = await validateUrlSafetyAsync(productUrl);
     if (!safetyCheck.isValid) {

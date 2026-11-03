@@ -1,4 +1,6 @@
 export const AUTH_ERRORS = {
+  rateLimited: "RateLimited",
+  unavailable: "ServiceUnavailable",
   oauthAccountOnly: "OAuthAccountOnly",
   oauthAccountNotLinked: "OAuthAccountNotLinked",
   oauthSignin: "OAuthSignin",
@@ -9,6 +11,8 @@ export const AUTH_ERRORS = {
 } as const;
 
 export const AUTH_ERROR_MESSAGES = {
+  rateLimited: "Zbyt wiele prób logowania. Odczekaj chwilę i spróbuj ponownie.",
+  unavailable: "Logowanie jest chwilowo niedostępne. Spróbuj ponownie później.",
   oauthAccountNotLinked:
     "To konto e-mail zostało wcześniej zarejestrowane za pomocą hasła. Zaloguj się hasłem.",
   oauthAccountOnly:

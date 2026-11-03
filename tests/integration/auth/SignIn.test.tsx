@@ -75,6 +75,29 @@ describe("app/login/_components/SignIn", () => {
     mockSearchParams = new URLSearchParams();
   });
 
+  it.each([
+    [AUTH_ERRORS.rateLimited, AUTH_ERROR_MESSAGES.rateLimited],
+    [AUTH_ERRORS.unavailable, AUTH_ERROR_MESSAGES.unavailable],
+  ])("shows a recoverable login error for %s", async (errorCode, message) => {
+    vi.mocked(signIn).mockResolvedValueOnce({
+      error: errorCode,
+      status: 401,
+      ok: false,
+      url: null,
+    });
+    render(<SignIn />);
+    const driver = createSignInDriver();
+    await driver.fillForm({
+      email: "user@example.com",
+      password: "password123",
+    });
+    await driver.submit();
+
+    await waitFor(() => expect(driver.alert()).toHaveTextContent(message));
+    expect(mockPush).not.toHaveBeenCalled();
+    expect(driver.submitButton()).toBeEnabled();
+  });
+
   it("renders the sign-in form correctly", () => {
     render(<SignIn />);
     const driver = createSignInDriver();

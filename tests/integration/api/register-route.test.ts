@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+vi.mock("@/lib/abuse/limits", () => ({
+  enforceRequestLimits: vi.fn().mockResolvedValue("test-client"),
+  enforceAccountLimit: vi.fn(),
+}));
+
 vi.mock("@/lib/db/prisma", () => ({
   prisma: {
     user: {
@@ -13,6 +18,8 @@ import { prisma } from "@/lib/db/prisma";
 import bcrypt from "bcryptjs";
 import { POST } from "@/app/api/register/route";
 import { REGISTER_API_MESSAGES } from "@/schemas/register";
+import { enforceRequestLimits, enforceAccountLimit } from "@/lib/abuse/limits";
+import { AbuseLimitError, ABUSE_MESSAGES } from "@/lib/abuse/errors";
 
 interface MockAccount {
   id: string;
@@ -44,6 +51,47 @@ interface MockUser {
 describe("app/api/register POST route handler", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it.each([enforceRequestLimits, enforceAccountLimit])(
+    "rejects exhausted limits before password hashing",
+    async (limitCheck) => {
+      vi.mocked(limitCheck).mockRejectedValueOnce(new AbuseLimitError(45));
+      const hashPassword = vi.spyOn(bcrypt, "hash");
+      const request = new Request("http://localhost/api/register", {
+        method: "POST",
+        body: JSON.stringify({
+          name: "Test User",
+          email: "limited@example.com",
+          password: "password123",
+        }),
+      });
+
+      const response = await POST(request);
+
+      expect(response.status).toBe(429);
+      expect(response.headers.get("Retry-After")).toBe("45");
+      expect(await response.json()).toEqual({
+        error: ABUSE_MESSAGES.rateLimited,
+      });
+      expect(hashPassword).not.toHaveBeenCalled();
+      expect(prisma.user.findUnique).not.toHaveBeenCalled();
+      expect(prisma.user.create).not.toHaveBeenCalled();
+    },
+  );
+
+  it("fails closed when shared abuse control storage is unavailable", async () => {
+    vi.mocked(enforceRequestLimits).mockRejectedValueOnce(
+      new Error("Database unavailable"),
+    );
+    const hashPassword = vi.spyOn(bcrypt, "hash");
+    const response = await POST(
+      new Request("http://localhost/api/register", { method: "POST" }),
+    );
+
+    expect(response.status).toBe(503);
+    expect(hashPassword).not.toHaveBeenCalled();
+    expect(prisma.user.create).not.toHaveBeenCalled();
   });
 
   it("returns 400 when body fails register validation schema", async () => {

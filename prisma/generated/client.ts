@@ -66,3 +66,18 @@ export type Shop = Prisma.ShopModel
  * 
  */
 export type Review = Prisma.ReviewModel
+/**
+ * Model AbuseBucket
+ * 
+ */
+export type AbuseBucket = Prisma.AbuseBucketModel
+/**
+ * Model OperationLease
+ * 
+ */
+export type OperationLease = Prisma.OperationLeaseModel
+/**
+ * Model ScrapeCache
+ * 
+ */
+export type ScrapeCache = Prisma.ScrapeCacheModel

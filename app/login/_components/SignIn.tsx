@@ -8,7 +8,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { CircleAlert } from "lucide-react";
 
 import { loginSchema, type LoginInput } from "@/schemas/login";
-import { AUTH_ERRORS, AUTH_ERROR_MESSAGES } from "@/lib/auth/constants";
 import { getAuthErrorMessage } from "@/lib/auth/getAuthErrorMessage";
 import { resolveAuthRedirectUrl } from "@/lib/auth/resolveAuthRedirectUrl";
 import { AuthCard } from "@/components/auth/AuthCard";
@@ -72,10 +71,7 @@ export function SignIn({ className }: SignInProps) {
 
     if (result?.error) {
       setError("root", {
-        message:
-          result.error === AUTH_ERRORS.oauthAccountOnly
-            ? AUTH_ERROR_MESSAGES.oauthAccountOnly
-            : AUTH_ERROR_MESSAGES.credentialsSignin,
+        message: getAuthErrorMessage(result.error),
       });
       return;
     }

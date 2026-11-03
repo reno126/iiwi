@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+vi.mock("@/lib/abuse/limits", () => ({
+  enforceRequestLimits: vi.fn().mockResolvedValue("test-client"),
+  enforceAccountLimit: vi.fn(),
+}));
+
 vi.mock("@/lib/db/prisma", () => ({
   prisma: {
     user: {
@@ -17,6 +22,8 @@ vi.mock("bcryptjs", () => ({
 import { prisma } from "@/lib/db/prisma";
 import bcrypt from "bcryptjs";
 import { authOptions, AUTH_ERRORS } from "@/lib/auth/authOptions";
+import { enforceRequestLimits, enforceAccountLimit } from "@/lib/abuse/limits";
+import { AbuseLimitError } from "@/lib/abuse/errors";
 
 describe("lib/auth/authOptions", () => {
   beforeEach(() => {
@@ -55,6 +62,34 @@ describe("lib/auth/authOptions", () => {
   };
 
   describe("Credentials authorize", () => {
+    it.each([enforceRequestLimits, enforceAccountLimit])(
+      "rejects exhausted limits before password comparison",
+      async (limitCheck) => {
+        vi.mocked(limitCheck).mockRejectedValueOnce(new AbuseLimitError(60));
+        await expect(
+          getAuthorizeFn()({
+            email: "limited@example.com",
+            password: "password123",
+          }),
+        ).rejects.toThrow(AUTH_ERRORS.rateLimited);
+        expect(bcrypt.compare).not.toHaveBeenCalled();
+        expect(prisma.user.findUnique).not.toHaveBeenCalled();
+      },
+    );
+
+    it("does not compare passwords when shared abuse control storage fails", async () => {
+      vi.mocked(enforceRequestLimits).mockRejectedValueOnce(
+        new Error("Database unavailable"),
+      );
+      await expect(
+        getAuthorizeFn()({
+          email: "limited@example.com",
+          password: "password123",
+        }),
+      ).rejects.toThrow(AUTH_ERRORS.unavailable);
+      expect(bcrypt.compare).not.toHaveBeenCalled();
+      expect(prisma.user.findUnique).not.toHaveBeenCalled();
+    });
     it("returns null if user does not exist in database", async () => {
       vi.mocked(prisma.user.findUnique).mockResolvedValueOnce(null);
 

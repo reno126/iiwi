@@ -13,6 +13,7 @@ export interface ScrapePageResponse {
 export async function fetchScrapePage(
   productUrl: string,
   headers: Record<string, string>,
+  parentSignal?: AbortSignal,
 ): Promise<ScrapePageResponse> {
   const targetUrl = new URL(productUrl);
   if (
@@ -26,10 +27,15 @@ export async function fetchScrapePage(
     throw new ScrapeSecurityError("Invalid scraping destination");
   }
 
-  const signal = AbortSignal.timeout(5000);
+  const timeoutSignal = AbortSignal.timeout(5000);
+  const signal = parentSignal
+    ? AbortSignal.any([parentSignal, timeoutSignal])
+    : timeoutSignal;
+  signal.throwIfAborted();
   const addresses = await dns.promises.lookup(targetUrl.hostname, {
     all: true,
   });
+  signal.throwIfAborted();
   const firstAddress = addresses[0];
   if (
     !firstAddress ||

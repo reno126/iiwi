@@ -401,7 +401,10 @@ export const ModelName = {
   Account: 'Account',
   Product: 'Product',
   Shop: 'Shop',
-  Review: 'Review'
+  Review: 'Review',
+  AbuseBucket: 'AbuseBucket',
+  OperationLease: 'OperationLease',
+  ScrapeCache: 'ScrapeCache'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -417,7 +420,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "account" | "product" | "shop" | "review"
+    modelProps: "user" | "account" | "product" | "shop" | "review" | "abuseBucket" | "operationLease" | "scrapeCache"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -791,6 +794,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AbuseBucket: {
+      payload: Prisma.$AbuseBucketPayload<ExtArgs>
+      fields: Prisma.AbuseBucketFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AbuseBucketFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbuseBucketPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AbuseBucketFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbuseBucketPayload>
+        }
+        findFirst: {
+          args: Prisma.AbuseBucketFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbuseBucketPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AbuseBucketFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbuseBucketPayload>
+        }
+        findMany: {
+          args: Prisma.AbuseBucketFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbuseBucketPayload>[]
+        }
+        create: {
+          args: Prisma.AbuseBucketCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbuseBucketPayload>
+        }
+        createMany: {
+          args: Prisma.AbuseBucketCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AbuseBucketCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbuseBucketPayload>[]
+        }
+        delete: {
+          args: Prisma.AbuseBucketDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbuseBucketPayload>
+        }
+        update: {
+          args: Prisma.AbuseBucketUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbuseBucketPayload>
+        }
+        deleteMany: {
+          args: Prisma.AbuseBucketDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AbuseBucketUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AbuseBucketUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbuseBucketPayload>[]
+        }
+        upsert: {
+          args: Prisma.AbuseBucketUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbuseBucketPayload>
+        }
+        aggregate: {
+          args: Prisma.AbuseBucketAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAbuseBucket>
+        }
+        groupBy: {
+          args: Prisma.AbuseBucketGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AbuseBucketGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AbuseBucketCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AbuseBucketCountAggregateOutputType> | number
+        }
+      }
+    }
+    OperationLease: {
+      payload: Prisma.$OperationLeasePayload<ExtArgs>
+      fields: Prisma.OperationLeaseFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.OperationLeaseFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OperationLeasePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.OperationLeaseFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OperationLeasePayload>
+        }
+        findFirst: {
+          args: Prisma.OperationLeaseFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OperationLeasePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.OperationLeaseFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OperationLeasePayload>
+        }
+        findMany: {
+          args: Prisma.OperationLeaseFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OperationLeasePayload>[]
+        }
+        create: {
+          args: Prisma.OperationLeaseCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OperationLeasePayload>
+        }
+        createMany: {
+          args: Prisma.OperationLeaseCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.OperationLeaseCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OperationLeasePayload>[]
+        }
+        delete: {
+          args: Prisma.OperationLeaseDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OperationLeasePayload>
+        }
+        update: {
+          args: Prisma.OperationLeaseUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OperationLeasePayload>
+        }
+        deleteMany: {
+          args: Prisma.OperationLeaseDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.OperationLeaseUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.OperationLeaseUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OperationLeasePayload>[]
+        }
+        upsert: {
+          args: Prisma.OperationLeaseUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OperationLeasePayload>
+        }
+        aggregate: {
+          args: Prisma.OperationLeaseAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateOperationLease>
+        }
+        groupBy: {
+          args: Prisma.OperationLeaseGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OperationLeaseGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.OperationLeaseCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OperationLeaseCountAggregateOutputType> | number
+        }
+      }
+    }
+    ScrapeCache: {
+      payload: Prisma.$ScrapeCachePayload<ExtArgs>
+      fields: Prisma.ScrapeCacheFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ScrapeCacheFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScrapeCachePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ScrapeCacheFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScrapeCachePayload>
+        }
+        findFirst: {
+          args: Prisma.ScrapeCacheFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScrapeCachePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ScrapeCacheFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScrapeCachePayload>
+        }
+        findMany: {
+          args: Prisma.ScrapeCacheFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScrapeCachePayload>[]
+        }
+        create: {
+          args: Prisma.ScrapeCacheCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScrapeCachePayload>
+        }
+        createMany: {
+          args: Prisma.ScrapeCacheCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ScrapeCacheCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScrapeCachePayload>[]
+        }
+        delete: {
+          args: Prisma.ScrapeCacheDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScrapeCachePayload>
+        }
+        update: {
+          args: Prisma.ScrapeCacheUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScrapeCachePayload>
+        }
+        deleteMany: {
+          args: Prisma.ScrapeCacheDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ScrapeCacheUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ScrapeCacheUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScrapeCachePayload>[]
+        }
+        upsert: {
+          args: Prisma.ScrapeCacheUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScrapeCachePayload>
+        }
+        aggregate: {
+          args: Prisma.ScrapeCacheAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateScrapeCache>
+        }
+        groupBy: {
+          args: Prisma.ScrapeCacheGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ScrapeCacheGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ScrapeCacheCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ScrapeCacheCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -913,12 +1138,46 @@ export const ReviewScalarFieldEnum = {
 export type ReviewScalarFieldEnum = (typeof ReviewScalarFieldEnum)[keyof typeof ReviewScalarFieldEnum]
 
 
+export const AbuseBucketScalarFieldEnum = {
+  key: 'key',
+  used: 'used',
+  expiresAt: 'expiresAt'
+} as const
+
+export type AbuseBucketScalarFieldEnum = (typeof AbuseBucketScalarFieldEnum)[keyof typeof AbuseBucketScalarFieldEnum]
+
+
+export const OperationLeaseScalarFieldEnum = {
+  key: 'key',
+  token: 'token',
+  expiresAt: 'expiresAt'
+} as const
+
+export type OperationLeaseScalarFieldEnum = (typeof OperationLeaseScalarFieldEnum)[keyof typeof OperationLeaseScalarFieldEnum]
+
+
+export const ScrapeCacheScalarFieldEnum = {
+  key: 'key',
+  payload: 'payload',
+  expiresAt: 'expiresAt'
+} as const
+
+export type ScrapeCacheScalarFieldEnum = (typeof ScrapeCacheScalarFieldEnum)[keyof typeof ScrapeCacheScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -935,6 +1194,15 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
 
@@ -996,6 +1264,20 @@ export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, '
  * Reference to a field of type 'Float[]'
  */
 export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 /**
@@ -1154,6 +1436,9 @@ export type GlobalOmitConfig = {
   product?: Prisma.ProductOmit
   shop?: Prisma.ShopOmit
   review?: Prisma.ReviewOmit
+  abuseBucket?: Prisma.AbuseBucketOmit
+  operationLease?: Prisma.OperationLeaseOmit
+  scrapeCache?: Prisma.ScrapeCacheOmit
 }
 
 /* Types for Logging */

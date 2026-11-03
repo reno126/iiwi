@@ -1,4 +1,7 @@
+import { reservePaidScrape } from "@/lib/abuse/limits";
+
 export interface ZenRowsScrapeOptions {
+  signal?: AbortSignal;
   timeoutMs?: number;
   antibot?: boolean;
   proxyCountry?: string;
@@ -70,6 +73,10 @@ export async function fetchWithZenRows(
     waitFor,
   } = options;
 
+  options.signal?.throwIfAborted();
+  if (!(await reservePaidScrape())) return null;
+  options.signal?.throwIfAborted();
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -102,7 +109,9 @@ export async function fetchWithZenRows(
       headers: {
         "X-API-Key": apiKey,
       },
-      signal: controller.signal,
+      signal: options.signal
+        ? AbortSignal.any([options.signal, controller.signal])
+        : controller.signal,
     });
     const durationMs = Date.now() - startTime;
 

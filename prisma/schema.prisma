@@ -94,3 +94,27 @@ model Review {
   @@index([productId])
   @@index([userId])
 }
+
+model AbuseBucket {
+  key       String   @id
+  used      Int
+  expiresAt DateTime @db.Timestamptz(3)
+
+  @@index([expiresAt])
+}
+
+model OperationLease {
+  key       String   @id
+  token     String
+  expiresAt DateTime @db.Timestamptz(3)
+
+  @@index([expiresAt])
+}
+
+model ScrapeCache {
+  key       String   @id
+  payload   Json
+  expiresAt DateTime @db.Timestamptz(3)
+
+  @@index([expiresAt])
+}

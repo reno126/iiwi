@@ -26,11 +26,15 @@ if (
 }
 
 export const applicationName = `rating-tests-${randomUUID()}`;
-export const database = new PrismaClient({
-  adapter: new PrismaPg({
-    connectionString,
-    application_name: applicationName,
-    max: 10,
-  }),
-});
+export function createTestDatabase() {
+  return new PrismaClient({
+    adapter: new PrismaPg({
+      connectionString,
+      application_name: applicationName,
+      max: 10,
+    }),
+  });
+}
+
+export const database = createTestDatabase();
 export const controlPool = new Pool({ connectionString, max: 2 });
