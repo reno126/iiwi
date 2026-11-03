@@ -7,6 +7,7 @@ vi.mock("@/lib/auth/helper", () => ({
 const { mockTx } = vi.hoisted(() => {
   return {
     mockTx: {
+      $queryRaw: vi.fn(),
       review: {
         create: vi.fn(),
         aggregate: vi.fn(),

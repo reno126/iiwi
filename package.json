@@ -25,6 +25,7 @@
     "test:watch": "vitest",
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",
+    "test:database": "vitest run --config vitest.database.config.ts",
     "test:e2e": "playwright test",
     "test:cleanup": "tsx tests/e2e/helpers/cleanup.ts",
     "ratings:reconstruct": "tsx scripts/reconstructRatings.ts",

@@ -3,6 +3,7 @@
 import { revalidatePath, updateTag } from "next/cache";
 import { safeActionUserCtx } from "@/lib/actions/safeActionUserCtx";
 import { prisma } from "@/lib/db/prisma";
+import { updateProductRating } from "@/lib/reviews/productRatings";
 import {
   productWithReviewCreateSchema,
   productWithReviewCreatedOutputSchema,
@@ -18,8 +19,8 @@ export const productWithReviewCreate = safeActionUserCtx
         parsedInput;
       const { userId } = ctx;
 
-      return await prisma.$transaction(async (tx) => {
-        const product = await tx.product.create({
+      return await prisma.$transaction(async (transaction) => {
+        const product = await transaction.product.create({
           data: {
             name,
             productUrl: productUrl || null,
@@ -32,7 +33,7 @@ export const productWithReviewCreate = safeActionUserCtx
           },
         });
 
-        const review = await tx.review.create({
+        const review = await transaction.review.create({
           data: {
             productId: product.id,
             rate,
@@ -41,25 +42,10 @@ export const productWithReviewCreate = safeActionUserCtx
           },
         });
 
-        const aggregations = await tx.review.aggregate({
-          where: { productId: product.id },
-          _avg: { rate: true },
-          _count: { rate: true },
-        });
-
-        const rate_avg =
-          aggregations._avg.rate !== null
-            ? Number(aggregations._avg.rate.toFixed(2))
-            : 0;
-        const rate_count = aggregations._count.rate;
-
-        const updatedProduct = await tx.product.update({
-          where: { id: product.id },
-          data: {
-            rate_avg,
-            rate_count,
-          },
-        });
+        const updatedProduct = await updateProductRating(
+          transaction,
+          product.id,
+        );
 
         const responsePayload: ProductWithReviewCreatedOutput = {
           product: {

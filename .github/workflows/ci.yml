@@ -112,6 +112,11 @@ jobs:
       - name: Apply database migrations
         run: pnpm prisma:deploy
 
+      - name: Verify concurrent rating updates against PostgreSQL
+        run: pnpm test:database
+        env:
+          DATABASE_TEST_URL: postgresql://ci:ci@127.0.0.1:5432/iiwi_ci
+
       - name: Build production application
         run: pnpm build
 

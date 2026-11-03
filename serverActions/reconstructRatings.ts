@@ -1,5 +1,9 @@
 import { prisma } from "@/lib/db/prisma";
 import {
+  updateProductRating,
+  withProductRatingLock,
+} from "@/lib/reviews/productRatings";
+import {
   reconstructRatingsSchema,
   type ReconstructRatingsInput,
 } from "@/schemas/product";
@@ -60,12 +64,6 @@ export async function reconstructRatings(
     where: targetProductId ? { id: targetProductId } : undefined,
     select: {
       id: true,
-      name: true,
-      reviews: {
-        select: {
-          rate: true,
-        },
-      },
     },
   });
 
@@ -81,41 +79,18 @@ export async function reconstructRatings(
   const updates: ReconstructedProductRating[] = [];
 
   for (const product of products) {
-    const reviewCount = product.reviews.length;
-    const rate_avg =
-      reviewCount > 0
-        ? Number(
-            (
-              product.reviews.reduce(
-                (accumulator, review) => accumulator + review.rate,
-                0,
-              ) / reviewCount
-            ).toFixed(2),
-          )
-        : 0;
-    const rate_count = reviewCount;
+    const updatedProduct = await withProductRatingLock(
+      product.id,
+      (transaction) => updateProductRating(transaction, product.id),
+    );
 
     updates.push({
-      id: product.id,
-      name: product.name,
-      rate_avg,
-      rate_count,
-      reviewCount,
+      id: updatedProduct.id,
+      name: updatedProduct.name,
+      rate_avg: updatedProduct.rate_avg,
+      rate_count: updatedProduct.rate_count,
+      reviewCount: updatedProduct.rate_count,
     });
-  }
-
-  if (updates.length > 0) {
-    await prisma.$transaction(
-      updates.map((item) =>
-        prisma.product.update({
-          where: { id: item.id },
-          data: {
-            rate_avg: item.rate_avg,
-            rate_count: item.rate_count,
-          },
-        }),
-      ),
-    );
   }
 
   return {

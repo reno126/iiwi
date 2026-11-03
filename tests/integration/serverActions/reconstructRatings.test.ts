@@ -1,12 +1,25 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-vi.mock("@/lib/db/prisma", () => ({
-  prisma: {
+const { mockDatabase } = vi.hoisted(() => ({
+  mockDatabase: {
+    $queryRaw: vi.fn(),
     product: {
       findMany: vi.fn(),
-      update: vi.fn((args) => args),
+      update: vi.fn(),
     },
-    $transaction: vi.fn(async (args) => args),
+    review: {
+      aggregate: vi.fn(),
+    },
+  },
+}));
+
+vi.mock("@/lib/db/prisma", () => ({
+  prisma: {
+    ...mockDatabase,
+    $transaction: vi.fn(
+      async (operation: (transaction: typeof mockDatabase) => unknown) =>
+        operation(mockDatabase),
+    ),
   },
 }));
 
@@ -42,18 +55,28 @@ describe("serverActions/reconstructRatings", () => {
       {
         id: "prod-1",
         name: "Produkt z dwoma opiniami",
-        reviews: [{ rate: 5 }, { rate: 4 }],
       },
       {
         id: "prod-2",
         name: "Produkt bez opinii",
-        reviews: [],
       },
     ];
 
-    vi.mocked(prisma.product.findMany).mockResolvedValueOnce(
-      mockProducts as never,
-    );
+    mockDatabase.product.findMany.mockResolvedValueOnce(mockProducts);
+    mockDatabase.review.aggregate
+      .mockResolvedValueOnce({ _avg: { rate: 4.5 }, _count: { rate: 2 } })
+      .mockResolvedValueOnce({ _avg: { rate: null }, _count: { rate: 0 } });
+    mockDatabase.product.update
+      .mockResolvedValueOnce({
+        ...mockProducts[0],
+        rate_avg: 4.5,
+        rate_count: 2,
+      })
+      .mockResolvedValueOnce({
+        ...mockProducts[1],
+        rate_avg: 0,
+        rate_count: 0,
+      });
 
     const result = await reconstructRatings();
 
@@ -75,7 +98,11 @@ describe("serverActions/reconstructRatings", () => {
         reviewCount: 0,
       },
     ]);
-    expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+    expect(prisma.$transaction).toHaveBeenCalledTimes(2);
+    expect(mockDatabase.product.update).toHaveBeenCalledWith({
+      where: { id: "prod-2" },
+      data: { rate_avg: 0, rate_count: 0 },
+    });
   });
 
   it("reconstructs ratings for a single product when productId string is passed", async () => {
@@ -83,13 +110,19 @@ describe("serverActions/reconstructRatings", () => {
       {
         id: "prod-1",
         name: "Produkt Testowy",
-        reviews: [{ rate: 4 }, { rate: 5 }, { rate: 5 }],
       },
     ];
 
-    vi.mocked(prisma.product.findMany).mockResolvedValueOnce(
-      mockProducts as never,
-    );
+    mockDatabase.product.findMany.mockResolvedValueOnce(mockProducts);
+    mockDatabase.review.aggregate.mockResolvedValueOnce({
+      _avg: { rate: 14 / 3 },
+      _count: { rate: 3 },
+    });
+    mockDatabase.product.update.mockResolvedValueOnce({
+      ...mockProducts[0],
+      rate_avg: 4.67,
+      rate_count: 3,
+    });
 
     const result = await reconstructRatings("prod-1");
 
@@ -97,18 +130,16 @@ describe("serverActions/reconstructRatings", () => {
       where: { id: "prod-1" },
       select: {
         id: true,
-        name: true,
-        reviews: {
-          select: {
-            rate: true,
-          },
-        },
       },
     });
 
     expect(result.success).toBe(true);
     expect(result.updatedCount).toBe(1);
     expect(result.products[0]?.rate_avg).toBe(4.67);
+    expect(mockDatabase.product.update).toHaveBeenCalledWith({
+      where: { id: "prod-1" },
+      data: { rate_avg: 4.67, rate_count: 3 },
+    });
   });
 
   it("reconstructs ratings when an object with productId is passed", async () => {
@@ -116,13 +147,19 @@ describe("serverActions/reconstructRatings", () => {
       {
         id: "prod-1",
         name: "Produkt Obiekt",
-        reviews: [{ rate: 3 }],
       },
     ];
 
-    vi.mocked(prisma.product.findMany).mockResolvedValueOnce(
-      mockProducts as never,
-    );
+    mockDatabase.product.findMany.mockResolvedValueOnce(mockProducts);
+    mockDatabase.review.aggregate.mockResolvedValueOnce({
+      _avg: { rate: 3 },
+      _count: { rate: 1 },
+    });
+    mockDatabase.product.update.mockResolvedValueOnce({
+      ...mockProducts[0],
+      rate_avg: 3,
+      rate_count: 1,
+    });
 
     const result = await reconstructRatings({ productId: "prod-1" });
 
