@@ -20,6 +20,7 @@ import { POST } from "@/app/api/register/route";
 import { REGISTER_API_MESSAGES } from "@/schemas/register";
 import { enforceRequestLimits, enforceAccountLimit } from "@/lib/abuse/limits";
 import { AbuseLimitError, ABUSE_MESSAGES } from "@/lib/abuse/errors";
+import { Prisma } from "@/prisma/generated/client";
 
 interface MockAccount {
   id: string;
@@ -52,6 +53,101 @@ describe("app/api/register POST route handler", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
+
+  it.each(["", "{", '{"email":'])(
+    "returns 400 for malformed JSON without accessing accounts or hashing",
+    async (body) => {
+      const hashPassword = vi.spyOn(bcrypt, "hash");
+      const response = await POST(
+        new Request("http://localhost/api/register", {
+          method: "POST",
+          body,
+        }),
+      );
+
+      expect(response.status).toBe(400);
+      expect(await response.json()).toEqual({
+        error: REGISTER_API_MESSAGES.invalidData,
+      });
+      expect(enforceAccountLimit).not.toHaveBeenCalled();
+      expect(prisma.user.findUnique).not.toHaveBeenCalled();
+      expect(prisma.user.create).not.toHaveBeenCalled();
+      expect(hashPassword).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
+    { name: "A".repeat(101) },
+    {
+      email: `${"a".repeat(64)}@${"b".repeat(63)}.${"c".repeat(63)}.${"d".repeat(62)}`,
+    },
+    { password: "a".repeat(73) },
+    { password: "ą".repeat(37) },
+  ])(
+    "rejects oversized fields before hashing or database access",
+    async (fields) => {
+      const hashPassword = vi.spyOn(bcrypt, "hash");
+      const response = await POST(
+        new Request("http://localhost/api/register", {
+          method: "POST",
+          body: JSON.stringify({
+            name: "Test User",
+            email: "test@example.com",
+            password: "password123",
+            ...fields,
+          }),
+        }),
+      );
+
+      expect(response.status).toBe(400);
+      expect(hashPassword).not.toHaveBeenCalled();
+      expect(prisma.user.findUnique).not.toHaveBeenCalled();
+      expect(prisma.user.create).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
+    {
+      error: new Prisma.PrismaClientKnownRequestError(
+        "Private database constraint details",
+        { code: "P2002", clientVersion: "7.10.0" },
+      ),
+      status: 409,
+      message: REGISTER_API_MESSAGES.emailTaken,
+    },
+    {
+      error: new Prisma.PrismaClientKnownRequestError(
+        "Private database table details",
+        { code: "P2021", clientVersion: "7.10.0" },
+      ),
+      status: 503,
+      message: ABUSE_MESSAGES.unavailable,
+    },
+    {
+      error: new Error("Private connection details"),
+      status: 503,
+      message: ABUSE_MESSAGES.unavailable,
+    },
+  ])(
+    "maps create failure to $status without leaking database details",
+    async ({ error, status, message }) => {
+      vi.mocked(prisma.user.findUnique).mockResolvedValueOnce(null);
+      vi.mocked(prisma.user.create).mockRejectedValueOnce(error);
+      const response = await POST(
+        new Request("http://localhost/api/register", {
+          method: "POST",
+          body: JSON.stringify({
+            name: "Test User",
+            email: "race@example.com",
+            password: "password123",
+          }),
+        }),
+      );
+
+      expect(response.status).toBe(status);
+      expect(await response.json()).toEqual({ error: message });
+    },
+  );
 
   it.each([enforceRequestLimits, enforceAccountLimit])(
     "rejects exhausted limits before password hashing",
@@ -212,8 +308,8 @@ describe("app/api/register POST route handler", () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        name: "Nowy Użytkownik",
-        email: "nowy@example.com",
+        name: "  Nowy Użytkownik  ",
+        email: "  nowy@example.com  ",
         password: "tajneHaslo123",
       }),
     });
@@ -225,6 +321,14 @@ describe("app/api/register POST route handler", () => {
     expect(json).toEqual({ success: REGISTER_API_MESSAGES.userCreated });
 
     expect(hashSpy).toHaveBeenCalledWith("tajneHaslo123", 12);
+    expect(enforceAccountLimit).toHaveBeenCalledWith(
+      "register",
+      "nowy@example.com",
+    );
+    expect(prisma.user.findUnique).toHaveBeenCalledWith({
+      where: { email: "nowy@example.com" },
+      include: { accounts: true },
+    });
 
     expect(prisma.user.create).toHaveBeenCalledWith({
       data: {

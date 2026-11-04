@@ -62,6 +62,21 @@ describe("lib/auth/authOptions", () => {
   };
 
   describe("Credentials authorize", () => {
+    it("trims email before account limits and lookup while preserving existing case", async () => {
+      vi.mocked(prisma.user.findUnique).mockResolvedValueOnce(null);
+      await getAuthorizeFn()({
+        email: "  Mixed.Case@Example.com  ",
+        password: "password123",
+      });
+      expect(enforceAccountLimit).toHaveBeenCalledWith(
+        "login",
+        "Mixed.Case@Example.com",
+      );
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+        where: { email: "Mixed.Case@Example.com" },
+      });
+    });
+
     it.each([enforceRequestLimits, enforceAccountLimit])(
       "rejects exhausted limits before password comparison",
       async (limitCheck) => {

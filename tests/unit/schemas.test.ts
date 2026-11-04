@@ -10,6 +10,75 @@ import {
 import { shopSchema, shopCreateSchema, SHOP_ERRORS } from "@/schemas/shop";
 
 describe("schemas/register", () => {
+  it.each([
+    { finalLabelLength: 61, accepted: true },
+    { finalLabelLength: 62, accepted: false },
+  ])(
+    "enforces the 254-character email limit in registration and login",
+    ({ finalLabelLength, accepted }) => {
+      const credentials = {
+        email: `${"a".repeat(64)}@${"b".repeat(63)}.${"c".repeat(63)}.${"d".repeat(finalLabelLength)}`,
+        password: "password123",
+      };
+      expect(
+        registerSchema.safeParse({ name: "Test User", ...credentials }).success,
+      ).toBe(accepted);
+      expect(loginSchema.safeParse(credentials).success).toBe(accepted);
+    },
+  );
+
+  it.each(["a".repeat(72), "ą".repeat(36), "🔒".repeat(18)])(
+    "accepts passwords at the bcrypt byte limit",
+    (password) => {
+      expect(
+        registerSchema.safeParse({
+          name: "A".repeat(100),
+          email: "test@example.com",
+          password,
+        }).success,
+      ).toBe(true);
+    },
+  );
+
+  it.each(["a".repeat(73), "ą".repeat(37), "🔒".repeat(19)])(
+    "rejects passwords beyond the bcrypt byte limit",
+    (password) => {
+      const result = registerSchema.safeParse({
+        name: "Test User",
+        email: "test@example.com",
+        password,
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.flatten().fieldErrors.password).toContain(
+          REGISTER_ERRORS.passwordMaxLength,
+        );
+      }
+    },
+  );
+
+  it("normalizes registration and login emails consistently while preserving case and passwords", () => {
+    const credentials = {
+      email: "  Mixed.Case@Example.com  ",
+      password: " password123 ",
+    };
+    const registration = registerSchema.parse({
+      name: " Test User ",
+      ...credentials,
+    });
+    const login = loginSchema.parse(credentials);
+
+    expect(registration).toEqual({
+      name: "Test User",
+      email: "Mixed.Case@Example.com",
+      password: credentials.password,
+    });
+    expect(login).toEqual({
+      email: registration.email,
+      password: registration.password,
+    });
+  });
+
   it("validates correct registration data", () => {
     const validData = {
       name: "Jan Kowalski",

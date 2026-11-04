@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { enforceRequestLimits, enforceAccountLimit } from "@/lib/abuse/limits";
 import { AbuseLimitError, ABUSE_MESSAGES } from "@/lib/abuse/errors";
+import { Prisma } from "@/prisma/generated/client";
 
 export async function POST(request: Request) {
   try {
@@ -28,7 +29,16 @@ export async function POST(request: Request) {
 }
 
 async function registerUser(request: Request) {
-  const body = await request.json();
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch (error) {
+    if (!(error instanceof SyntaxError)) throw error;
+    return NextResponse.json(
+      { error: REGISTER_API_MESSAGES.invalidData },
+      { status: 400 },
+    );
+  }
   const validated = registerSchema.safeParse(body);
 
   if (!validated.success) {
@@ -69,13 +79,26 @@ async function registerUser(request: Request) {
 
   const hashedPassword = await bcrypt.hash(password, 12);
 
-  await prisma.user.create({
-    data: {
-      email,
-      name,
-      password: hashedPassword,
-    },
-  });
+  try {
+    await prisma.user.create({
+      data: {
+        email,
+        name,
+        password: hashedPassword,
+      },
+    });
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return NextResponse.json(
+        { error: REGISTER_API_MESSAGES.emailTaken },
+        { status: 409 },
+      );
+    }
+    throw error;
+  }
 
   return NextResponse.json(
     { success: REGISTER_API_MESSAGES.userCreated },

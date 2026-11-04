@@ -1,14 +1,13 @@
 import z from "zod";
+import { authEmailSchema, AUTH_EMAIL_ERRORS } from "@/schemas/authEmail";
 
 export const LOGIN_ERRORS = {
-  invalidEmail: "Podaj prawidłowy adres e-mail",
+  invalidEmail: AUTH_EMAIL_ERRORS.invalidEmail,
   passwordRequired: "Wprowadź hasło",
 } as const;
 
 export const loginSchema = z.object({
-  email: z.email({
-    message: LOGIN_ERRORS.invalidEmail,
-  }),
+  email: authEmailSchema,
   password: z.string().min(1, {
     message: LOGIN_ERRORS.passwordRequired,
   }),

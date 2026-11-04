@@ -1,14 +1,9 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { signIn } from "next-auth/react";
 import { CircleAlert } from "lucide-react";
 
-import { registerSchema, type RegisterInput } from "@/schemas/register";
-import { resolveAuthRedirectUrl } from "@/lib/auth/resolveAuthRedirectUrl";
+import { useRegisterForm } from "./useRegisterForm";
 import { AuthCard } from "@/components/auth/AuthCard";
 import {
   Field,
@@ -30,64 +25,12 @@ interface RegisterProps {
 }
 
 export function Register({ className }: RegisterProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl");
-
-  const loginHref =
-    callbackUrl && callbackUrl !== "/dashboard"
-      ? `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
-      : "/login";
-
+  const { form, onSubmit, loginHref } = useRegisterForm();
   const {
     register,
     handleSubmit,
-    setError,
-    clearErrors,
     formState: { errors, isSubmitting },
-  } = useForm<RegisterInput>({
-    resolver: zodResolver(registerSchema),
-    mode: "onTouched",
-    defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-    },
-  });
-
-  const onSubmit = async (data: RegisterInput) => {
-    clearErrors("root");
-
-    const response = await fetch("/api/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const resData = await response.json().catch(() => ({}));
-      setError("root", {
-        message: resData.error || REGISTER_MESSAGES.defaultError,
-      });
-      return;
-    }
-
-    const result = await signIn("credentials", {
-      email: data.email,
-      password: data.password,
-      redirect: false,
-    });
-
-    if (result?.ok) {
-      const targetUrl = resolveAuthRedirectUrl(callbackUrl);
-      router.push(targetUrl);
-      router.refresh();
-    } else {
-      router.push(loginHref);
-    }
-  };
+  } = form;
 
   return (
     <AuthCard

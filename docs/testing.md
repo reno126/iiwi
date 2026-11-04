@@ -24,11 +24,13 @@
 - Isolate stateful hooks using `renderHook` from `@testing-library/react`.
 - Use fake timers (`vi.useFakeTimers()`) to verify delay thresholds and timer cleanups.
 
-## 5. PostgreSQL Rating Regression Tests
+## 5. PostgreSQL Regression Tests
 
 Run `pnpm test:database` with `DATABASE_TEST_URL` explicitly set to a disposable local PostgreSQL database named `iiwi_ratings_test` or `iiwi_ci`. Apply the existing Prisma migrations to that database first, using the same URL as `DATABASE_URL` for `pnpm prisma:deploy`. This suite does not fall back to the application's database configuration. Fixtures use unique IDs and cleanup deletes only the user created by each test, cascading to its test products and reviews.
 
 The suite calls the real review actions with authentication and cache invalidation mocked. PostgreSQL row locks synchronize concurrent submissions and repairs; assertions compare stored totals with database `COUNT`/`AVG`. CI runs it against its disposable PostgreSQL service before the production build.
+
+Registration tests call the real route and synchronize two completed email lookups before either request can create an account. Both requests use PostgreSQL and real bcrypt hashing, while abuse limits are mocked. Assert one 201, one 409, and exactly one account, then delete only the fixture's unique generated email.
 
 Every mutation of reviews for an existing product, including future edits and deletions, must use `withProductRatingLock` before changing reviews and `updateProductRating` before committing. The wrapper explicitly uses Read Committed isolation so aggregation after acquiring the lock sees the preceding writer's committed reviews. A newly created product is already isolated by its creating transaction. Rating reconstruction locks and commits one product at a time; a later failure leaves earlier products repaired, and rerunning the command is safe.
 

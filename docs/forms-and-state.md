@@ -25,3 +25,10 @@
 - Split schemas into dedicated domain files in `schemas/` (e.g. `schemas/product.ts`, `schemas/review.ts`). Monolithic schema files are forbidden.
 - Schema constants (values): always use `camelCase` ending with `Schema` (e.g. `productCreateSchema`, `reviewCreateSchema`).
 - Inferred types: always use `PascalCase` ending with `Input` (e.g. `ProductCreateInput`, `ReviewCreateInput`).
+
+## 5. Registration and Credentials
+
+- Registration, the login form, and server-side credentials authentication share `authEmailSchema`: trim surrounding whitespace, preserve case, and limit email addresses to 254 characters. Email identity remains case-sensitive to match existing stored accounts and the database unique constraint. Do not lowercase addresses without a separate migration and collision policy covering existing credentials and OAuth accounts.
+- Registration trims names and accepts 2–100 characters. Passwords remain unchanged and require at least 6 characters and at most 72 UTF-8 bytes, matching bcrypt's input limit. Login retains compatibility with existing passwords.
+- Malformed JSON and invalid fields return 400. Existing emails and database uniqueness conflicts return 409. Unexpected failures are logged server-side and return a generic error without exception details.
+- Registration transport failures appear as root form errors and allow retry. Once account creation succeeds, failed automatic login redirects to the login page with the callback URL preserved.

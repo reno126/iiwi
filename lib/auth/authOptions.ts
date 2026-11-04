@@ -7,6 +7,7 @@ import { prisma } from "@/lib/db/prisma";
 import { AUTH_ERRORS } from "@/lib/auth/constants";
 import { enforceRequestLimits, enforceAccountLimit } from "@/lib/abuse/limits";
 import { AbuseLimitError } from "@/lib/abuse/errors";
+import { loginSchema } from "@/schemas/login";
 
 export { AUTH_ERRORS };
 
@@ -46,17 +47,11 @@ export const authOptions = {
         password: { type: "password" },
       },
       async authorize(credentials, request) {
-        const email = credentials?.email;
-        const password = credentials?.password;
-
-        if (
-          !email ||
-          !password ||
-          typeof email !== "string" ||
-          typeof password !== "string"
-        ) {
+        const validatedCredentials = loginSchema.safeParse(credentials);
+        if (!validatedCredentials.success) {
           return null;
         }
+        const { email, password } = validatedCredentials.data;
 
         try {
           await enforceRequestLimits("login", new Headers(request?.headers));

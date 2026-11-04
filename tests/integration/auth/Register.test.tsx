@@ -82,6 +82,91 @@ describe("app/register/_components/Register", () => {
     mockSearchParams = new URLSearchParams();
   });
 
+  it("shows a root error after a network failure and allows a successful retry", async () => {
+    server.use(http.post("*/api/register", () => HttpResponse.error()));
+    render(<Register />);
+    const driver = createRegisterDriver();
+    await driver.fillForm({
+      name: "Test User",
+      email: "test@example.com",
+      password: "password123",
+    });
+    await driver.submit();
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      REGISTER_MESSAGES.defaultError,
+    );
+    expect(driver.submitButton()).toBeEnabled();
+    expect(driver.emailInput()).toHaveValue("test@example.com");
+    expect(signIn).not.toHaveBeenCalled();
+    expect(mockPush).not.toHaveBeenCalled();
+
+    server.use(
+      http.post("*/api/register", () =>
+        HttpResponse.json({ success: true }, { status: 201 }),
+      ),
+    );
+    vi.mocked(signIn).mockResolvedValueOnce({
+      error: null,
+      status: 200,
+      ok: true,
+      url: "/dashboard",
+    });
+    await driver.submit();
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/dashboard"));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it.each([
+    () => new HttpResponse("Not JSON", { status: 502 }),
+    () =>
+      HttpResponse.json(
+        { error: { privateDetail: "untrusted payload" } },
+        { status: 500 },
+      ),
+  ])(
+    "shows a fallback alert for an invalid API error response",
+    async (createResponse) => {
+      server.use(http.post("*/api/register", createResponse));
+      render(<Register />);
+      const driver = createRegisterDriver();
+      await driver.fillForm({
+        name: "Test User",
+        email: "test@example.com",
+        password: "password123",
+      });
+      await driver.submit();
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        REGISTER_MESSAGES.defaultError,
+      );
+      expect(driver.submitButton()).toBeEnabled();
+      expect(signIn).not.toHaveBeenCalled();
+    },
+  );
+
+  it("preserves callbackUrl when automatic login rejects after creating the account", async () => {
+    mockSearchParams = new URLSearchParams("callbackUrl=/opinie/dodaj");
+    vi.mocked(signIn).mockRejectedValueOnce(
+      new TypeError("Network unavailable"),
+    );
+    render(<Register />);
+    const driver = createRegisterDriver();
+    await driver.fillForm({
+      name: "Test User",
+      email: "test@example.com",
+      password: "password123",
+    });
+    await driver.submit();
+
+    await waitFor(() =>
+      expect(mockPush).toHaveBeenCalledWith(
+        "/login?callbackUrl=%2Fopinie%2Fdodaj",
+      ),
+    );
+    expect(mockRefresh).not.toHaveBeenCalled();
+  });
+
   it("renders registration form fields and submit button", () => {
     render(<Register />);
     const driver = createRegisterDriver();
