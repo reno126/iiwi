@@ -176,6 +176,8 @@ ZENROWS_API_KEY=""
 
 ### 4. Initialize Database
 
+For local Docker PostgreSQL, set `POSTGRES_PASSWORD`, `POSTGRES_BIND_ADDRESS`, and `POSTGRES_PORT` in your untracked `.env.local`, then run `docker compose --env-file .env.local up --build -d db`. The password is required; the binding address and port default to `127.0.0.1:5432`. Set `DATABASE_URL` to the matching credentials and address. Changing the environment password does not update an existing database role's password; rotate previously exposed credentials through PostgreSQL as well.
+
 ```bash
 # Generate Prisma Client
 pnpm prisma:generate

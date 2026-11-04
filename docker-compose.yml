@@ -9,9 +9,9 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-iiwii}
       POSTGRES_USER: ${POSTGRES_USER:-pg}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-k9Qz8Vm2XpLw5TnR4YhE7CsB1DaF3G6j}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD to a unique database password}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${POSTGRES_BIND_ADDRESS:-127.0.0.1}:${POSTGRES_PORT:-5432}:5432"
     volumes:
       - iiwii_pgdata:/var/lib/postgresql/data
 
