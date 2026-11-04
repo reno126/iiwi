@@ -7,6 +7,7 @@ import {
 } from "@/lib/scraper/fetchScrapePage";
 import type { ScrapedMetadataResult } from "@/schemas/productScrape";
 import { withScrapeCache } from "@/lib/scraper/scrapeCache";
+import { ScrapeResponseError } from "@/lib/scraper/readScrapeHtml";
 
 const BROWSER_HEADERS = {
   "User-Agent":
@@ -102,7 +103,9 @@ async function fetchDirectTier1(
     );
     return {
       html: null,
-      shouldTryTier2: !(error instanceof ScrapeSecurityError),
+      shouldTryTier2:
+        !(error instanceof ScrapeSecurityError) &&
+        !(error instanceof ScrapeResponseError),
     };
   }
 }

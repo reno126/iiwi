@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { fetchWithZenRows } from "@/lib/scraper/zenrowsClient";
 import { reservePaidScrape } from "@/lib/abuse/limits";
+import { MAX_SCRAPE_HTML_BYTES } from "@/lib/scraper/readScrapeHtml";
+
+vi.mock("fs", () => ({ existsSync: () => true, writeFileSync: vi.fn() }));
 
 vi.mock("@/lib/abuse/limits", () => ({
   reservePaidScrape: vi.fn().mockResolvedValue(true),
@@ -16,6 +19,7 @@ describe("lib/scraper/zenrowsClient", () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     process.env = originalEnv;
     globalThis.fetch = originalFetch;
   });
@@ -69,19 +73,11 @@ describe("lib/scraper/zenrowsClient", () => {
 
     const mockHtml =
       "<html><head><title>Produkt Testowy</title></head><body>Treść</body></html>";
-    const fetchMock = vi.fn().mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      statusText: "OK",
-      headers: {
-        get: vi.fn((header: string) => {
-          if (header === "zr-status") return "200";
-          if (header === "content-type") return "text/html";
-          return null;
-        }),
-      },
-      text: async () => mockHtml,
-    });
+    const fetchMock = vi.fn().mockResolvedValueOnce(
+      new Response(mockHtml, {
+        headers: { "content-type": "text/html", "zr-status": "200" },
+      }),
+    );
     globalThis.fetch = fetchMock;
 
     const result = await fetchWithZenRows("https://sklep.pl/p/1");
@@ -110,12 +106,11 @@ describe("lib/scraper/zenrowsClient", () => {
   it("passes custom options (antibot, proxyCountry, waitMs, waitFor) to the URL", async () => {
     process.env.ZENROWS_API_KEY = "test-key";
 
-    const fetchMock = vi.fn().mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      headers: { get: () => null },
-      text: async () => "<html></html>",
-    });
+    const fetchMock = vi.fn().mockResolvedValueOnce(
+      new Response("<html></html>", {
+        headers: { "content-type": "text/html" },
+      }),
+    );
     globalThis.fetch = fetchMock;
 
     await fetchWithZenRows("https://sklep.pl/p/2", {
@@ -137,18 +132,88 @@ describe("lib/scraper/zenrowsClient", () => {
   it("returns null when API returns an HTTP error status", async () => {
     process.env.ZENROWS_API_KEY = "test-key";
 
-    const fetchMock = vi.fn().mockResolvedValueOnce({
-      ok: false,
-      status: 403,
-      statusText: "Forbidden",
-      headers: { get: () => null },
-    });
+    const cancel = vi.fn();
+    const body = new ReadableStream<Uint8Array>({ cancel });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(body, { status: 403 }));
     globalThis.fetch = fetchMock;
 
     const result = await fetchWithZenRows("https://protected-shop.com");
 
     expect(result).toBeNull();
+    expect(cancel).toHaveBeenCalledOnce();
   });
+
+  it.each(["application/json", "image/png", ""])(
+    "cancels unsupported response bodies: %s",
+    async (contentType) => {
+      process.env.ZENROWS_API_KEY = "test-key";
+      const cancel = vi.fn();
+      globalThis.fetch = vi.fn().mockResolvedValueOnce(
+        new Response(new ReadableStream<Uint8Array>({ cancel }), {
+          headers: contentType ? { "content-type": contentType } : {},
+        }),
+      );
+
+      expect(await fetchWithZenRows("https://shop.pl/item")).toBeNull();
+      expect(cancel).toHaveBeenCalledOnce();
+    },
+  );
+
+  it("cancels oversized streaming HTML even with an understated content length", async () => {
+    process.env.ZENROWS_API_KEY = "test-key";
+    const cancel = vi.fn();
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new Uint8Array(MAX_SCRAPE_HTML_BYTES));
+        controller.enqueue(new Uint8Array(1));
+      },
+      cancel,
+    });
+    globalThis.fetch = vi.fn().mockResolvedValueOnce(
+      new Response(body, {
+        headers: { "content-type": "text/html", "content-length": "1" },
+      }),
+    );
+
+    expect(await fetchWithZenRows("https://shop.pl/item")).toBeNull();
+    expect(cancel).toHaveBeenCalledOnce();
+  });
+
+  it.each(["timeout", "parent cancellation"])(
+    "cancels a body stalled after headers on %s",
+    async (abortSource) => {
+      vi.useFakeTimers();
+      process.env.ZENROWS_API_KEY = "test-key";
+      const controller = new AbortController();
+      const cancel = vi.fn();
+      const body = new ReadableStream<Uint8Array>({
+        start(streamController) {
+          streamController.enqueue(new TextEncoder().encode("<html>"));
+        },
+        cancel,
+      });
+      globalThis.fetch = vi
+        .fn()
+        .mockResolvedValueOnce(
+          new Response(body, { headers: { "content-type": "text/html" } }),
+        );
+
+      const result = fetchWithZenRows("https://shop.pl/item", {
+        timeoutMs: 100,
+        signal: controller.signal,
+      });
+      await vi.advanceTimersByTimeAsync(99);
+      expect(cancel).not.toHaveBeenCalled();
+      if (abortSource === "timeout") await vi.advanceTimersByTimeAsync(1);
+      else controller.abort();
+
+      expect(await result).toBeNull();
+      expect(cancel).toHaveBeenCalledOnce();
+      expect(vi.getTimerCount()).toBe(0);
+    },
+  );
 
   it("handles AbortError timeout gracefully and returns null", async () => {
     process.env.ZENROWS_API_KEY = "test-key";

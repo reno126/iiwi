@@ -54,6 +54,7 @@ import { productScrapeMetadata } from "@/serverActions/productScrapeMetadata";
 import { PRODUCT_SCRAPE_MESSAGES } from "@/schemas/productScrape";
 import { enforceRequestLimits, enforceScrapeQuota } from "@/lib/abuse/limits";
 import { AbuseLimitError, ABUSE_MESSAGES } from "@/lib/abuse/errors";
+import { ScrapeResponseError } from "@/lib/scraper/readScrapeHtml";
 
 describe("serverActions/productScrapeMetadata", () => {
   const originalEnv = process.env;
@@ -306,6 +307,7 @@ describe("serverActions/productScrapeMetadata", () => {
       .mockResolvedValueOnce(
         new Response("<html><body><div>Pusto</div></body></html>", {
           status: 200,
+          headers: { "Content-Type": "text/html" },
         }),
       );
 
@@ -330,17 +332,23 @@ describe("serverActions/productScrapeMetadata", () => {
     expect(result?.serverError).toBe(SSRF_ERRORS.dnsRebindingPrivateIp);
   });
 
-  it("does not invoke the paid provider after a transport security rejection", async () => {
-    vi.mocked(fetchScrapePage).mockRejectedValueOnce(
-      new ScrapeSecurityError("Unsafe destination"),
-    );
-    const fetchSpy = vi.spyOn(globalThis, "fetch");
+  it.each([
+    new ScrapeSecurityError("Unsafe destination"),
+    new ScrapeResponseError("Response rejected"),
+  ])(
+    "does not invoke the paid provider after a transport rejection: %s",
+    async (error) => {
+      vi.mocked(fetchScrapePage).mockRejectedValueOnce(error);
+      const fetchSpy = vi.spyOn(globalThis, "fetch");
 
-    const result = await productScrapeMetadata({
-      productUrl: "https://shop.pl/redirect",
-    });
+      const result = await productScrapeMetadata({
+        productUrl: "https://shop.pl/redirect",
+      });
 
-    expect(result?.serverError).toBe(PRODUCT_SCRAPE_MESSAGES.scrapeFailedError);
-    expect(fetchSpy).not.toHaveBeenCalled();
-  });
+      expect(result?.serverError).toBe(
+        PRODUCT_SCRAPE_MESSAGES.scrapeFailedError,
+      );
+      expect(fetchSpy).not.toHaveBeenCalled();
+    },
+  );
 });

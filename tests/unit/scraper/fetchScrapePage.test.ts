@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { EventEmitter } from "node:events";
 import { IncomingMessage } from "node:http";
 import { Socket } from "node:net";
@@ -21,6 +21,12 @@ import {
   fetchScrapePage,
   ScrapeSecurityError,
 } from "@/lib/scraper/fetchScrapePage";
+import {
+  MAX_SCRAPE_HTML_BYTES,
+  ScrapeResponseError,
+} from "@/lib/scraper/readScrapeHtml";
+
+afterEach(() => vi.useRealTimers());
 
 beforeEach(() => {
   lookup
@@ -38,6 +44,7 @@ function respondWith(status: number, html = "", location?: string) {
     ) => {
       const response = new IncomingMessage(new Socket());
       response.statusCode = status;
+      response.headers["content-type"] = "text/html";
       if (location) response.headers.location = location;
       queueMicrotask(() => {
         onResponse(response);
@@ -52,6 +59,65 @@ function respondWith(status: number, html = "", location?: string) {
 }
 
 describe("scraper HTTPS transport", () => {
+  it("cancels a stalled body when the five-second deadline expires", async () => {
+    vi.useFakeTimers();
+    const response = new IncomingMessage(new Socket());
+    response.statusCode = 200;
+    response.headers["content-type"] = "text/html";
+    get.mockImplementation((targetUrl, options, onResponse) => {
+      onResponse(response);
+      response.push(Buffer.from("<html>"));
+      return new EventEmitter();
+    });
+
+    const result = fetchScrapePage("https://shop.example/item", {});
+    const assertion = expect(result).rejects.toMatchObject({
+      name: "AbortError",
+    });
+    await vi.advanceTimersByTimeAsync(4999);
+    expect(response.destroyed).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    await assertion;
+    expect(response.destroyed).toBe(true);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it.each(["application/json", "image/png", undefined])(
+    "cancels responses with an unsupported content type: %s",
+    async (contentType) => {
+      const response = new IncomingMessage(new Socket());
+      response.statusCode = 200;
+      response.headers["content-type"] = contentType;
+      get.mockImplementation((targetUrl, options, onResponse) => {
+        onResponse(response);
+        return new EventEmitter();
+      });
+
+      await expect(
+        fetchScrapePage("https://shop.example/item", {}),
+      ).rejects.toBeInstanceOf(ScrapeResponseError);
+      expect(response.destroyed).toBe(true);
+    },
+  );
+
+  it("cancels a streamed response exceeding the byte limit", async () => {
+    const response = new IncomingMessage(new Socket());
+    response.statusCode = 200;
+    response.headers["content-type"] = "text/html";
+    response.headers["content-length"] = "10";
+    get.mockImplementation((targetUrl, options, onResponse) => {
+      onResponse(response);
+      response.push(Buffer.alloc(MAX_SCRAPE_HTML_BYTES));
+      response.push(Buffer.from("x"));
+      return new EventEmitter();
+    });
+
+    await expect(
+      fetchScrapePage("https://shop.example/item", {}),
+    ).rejects.toBeInstanceOf(ScrapeResponseError);
+    expect(response.destroyed).toBe(true);
+  });
+
   it("pins the validated DNS result while preserving the TLS hostname", async () => {
     respondWith(200, "<h1>Product</h1>");
     lookup.mockResolvedValueOnce([{ address: "93.184.216.34", family: 4 }]);

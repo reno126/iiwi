@@ -1,4 +1,5 @@
 import { reservePaidScrape } from "@/lib/abuse/limits";
+import { readScrapeHtml } from "@/lib/scraper/readScrapeHtml";
 
 export interface ZenRowsScrapeOptions {
   signal?: AbortSignal;
@@ -79,6 +80,9 @@ export async function fetchWithZenRows(
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const signal = options.signal
+    ? AbortSignal.any([options.signal, controller.signal])
+    : controller.signal;
 
   try {
     const zenrowsEndpoint = new URL("https://api.zenrows.com/v1/");
@@ -109,9 +113,7 @@ export async function fetchWithZenRows(
       headers: {
         "X-API-Key": apiKey,
       },
-      signal: options.signal
-        ? AbortSignal.any([options.signal, controller.signal])
-        : controller.signal,
+      signal,
     });
     const durationMs = Date.now() - startTime;
 
@@ -124,13 +126,14 @@ export async function fetchWithZenRows(
     );
 
     if (!response.ok) {
+      void response.body?.cancel().catch(() => undefined);
       console.warn(
         `[ZenRows] API error: HTTP ${response.status} (${response.statusText}) for ${targetUrl}`,
       );
       return null;
     }
 
-    const html = await response.text();
+    const html = await readScrapeHtml(response.body, contentType, signal);
     const pageTitle = extractPageTitle(html);
 
     if (isBotChallengeDetected(html)) {
@@ -146,13 +149,13 @@ export async function fetchWithZenRows(
     await saveDebugHtmlSnapshotIfDevelopment(html, targetUrl);
 
     return html;
-  } catch (err: unknown) {
-    if (err instanceof Error && err.name === "AbortError") {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.name === "AbortError") {
       console.warn(
         `[ZenRows] Request timed out after ${timeoutMs}ms for ${targetUrl}`,
       );
     } else {
-      console.warn("[ZenRows] Request failed:", err);
+      console.warn("[ZenRows] Request failed:", error);
     }
     return null;
   } finally {
