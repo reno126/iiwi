@@ -13,6 +13,7 @@ export interface UserDashboardProductItem {
 }
 
 export interface UserDashboardShopItem {
+  shopId: string | null;
   shopName: string;
   reviewCount: number;
 }
@@ -28,51 +29,6 @@ export interface UserDashboardData {
   reviewedShops: UserDashboardShopItem[];
 }
 
-interface ProductAccumulator {
-  productId: string;
-  productName: string;
-  rates: number[];
-}
-
-function aggregateProductReviews(
-  reviews: Array<{
-    id: string;
-    rate: number;
-    product: {
-      id: string;
-      name: string;
-    };
-  }>,
-): UserDashboardProductItem[] {
-  const productsMap = new Map<string, ProductAccumulator>();
-
-  for (const review of reviews) {
-    const existing = productsMap.get(review.product.id);
-    if (existing) {
-      existing.rates.push(review.rate);
-    } else {
-      productsMap.set(review.product.id, {
-        productId: review.product.id,
-        productName: review.product.name,
-        rates: [review.rate],
-      });
-    }
-  }
-
-  return Array.from(productsMap.values()).map((entry) => {
-    const totalRate = entry.rates.reduce((sum, rate) => sum + rate, 0);
-    const averageRate = totalRate / entry.rates.length;
-    const roundedRate = Math.round(averageRate * 10) / 10;
-
-    return {
-      productId: entry.productId,
-      productName: entry.productName,
-      rate: roundedRate,
-      userReviewsCount: entry.rates.length,
-    };
-  });
-}
-
 function compareShopEntries(
   firstShop: UserDashboardShopItem,
   secondShop: UserDashboardShopItem,
@@ -80,7 +36,10 @@ function compareShopEntries(
   if (secondShop.reviewCount !== firstShop.reviewCount) {
     return secondShop.reviewCount - firstShop.reviewCount;
   }
-  return firstShop.shopName.localeCompare(secondShop.shopName);
+  return (
+    firstShop.shopName.localeCompare(secondShop.shopName) ||
+    (firstShop.shopId ?? "").localeCompare(secondShop.shopId ?? "")
+  );
 }
 
 export const userDashboardGet = cache(async function userDashboardGet(
@@ -106,25 +65,6 @@ export const userDashboardGet = cache(async function userDashboardGet(
       name: true,
       email: true,
       createdAt: true,
-      reviews: {
-        take: 100,
-        orderBy: { createdAt: "desc" },
-        select: {
-          id: true,
-          rate: true,
-          product: {
-            select: {
-              id: true,
-              name: true,
-              shop: {
-                select: {
-                  name: true,
-                },
-              },
-            },
-          },
-        },
-      },
     },
   });
 
@@ -132,25 +72,55 @@ export const userDashboardGet = cache(async function userDashboardGet(
     return null;
   }
 
-  const reviewedProducts = aggregateProductReviews(user.reviews);
-  const totalReviewedProducts = reviewedProducts.length;
+  const [reviewGroups, products] = await Promise.all([
+    prisma.review.groupBy({
+      by: ["productId"],
+      where: { userId },
+      _avg: { rate: true },
+      _count: { _all: true },
+      orderBy: [{ _max: { createdAt: "desc" } }, { productId: "asc" }],
+    }),
+    prisma.product.findMany({
+      where: { reviews: { some: { userId } } },
+      select: {
+        id: true,
+        name: true,
+        shopId: true,
+        shop: { select: { name: true } },
+      },
+    }),
+  ]);
 
-  const shopCounts = new Map<string, number>();
-  for (const review of user.reviews) {
-    const shopName =
-      review.product.shop?.name ?? DASHBOARD_MESSAGES.fallbackShopName;
-    const currentCount = shopCounts.get(shopName) ?? 0;
-    shopCounts.set(shopName, currentCount + 1);
+  const productsById = new Map(
+    products.map((product) => [product.id, product]),
+  );
+  const reviewedProducts: UserDashboardProductItem[] = [];
+  const shopsById = new Map<string | null, UserDashboardShopItem>();
+  for (const reviewGroup of reviewGroups) {
+    const product = productsById.get(reviewGroup.productId);
+    if (!product) continue;
+
+    const reviewCount = reviewGroup._count._all;
+    reviewedProducts.push({
+      productId: product.id,
+      productName: product.name,
+      rate: Math.round((reviewGroup._avg.rate ?? 0) * 10) / 10,
+      userReviewsCount: reviewCount,
+    });
+
+    const shop = shopsById.get(product.shopId);
+    if (shop) {
+      shop.reviewCount += reviewCount;
+    } else {
+      shopsById.set(product.shopId, {
+        shopId: product.shopId,
+        shopName: product.shop?.name ?? DASHBOARD_MESSAGES.fallbackShopName,
+        reviewCount,
+      });
+    }
   }
 
-  const reviewedShops: UserDashboardShopItem[] = Array.from(
-    shopCounts.entries(),
-  )
-    .map(([shopName, reviewCount]) => ({
-      shopName,
-      reviewCount,
-    }))
-    .sort(compareShopEntries);
+  const reviewedShops = Array.from(shopsById.values()).sort(compareShopEntries);
 
   return {
     user: {
@@ -158,7 +128,7 @@ export const userDashboardGet = cache(async function userDashboardGet(
       email: user.email,
       createdAt: user.createdAt,
     },
-    totalReviewedProducts,
+    totalReviewedProducts: reviewedProducts.length,
     reviewedProducts,
     reviewedShops,
   };

@@ -30,7 +30,7 @@ export function UserShopStats({ reviewedShops }: UserShopStatsProps) {
         <ul role="list" className="space-y-2 pt-1">
           {reviewedShops.map((item) => (
             <DividedListItem
-              key={item.shopName}
+              key={item.shopId === null ? "no-shop" : `shop:${item.shopId}`}
               left={
                 <span className="truncate font-medium text-foreground">
                   {item.shopName}

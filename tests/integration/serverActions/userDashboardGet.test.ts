@@ -1,183 +1,135 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-vi.mock("@/lib/auth/helper", () => ({
-  auth: vi.fn(),
+const { findUser, groupReviews, findProducts } = vi.hoisted(() => ({
+  findUser: vi.fn(),
+  groupReviews: vi.fn(),
+  findProducts: vi.fn(),
 }));
 
+vi.mock("@/lib/auth/helper", () => ({ auth: vi.fn() }));
 vi.mock("@/lib/db/prisma", () => ({
   prisma: {
-    user: {
-      findUnique: vi.fn(),
-    },
+    user: { findUnique: findUser },
+    review: { groupBy: groupReviews },
+    product: { findMany: findProducts },
   },
 }));
 
 import { auth } from "@/lib/auth/helper";
-import { prisma } from "@/lib/db/prisma";
 import { userDashboardGet } from "@/serverActions/userDashboardGet";
 import { DASHBOARD_MESSAGES } from "@/app/dashboard/constants";
 
 describe("serverActions/userDashboardGet", () => {
+  const user = {
+    id: "user-1",
+    name: "Krzysztof",
+    email: "krzys@example.com",
+    createdAt: new Date("2026-01-15T12:00:00.000Z"),
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(auth).mockResolvedValue({
+      user: { id: user.id },
+      expires: "2099-01-01",
+    });
+    findUser.mockResolvedValue(user);
+    groupReviews.mockResolvedValue([]);
+    findProducts.mockResolvedValue([]);
   });
 
-  it("returns null when user is not authenticated and no userId is provided", async () => {
+  it("returns null without database access for an unauthenticated caller", async () => {
     vi.mocked(auth).mockResolvedValueOnce(null);
-
-    const result = await userDashboardGet();
-
-    expect(result).toBeNull();
-    expect(prisma.user.findUnique).not.toHaveBeenCalled();
+    expect(await userDashboardGet()).toBeNull();
+    expect(findUser).not.toHaveBeenCalled();
+    expect(groupReviews).not.toHaveBeenCalled();
+    expect(findProducts).not.toHaveBeenCalled();
   });
 
-  it("returns null when user is not found in the database", async () => {
-    vi.mocked(auth).mockResolvedValueOnce({
-      user: { id: "non-existent-user" },
-      expires: "2099-01-01",
-    });
-    vi.mocked(prisma.user.findUnique).mockResolvedValueOnce(null);
+  it("returns null when the session user no longer exists", async () => {
+    findUser.mockResolvedValueOnce(null);
+    expect(await userDashboardGet()).toBeNull();
+    expect(groupReviews).not.toHaveBeenCalled();
+    expect(findProducts).not.toHaveBeenCalled();
+  });
 
-    const result = await userDashboardGet();
+  it("rejects access to another user's dashboard before database access", async () => {
+    expect(await userDashboardGet("other-user")).toBeNull();
+    expect(findUser).not.toHaveBeenCalled();
+    expect(groupReviews).not.toHaveBeenCalled();
+    expect(findProducts).not.toHaveBeenCalled();
+  });
 
-    expect(result).toBeNull();
-    expect(prisma.user.findUnique).toHaveBeenCalledWith({
-      where: { id: "non-existent-user" },
-      select: expect.any(Object),
+  it("returns an empty dashboard for a user without reviews", async () => {
+    expect(await userDashboardGet()).toEqual({
+      user: { name: user.name, email: user.email, createdAt: user.createdAt },
+      totalReviewedProducts: 0,
+      reviewedProducts: [],
+      reviewedShops: [],
     });
   });
 
-  it("returns aggregated dashboard data and averages ratings for duplicate products", async () => {
-    const mockCreatedDate = new Date("2026-01-15T12:00:00.000Z");
-    const mockUserFromDb = {
-      id: "user-123",
-      name: "Krzysztof",
-      email: "krzys@example.com",
-      createdAt: mockCreatedDate,
-      reviews: [
-        {
-          id: "rev-1",
-          rate: 5,
-          createdAt: new Date("2026-02-04"),
-          product: {
-            id: "prod-1",
-            name: "Ekspres DeLonghi",
-            shop: { name: "Media Expert" },
-          },
-        },
-        {
-          id: "rev-2",
-          rate: 3,
-          createdAt: new Date("2026-02-03"),
-          product: {
-            id: "prod-1",
-            name: "Ekspres DeLonghi",
-            shop: { name: "Media Expert" },
-          },
-        },
-        {
-          id: "rev-3",
-          rate: 4.5,
-          createdAt: new Date("2026-02-02"),
-          product: {
-            id: "prod-2",
-            name: "Słuchawki Sony",
-            shop: { name: "Allegro" },
-          },
-        },
-        {
-          id: "rev-4",
-          rate: 5,
-          createdAt: new Date("2026-02-01"),
-          product: {
-            id: "prod-3",
-            name: "Myszka Logitech",
-            shop: null,
-          },
-        },
-      ],
-    };
-
-    vi.mocked(auth).mockResolvedValueOnce({
-      user: { id: "user-123" },
-      expires: "2099-01-01",
-    });
-    vi.mocked(prisma.user.findUnique).mockResolvedValueOnce(
-      mockUserFromDb as never,
-    );
-
-    const result = await userDashboardGet();
-
-    expect(result).not.toBeNull();
-    expect(result?.user).toEqual({
-      name: "Krzysztof",
-      email: "krzys@example.com",
-      createdAt: mockCreatedDate,
-    });
-    expect(result?.totalReviewedProducts).toBe(3);
-    expect(result?.reviewedProducts).toHaveLength(3);
-    expect(result?.reviewedProducts[0]).toEqual({
-      productId: "prod-1",
-      productName: "Ekspres DeLonghi",
-      rate: 4,
-      userReviewsCount: 2,
-    });
-    expect(result?.reviewedProducts[1]).toEqual({
-      productId: "prod-2",
-      productName: "Słuchawki Sony",
-      rate: 4.5,
-      userReviewsCount: 1,
-    });
-    expect(result?.reviewedProducts[2]).toEqual({
-      productId: "prod-3",
-      productName: "Myszka Logitech",
-      rate: 5,
-      userReviewsCount: 1,
-    });
-    expect(result?.reviewedShops).toEqual([
-      { shopName: "Media Expert", reviewCount: 2 },
-      { shopName: "Allegro", reviewCount: 1 },
-      { shopName: DASHBOARD_MESSAGES.fallbackShopName, reviewCount: 1 },
+  it("uses lifetime product aggregates and keeps shops with matching labels separate", async () => {
+    groupReviews.mockResolvedValueOnce([
+      { productId: "product-1", _avg: { rate: 4.25 }, _count: { _all: 120 } },
+      { productId: "product-2", _avg: { rate: 3 }, _count: { _all: 2 } },
+      { productId: "product-3", _avg: { rate: 5 }, _count: { _all: 1 } },
     ]);
-  });
-
-  it("handles user with zero reviews correctly", async () => {
-    const mockCreatedDate = new Date("2026-03-01T10:00:00.000Z");
-    const mockUserWithoutReviews = {
-      id: "user-empty",
-      name: null,
-      email: "nowy@example.com",
-      createdAt: mockCreatedDate,
-      reviews: [],
-    };
-
-    vi.mocked(auth).mockResolvedValueOnce({
-      user: { id: "user-empty" },
-      expires: "2099-01-01",
-    });
-    vi.mocked(prisma.user.findUnique).mockResolvedValueOnce(
-      mockUserWithoutReviews as never,
-    );
+    findProducts.mockResolvedValueOnce([
+      { id: "product-3", name: "Mouse", shopId: null, shop: null },
+      {
+        id: "product-2",
+        name: "Keyboard",
+        shopId: "shop-2",
+        shop: { name: null },
+      },
+      {
+        id: "product-1",
+        name: "Screen",
+        shopId: "shop-1",
+        shop: { name: null },
+      },
+    ]);
 
     const result = await userDashboardGet();
 
-    expect(result).not.toBeNull();
-    expect(result?.user.name).toBeNull();
-    expect(result?.user.email).toBe("nowy@example.com");
-    expect(result?.totalReviewedProducts).toBe(0);
-    expect(result?.reviewedProducts).toEqual([]);
-    expect(result?.reviewedShops).toEqual([]);
-  });
-
-  it("rejects access and returns null when targetUserId does not match active session", async () => {
-    vi.mocked(auth).mockResolvedValueOnce({
-      user: { id: "logged-in-user" },
-      expires: "2099-01-01",
-    });
-
-    const result = await userDashboardGet("other-user-id");
-
-    expect(result).toBeNull();
-    expect(prisma.user.findUnique).not.toHaveBeenCalled();
+    expect(result?.totalReviewedProducts).toBe(3);
+    expect(result?.reviewedProducts).toEqual([
+      {
+        productId: "product-1",
+        productName: "Screen",
+        rate: 4.3,
+        userReviewsCount: 120,
+      },
+      {
+        productId: "product-2",
+        productName: "Keyboard",
+        rate: 3,
+        userReviewsCount: 2,
+      },
+      {
+        productId: "product-3",
+        productName: "Mouse",
+        rate: 5,
+        userReviewsCount: 1,
+      },
+    ]);
+    expect(result?.reviewedShops).toEqual([
+      {
+        shopId: "shop-1",
+        shopName: DASHBOARD_MESSAGES.fallbackShopName,
+        reviewCount: 120,
+      },
+      {
+        shopId: "shop-2",
+        shopName: DASHBOARD_MESSAGES.fallbackShopName,
+        reviewCount: 2,
+      },
+      {
+        shopId: null,
+        shopName: DASHBOARD_MESSAGES.fallbackShopName,
+        reviewCount: 1,
+      },
+    ]);
   });
 });

@@ -126,10 +126,40 @@ describe("app/dashboard components", () => {
   });
 
   describe("UserShopStats", () => {
+    it("renders separate entries for shops sharing the fallback label", () => {
+      render(
+        <UserShopStats
+          reviewedShops={[
+            {
+              shopId: "shop-1",
+              shopName: DASHBOARD_MESSAGES.fallbackShopName,
+              reviewCount: 51,
+            },
+            {
+              shopId: "shop-2",
+              shopName: DASHBOARD_MESSAGES.fallbackShopName,
+              reviewCount: 50,
+            },
+            {
+              shopId: null,
+              shopName: DASHBOARD_MESSAGES.fallbackShopName,
+              reviewCount: 1,
+            },
+          ]}
+        />,
+      );
+
+      const entries = screen.getAllByRole("listitem");
+      expect(entries).toHaveLength(3);
+      expect(entries[0]).toHaveTextContent(formatReviewCount(51));
+      expect(entries[1]).toHaveTextContent(formatReviewCount(50));
+      expect(entries[2]).toHaveTextContent(formatReviewCount(1));
+    });
+
     it("renders shops heading and list of shops with formatted review counts", () => {
       const mockShops = [
-        { shopName: "Media Expert", reviewCount: 3 },
-        { shopName: "Allegro", reviewCount: 1 },
+        { shopId: "shop-1", shopName: "Media Expert", reviewCount: 3 },
+        { shopId: "shop-2", shopName: "Allegro", reviewCount: 1 },
       ];
 
       render(<UserShopStats reviewedShops={mockShops} />);
