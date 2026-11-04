@@ -58,24 +58,16 @@ export function useAuthGatedSubmit<TForm extends FieldValues, TData>({
           return;
         }
 
-        const actionResult = await action(formData);
+        let actionResult = await action(formData);
 
         if (actionResult?.serverError === UNAUTHORIZED_ERROR_MESSAGE) {
           const isStillAuthenticated = await ensureAuthenticated({
+            forceRefresh: true,
             onUnauthenticated: () => onSaveDraft(formData),
           });
           if (!isStillAuthenticated) return;
 
-          const retryResult = await action(formData);
-          if (retryResult?.data) {
-            clearReviewDraft();
-            onSuccess(retryResult.data);
-            return;
-          }
-          if (retryResult?.serverError) {
-            setError("root", { message: retryResult.serverError });
-            return;
-          }
+          actionResult = await action(formData);
         }
 
         if (actionResult?.serverError) {

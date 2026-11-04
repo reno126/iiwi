@@ -6,6 +6,7 @@ import { useCallback } from "react";
 import { isSafeRedirectUrl } from "./resolveAuthRedirectUrl";
 
 export interface EnsureAuthenticatedOptions {
+  forceRefresh?: boolean;
   onUnauthenticated?: () => void;
   callbackUrl?: string;
 }
@@ -17,7 +18,7 @@ export function useEnsureAuthenticated() {
   const ensureAuthenticated = useCallback(
     async (options?: EnsureAuthenticatedOptions): Promise<boolean> => {
       const isSessionActive = Boolean(session?.user?.id);
-      if (isSessionActive) {
+      if (isSessionActive && !options?.forceRefresh) {
         return true;
       }
 

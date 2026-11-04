@@ -13,7 +13,7 @@
   - Check authentication via `useEnsureAuthenticated`.
   - If unauthenticated, save form state to `localStorage` with TTL and redirect to `/login?callbackUrl=...`.
   - On login or registration, the callback URL restores the user to their form draft.
-  - Intercept 401 unauthorized errors, refresh the session, and retry the action once before failing.
+  - After a server unauthorized response, force a session refresh even when the client still has a cached user. If refresh fails, save the draft and redirect to login without retrying. If refresh succeeds, retry the action at most once and handle its success, server errors, and validation errors through the same path as the initial response.
   - Clear the draft upon successful submission.
 
 ## 3. Reference Stability & Context Hygiene
