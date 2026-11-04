@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/db/prisma";
+import { createTestUser, deleteTestUser } from "./helpers/testUsers";
 import { E2E_TEST_PREFIX, waitForHydration } from "./helpers/auth";
 import { SIGN_IN_MESSAGES } from "@/app/login/constants";
 import { ADD_REVIEW_FLOW_MESSAGES } from "@/app/opinie/dodaj/_components/addReviewFlowMessages";
@@ -19,12 +19,10 @@ test.describe("Guest Review Draft and Auth-Gated Submission Flow", () => {
     const password = "bezpieczneHaslo123";
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await prisma.user.create({
-      data: {
-        email: guestEmail,
-        name: `${E2E_TEST_PREFIX} Guest Reviewer`,
-        password: hashedPassword,
-      },
+    const user = await createTestUser({
+      email: guestEmail,
+      name: `${E2E_TEST_PREFIX} Guest Reviewer`,
+      password: hashedPassword,
     });
 
     const productName = `${E2E_TEST_PREFIX} Klawiatura Mechaniczna ${timestamp}`;
@@ -99,15 +97,7 @@ test.describe("Guest Review Draft and Auth-Gated Submission Flow", () => {
       ).toBeVisible();
       await expect(page.getByText(reviewContent)).toBeVisible();
     } finally {
-      await prisma.review.deleteMany({
-        where: { userId: user.id },
-      });
-      await prisma.product.deleteMany({
-        where: { name: productName },
-      });
-      await prisma.user.deleteMany({
-        where: { id: user.id },
-      });
+      await deleteTestUser(user.id);
     }
   });
 });

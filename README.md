@@ -252,7 +252,7 @@ Configure both checks as required in the GitHub branch rules for `main`. CI uses
 
 The workflow caches the pnpm store and `.next/cache`. Browser reports and retry traces are retained for seven days. Action references are pinned to commit SHAs and maintained by weekly Dependabot updates.
 
-Local browser tests continue to start the development server. When `CI` is set, build the application before running `pnpm test:e2e`; Playwright starts the production server automatically.
+Browser tests require `E2E_DATABASE_URL` pointing to an approved disposable local PostgreSQL database. Playwright starts a fresh development server against that database; it does not reuse an existing server. When `CI` is set, build the application before running `pnpm test:e2e`; Playwright starts the production server automatically. See [browser test database and cleanup instructions](docs/testing.md#6-browser-test-database-and-cleanup) for setup and run-specific cleanup.
 
 ---
 

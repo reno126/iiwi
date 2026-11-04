@@ -1,7 +1,7 @@
+import { deleteTestUser } from "./helpers/testUsers";
 import { test, expect } from "@playwright/test";
 import {
   createAuthenticatedSession,
-  deleteTestUser,
   E2E_TEST_PREFIX,
   waitForHydration,
   type TestUser,

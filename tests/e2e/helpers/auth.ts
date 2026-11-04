@@ -1,6 +1,6 @@
 import { BrowserContext, Page } from "@playwright/test";
 import { encode } from "next-auth/jwt";
-import { prisma } from "@/lib/db/prisma";
+import { createTestUser } from "./testUsers";
 
 export const E2E_TEST_PREFIX = "__test__";
 
@@ -23,12 +23,10 @@ export async function createAuthenticatedSession(
     `${E2E_TEST_PREFIX}authed_${Date.now()}_${Math.random().toString(36).slice(2, 7)}@example.com`;
   const name = `${E2E_TEST_PREFIX} Authed User`;
 
-  const user = await prisma.user.create({
-    data: {
-      email,
-      name,
-      password: "hashedPasswordPlaceholder",
-    },
+  const user = await createTestUser({
+    email,
+    name,
+    password: "hashedPasswordPlaceholder",
   });
 
   const secret =
@@ -60,41 +58,5 @@ export async function createAuthenticatedSession(
     id: user.id,
     name: user.name,
     email: user.email,
-  };
-}
-
-export async function deleteTestUser(userId: string): Promise<void> {
-  try {
-    await prisma.user.delete({
-      where: { id: userId },
-    });
-  } catch {}
-}
-
-export async function cleanAllTestRecords(): Promise<{
-  deletedProducts: number;
-  deletedUsers: number;
-}> {
-  const deletedProducts = await prisma.product.deleteMany({
-    where: {
-      OR: [
-        { name: { startsWith: E2E_TEST_PREFIX } },
-        { code: { startsWith: E2E_TEST_PREFIX } },
-      ],
-    },
-  });
-
-  const deletedUsers = await prisma.user.deleteMany({
-    where: {
-      OR: [
-        { email: { startsWith: E2E_TEST_PREFIX } },
-        { name: { startsWith: E2E_TEST_PREFIX } },
-      ],
-    },
-  });
-
-  return {
-    deletedProducts: deletedProducts.count,
-    deletedUsers: deletedUsers.count,
   };
 }

@@ -1,7 +1,13 @@
 import { defineConfig, devices } from "@playwright/test";
+import { getE2eDatabaseUrl } from "./tests/e2e/helpers/environment";
+
+const connectionString = getE2eDatabaseUrl();
+process.env.DATABASE_URL = connectionString;
+process.env.E2E_DATABASE_URL = connectionString;
 
 export default defineConfig({
   testDir: "./tests/e2e",
+  globalSetup: "./tests/e2e/globalSetup.ts",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -12,7 +18,7 @@ export default defineConfig({
   },
   reporter: "list",
   use: {
-    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || "http://localhost:3000",
+    baseURL: "http://localhost:3000",
     trace: "on-first-retry",
   },
   projects: [
@@ -24,7 +30,12 @@ export default defineConfig({
   webServer: {
     command: process.env.CI ? "pnpm start" : "pnpm dev",
     url: "http://localhost:3000",
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
+    env: {
+      DATABASE_URL: connectionString,
+      E2E_DATABASE_URL: connectionString,
+      NEXTAUTH_URL: "http://localhost:3000",
+    },
     timeout: 120 * 1000,
   },
 });

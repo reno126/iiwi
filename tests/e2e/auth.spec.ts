@@ -1,10 +1,14 @@
+import {
+  prisma,
+  createTestUser,
+  trackRegisteredTestUser,
+  deleteTestUser,
+} from "./helpers/testUsers";
 import { test, expect } from "@playwright/test";
-import { prisma } from "@/lib/db/prisma";
 import {
   E2E_TEST_PREFIX,
   waitForHydration,
   createAuthenticatedSession,
-  deleteTestUser,
 } from "./helpers/auth";
 import { DASHBOARD_MESSAGES } from "@/app/dashboard/constants";
 import { SIGN_IN_MESSAGES } from "@/app/login/constants";
@@ -81,9 +85,13 @@ test.describe("Authentication and Route Protection Flows", () => {
         }),
       ).toBeVisible();
     } finally {
-      await prisma.user.deleteMany({
+      const registeredUser = await prisma.user.findUnique({
         where: { email: uniqueEmail },
       });
+      if (registeredUser) {
+        trackRegisteredTestUser(registeredUser.id);
+        await deleteTestUser(registeredUser.id);
+      }
     }
   });
 
@@ -92,15 +100,13 @@ test.describe("Authentication and Route Protection Flows", () => {
   }) => {
     const duplicateEmail = `${E2E_TEST_PREFIX}dup_${Date.now()}_${Math.random().toString(36).slice(2, 7)}@example.com`;
 
-    try {
-      await prisma.user.create({
-        data: {
-          email: duplicateEmail,
-          name: `${E2E_TEST_PREFIX} Istniejący Użytkownik`,
-          password: "bezpieczneHaslo123",
-        },
-      });
+    const existingUser = await createTestUser({
+      email: duplicateEmail,
+      name: `${E2E_TEST_PREFIX} Istniejący Użytkownik`,
+      password: "bezpieczneHaslo123",
+    });
 
+    try {
       await page.goto("/register");
       await waitForHydration(page);
 
@@ -119,9 +125,7 @@ test.describe("Authentication and Route Protection Flows", () => {
         page.getByText(REGISTER_API_MESSAGES.emailTaken),
       ).toBeVisible();
     } finally {
-      await prisma.user.deleteMany({
-        where: { email: duplicateEmail },
-      });
+      await deleteTestUser(existingUser.id);
     }
   });
 

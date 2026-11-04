@@ -1,8 +1,7 @@
+import { prisma, deleteTestUser } from "./helpers/testUsers";
 import { test, expect } from "@playwright/test";
-import { prisma } from "@/lib/db/prisma";
 import {
   createAuthenticatedSession,
-  deleteTestUser,
   E2E_TEST_PREFIX,
   waitForHydration,
   type TestUser,
