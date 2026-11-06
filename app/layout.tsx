@@ -6,23 +6,27 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/authOptions";
 import { TopMenu } from "@/components/navigation/TopMenu";
 import { BrandLogo } from "@/components/BrandLogo";
-import { Plus_Jakarta_Sans, Newsreader } from "next/font/google";
+import localFont from "next/font/local";
 import { cn } from "cn";
 import { buildWebSiteSchema } from "@/lib/seo/schemaMarkup";
 import { buildRootMetadata } from "@/lib/seo/metadata";
 import { serializeJsonLd } from "@/lib/seo/serializeJsonLd";
 
-const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ["latin", "latin-ext"],
+const plusJakartaSans = localFont({
+  src: "./fonts/PlusJakartaSans-Variable.woff2",
   variable: "--font-sans",
-  weight: ["400", "500", "600", "700", "800"],
+  weight: "400 800",
+  style: "normal",
+  display: "swap",
 });
 
-const newsreader = Newsreader({
-  subsets: ["latin", "latin-ext"],
+const newsreader = localFont({
+  src: "./fonts/Newsreader-Variable.woff2",
   variable: "--font-heading",
-  weight: ["400", "500", "600", "700"],
-  style: ["normal"],
+  weight: "400 700",
+  style: "normal",
+  display: "swap",
+  adjustFontFallback: "Times New Roman",
 });
 
 export const viewport: Viewport = {
