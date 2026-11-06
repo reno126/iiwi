@@ -37,6 +37,19 @@ The provider allowance is a request budget, not a currency amount. Set it to mat
 
 Expired counter, lease, and cache rows are pruned in batches of up to 1,000 per table on the first accepted global request of each new window. Expired data is never used even if no traffic arrives to trigger cleanup. All instances must share the same PostgreSQL database and policy configuration.
 
+## Local ZenRows response inspection
+
+ZenRows sometimes labels an HTML document as `text/plain`. Only the ZenRows transport permits this fallback: the response must start with an HTML document element, optionally preceded by an HTML doctype, within the first 4 KiB. The existing 2 MiB limit and request deadline still apply. Plain-text errors, JSON, and other unsupported media types remain rejected; direct scraping still requires an HTML content type.
+
+In development (`pnpm dev`), rejected ZenRows HTTP responses and unsupported content types are saved in the ignored `tmp/scrapes` directory:
+
+- `<hostname>_last_zenrows_response.json`: HTTP status, selected response headers, capture time, and preview truncation/read-error details.
+- `<hostname>_last_zenrows_response.txt`: a UTF-8 body preview, capped at 64 KiB with a one-second read deadline that also respects request cancellation.
+
+The terminal prints both absolute paths. Each rejected response overwrites the previous diagnostic files for that hostname. These files are not written in production. Unsupported responses still fail scraping; diagnostics do not make them eligible for HTML parsing. Successful HTML snapshots continue to use `<hostname>_last_zenrows.html`.
+
+Previously rejected bodies cannot be recovered after cancellation. Retry the scrape to capture another response; unsuccessful scrape results are cached for 60 seconds, so an immediate retry may return the cached failure without contacting ZenRows or updating files.
+
 ## Verification
 
 `pnpm test:database` verifies atomic limits and leases with independent Prisma clients, including concurrent admission, expiry, cache reuse, duplicate suppression, capacity exhaustion, and rejection before registration hashing and paid-provider calls. Follow the disposable-database setup in [testing.md](testing.md). Unit and action tests cover trusted identities, account/guest quotas, storage failure, and retry messages.

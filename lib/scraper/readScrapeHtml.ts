@@ -4,13 +4,17 @@ export const MAX_SCRAPE_HTML_BYTES = 2 * 1024 * 1024;
 
 export class ScrapeResponseError extends Error {}
 
+export function isScrapeHtmlContentType(contentType: string | null): boolean {
+  const mediaType = contentType?.split(";")[0]?.trim().toLowerCase();
+  return mediaType === "text/html" || mediaType === "application/xhtml+xml";
+}
+
 export async function readScrapeHtml(
   body: ReadableStream<Uint8Array> | NodeReadableStream<Uint8Array> | null,
   contentType: string | null,
   signal: AbortSignal,
 ): Promise<string> {
-  const mediaType = contentType?.split(";")[0]?.trim().toLowerCase();
-  if (mediaType !== "text/html" && mediaType !== "application/xhtml+xml") {
+  if (!isScrapeHtmlContentType(contentType)) {
     void body?.cancel().catch(() => undefined);
     throw new ScrapeResponseError("Unsupported scraping content type");
   }

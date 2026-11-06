@@ -2,8 +2,14 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { fetchWithZenRows } from "@/lib/scraper/zenrowsClient";
 import { reservePaidScrape } from "@/lib/abuse/limits";
 import { MAX_SCRAPE_HTML_BYTES } from "@/lib/scraper/readScrapeHtml";
+import { writeFile } from "node:fs/promises";
 
 vi.mock("fs", () => ({ existsSync: () => true, writeFileSync: vi.fn() }));
+
+vi.mock("node:fs/promises", () => ({
+  mkdir: vi.fn().mockResolvedValue(undefined),
+  writeFile: vi.fn().mockResolvedValue(undefined),
+}));
 
 vi.mock("@/lib/abuse/limits", () => ({
   reservePaidScrape: vi.fn().mockResolvedValue(true),
@@ -20,6 +26,7 @@ describe("lib/scraper/zenrowsClient", () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.unstubAllEnvs();
     process.env = originalEnv;
     globalThis.fetch = originalFetch;
   });
@@ -129,6 +136,45 @@ describe("lib/scraper/zenrowsClient", () => {
     expect(urlObj.searchParams.get("wait_for")).toBe(".product-loaded");
   });
 
+  it.each([
+    '<html lang="pl"><head><title>Product</title></head></html>',
+    "<!DOCTYPE html>\n<html><head><title>Product</title></head></html>",
+  ])("accepts an HTML document mislabeled as text/plain: %s", async (html) => {
+    process.env.ZENROWS_API_KEY = "test-key";
+    globalThis.fetch = vi.fn().mockResolvedValueOnce(
+      new Response(html, {
+        headers: { "content-type": "text/plain; charset=utf-8" },
+      }),
+    );
+
+    expect(await fetchWithZenRows("https://shop.pl/item")).toBe(html);
+  });
+
+  it.each(['{"error":"<html>blocked</html>"}', "Provider unavailable", ""])(
+    "rejects non-HTML plain text: %s",
+    async (body) => {
+      process.env.ZENROWS_API_KEY = "test-key";
+      globalThis.fetch = vi.fn().mockResolvedValueOnce(
+        new Response(body, {
+          headers: { "content-type": "text/plain" },
+        }),
+      );
+
+      expect(await fetchWithZenRows("https://shop.pl/item")).toBeNull();
+    },
+  );
+
+  it("keeps the byte limit for mislabeled plain-text HTML", async () => {
+    process.env.ZENROWS_API_KEY = "test-key";
+    globalThis.fetch = vi.fn().mockResolvedValueOnce(
+      new Response("<html>" + "x".repeat(MAX_SCRAPE_HTML_BYTES), {
+        headers: { "content-type": "text/plain" },
+      }),
+    );
+
+    expect(await fetchWithZenRows("https://shop.pl/item")).toBeNull();
+  });
+
   it("returns null when API returns an HTTP error status", async () => {
     process.env.ZENROWS_API_KEY = "test-key";
 
@@ -179,6 +225,31 @@ describe("lib/scraper/zenrowsClient", () => {
 
     expect(await fetchWithZenRows("https://shop.pl/item")).toBeNull();
     expect(cancel).toHaveBeenCalledOnce();
+  });
+
+  it("saves rejected response diagnostics before rejecting a non-HTML body in development", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    process.env.ZENROWS_API_KEY = "test-key";
+    const responseBody = JSON.stringify({
+      error: "Provider rejected the target",
+    });
+    globalThis.fetch = vi.fn().mockResolvedValueOnce(
+      new Response(responseBody, {
+        headers: { "content-type": "application/json", "zr-status": "403" },
+      }),
+    );
+
+    expect(await fetchWithZenRows("https://shop.pl/item")).toBeNull();
+    expect(writeFile).toHaveBeenCalledWith(
+      expect.stringContaining("shop.pl_last_zenrows_response.txt"),
+      responseBody,
+      "utf8",
+    );
+    expect(writeFile).toHaveBeenCalledWith(
+      expect.stringContaining("shop.pl_last_zenrows_response.json"),
+      expect.stringContaining('"content-type": "application/json"'),
+      "utf8",
+    );
   });
 
   it.each(["timeout", "parent cancellation"])(

@@ -1,5 +1,9 @@
 import { reservePaidScrape } from "@/lib/abuse/limits";
-import { readScrapeHtml } from "@/lib/scraper/readScrapeHtml";
+import {
+  isScrapeHtmlContentType,
+  readScrapeHtml,
+} from "@/lib/scraper/readScrapeHtml";
+import { saveRejectedZenRowsResponse } from "@/lib/scraper/zenrowsDebug";
 
 export interface ZenRowsScrapeOptions {
   signal?: AbortSignal;
@@ -120,10 +124,19 @@ export async function fetchWithZenRows(
     const zrStatus = response.headers.get("zr-status");
     const zrUrl = response.headers.get("zr-url");
     const contentType = response.headers.get("content-type");
+    const isPlainText =
+      contentType?.split(";")[0]?.trim().toLowerCase() === "text/plain";
 
     console.log(
       `[ZenRows] Response HTTP ${response.status} in ${durationMs}ms | zr-status: ${zrStatus ?? "N/A"} | zr-url: ${zrUrl ?? targetUrl} | type: ${contentType ?? "unknown"}`,
     );
+
+    if (
+      !response.ok ||
+      (!isScrapeHtmlContentType(contentType) && !isPlainText)
+    ) {
+      await saveRejectedZenRowsResponse(response, targetUrl, signal);
+    }
 
     if (!response.ok) {
       void response.body?.cancel().catch(() => undefined);
@@ -133,7 +146,29 @@ export async function fetchWithZenRows(
       return null;
     }
 
-    const html = await readScrapeHtml(response.body, contentType, signal);
+    const html = await readScrapeHtml(
+      response.body,
+      isPlainText ? "text/html" : contentType,
+      signal,
+    );
+    if (
+      isPlainText &&
+      !/^\s*(?:<!doctype\s+html\b[^>]*>\s*)?<html(?:\s|>)/i.test(
+        html.slice(0, 4096),
+      )
+    ) {
+      await saveRejectedZenRowsResponse(
+        new Response(html, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers,
+        }),
+        targetUrl,
+        signal,
+      );
+      console.warn("[ZenRows] Plain-text response is not an HTML document.");
+      return null;
+    }
     const pageTitle = extractPageTitle(html);
 
     if (isBotChallengeDetected(html)) {
