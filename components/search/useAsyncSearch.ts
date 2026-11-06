@@ -5,14 +5,25 @@ import {
   useRef,
   useTransition,
   useCallback,
+  useMemo,
 } from "react";
 
 const EMPTY_RESULTS: never[] = [];
 
-export interface UseAsyncSearchOptions<T> {
-  searchAction: (
-    query: string,
-  ) => Promise<T[] | { data?: T[] | null } | null | undefined>;
+export interface AsyncSearchActionResponse<SearchItem> {
+  data?: SearchItem[] | null;
+  serverError?: string;
+  validationErrors?: unknown;
+}
+
+export type AsyncSearchActionResult<SearchItem> =
+  | SearchItem[]
+  | AsyncSearchActionResponse<SearchItem>
+  | null
+  | undefined;
+
+export interface UseAsyncSearchOptions<SearchItem> {
+  searchAction: (query: string) => Promise<AsyncSearchActionResult<SearchItem>>;
   minChars?: number;
   debounceMs?: number;
   defaultValue?: string;
@@ -21,7 +32,7 @@ export interface UseAsyncSearchOptions<T> {
   defaultErrorMessage?: string;
 }
 
-export function useAsyncSearch<T>({
+export function useAsyncSearch<SearchItem>({
   searchAction,
   minChars = 3,
   debounceMs = 300,
@@ -29,7 +40,7 @@ export function useAsyncSearch<T>({
   value,
   onQueryChange,
   defaultErrorMessage = "Wystąpił błąd podczas wyszukiwania.",
-}: UseAsyncSearchOptions<T>) {
+}: UseAsyncSearchOptions<SearchItem>) {
   const isControlled = value !== undefined;
   const [internalQuery, setInternalQuery] = useState(defaultValue);
   const query = isControlled ? value : internalQuery;
@@ -39,7 +50,7 @@ export function useAsyncSearch<T>({
 
   const [isActionPending, startTransition] = useTransition();
 
-  const [rawResults, setRawResults] = useState<T[]>([]);
+  const [rawResults, setRawResults] = useState<SearchItem[]>([]);
   const [rawHasSearched, setRawHasSearched] = useState(false);
   const [lastSearchedQuery, setLastSearchedQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +73,10 @@ export function useAsyncSearch<T>({
       const requestId = ++latestRequestIdRef.current;
 
       const timer = setTimeout(() => {
+        if (requestId !== latestRequestIdRef.current) {
+          return;
+        }
+
         startTransition(async () => {
           try {
             const response = await searchAction(trimmedDeferred);
@@ -70,7 +85,20 @@ export function useAsyncSearch<T>({
               return;
             }
 
-            let items: T[] = [];
+            if (
+              response &&
+              !Array.isArray(response) &&
+              (response.serverError !== undefined ||
+                response.validationErrors !== undefined)
+            ) {
+              setError(response.serverError || defaultErrorMessage);
+              setRawResults(EMPTY_RESULTS);
+              setRawHasSearched(false);
+              setLastSearchedQuery(trimmedDeferred);
+              return;
+            }
+
+            let items: SearchItem[] = [];
             if (Array.isArray(response)) {
               items = response;
             } else if (
@@ -86,13 +114,17 @@ export function useAsyncSearch<T>({
             setRawHasSearched(true);
             setLastSearchedQuery(trimmedDeferred);
             setError(null);
-          } catch (err) {
+          } catch (searchError) {
             if (requestId !== latestRequestIdRef.current) {
               return;
             }
-            setError(err instanceof Error ? err.message : defaultErrorMessage);
+            setError(
+              searchError instanceof Error
+                ? searchError.message
+                : defaultErrorMessage,
+            );
             setRawResults(EMPTY_RESULTS);
-            setRawHasSearched(true);
+            setRawHasSearched(false);
             setLastSearchedQuery(trimmedDeferred);
           }
         });
@@ -100,6 +132,7 @@ export function useAsyncSearch<T>({
 
       return () => {
         clearTimeout(timer);
+        ++latestRequestIdRef.current;
       };
     }
 
@@ -113,16 +146,17 @@ export function useAsyncSearch<T>({
   ]);
 
   const setQueryValue = useCallback(
-    (nextVal: string) => {
+    (nextQuery: string) => {
       if (!isControlled) {
-        setInternalQuery(nextVal);
+        setInternalQuery(nextQuery);
       }
-      onQueryChange?.(nextVal);
+      onQueryChange?.(nextQuery);
     },
     [isControlled, onQueryChange],
   );
 
   const clearSearch = useCallback(() => {
+    ++latestRequestIdRef.current;
     setQueryValue("");
     setRawResults(EMPTY_RESULTS);
     setRawHasSearched(false);
@@ -131,22 +165,39 @@ export function useAsyncSearch<T>({
   }, [setQueryValue]);
 
   const resetResults = useCallback(() => {
+    ++latestRequestIdRef.current;
     setRawResults(EMPTY_RESULTS);
     setRawHasSearched(false);
+    setLastSearchedQuery("");
     setError(null);
   }, []);
 
-  return {
-    query,
-    trimmedDeferred,
-    hasMinChars,
-    isLoading,
-    results,
-    hasSearched,
-    lastSearchedQuery,
-    error,
-    setQueryValue,
-    clearSearch,
-    resetResults,
-  };
+  return useMemo(
+    () => ({
+      query,
+      trimmedDeferred,
+      hasMinChars,
+      isLoading,
+      results,
+      hasSearched,
+      lastSearchedQuery,
+      error,
+      setQueryValue,
+      clearSearch,
+      resetResults,
+    }),
+    [
+      query,
+      trimmedDeferred,
+      hasMinChars,
+      isLoading,
+      results,
+      hasSearched,
+      lastSearchedQuery,
+      error,
+      setQueryValue,
+      clearSearch,
+      resetResults,
+    ],
+  );
 }

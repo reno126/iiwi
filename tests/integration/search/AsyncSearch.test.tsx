@@ -4,6 +4,7 @@ import {
   AsyncSearch,
   ASYNC_SEARCH_MESSAGES,
 } from "@/components/search/AsyncSearch";
+import { DEFAULT_SERVER_ACTION_ERROR } from "@/lib/actions/safeActionClient";
 
 interface TestProduct {
   id: string;
@@ -234,6 +235,77 @@ describe("components/search/AsyncSearch", () => {
         ASYNC_SEARCH_MESSAGES.defaultEmptyDescription("Nieistniejący"),
       ),
     ).toBeInTheDocument();
+  });
+
+  it.each([
+    {
+      response: { serverError: DEFAULT_SERVER_ACTION_ERROR },
+      expectedMessage: DEFAULT_SERVER_ACTION_ERROR,
+    },
+    {
+      response: { validationErrors: { formErrors: ["Invalid query"] } },
+      expectedMessage: ASYNC_SEARCH_MESSAGES.defaultError,
+    },
+    {
+      response: {
+        data: mockProducts,
+        serverError: DEFAULT_SERVER_ACTION_ERROR,
+      },
+      expectedMessage: DEFAULT_SERVER_ACTION_ERROR,
+    },
+  ])(
+    "shows an alert instead of empty results for $response",
+    async ({ response, expectedMessage }) => {
+      const searchAction = vi.fn().mockResolvedValue(response);
+      render(
+        <AsyncSearch<TestProduct>
+          searchAction={searchAction}
+          debounceMs={200}
+        />,
+      );
+      const driver = createAsyncSearchDriver();
+
+      driver.type("Sony");
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(200);
+      });
+
+      expect(screen.getByRole("alert")).toHaveTextContent(expectedMessage);
+      expect(
+        screen.queryByText(ASYNC_SEARCH_MESSAGES.defaultEmptyTitle),
+      ).not.toBeInTheDocument();
+      expect(driver.queryListbox()).not.toBeInTheDocument();
+    },
+  );
+
+  it("recovers from a rejected search without offering the empty state", async () => {
+    const searchError = new Error("Search connection failed");
+    const searchAction = vi
+      .fn()
+      .mockRejectedValueOnce(searchError)
+      .mockResolvedValueOnce({ data: mockProducts });
+    render(
+      <AsyncSearch<TestProduct> searchAction={searchAction} debounceMs={200} />,
+    );
+    const driver = createAsyncSearchDriver();
+
+    driver.type("Sony");
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(200);
+    });
+
+    expect(screen.getByRole("alert")).toHaveTextContent(searchError.message);
+    expect(
+      screen.queryByText(ASYNC_SEARCH_MESSAGES.defaultEmptyTitle),
+    ).not.toBeInTheDocument();
+
+    driver.type("Słuchawki");
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(200);
+    });
+
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(driver.options()).toHaveLength(mockProducts.length);
   });
 
   it("displays clear button ('X') when query is non-empty and resets state when clicked", async () => {

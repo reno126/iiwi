@@ -2,9 +2,9 @@
 
 import * as React from "react";
 import { useState, useRef, useId, useCallback } from "react";
-import { Card } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "cn";
-import { useAsyncSearch } from "./useAsyncSearch";
+import { useAsyncSearch, type UseAsyncSearchOptions } from "./useAsyncSearch";
 import { SearchInputBar } from "./SearchInputBar";
 import { SearchEmptyState } from "./SearchEmptyState";
 import { SearchResultsList } from "./SearchResultsList";
@@ -23,9 +23,7 @@ export const ASYNC_SEARCH_MESSAGES = {
 } as const;
 
 export interface AsyncSearchProps<T> {
-  searchAction: (
-    query: string,
-  ) => Promise<T[] | { data?: T[] | null } | null | undefined>;
+  searchAction: UseAsyncSearchOptions<T>["searchAction"];
   getItemLabel?: (item: T) => string;
   onResultSelect?: (item: T) => void;
   renderItem?: (
@@ -105,8 +103,8 @@ export function AsyncSearch<T>({
   const listboxId = useId();
 
   const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setQueryValue(e.target.value);
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setQueryValue(event.target.value);
     },
     [setQueryValue],
   );
@@ -211,15 +209,12 @@ export function AsyncSearch<T>({
             loadingComponent}
 
           {error && !isLoading && (
-            <Card
-              className="border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive"
-              data-slot="search-error"
-            >
-              {error}
-            </Card>
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
           )}
 
-          {hasSearched && results.length === 0 && hasMinChars && (
+          {!error && hasSearched && results.length === 0 && hasMinChars && (
             <div className={cn(isLoading && "opacity-60 transition-opacity")}>
               <SearchEmptyState
                 emptyTitle={emptyTitle}
